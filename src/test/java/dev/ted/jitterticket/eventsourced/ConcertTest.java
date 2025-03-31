@@ -30,7 +30,7 @@ public class ConcertTest {
                             price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
                     ));
         }
-        
+
     }
 
     @Nested
@@ -50,6 +50,15 @@ public class ConcertTest {
 
             assertThat(concert.ticketPrice())
                     .isEqualTo(price);
+            assertThat(concert.showDateTime())
+                    .isEqualTo(showDateTime);
+            assertThat(concert.doorsTime())
+                    .isEqualTo(doorsTime);
+            assertThat(concert.capacity())
+                    .isEqualTo(capacity);
+            assertThat(concert.maxTicketsPerPurchase())
+                    .isEqualTo(maxTicketsPerPurchase);
+
         }
     }
 

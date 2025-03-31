@@ -8,13 +8,21 @@ import java.util.List;
 public class Concert {
 
     private final List<ConcertEvent> uncommittedEvents = new ArrayList<>();
-    private int ticketPrice = -99;
+    private int ticketPrice;
+    private LocalDateTime showDateTime;
+    private LocalTime doorsTime;
+    private int capacity;
+    private int maxTicketsPerPurchase;
 
     private Concert(List<ConcertEvent> concertEvents) {
         ConcertEvent concertEvent = concertEvents.getFirst();
         switch (concertEvent) {
             case ConcertScheduled(int price, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) -> {
-                ticketPrice = price;
+                this.ticketPrice = price;
+                this.showDateTime = showDateTime;
+                this.doorsTime = doorsTime;
+                this.capacity = capacity;
+                this.maxTicketsPerPurchase = maxTicketsPerPurchase;
             }
         }
     }
@@ -44,5 +52,21 @@ public class Concert {
 
     public int ticketPrice() {
         return ticketPrice;
+    }
+
+    public LocalDateTime showDateTime() {
+        return showDateTime;
+    }
+
+    public LocalTime doorsTime() {
+        return doorsTime;
+    }
+
+    public int capacity() {
+        return capacity;
+    }
+
+    public int maxTicketsPerPurchase() {
+        return maxTicketsPerPurchase;
     }
 }

@@ -9,3 +9,6 @@ Monday, March 31, 2025
 
 [Junie]
 * When I asked it to add parameters to the Concert constructor, it did stuff and then wanted to run the ConcertTest to ensure everything is working. HOWEVER, it didn't check that this test was failing before and its changes might not have been enough to get it to pass—which would not have been Junie's fault!
+
+[Junie]
+* How to more easily reference line(s) of code in a specific file (e.g., a specific test method) when asking Junie to do something
