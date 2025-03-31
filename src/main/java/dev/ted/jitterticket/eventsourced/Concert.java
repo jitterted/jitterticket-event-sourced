@@ -5,7 +5,7 @@ import java.util.List;
 public class Concert {
 
     public static Concert schedule() {
-        return null;
+        return new Concert();
     }
 
     public List<ConcertEvent> uncommittedEvents() {
