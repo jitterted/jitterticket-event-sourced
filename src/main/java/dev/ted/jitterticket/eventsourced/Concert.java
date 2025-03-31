@@ -10,8 +10,13 @@ public class Concert {
     private final List<ConcertEvent> uncommittedEvents = new ArrayList<>();
     private int ticketPrice = -99;
 
-    public Concert(List<ConcertEvent> concertEvents) {
-
+    private Concert(List<ConcertEvent> concertEvents) {
+        ConcertEvent concertEvent = concertEvents.getFirst();
+        switch (concertEvent) {
+            case ConcertScheduled(int price, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) -> {
+                ticketPrice = price;
+            }
+        }
     }
 
     public static Concert schedule(int price,
