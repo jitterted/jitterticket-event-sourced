@@ -83,6 +83,32 @@ public class ConcertTest {
                     .isEqualTo(maxTicketsPerPurchase);
 
         }
+
+        @Test
+        void concertRescheduledUpdatesShowAndDoorTimesOnly() {
+            int ticketPrice = 35;
+            LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
+            LocalTime originalDoorsTime = LocalTime.of(19, 0);
+            int capacity = 100;
+            int maxTicketsPerPurchase = 4;
+            ConcertScheduled concertScheduled = new ConcertScheduled(ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+            LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
+            LocalTime newDoorsTime = originalDoorsTime.minusHours(1);
+            ConcertRescheduled concertRescheduled = new ConcertRescheduled(newShowDateTime, newDoorsTime);
+
+            List<ConcertEvent> concertEvents = List.of(concertScheduled,
+                                                       concertRescheduled);
+
+            Concert concert = Concert.reconstitute(concertEvents);
+
+            assertThat(concert.showDateTime())
+                    .isEqualTo(newShowDateTime);
+            assertThat(concert.doorsTime())
+                    .isEqualTo(newDoorsTime);
+            assertThat(concert.ticketPrice())
+                    .as("Ticket Price should not have changed")
+                    .isEqualTo(ticketPrice);
+        }
     }
 
 }
