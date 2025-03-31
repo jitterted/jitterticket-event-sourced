@@ -15,19 +15,19 @@ public class ConcertTest {
     class CommandsGenerateEvents {
 
         @Test
-        public void scheduleConcertGeneratesConcertScheduled() {
-            int price = 35;
+        void scheduleConcertGeneratesConcertScheduled() {
+            int ticketPrice = 35;
             LocalDateTime showDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
             LocalTime doorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
-            Concert concert = Concert.schedule(price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+            Concert concert = Concert.schedule(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
 
             List<ConcertEvent> events = concert.uncommittedEvents();
 
             assertThat(events)
                     .containsExactly(new ConcertScheduled(
-                            price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
+                            ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
                     ));
         }
 
@@ -38,18 +38,18 @@ public class ConcertTest {
 
         @Test
         void concertScheduledUpdatesConcertDetails() {
-            int price = 35;
+            int ticketPrice = 35;
             LocalDateTime showDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
             LocalTime doorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
-            ConcertScheduled concertScheduled = new ConcertScheduled(price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+            ConcertScheduled concertScheduled = new ConcertScheduled(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
             List<ConcertEvent> concertEvents = List.of(concertScheduled);
 
             Concert concert = Concert.reconstitute(concertEvents);
 
             assertThat(concert.ticketPrice())
-                    .isEqualTo(price);
+                    .isEqualTo(ticketPrice);
             assertThat(concert.showDateTime())
                     .isEqualTo(showDateTime);
             assertThat(concert.doorsTime())

@@ -19,18 +19,6 @@ public class Concert {
         apply(concertEvent);
     }
 
-    private void apply(ConcertEvent concertEvent) {
-        switch (concertEvent) {
-            case ConcertScheduled(int price, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) -> {
-                this.ticketPrice = price;
-                this.showDateTime = showDateTime;
-                this.doorsTime = doorsTime;
-                this.capacity = capacity;
-                this.maxTicketsPerPurchase = maxTicketsPerPurchase;
-            }
-        }
-    }
-
     public static Concert schedule(int price,
                                    LocalDateTime showDateTime,
                                    LocalTime doorsTime,
@@ -43,15 +31,27 @@ public class Concert {
         return new Concert(concertEvents);
     }
 
-    private Concert(int price, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
+    private Concert(int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
         ConcertScheduled concertScheduled = new ConcertScheduled(
-                price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
+                ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
         );
         enqueue(concertScheduled);
     }
 
     private void enqueue(ConcertScheduled concertScheduled) {
         uncommittedEvents.add(concertScheduled);
+    }
+
+    private void apply(ConcertEvent concertEvent) {
+        switch (concertEvent) {
+            case ConcertScheduled(int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) -> {
+                this.ticketPrice = ticketPrice;
+                this.showDateTime = showDateTime;
+                this.doorsTime = doorsTime;
+                this.capacity = capacity;
+                this.maxTicketsPerPurchase = maxTicketsPerPurchase;
+            }
+        }
     }
 
     public List<ConcertEvent> uncommittedEvents() {
