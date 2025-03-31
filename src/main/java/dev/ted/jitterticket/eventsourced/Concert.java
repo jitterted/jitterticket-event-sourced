@@ -17,6 +17,10 @@ public class Concert {
         return new Concert(price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
     }
 
+    public static Concert reconstitute(List<ConcertEvent> concertEvents) {
+        return null;
+    }
+
     private Concert(int price, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
         ConcertScheduled concertScheduled = new ConcertScheduled(
                 price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
@@ -26,5 +30,9 @@ public class Concert {
 
     public List<ConcertEvent> uncommittedEvents() {
         return uncommittedEvents;
+    }
+
+    public int ticketPrice() {
+        return -99;
     }
 }

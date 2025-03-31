@@ -32,5 +32,25 @@ public class ConcertTest {
         }
         
     }
-    
+
+    @Nested
+    class EventsProjectState {
+
+        @Test
+        void concertScheduledUpdatesConcertDetails() {
+            int price = 35;
+            LocalDateTime showDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
+            LocalTime doorsTime = LocalTime.of(19, 0);
+            int capacity = 100;
+            int maxTicketsPerPurchase = 4;
+            ConcertScheduled concertScheduled = new ConcertScheduled(price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+            List<ConcertEvent> concertEvents = List.of(concertScheduled);
+
+            Concert concert = Concert.reconstitute(concertEvents);
+
+            assertThat(concert.ticketPrice())
+                    .isEqualTo(price);
+        }
+    }
+
 }
