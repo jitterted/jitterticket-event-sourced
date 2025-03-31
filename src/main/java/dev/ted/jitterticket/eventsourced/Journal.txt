@@ -15,3 +15,5 @@ Monday, March 31, 2025
 
 [IntelliJ IDEA]
 * Didn't offer to select the entire switch statement when doing Extract Method
+
+* In "Commands Generate Events" tests, the SETUP creates events and uses reconstitute (does not itself call Commands)

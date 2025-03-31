@@ -1,4 +1,4 @@
 package dev.ted.jitterticket.eventsourced;
 
-public sealed interface ConcertEvent permits ConcertScheduled {
+public sealed interface ConcertEvent permits ConcertRescheduled, ConcertScheduled {
 }

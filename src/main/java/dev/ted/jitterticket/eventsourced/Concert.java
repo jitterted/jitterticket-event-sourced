@@ -38,8 +38,8 @@ public class Concert {
         enqueue(concertScheduled);
     }
 
-    private void enqueue(ConcertScheduled concertScheduled) {
-        uncommittedEvents.add(concertScheduled);
+    private void enqueue(ConcertEvent concertEvent) {
+        uncommittedEvents.add(concertEvent);
     }
 
     private void apply(ConcertEvent concertEvent) {
@@ -50,6 +50,8 @@ public class Concert {
                 this.doorsTime = doorsTime;
                 this.capacity = capacity;
                 this.maxTicketsPerPurchase = maxTicketsPerPurchase;
+            }
+            case ConcertRescheduled concertRescheduled -> {
             }
         }
     }
@@ -77,4 +79,10 @@ public class Concert {
     public int maxTicketsPerPurchase() {
         return maxTicketsPerPurchase;
     }
+
+    public void rescheduleTo(LocalDateTime newShowDateTime, LocalTime newDoorsTime) {
+        ConcertRescheduled concertRescheduled = new ConcertRescheduled(newShowDateTime, newDoorsTime);
+        enqueue(concertRescheduled);
+    }
+
 }

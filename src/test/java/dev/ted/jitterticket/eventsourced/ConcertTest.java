@@ -31,6 +31,25 @@ public class ConcertTest {
                     ));
         }
 
+        @Test
+        void rescheduleConcertGeneratesConcertRescheduled() {
+            int ticketPrice = 35;
+            LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
+            LocalTime originalDoorsTime = LocalTime.of(19, 0);
+            int capacity = 100;
+            int maxTicketsPerPurchase = 4;
+            ConcertScheduled concertScheduled = new ConcertScheduled(ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+            Concert concert = Concert.reconstitute(List.of(concertScheduled));
+
+            LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
+            LocalTime newDoorsTime = originalDoorsTime.minusHours(1);
+            concert.rescheduleTo(newShowDateTime, newDoorsTime);
+
+            assertThat(concert.uncommittedEvents())
+                    .containsExactly(
+                            new ConcertRescheduled(newShowDateTime, newDoorsTime));
+        }
+
     }
 
     @Nested
