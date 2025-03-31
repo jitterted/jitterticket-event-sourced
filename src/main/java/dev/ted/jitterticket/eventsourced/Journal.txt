@@ -1,0 +1,9 @@
+Monday, March 31, 2025
+======================
+
+* Two ways to create a Concert Aggregate Root:
+
+  1. schedule (static factory method) -- could also be a separate Factory class, if we need more control (passing in dependencies to the aggregate root)
+
+  2. reconstitute (apply events from the event store)
+
