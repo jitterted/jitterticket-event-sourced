@@ -1,6 +1,5 @@
 package dev.ted.jitterticket.eventsourced;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Concert {
@@ -10,6 +9,6 @@ public class Concert {
     }
 
     public List<ConcertEvent> uncommittedEvents() {
-        return new ArrayList<>();
+        return null;
     }
 }
