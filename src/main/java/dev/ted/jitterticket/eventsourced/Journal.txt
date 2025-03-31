@@ -7,3 +7,5 @@ Monday, March 31, 2025
 
   2. reconstitute (apply events from the event store)
 
+[Junie]
+* When I asked it to add parameters to the Concert constructor, it did stuff and then wanted to run the ConcertTest to ensure everything is working. HOWEVER, it didn't check that this test was failing before and its changes might not have been enough to get it to pass—which would not have been Junie's fault!
