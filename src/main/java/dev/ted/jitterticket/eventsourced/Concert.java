@@ -16,6 +16,10 @@ public class Concert {
 
     private Concert(List<ConcertEvent> concertEvents) {
         ConcertEvent concertEvent = concertEvents.getFirst();
+        apply(concertEvent);
+    }
+
+    private void apply(ConcertEvent concertEvent) {
         switch (concertEvent) {
             case ConcertScheduled(int price, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) -> {
                 this.ticketPrice = price;
@@ -43,6 +47,10 @@ public class Concert {
         ConcertScheduled concertScheduled = new ConcertScheduled(
                 price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
         );
+        enqueue(concertScheduled);
+    }
+
+    private void enqueue(ConcertScheduled concertScheduled) {
         uncommittedEvents.add(concertScheduled);
     }
 

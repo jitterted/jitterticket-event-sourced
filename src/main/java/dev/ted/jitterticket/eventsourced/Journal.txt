@@ -12,3 +12,6 @@ Monday, March 31, 2025
 
 [Junie]
 * How to more easily reference line(s) of code in a specific file (e.g., a specific test method) when asking Junie to do something
+
+[IntelliJ IDEA]
+* Didn't offer to select the entire switch statement when doing Extract Method
