@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class JitterticketEventSourcedApplication {
+public class JitterTicketEventSourcedApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(JitterticketEventSourcedApplication.class, args);
+		SpringApplication.run(JitterTicketEventSourcedApplication.class, args);
 	}
 
 }

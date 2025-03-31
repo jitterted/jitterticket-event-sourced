@@ -11,8 +11,8 @@
 	<groupId>dev.ted.jitterticket</groupId>
 	<artifactId>event-sourced</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>jitterticket-event-sourced</name>
-	<description>jitterticket-event-sourced</description>
+	<name>JitterTicket Event-sourced Concert Ticketing</name>
+	<description>Minimal (as possible) example of an event-sourced concert event ticketing application.</description>
 	<url/>
 	<licenses>
 		<license/>
