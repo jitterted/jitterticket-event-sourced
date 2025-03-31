@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Concert {
 
-    private final List<ConcertEvent> concertEvents = new ArrayList<>();
+    private final List<ConcertEvent> uncommittedEvents = new ArrayList<>();
 
     public static Concert schedule(int price,
                                    LocalDateTime showDateTime,
@@ -21,10 +21,10 @@ public class Concert {
         ConcertScheduled concertScheduled = new ConcertScheduled(
                 price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
         );
-        concertEvents.add(concertScheduled);
+        uncommittedEvents.add(concertScheduled);
     }
 
     public List<ConcertEvent> uncommittedEvents() {
-        return concertEvents;
+        return uncommittedEvents;
     }
 }
