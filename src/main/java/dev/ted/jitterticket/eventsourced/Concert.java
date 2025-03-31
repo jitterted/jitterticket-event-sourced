@@ -8,6 +8,11 @@ import java.util.List;
 public class Concert {
 
     private final List<ConcertEvent> uncommittedEvents = new ArrayList<>();
+    private int ticketPrice = -99;
+
+    public Concert(List<ConcertEvent> concertEvents) {
+
+    }
 
     public static Concert schedule(int price,
                                    LocalDateTime showDateTime,
@@ -18,7 +23,7 @@ public class Concert {
     }
 
     public static Concert reconstitute(List<ConcertEvent> concertEvents) {
-        return null;
+        return new Concert(concertEvents);
     }
 
     private Concert(int price, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
@@ -33,6 +38,6 @@ public class Concert {
     }
 
     public int ticketPrice() {
-        return -99;
+        return ticketPrice;
     }
 }
