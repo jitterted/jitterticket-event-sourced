@@ -13,7 +13,7 @@ public class BuyTicketsUseCase {
     }
 
     public Stream<Concert> availableConcerts() {
-        return Stream.empty();
+        return concertStore.findAll();
     }
 
 }
