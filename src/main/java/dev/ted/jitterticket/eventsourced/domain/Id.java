@@ -1,4 +1,6 @@
 package dev.ted.jitterticket.eventsourced.domain;
 
-public interface Id {
+public sealed interface Id
+        permits ConcertId, CustomerId {
+    Long id();
 }
