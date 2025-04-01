@@ -55,6 +55,7 @@ public class Concert {
                                     LocalTime newDoorsTime)
                     -> {
                 this.showDateTime = newShowDateTime;
+                this.doorsTime = newDoorsTime;
             }
         }
     }
