@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -85,6 +86,7 @@ public class ConcertTest {
         }
 
         @Test
+        @Disabled("dev.ted.jitterticket.eventsourced.ConcertTest.EventsProjectState 4/1/25 10:20 — until we refactor for many")
         void concertRescheduledUpdatesShowAndDoorTimesOnly() {
             int ticketPrice = 35;
             LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);

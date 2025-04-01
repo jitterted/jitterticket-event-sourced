@@ -15,8 +15,7 @@ public class Concert {
     private int maxTicketsPerPurchase;
 
     private Concert(List<ConcertEvent> concertEvents) {
-        ConcertEvent concertEvent = concertEvents.getFirst();
-        apply(concertEvent);
+        concertEvents.forEach(this::apply);
     }
 
     public static Concert schedule(int price,
@@ -51,7 +50,11 @@ public class Concert {
                 this.capacity = capacity;
                 this.maxTicketsPerPurchase = maxTicketsPerPurchase;
             }
-            case ConcertRescheduled concertRescheduled -> {
+
+            case ConcertRescheduled(LocalDateTime newShowDateTime,
+                                    LocalTime newDoorsTime)
+                    -> {
+                this.showDateTime = newShowDateTime;
             }
         }
     }
