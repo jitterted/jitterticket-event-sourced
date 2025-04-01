@@ -21,14 +21,14 @@ public class ConcertTest {
             LocalTime doorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
-            String artist = "Test Artist";
-            Concert concert = Concert.schedule(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist);
+            String artist = "Headliner";
+            Concert concert = Concert.schedule(artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
 
             List<ConcertEvent> events = concert.uncommittedEvents();
 
             assertThat(events)
                     .containsExactly(new ConcertScheduled(
-                            ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist
+                            artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
                     ));
         }
 
@@ -54,8 +54,8 @@ public class ConcertTest {
         int ticketPrice = 35;
         int capacity = 100;
         int maxTicketsPerPurchase = 4;
-        String artist = "Test Artist";
-        return new ConcertScheduled(ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase, artist);
+        String artist = "Irrelevant Artist Name";
+        return new ConcertScheduled(artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
     }
 
     @Nested
@@ -68,8 +68,8 @@ public class ConcertTest {
             LocalTime doorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
-            String artist = "Test Artist";
-            ConcertScheduled concertScheduled = new ConcertScheduled(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist);
+            String artist = "Headliner";
+            ConcertScheduled concertScheduled = new ConcertScheduled(artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
             List<ConcertEvent> concertEvents = List.of(concertScheduled);
 
             Concert concert = Concert.reconstitute(concertEvents);
@@ -96,8 +96,8 @@ public class ConcertTest {
             LocalTime originalDoorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
-            String artist = "Test Artist";
-            ConcertScheduled concertScheduled = new ConcertScheduled(ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase, artist);
+            String artist = "Rescheduler Artist Name";
+            ConcertScheduled concertScheduled = new ConcertScheduled(artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
             LocalTime newDoorsTime = originalDoorsTime.minusHours(1);
             ConcertRescheduled concertRescheduled = new ConcertRescheduled(newShowDateTime, newDoorsTime);

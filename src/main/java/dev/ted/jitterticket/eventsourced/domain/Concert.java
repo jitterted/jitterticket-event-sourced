@@ -6,33 +6,33 @@ import java.util.List;
 
 public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
 
+    private String artist;
     private int ticketPrice;
     private LocalDateTime showDateTime;
     private LocalTime doorsTime;
     private int capacity;
     private int maxTicketsPerPurchase;
-    private String artist;
 
     private Concert(List<ConcertEvent> concertEvents) {
         concertEvents.forEach(this::apply);
     }
 
-    public static Concert schedule(int ticketPrice,
+    public static Concert schedule(String artist,
+                                   int ticketPrice,
                                    LocalDateTime showDateTime,
                                    LocalTime doorsTime,
                                    int capacity,
-                                   int maxTicketsPerPurchase,
-                                   String artist) {
-        return new Concert(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist);
+                                   int maxTicketsPerPurchase) {
+        return new Concert(artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
     }
 
     public static Concert reconstitute(List<ConcertEvent> concertEvents) {
         return new Concert(concertEvents);
     }
 
-    private Concert(int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase, String artist) {
+    private Concert(String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
         ConcertScheduled concertScheduled = new ConcertScheduled(
-                ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist
+                artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
         );
         enqueue(concertScheduled);
     }
@@ -41,19 +41,19 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
     protected void apply(ConcertEvent concertEvent) {
         switch (concertEvent) {
             case ConcertScheduled(
+                    String artist,
                     int ticketPrice,
                     LocalDateTime showDateTime,
                     LocalTime doorsTime,
                     int capacity,
-                    int maxTicketsPerPurchase,
-                    String artist
+                    int maxTicketsPerPurchase
             ) -> {
+                this.artist = artist;
                 this.ticketPrice = ticketPrice;
                 this.showDateTime = showDateTime;
                 this.doorsTime = doorsTime;
                 this.capacity = capacity;
                 this.maxTicketsPerPurchase = maxTicketsPerPurchase;
-                this.artist = artist;
             }
 
             case ConcertRescheduled(

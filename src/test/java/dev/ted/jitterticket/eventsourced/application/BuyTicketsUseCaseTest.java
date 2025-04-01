@@ -23,12 +23,13 @@ class BuyTicketsUseCaseTest {
 
     @Test
     void availableConcertsReturnsTheSingleTicketableConcert() {
-        Concert concert = Concert.schedule(99,
+        Concert concert = Concert.schedule("Single",
+                                           99,
                                            LocalDateTime.now(),
                                            LocalTime.now().minusHours(1),
                                            100,
-                                           4,
-                                           "Test Artist");
+                                           4
+        );
         ConcertStore concertStore = new ConcertStore();
         concertStore.save(concert);
         BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(concertStore);

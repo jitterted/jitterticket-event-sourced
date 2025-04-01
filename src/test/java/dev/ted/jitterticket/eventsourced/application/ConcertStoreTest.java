@@ -22,12 +22,13 @@ class ConcertStoreTest {
     @Test
     void findAllReturnsOnlySavedConcert() {
         ConcertStore concertStore = new ConcertStore();
-        Concert concert = Concert.schedule(99,
+        Concert concert = Concert.schedule("Headliner",
+                                           99,
                                            LocalDateTime.now(),
                                            LocalTime.now().minusHours(1),
                                            100,
-                                           4,
-                                           "Test Artist");
+                                           4
+        );
 
         concertStore.save(concert);
 
