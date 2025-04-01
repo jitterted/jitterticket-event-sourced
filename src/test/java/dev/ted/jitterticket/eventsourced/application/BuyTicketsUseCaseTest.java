@@ -29,6 +29,7 @@ class BuyTicketsUseCaseTest {
                                            100,
                                            4);
         ConcertStore concertStore = new ConcertStore();
+        concertStore.save(concert);
         BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(concertStore);
 
         Stream<Concert> availableConcerts = buyTicketsUseCase.availableConcerts();
