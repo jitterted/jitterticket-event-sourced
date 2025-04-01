@@ -1,4 +1,4 @@
 package dev.ted.jitterticket.eventsourced;
 
-public interface CustomerEvent {
+public sealed interface CustomerEvent permits CustomerRegistered {
 }
