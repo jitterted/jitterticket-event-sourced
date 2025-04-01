@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-public class Concert extends EventSourcedAggregate {
+public class Concert extends EventSourcedAggregate<ConcertEvent> {
 
     private int ticketPrice;
     private LocalDateTime showDateTime;

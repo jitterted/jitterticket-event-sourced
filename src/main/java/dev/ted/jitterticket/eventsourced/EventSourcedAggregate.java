@@ -3,16 +3,16 @@ package dev.ted.jitterticket.eventsourced;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class EventSourcedAggregate {
-    private final List<ConcertEvent> uncommittedEvents = new ArrayList<>();
+public abstract class EventSourcedAggregate<EVENT> {
+    private final List<EVENT> uncommittedEvents = new ArrayList<>();
 
-    protected void enqueue(ConcertEvent concertEvent) {
-        uncommittedEvents.add(concertEvent);
+    protected void enqueue(EVENT event) {
+        uncommittedEvents.add(event);
     }
 
-    protected abstract void apply(ConcertEvent concertEvent);
+    protected abstract void apply(EVENT event);
 
-    public List<ConcertEvent> uncommittedEvents() {
+    public List<EVENT> uncommittedEvents() {
         return uncommittedEvents;
     }
 }
