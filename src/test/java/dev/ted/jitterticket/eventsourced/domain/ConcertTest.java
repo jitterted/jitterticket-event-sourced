@@ -74,6 +74,8 @@ public class ConcertTest {
 
             Concert concert = Concert.reconstitute(concertEvents);
 
+            assertThat(concert.artist())
+                    .isEqualTo(artist);
             assertThat(concert.ticketPrice())
                     .isEqualTo(ticketPrice);
             assertThat(concert.showDateTime())
@@ -84,8 +86,6 @@ public class ConcertTest {
                     .isEqualTo(capacity);
             assertThat(concert.maxTicketsPerPurchase())
                     .isEqualTo(maxTicketsPerPurchase);
-            assertThat(concert.artist())
-                    .isEqualTo(artist);
 
         }
 
@@ -113,9 +113,9 @@ public class ConcertTest {
             assertThat(concert.doorsTime())
                     .as("Door time was not updated")
                     .isEqualTo(newDoorsTime);
-            assertThat(concert.ticketPrice())
-                    .as("Ticket Price should not have changed")
-                    .isEqualTo(ticketPrice);
+            assertThat(concert.artist())
+                    .as("Artist should not have changed")
+                    .isEqualTo(artist);
         }
     }
 

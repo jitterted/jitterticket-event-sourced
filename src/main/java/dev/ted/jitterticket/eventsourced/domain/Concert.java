@@ -3,6 +3,7 @@ package dev.ted.jitterticket.eventsourced.domain;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
 
@@ -95,4 +96,16 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
         enqueue(concertRescheduled);
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Concert.class.getSimpleName() + "[", "]")
+                .add("(id='" + getId() + "')")
+                .add("artist='" + artist + "'")
+                .add("ticketPrice=" + ticketPrice)
+                .add("showDateTime=" + showDateTime)
+                .add("doorsTime=" + doorsTime)
+                .add("capacity=" + capacity)
+                .add("maxTicketsPerPurchase=" + maxTicketsPerPurchase)
+                .toString();
+    }
 }
