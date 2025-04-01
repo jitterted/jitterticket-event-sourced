@@ -2,12 +2,10 @@ package dev.ted.jitterticket.eventsourced;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
-public class Concert {
+public class Concert extends EventSourcedAggregate {
 
-    private final List<ConcertEvent> uncommittedEvents = new ArrayList<>();
     private int ticketPrice;
     private LocalDateTime showDateTime;
     private LocalTime doorsTime;
@@ -37,13 +35,17 @@ public class Concert {
         enqueue(concertScheduled);
     }
 
-    private void enqueue(ConcertEvent concertEvent) {
-        uncommittedEvents.add(concertEvent);
-    }
-
-    private void apply(ConcertEvent concertEvent) {
+    @SuppressWarnings("PatternVariableHidesField")
+    @Override
+    protected void apply(ConcertEvent concertEvent) {
         switch (concertEvent) {
-            case ConcertScheduled(int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) -> {
+            case ConcertScheduled(
+                    int ticketPrice,
+                    LocalDateTime showDateTime,
+                    LocalTime doorsTime,
+                    int capacity,
+                    int maxTicketsPerPurchase
+            ) -> {
                 this.ticketPrice = ticketPrice;
                 this.showDateTime = showDateTime;
                 this.doorsTime = doorsTime;
@@ -51,17 +53,14 @@ public class Concert {
                 this.maxTicketsPerPurchase = maxTicketsPerPurchase;
             }
 
-            case ConcertRescheduled(LocalDateTime newShowDateTime,
-                                    LocalTime newDoorsTime)
-                    -> {
+            case ConcertRescheduled(
+                    LocalDateTime newShowDateTime,
+                    LocalTime newDoorsTime
+            ) -> {
                 this.showDateTime = newShowDateTime;
                 this.doorsTime = newDoorsTime;
             }
         }
-    }
-
-    public List<ConcertEvent> uncommittedEvents() {
-        return uncommittedEvents;
     }
 
     public int ticketPrice() {
