@@ -16,12 +16,12 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
         concertEvents.forEach(this::apply);
     }
 
-    public static Concert schedule(int price,
+    public static Concert schedule(int ticketPrice,
                                    LocalDateTime showDateTime,
                                    LocalTime doorsTime,
                                    int capacity,
                                    int maxTicketsPerPurchase) {
-        return new Concert(price, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+        return new Concert(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
     }
 
     public static Concert reconstitute(List<ConcertEvent> concertEvents) {
