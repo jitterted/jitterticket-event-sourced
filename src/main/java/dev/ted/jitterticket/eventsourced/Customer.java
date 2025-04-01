@@ -5,6 +5,7 @@ import java.util.List;
 public class Customer extends EventSourcedAggregate<CustomerEvent> {
 
     private String name;
+    private String email;
 
     public static Customer register(String name, String email) {
         return new Customer(name, email);
@@ -27,6 +28,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent> {
         switch (customerEvent) {
             case CustomerRegistered(String customerName, String email) -> {
                 this.name = customerName;
+                this.email = email;
             }
         }
     }
@@ -36,6 +38,6 @@ public class Customer extends EventSourcedAggregate<CustomerEvent> {
     }
 
     public String email() {
-        return null;
+        return email;
     }
 }
