@@ -35,7 +35,6 @@ public class Concert extends EventSourcedAggregate<ConcertEvent> {
         enqueue(concertScheduled);
     }
 
-    @SuppressWarnings("PatternVariableHidesField")
     @Override
     protected void apply(ConcertEvent concertEvent) {
         switch (concertEvent) {
