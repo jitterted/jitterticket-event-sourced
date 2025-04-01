@@ -7,6 +7,9 @@ Tuesday, April 1, 2025
 
 * Instead of using switch+pattern matching for apply(), create dedicated (overloaded) apply methods for each concrete event type, however the dispatching of the events based on their concrete type would require either reflection or use of a switch anyway
 
+[Alternative Implementation]
+* Instead of a Use Case in the Application package, make self-contained Command objects that get executed by the boundary adapter
+
 
 Monday, March 31, 2025
 ======================
