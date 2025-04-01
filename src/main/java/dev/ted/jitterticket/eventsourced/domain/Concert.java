@@ -11,6 +11,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
     private LocalTime doorsTime;
     private int capacity;
     private int maxTicketsPerPurchase;
+    private String artist;
 
     private Concert(List<ConcertEvent> concertEvents) {
         concertEvents.forEach(this::apply);
@@ -20,17 +21,18 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
                                    LocalDateTime showDateTime,
                                    LocalTime doorsTime,
                                    int capacity,
-                                   int maxTicketsPerPurchase) {
-        return new Concert(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+                                   int maxTicketsPerPurchase,
+                                   String artist) {
+        return new Concert(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist);
     }
 
     public static Concert reconstitute(List<ConcertEvent> concertEvents) {
         return new Concert(concertEvents);
     }
 
-    private Concert(int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
+    private Concert(int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase, String artist) {
         ConcertScheduled concertScheduled = new ConcertScheduled(
-                ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
+                ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist
         );
         enqueue(concertScheduled);
     }
@@ -43,13 +45,15 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
                     LocalDateTime showDateTime,
                     LocalTime doorsTime,
                     int capacity,
-                    int maxTicketsPerPurchase
+                    int maxTicketsPerPurchase,
+                    String artist
             ) -> {
                 this.ticketPrice = ticketPrice;
                 this.showDateTime = showDateTime;
                 this.doorsTime = doorsTime;
                 this.capacity = capacity;
                 this.maxTicketsPerPurchase = maxTicketsPerPurchase;
+                this.artist = artist;
             }
 
             case ConcertRescheduled(
@@ -80,6 +84,10 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
 
     public int maxTicketsPerPurchase() {
         return maxTicketsPerPurchase;
+    }
+
+    public String artist() {
+        return artist;
     }
 
     public void rescheduleTo(LocalDateTime newShowDateTime, LocalTime newDoorsTime) {

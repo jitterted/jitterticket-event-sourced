@@ -21,13 +21,14 @@ public class ConcertTest {
             LocalTime doorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
-            Concert concert = Concert.schedule(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+            String artist = "Test Artist";
+            Concert concert = Concert.schedule(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist);
 
             List<ConcertEvent> events = concert.uncommittedEvents();
 
             assertThat(events)
                     .containsExactly(new ConcertScheduled(
-                            ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
+                            ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist
                     ));
         }
 
@@ -53,7 +54,8 @@ public class ConcertTest {
         int ticketPrice = 35;
         int capacity = 100;
         int maxTicketsPerPurchase = 4;
-        return new ConcertScheduled(ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+        String artist = "Test Artist";
+        return new ConcertScheduled(ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase, artist);
     }
 
     @Nested
@@ -66,7 +68,8 @@ public class ConcertTest {
             LocalTime doorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
-            ConcertScheduled concertScheduled = new ConcertScheduled(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+            String artist = "Test Artist";
+            ConcertScheduled concertScheduled = new ConcertScheduled(ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase, artist);
             List<ConcertEvent> concertEvents = List.of(concertScheduled);
 
             Concert concert = Concert.reconstitute(concertEvents);
@@ -81,6 +84,8 @@ public class ConcertTest {
                     .isEqualTo(capacity);
             assertThat(concert.maxTicketsPerPurchase())
                     .isEqualTo(maxTicketsPerPurchase);
+            assertThat(concert.artist())
+                    .isEqualTo(artist);
 
         }
 
@@ -91,7 +96,8 @@ public class ConcertTest {
             LocalTime originalDoorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
-            ConcertScheduled concertScheduled = new ConcertScheduled(ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+            String artist = "Test Artist";
+            ConcertScheduled concertScheduled = new ConcertScheduled(ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase, artist);
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
             LocalTime newDoorsTime = originalDoorsTime.minusHours(1);
             ConcertRescheduled concertRescheduled = new ConcertRescheduled(newShowDateTime, newDoorsTime);

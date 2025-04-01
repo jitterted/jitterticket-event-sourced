@@ -26,7 +26,8 @@ class ConcertStoreTest {
                                            LocalDateTime.now(),
                                            LocalTime.now().minusHours(1),
                                            100,
-                                           4);
+                                           4,
+                                           "Test Artist");
 
         concertStore.save(concert);
 

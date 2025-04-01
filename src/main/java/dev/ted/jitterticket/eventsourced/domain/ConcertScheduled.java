@@ -7,6 +7,7 @@ public record ConcertScheduled(int ticketPrice,
                                LocalDateTime showDateTime,
                                LocalTime doorsTime,
                                int capacity,
-                               int maxTicketsPerPurchase)
+                               int maxTicketsPerPurchase,
+                               String artist)
         implements ConcertEvent {
 }

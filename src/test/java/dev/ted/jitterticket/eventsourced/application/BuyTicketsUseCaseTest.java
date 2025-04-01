@@ -27,7 +27,8 @@ class BuyTicketsUseCaseTest {
                                            LocalDateTime.now(),
                                            LocalTime.now().minusHours(1),
                                            100,
-                                           4);
+                                           4,
+                                           "Test Artist");
         ConcertStore concertStore = new ConcertStore();
         concertStore.save(concert);
         BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(concertStore);
