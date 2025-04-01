@@ -1,7 +1,13 @@
 Tuesday, April 1, 2025
 ======================
 
+* Thought about pushing up to the base class, the apply-loop over events in the concrete subclass,
+  but then we're running the apply method inside the super-constructor, which may cause issues
+  (which may be "fixed" with the upcoming "flexible constructor bodies" JEP?)
 
+[Alternative Implementation To Try]
+* Instead of using switch+pattern matching for apply(), create dedicated (overloaded) apply methods
+  for each concrete event type
 
 Monday, March 31, 2025
 ======================
