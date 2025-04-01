@@ -5,9 +5,8 @@ Tuesday, April 1, 2025
   but then we're running the apply method inside the super-constructor, which may cause issues
   (which may be "fixed" with the upcoming "flexible constructor bodies" JEP?)
 
-[Alternative Implementation To Try]
-* Instead of using switch+pattern matching for apply(), create dedicated (overloaded) apply methods
-  for each concrete event type
+* Instead of using switch+pattern matching for apply(), create dedicated (overloaded) apply methods for each concrete event type, however the dispatching of the events based on their concrete type would require either reflection or use of a switch anyway
+
 
 Monday, March 31, 2025
 ======================
