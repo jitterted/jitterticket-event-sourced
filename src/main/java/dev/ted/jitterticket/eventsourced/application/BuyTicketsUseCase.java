@@ -6,6 +6,12 @@ import java.util.stream.Stream;
 
 public class BuyTicketsUseCase {
 
+    private final ConcertStore concertStore;
+
+    public BuyTicketsUseCase(ConcertStore concertStore) {
+        this.concertStore = concertStore;
+    }
+
     public Stream<Concert> availableConcerts() {
         return Stream.empty();
     }

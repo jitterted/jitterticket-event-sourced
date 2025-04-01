@@ -13,7 +13,7 @@ class BuyTicketsUseCaseTest {
 
     @Test
     void availableConcertsReturnsNoConcertsWhenNoneCreated() {
-        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase();
+        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(new ConcertStore());
 
         Stream<Concert> availableConcerts = buyTicketsUseCase.availableConcerts();
 
@@ -28,7 +28,8 @@ class BuyTicketsUseCaseTest {
                                            LocalTime.now().minusHours(1),
                                            100,
                                            4);
-        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase();
+        ConcertStore concertStore = new ConcertStore();
+        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(concertStore);
 
         Stream<Concert> availableConcerts = buyTicketsUseCase.availableConcerts();
 
