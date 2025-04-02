@@ -27,7 +27,7 @@ public class EventDto<EVENT_TYPE extends Event> {
         this.json = json;
     }
 
-    public static <EVENT_TYPE extends Event> EventDto<EVENT_TYPE> from(UUID aggRootId, int eventId, Event event) {
+    public static <EVENT_TYPE extends Event> EventDto<EVENT_TYPE> from(UUID aggRootId, int eventId, EVENT_TYPE event) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 

@@ -33,7 +33,7 @@ public class ConcertStore {
 
         List<EventDto<ConcertEvent>> freshEventDtos = concert.uncommittedEvents()
                                                .stream()
-                                               .map(event -> EventDto.<ConcertEvent>from(
+                                               .map(event -> EventDto.from(
                                                        concert.getId().id(),
                                                        0,
                                                        event))
