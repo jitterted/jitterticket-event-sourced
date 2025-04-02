@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -15,20 +16,21 @@ public class ConcertTest {
     class CommandsGenerateEvents {
 
         @Test
-        void scheduleConcertGeneratesConcertScheduled() {
+        void scheduleConcertGeneratesConcertScheduledEventWithId() {
             int ticketPrice = 35;
             LocalDateTime showDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
             LocalTime doorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
             String artist = "Headliner";
-            Concert concert = Concert.schedule(artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+            ConcertId concertId = new ConcertId(UUID.randomUUID());
+            Concert concert = Concert.schedule(concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
 
             List<ConcertEvent> events = concert.uncommittedEvents();
 
             assertThat(events)
                     .containsExactly(new ConcertScheduled(
-                            artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
+                            concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
                     ));
         }
 
@@ -55,25 +57,28 @@ public class ConcertTest {
         int capacity = 100;
         int maxTicketsPerPurchase = 4;
         String artist = "Irrelevant Artist Name";
-        return new ConcertScheduled(artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+        return new ConcertScheduled(new ConcertId(UUID.randomUUID()), artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
     }
 
     @Nested
     class EventsProjectState {
 
         @Test
-        void concertScheduledUpdatesConcertDetails() {
+        void concertScheduledUpdatesConcertDetailsWithId() {
             int ticketPrice = 35;
             LocalDateTime showDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
             LocalTime doorsTime = LocalTime.of(19, 0);
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
             String artist = "Headliner";
-            ConcertScheduled concertScheduled = new ConcertScheduled(artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+            ConcertId concertId = new ConcertId(UUID.randomUUID());
+            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
             List<ConcertEvent> concertEvents = List.of(concertScheduled);
 
             Concert concert = Concert.reconstitute(concertEvents);
 
+            assertThat(concert.getId())
+                    .isEqualTo(concertId);
             assertThat(concert.artist())
                     .isEqualTo(artist);
             assertThat(concert.ticketPrice())
@@ -86,7 +91,6 @@ public class ConcertTest {
                     .isEqualTo(capacity);
             assertThat(concert.maxTicketsPerPurchase())
                     .isEqualTo(maxTicketsPerPurchase);
-
         }
 
         @Test
@@ -97,7 +101,7 @@ public class ConcertTest {
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
             String artist = "Rescheduler Artist Name";
-            ConcertScheduled concertScheduled = new ConcertScheduled(artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+            ConcertScheduled concertScheduled = new ConcertScheduled(new ConcertId(UUID.randomUUID()), artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
             LocalTime newDoorsTime = originalDoorsTime.minusHours(1);
             ConcertRescheduled concertRescheduled = new ConcertRescheduled(newShowDateTime, newDoorsTime);

@@ -1,3 +1,12 @@
+Wednesday, April 2, 2025
+========================
+
+[Decision]
+* Aggregates now have IDs that are of type UUIDv7 instead of Long, because we can't rely on the database to generate IDs as there's not a 1:1 relationship between rows/records in a table and the Aggregate Entities.
+  IDs will be assigned upon the first creation event for each domain aggregate.
+  Using type 7 UUIDs as they can be time-ordered, which is probably useful for events (since they must be correctly ordered).
+
+
 Tuesday, April 1, 2025
 ======================
 

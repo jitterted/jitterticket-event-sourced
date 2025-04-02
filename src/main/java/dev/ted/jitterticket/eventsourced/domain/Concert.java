@@ -18,22 +18,23 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
         concertEvents.forEach(this::apply);
     }
 
-    public static Concert schedule(String artist,
+    public static Concert schedule(ConcertId concertId,
+                                   String artist,
                                    int ticketPrice,
                                    LocalDateTime showDateTime,
                                    LocalTime doorsTime,
                                    int capacity,
                                    int maxTicketsPerPurchase) {
-        return new Concert(artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+        return new Concert(concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
     }
 
     public static Concert reconstitute(List<ConcertEvent> concertEvents) {
         return new Concert(concertEvents);
     }
 
-    private Concert(String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
+    private Concert(ConcertId concertId, String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
         ConcertScheduled concertScheduled = new ConcertScheduled(
-                artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
+                concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
         );
         enqueue(concertScheduled);
     }
@@ -42,6 +43,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
     protected void apply(ConcertEvent concertEvent) {
         switch (concertEvent) {
             case ConcertScheduled(
+                    ConcertId concertId,
                     String artist,
                     int ticketPrice,
                     LocalDateTime showDateTime,
@@ -49,6 +51,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
                     int capacity,
                     int maxTicketsPerPurchase
             ) -> {
+                this.setId(concertId);
                 this.artist = artist;
                 this.ticketPrice = ticketPrice;
                 this.showDateTime = showDateTime;

@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store;
 
+import dev.ted.jitterticket.eventsourced.domain.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.CustomerRegistered;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -84,7 +86,7 @@ class EventDtoTest {
 
     public static Stream<Arguments> events() {
         return Stream.of(
-                Arguments.of(new ConcertScheduled("artist",
+                Arguments.of(new ConcertScheduled(new ConcertId(UUID.randomUUID()), "artist",
                                                   99,
                                                   LocalDateTime.now(),
                                                   LocalTime.now().minusHours(1),

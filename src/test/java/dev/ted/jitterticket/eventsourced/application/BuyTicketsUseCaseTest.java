@@ -1,10 +1,12 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.Concert;
+import dev.ted.jitterticket.eventsourced.domain.ConcertId;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -23,7 +25,8 @@ class BuyTicketsUseCaseTest {
 
     @Test
     void availableConcertsReturnsTheSingleTicketableConcert() {
-        Concert concert = Concert.schedule("Single",
+        Concert concert = Concert.schedule(new ConcertId(UUID.randomUUID()),
+                                           "Single",
                                            99,
                                            LocalDateTime.now(),
                                            LocalTime.now().minusHours(1),

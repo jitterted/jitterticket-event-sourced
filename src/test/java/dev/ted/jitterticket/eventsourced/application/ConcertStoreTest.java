@@ -1,10 +1,13 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.Concert;
+import dev.ted.jitterticket.eventsourced.domain.ConcertId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -22,7 +25,7 @@ class ConcertStoreTest {
     @Test
     void findAllReturnsOnlySavedConcert() {
         ConcertStore concertStore = new ConcertStore();
-        Concert concert = Concert.schedule("Headliner",
+        Concert concert = Concert.schedule(new ConcertId(UUID.randomUUID()), "Headliner",
                                            99,
                                            LocalDateTime.now(),
                                            LocalTime.now().minusHours(1),
@@ -36,5 +39,28 @@ class ConcertStoreTest {
                 .hasSize(1)
                 .extracting(Concert::artist)
                 .containsExactly("Headliner");
+    }
+
+    @Test
+    @Disabled("dev.ted.jitterticket.eventsourced.application.ConcertStoreTest 4/2/25 11:31 — until store uses IDs")
+    void findReturnsDifferentInstanceOfConcert() {
+        ConcertStore concertStore = new ConcertStore();
+        Concert savedConcert = createConcert();
+        concertStore.save(savedConcert);
+
+        Concert foundConcert = concertStore.findAll().findFirst().orElseThrow();
+
+        assertThat(foundConcert)
+                .isNotSameAs(savedConcert);
+    }
+
+    private Concert createConcert() {
+        return Concert.schedule(new ConcertId(UUID.randomUUID()), "Headliner",
+                                99,
+                                LocalDateTime.now(),
+                                LocalTime.now().minusHours(1),
+                                100,
+                                4
+        );
     }
 }
