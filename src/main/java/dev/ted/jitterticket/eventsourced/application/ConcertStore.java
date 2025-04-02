@@ -31,13 +31,9 @@ public class ConcertStore {
                 .computeIfAbsent(concert.getId(),
                                  _ -> new ArrayList<>());
 
-        // compile error below I don't know if I can fix:
-        // Required type: List<EventDto<ConcertEvent>>
-        // Provided:
-        // List<EventDto<Event>>
         List<EventDto<ConcertEvent>> freshEventDtos = concert.uncommittedEvents()
                                                .stream()
-                                               .map(event -> EventDto.from(
+                                               .map(event -> EventDto.<ConcertEvent>from(
                                                        concert.getId().id(),
                                                        0,
                                                        event))
