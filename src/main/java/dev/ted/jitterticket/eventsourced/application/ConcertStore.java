@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.EventDto;
 import dev.ted.jitterticket.eventsourced.domain.Concert;
+import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.Id;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
 public class ConcertStore {
 
     private final List<Concert> concerts = new ArrayList<>();
-    private final Map<Id, List<EventDto>> idToEventDtoMap = new HashMap<>();
+    private final Map<Id, List<EventDto<ConcertEvent>>> idToEventDtoMap = new HashMap<>();
 
     public Stream<Concert> findAll() {
         return concerts.stream();
@@ -23,7 +24,7 @@ public class ConcertStore {
         if (concert.getId() == null) {
             throw new IllegalArgumentException("concert must have an ID");
         }
-        List<EventDto> existingEventDtos = idToEventDtoMap
+        List<EventDto<ConcertEvent>> existingEventDtos = idToEventDtoMap
                 .computeIfAbsent(concert.getId(),
                                  _ -> new ArrayList<>());
         concerts.add(concert);

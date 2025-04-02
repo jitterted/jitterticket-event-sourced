@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 
-public class EventDto {
+public class EventDto<EVENT_TYPE extends Event> {
     private final long aggRootId; // ID for the Aggregate Root
     private final int eventId;
     private final String eventType;
@@ -25,7 +25,7 @@ public class EventDto {
         this.json = json;
     }
 
-    public static EventDto from(long id, int eventId, Event event) {
+    public static <EVENT_TYPE extends Event> EventDto<EVENT_TYPE> from(long id, int eventId, EVENT_TYPE event) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -35,19 +35,19 @@ public class EventDto {
             if (fullyQualifiedClassName == null) {
                 throw new IllegalArgumentException("Unknown event class: " + event.getClass().getSimpleName());
             }
-            return new EventDto(id, eventId, fullyQualifiedClassName, json);
+            return new EventDto<EVENT_TYPE>(id, eventId, fullyQualifiedClassName, json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public Event toDomain() {
+    public EVENT_TYPE toDomain() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
         try {
-            Class<? extends Event> valueType = (Class<? extends Event>) Class.forName(eventType);
+            Class<? extends EVENT_TYPE> valueType = (Class<? extends EVENT_TYPE>) Class.forName(eventType);
             return objectMapper.readValue(json, valueType);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Problem converting JSON: " + json + " to " + eventType, e);
