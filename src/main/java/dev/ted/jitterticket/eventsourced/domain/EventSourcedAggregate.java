@@ -3,7 +3,7 @@ package dev.ted.jitterticket.eventsourced.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class EventSourcedAggregate<EVENT, ID> {
+public abstract class EventSourcedAggregate<EVENT extends Event, ID extends Id> {
     private final List<EVENT> uncommittedEvents = new ArrayList<>();
     private ID id;
 

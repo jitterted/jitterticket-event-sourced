@@ -6,6 +6,9 @@ Wednesday, April 2, 2025
   IDs will be assigned upon the first creation event for each domain aggregate.
   Using type 7 UUIDs as they can be time-ordered, which is probably useful for events (since they must be correctly ordered).
 
+* Interesting issues while generifying the ConcertStore: was able to get most of the way there, but the reconstitution of the object (e.g., Concert) needs to be externalized by a factory-like/functional method that takes the Events and converts them to the AGGREGATE
+
+* For easier understanding, create two stores: one specific (without Generics) to a type (e.g., CustomerStore), and then one that is generified, e.g., Store<...> (which is where ConcertStore is heading)
 
 Tuesday, April 1, 2025
 ======================

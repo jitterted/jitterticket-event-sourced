@@ -3,7 +3,8 @@ package dev.ted.jitterticket.eventsourced.application;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.EventDto;
 import dev.ted.jitterticket.eventsourced.domain.Concert;
 import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
-import dev.ted.jitterticket.eventsourced.domain.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.Event;
+import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
 
 import java.util.ArrayList;
@@ -13,20 +14,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-// will become Store<Concert>
-public class ConcertStore {
+public class ConcertStore<
+        ID extends Id,
+        EVENT extends Event,
+        AGGREGATE extends EventSourcedAggregate<EVENT, ID>> {
 
     private final Map<Id, List<EventDto>> idToEventDtoMap = new HashMap<>();
 
     @Deprecated // use findById() instead
-    public Stream<Concert> findAll() {
+    public Stream<AGGREGATE> findAll() {
         return idToEventDtoMap
                 .keySet()
                 .stream()
                 .map(id -> concertFromEvents(idToEventDtoMap.get(id)));
     }
 
-    public void save(Concert concert) {
+    public void save(AGGREGATE concert) {
         if (concert.getId() == null) {
             throw new IllegalArgumentException("concert must have an ID");
         }
@@ -45,16 +48,16 @@ public class ConcertStore {
         idToEventDtoMap.put(concert.getId(), existingEventDtos);
     }
 
-    private Concert concertFromEvents(List<EventDto> existingEventDtos) {
-        List<ConcertEvent> events = existingEventDtos
+    private AGGREGATE concertFromEvents(List<EventDto> existingEventDtos) {
+        List<EVENT> events = existingEventDtos
                 .stream()
-                .map(existingEventDto -> (ConcertEvent) existingEventDto.toDomain())
+                .map(existingEventDto -> (EVENT) existingEventDto.toDomain())
                 .toList();
-        return Concert.reconstitute(events);
+        return (AGGREGATE) Concert.reconstitute((List<ConcertEvent>) events);
     }
 
-    public Optional<Concert> findById(ConcertId concertId) {
-        return Optional.ofNullable(idToEventDtoMap.get(concertId))
+    public Optional<AGGREGATE> findById(ID id) {
+        return Optional.ofNullable(idToEventDtoMap.get(id))
                        .map(this::concertFromEvents);
     }
 }

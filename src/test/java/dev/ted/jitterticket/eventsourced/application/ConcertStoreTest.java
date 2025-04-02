@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.Concert;
+import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,7 @@ class ConcertStoreTest {
 
     @Test
     void findByIdForNonExistingConcertReturnsEmptyOptional() {
-        ConcertStore concertStore = new ConcertStore();
+        ConcertStore<ConcertId, ConcertEvent, Concert> concertStore = new ConcertStore<>();
 
         ConcertId concertId = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440000"));
         assertThat(concertStore.findById(concertId))
@@ -25,7 +26,7 @@ class ConcertStoreTest {
 
     @Test
     void findByIdReturnsSavedConcert() {
-        ConcertStore concertStore = new ConcertStore();
+        ConcertStore<ConcertId, ConcertEvent, Concert> concertStore = new ConcertStore<ConcertId, ConcertEvent, Concert>();
         ConcertId concertId = new ConcertId(UUID.randomUUID());
         Concert concert = Concert.schedule(concertId,
                                            "Headliner",
@@ -48,7 +49,7 @@ class ConcertStoreTest {
 
     @Test
     void findByIdReturnsDifferentInstanceOfConcert() {
-        ConcertStore concertStore = new ConcertStore();
+        ConcertStore<ConcertId, ConcertEvent, Concert> concertStore = new ConcertStore<ConcertId, ConcertEvent, Concert>();
         Concert savedConcert = createConcert();
         concertStore.save(savedConcert);
 

@@ -8,18 +8,20 @@ class EventSourcedAggregateTest {
 
     @Test
     void eventsAreAppliedUponBeingEnqueued() {
-        var eventSourcedAggregate = new EventSourcedAggregate<String, Long>() {
-            private String appliedString;
+        var eventSourcedAggregate = new EventSourcedAggregate<>() {
+            private Event appliedEvent;
 
             @Override
-            protected void apply(String s) {
-                this.appliedString = s;
+            protected void apply(Event event) {
+                appliedEvent = event;
             }
         };
 
-        eventSourcedAggregate.enqueue("StringlyEvent");
+        CustomerRegistered event = new CustomerRegistered("name", "email");
+        eventSourcedAggregate.enqueue(event);
 
-        assertThat(eventSourcedAggregate.appliedString)
-                .isEqualTo("StringlyEvent");
+        assertThat(eventSourcedAggregate.appliedEvent)
+                .isEqualTo(event);
     }
+
 }

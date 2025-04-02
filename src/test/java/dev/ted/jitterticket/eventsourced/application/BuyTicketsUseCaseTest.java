@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.Concert;
+import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,7 @@ class BuyTicketsUseCaseTest {
 
     @Test
     void availableConcertsReturnsNoConcertsWhenNoneCreated() {
-        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(new ConcertStore());
+        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(new ConcertStore<ConcertId, ConcertEvent, Concert>());
 
         Stream<Concert> availableConcerts = buyTicketsUseCase.availableConcerts();
 
@@ -33,7 +34,7 @@ class BuyTicketsUseCaseTest {
                                            100,
                                            4
         );
-        ConcertStore concertStore = new ConcertStore();
+        ConcertStore<ConcertId, ConcertEvent, Concert> concertStore = new ConcertStore<ConcertId, ConcertEvent, Concert>();
         concertStore.save(concert);
         BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(concertStore);
 

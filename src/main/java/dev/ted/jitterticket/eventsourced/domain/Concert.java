@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
+public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
 
     private String artist;
     private int ticketPrice;
