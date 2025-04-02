@@ -76,7 +76,7 @@ class EventDtoTest {
     @ParameterizedTest
     @MethodSource("events")
     void eventRoundTripConversion(Event sourceEvent) {
-        EventDto eventDto = EventDto.from(42L, 14, sourceEvent);
+        EventDto eventDto = EventDto.from(UUID.randomUUID(), 14, sourceEvent);
 
         Event actual = eventDto.toDomain();
 

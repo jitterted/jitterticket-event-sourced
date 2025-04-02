@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 
+import java.util.UUID;
+
 public class EventDto {
-    private final long aggRootId; // ID for the Aggregate Root
+    private final UUID aggRootId; // ID for the Aggregate Root
     private final int eventId;
     private final String eventType;
     private final String json;
@@ -15,7 +17,7 @@ public class EventDto {
     //    so that when adding (and especially renaming) classes, the mapping works
 //    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public EventDto(long aggRootId, int eventId, String eventClassName, String json) {
+    public EventDto(UUID aggRootId, int eventId, String eventClassName, String json) {
         if (eventClassName == null) {
             throw new IllegalArgumentException("Event class name cannot be null, JSON is: " + json);
         }
@@ -25,7 +27,7 @@ public class EventDto {
         this.json = json;
     }
 
-    public static EventDto from(long id, int eventId, Event event) {
+    public static EventDto from(UUID aggRootId, int eventId, Event event) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -35,7 +37,7 @@ public class EventDto {
             if (fullyQualifiedClassName == null) {
                 throw new IllegalArgumentException("Unknown event class: " + event.getClass().getSimpleName());
             }
-            return new EventDto(id, eventId, fullyQualifiedClassName, json);
+            return new EventDto(aggRootId, eventId, fullyQualifiedClassName, json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
