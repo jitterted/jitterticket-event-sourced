@@ -1,4 +1,6 @@
 package dev.ted.jitterticket.eventsourced.domain;
 
-public record ConcertId(Long id) implements Id {
+import java.util.UUID;
+
+public record ConcertId(UUID id) implements Id {
 }
