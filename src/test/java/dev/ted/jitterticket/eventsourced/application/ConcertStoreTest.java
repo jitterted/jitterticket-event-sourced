@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -46,14 +47,15 @@ class ConcertStoreTest {
     }
 
     @Test
-    void findReturnsDifferentInstanceOfConcert() {
+    void findByIdReturnsDifferentInstanceOfConcert() {
         ConcertStore concertStore = new ConcertStore();
         Concert savedConcert = createConcert();
         concertStore.save(savedConcert);
 
-        Concert foundConcert = concertStore.findAll().findFirst().orElseThrow();
+        Optional<Concert> foundConcert = concertStore.findById((ConcertId) savedConcert.getId());
 
         assertThat(foundConcert)
+                .get()
                 .isNotSameAs(savedConcert);
     }
 
