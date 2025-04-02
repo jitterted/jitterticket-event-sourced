@@ -91,8 +91,11 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, Id> {
         return artist;
     }
 
-    public void rescheduleTo(LocalDateTime newShowDateTime, LocalTime newDoorsTime) {
-        ConcertRescheduled concertRescheduled = new ConcertRescheduled(newShowDateTime, newDoorsTime);
+    public void rescheduleTo(LocalDateTime newShowDateTime,
+                             LocalTime newDoorsTime) {
+        // validation: new times must be X amount of time in the future
+        ConcertRescheduled concertRescheduled =
+                new ConcertRescheduled(newShowDateTime, newDoorsTime);
         enqueue(concertRescheduled);
     }
 

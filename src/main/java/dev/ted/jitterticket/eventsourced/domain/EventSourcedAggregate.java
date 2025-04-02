@@ -9,6 +9,7 @@ public abstract class EventSourcedAggregate<EVENT, ID> {
 
     protected void enqueue(EVENT event) {
         uncommittedEvents.add(event);
+        apply(event);
     }
 
     protected abstract void apply(EVENT event);
