@@ -11,13 +11,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+// will become Store<Concert>
 public class ConcertStore {
 
-    private final List<Concert> concerts = new ArrayList<>();
     private final Map<Id, List<EventDto<ConcertEvent>>> idToEventDtoMap = new HashMap<>();
 
     public Stream<Concert> findAll() {
-        return concerts.stream();
+        return idToEventDtoMap
+                .keySet()
+                .stream()
+                .map(id -> concertFromEvents(idToEventDtoMap.get(id)));
     }
 
     public void save(Concert concert) {
@@ -27,6 +30,23 @@ public class ConcertStore {
         List<EventDto<ConcertEvent>> existingEventDtos = idToEventDtoMap
                 .computeIfAbsent(concert.getId(),
                                  _ -> new ArrayList<>());
-        concerts.add(concert);
+        List<EventDto<ConcertEvent>> freshEventDtos = concert.uncommittedEvents()
+                                               .stream()
+                                               .map(event -> EventDto.from(
+                                                       concert.getId().id(),
+                                                       0,
+                                                       event))
+                                               .toList();
+        existingEventDtos.addAll(freshEventDtos);
+
+        idToEventDtoMap.put(concert.getId(), existingEventDtos);
+    }
+
+    private Concert concertFromEvents(List<EventDto<ConcertEvent>> existingEventDtos) {
+        List<ConcertEvent> events = existingEventDtos
+                .stream()
+                .map(EventDto::toDomain)
+                .toList();
+        return Concert.reconstitute(events);
     }
 }
