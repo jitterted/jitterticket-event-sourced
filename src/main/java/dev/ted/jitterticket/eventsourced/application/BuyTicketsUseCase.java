@@ -8,9 +8,9 @@ import java.util.stream.Stream;
 
 public class BuyTicketsUseCase {
 
-    private final ConcertStore<ConcertId, ConcertEvent, Concert> concertStore;
+    private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
-    public BuyTicketsUseCase(ConcertStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    public BuyTicketsUseCase(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         this.concertStore = concertStore;
     }
 

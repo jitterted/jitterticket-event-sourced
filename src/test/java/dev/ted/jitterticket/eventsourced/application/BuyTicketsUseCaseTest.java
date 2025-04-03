@@ -16,7 +16,7 @@ class BuyTicketsUseCaseTest {
 
     @Test
     void availableConcertsReturnsNoConcertsWhenNoneCreated() {
-        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(new ConcertStore<ConcertId, ConcertEvent, Concert>());
+        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(EventStore.forConcerts());
 
         Stream<Concert> availableConcerts = buyTicketsUseCase.availableConcerts();
 
@@ -34,7 +34,7 @@ class BuyTicketsUseCaseTest {
                                            100,
                                            4
         );
-        ConcertStore<ConcertId, ConcertEvent, Concert> concertStore = new ConcertStore<ConcertId, ConcertEvent, Concert>();
+        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
         concertStore.save(concert);
         BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(concertStore);
 

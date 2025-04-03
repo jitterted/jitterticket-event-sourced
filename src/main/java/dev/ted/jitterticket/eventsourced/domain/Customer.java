@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.domain;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
@@ -39,5 +40,14 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
     public String email() {
         return email;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Customer.class.getSimpleName() + "[", "]")
+                .add("id='" + getId() + "'")
+                .add("name='" + name + "'")
+                .add("email='" + email + "'")
+                .toString();
     }
 }
