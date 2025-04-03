@@ -3,6 +3,7 @@ package dev.ted.jitterticket.eventsourced.application;
 import dev.ted.jitterticket.eventsourced.domain.Concert;
 import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.ConcertScheduled;
 
 import java.util.stream.Stream;
 
@@ -15,7 +16,9 @@ public class ConcertProjector {
     }
 
     public Stream<ConcertId> allConcerts() {
-        return Stream.empty();
+        return concertStore.allEvents()
+                .filter(concertEvent -> concertEvent instanceof ConcertScheduled)
+                .map(concertEvent -> ((ConcertScheduled)concertEvent).concertId());
     }
 
 }

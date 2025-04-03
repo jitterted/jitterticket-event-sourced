@@ -6,7 +6,12 @@ import java.util.UUID;
 
 public class ConcertFactory {
     public static Concert createConcert() {
-        return Concert.schedule(new ConcertId(UUID.randomUUID()),
+        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        return createConcertWithId(concertId);
+    }
+
+    public static Concert createConcertWithId(ConcertId concertId) {
+        return Concert.schedule(concertId,
                                 "Headliner",
                                 99,
                                 LocalDateTime.now(),

@@ -3,12 +3,14 @@ package dev.ted.jitterticket.eventsourced.application;
 import dev.ted.jitterticket.eventsourced.domain.Concert;
 import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.UUID;
 import java.util.stream.Stream;
 
-import static dev.ted.jitterticket.eventsourced.domain.ConcertFactory.createConcert;
+import static dev.ted.jitterticket.eventsourced.domain.ConcertFactory.createConcertWithId;
 import static org.assertj.core.api.Assertions.*;
 
 class ConcertProjectorTest {
@@ -24,16 +26,33 @@ class ConcertProjectorTest {
     }
 
     @Test
-    @Disabled("dev.ted.jitterticket.eventsourced.application.ConcertProjectorTest 4/3/25 13:43 — until EventStore provides a way to get alllll events")
-    void projectorReturnsNewConcertSavedInConcertStore() {
+    void projectorReturnsConcertsSavedInConcertStore() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
-        Concert savedConcert = createConcert();
-        concertStore.save(savedConcert);
+        ConcertId firstConcertId = new ConcertId(UUID.randomUUID());
+        concertStore.save(createConcertWithId(firstConcertId));
+        ConcertId secondConcertId = new ConcertId(UUID.randomUUID());
+        concertStore.save(createConcertWithId(secondConcertId));
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
 
-        Stream<ConcertId> concerts = concertProjector.allConcerts();
+        Stream<ConcertId> allConcertIds = concertProjector.allConcerts();
 
-        assertThat(concerts)
-                .containsExactly(savedConcert.getId());
+        assertThat(allConcertIds)
+                .containsExactlyInAnyOrder(firstConcertId, secondConcertId);
+    }
+
+    @Test
+    void projectorReturnsSingleConcertForSavedAndRescheduledConcerts() {
+        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        concertStore.save(createConcertWithId(concertId));
+        Concert rescheduledConcert = concertStore.findById(concertId).orElseThrow();
+        rescheduledConcert.rescheduleTo(LocalDateTime.now(), LocalTime.now().minusHours(1));
+        concertStore.save(rescheduledConcert);
+
+        Stream<ConcertId> allConcertIds = concertProjector.allConcerts();
+
+        assertThat(allConcertIds)
+                .containsExactly(concertId);
     }
 }
