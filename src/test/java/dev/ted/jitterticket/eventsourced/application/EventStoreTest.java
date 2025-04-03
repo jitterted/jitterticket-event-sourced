@@ -6,7 +6,6 @@ import dev.ted.jitterticket.eventsourced.domain.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.Customer;
 import dev.ted.jitterticket.eventsourced.domain.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.CustomerId;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -65,7 +64,6 @@ class EventStoreTest {
     }
 
     @Test
-    @Disabled("dev.ted.jitterticket.eventsourced.application.EventStoreTest 4/3/25 12:41 — until Customer has ID assigned and event has ID")
     void eventStoreCanStoreCustomers() {
         EventStore<CustomerId, CustomerEvent, Customer> customerStore = EventStore.forCustomers();
         Customer savedCustomer = Customer.register(new CustomerId(UUID.randomUUID()), "name", "email@example.com");
