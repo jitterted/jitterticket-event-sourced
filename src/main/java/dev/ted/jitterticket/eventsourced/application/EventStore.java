@@ -12,6 +12,7 @@ import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,5 +78,12 @@ public class EventStore<
     public Optional<AGGREGATE> findById(ID id) {
         return Optional.ofNullable(idToEventDtoMap.get(id))
                        .map(this::concertFromEvents);
+    }
+
+    public Stream<EVENT> allEvents() {
+        return idToEventDtoMap.values()
+                              .stream()
+                              .flatMap(Collection::stream)
+                              .map(EventDto::toDomain);
     }
 }

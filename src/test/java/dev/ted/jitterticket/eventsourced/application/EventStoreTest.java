@@ -2,7 +2,10 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.Concert;
 import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.Customer;
 import dev.ted.jitterticket.eventsourced.domain.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.CustomerId;
@@ -12,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -53,7 +57,7 @@ class EventStoreTest {
     @Test
     void findByIdReturnsDifferentInstanceOfConcert() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
-        Concert savedConcert = createConcert();
+        Concert savedConcert = ConcertFactory.createConcert();
         concertStore.save(savedConcert);
 
         Optional<Concert> foundConcert = concertStore.findById(savedConcert.getId());
@@ -77,14 +81,19 @@ class EventStoreTest {
                 .isNotSameAs(savedCustomer);
     }
 
-    private Concert createConcert() {
-        return Concert.schedule(new ConcertId(UUID.randomUUID()),
-                                "Headliner",
-                                99,
-                                LocalDateTime.now(),
-                                LocalTime.now().minusHours(1),
-                                100,
-                                4
-        );
+    @Test
+    void eventStoreReturnsAllEventsAcrossAllSavedAggregatesInOrder() {
+        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        Concert originalConcert = ConcertFactory.createConcert();
+        concertStore.save(originalConcert);
+        Concert rescheduledConcert = concertStore.findById(originalConcert.getId()).orElseThrow();
+        rescheduledConcert.rescheduleTo(LocalDateTime.now(), LocalTime.now().minusHours(1));
+        concertStore.save(rescheduledConcert);
+
+        Stream<ConcertEvent> concertEventStream = concertStore.allEvents();
+
+        assertThat(concertEventStream)
+                .hasExactlyElementsOfTypes(ConcertScheduled.class,
+                                           ConcertRescheduled.class);
     }
 }

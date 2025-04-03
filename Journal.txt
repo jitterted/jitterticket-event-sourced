@@ -1,3 +1,17 @@
+Thursday, April 3, 2025
+=======================
+
+[Design]
+* {per @Suigi} To start, we'll create an in-memory Projector that always loops over all existing events in order to derive the information it needs to provide (e.g., which concerts are in the future and have tickets remaining)
+
+    * All EventStore instances (we need a separate instance per Aggregate type) eventually share a single EventDto-Repository (through which all events will flow on their way to a database), which could provide a single place for Projectors to tap into (and could specify the event types they're interested in).
+
+* Learned a lot about generics in making EventStore generic
+
+[Junie Issue]
+* When asking a question (instead of having it do work), the answers ended up in a markdown file instead of in its chat area
+
+
 Wednesday, April 2, 2025
 ========================
 

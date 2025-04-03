@@ -11,7 +11,7 @@ public class EventDto<EVENT extends Event> {
     private final UUID aggRootId; // ID for the Aggregate Root
     private final int eventId;
     private final String eventType;
-    private final String json;
+    private final String json; // blob of data - schemaless
 
     // -- the following mapper and maps should be externalized to some configuration
     //    so that when adding (and especially renaming) classes, the mapping works
