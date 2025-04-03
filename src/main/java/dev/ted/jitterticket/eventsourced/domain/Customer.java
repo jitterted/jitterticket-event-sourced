@@ -2,7 +2,7 @@ package dev.ted.jitterticket.eventsourced.domain;
 
 import java.util.List;
 
-public class Customer extends EventSourcedAggregate<CustomerEvent, Id> {
+public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
     private String name;
     private String email;

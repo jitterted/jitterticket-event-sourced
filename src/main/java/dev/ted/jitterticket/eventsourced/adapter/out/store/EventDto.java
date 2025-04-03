@@ -7,7 +7,7 @@ import dev.ted.jitterticket.eventsourced.domain.Event;
 
 import java.util.UUID;
 
-public class EventDto {
+public class EventDto<EVENT extends Event> {
     private final UUID aggRootId; // ID for the Aggregate Root
     private final int eventId;
     private final String eventType;
@@ -27,7 +27,7 @@ public class EventDto {
         this.json = json;
     }
 
-    public static EventDto from(UUID aggRootId, int eventId, Event event) {
+    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggRootId, int eventId, EVENT event) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -37,19 +37,19 @@ public class EventDto {
             if (fullyQualifiedClassName == null) {
                 throw new IllegalArgumentException("Unknown event class: " + event.getClass().getSimpleName());
             }
-            return new EventDto(aggRootId, eventId, fullyQualifiedClassName, json);
+            return new EventDto<>(aggRootId, eventId, fullyQualifiedClassName, json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public Event toDomain() {
+    public EVENT toDomain() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
         try {
-            Class<? extends Event> valueType = (Class<? extends Event>) Class.forName(eventType);
+            Class<EVENT> valueType = (Class<EVENT>) Class.forName(eventType);
             return objectMapper.readValue(json, valueType);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Problem converting JSON: " + json + " to " + eventType, e);

@@ -1,6 +1,8 @@
 Wednesday, April 2, 2025
 ========================
 
+Next Time: Deal with "find all concerts that we can buy tickets for" in the BuyTicketsUseCase
+
 [Decision]
 * Aggregates now have IDs that are of type UUIDv7 instead of Long, because we can't rely on the database to generate IDs as there's not a 1:1 relationship between rows/records in a table and the Aggregate Entities.
   IDs will be assigned upon the first creation event for each domain aggregate.
@@ -9,6 +11,7 @@ Wednesday, April 2, 2025
 * Interesting issues while generifying the ConcertStore: was able to get most of the way there, but the reconstitution of the object (e.g., Concert) needs to be externalized by a factory-like/functional method that takes the Events and converts them to the AGGREGATE
 
 * For easier understanding, create two stores: one specific (without Generics) to a type (e.g., CustomerStore), and then one that is generified, e.g., Store<...> (which is where ConcertStore is heading)
+
 
 Tuesday, April 1, 2025
 ======================

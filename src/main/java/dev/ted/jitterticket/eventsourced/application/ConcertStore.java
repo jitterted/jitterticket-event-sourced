@@ -19,7 +19,7 @@ public class ConcertStore<
         EVENT extends Event,
         AGGREGATE extends EventSourcedAggregate<EVENT, ID>> {
 
-    private final Map<Id, List<EventDto>> idToEventDtoMap = new HashMap<>();
+    private final Map<ID, List<EventDto<EVENT>>> idToEventDtoMap = new HashMap<>();
 
     @Deprecated // use findById() instead
     public Stream<AGGREGATE> findAll() {
@@ -33,22 +33,22 @@ public class ConcertStore<
         if (concert.getId() == null) {
             throw new IllegalArgumentException("concert must have an ID");
         }
-        List<EventDto> existingEventDtos = idToEventDtoMap
+        List<EventDto<EVENT>> existingEventDtos = idToEventDtoMap
                 .computeIfAbsent(concert.getId(),
                                  _ -> new ArrayList<>());
-        List<EventDto> freshEventDtos = concert.uncommittedEvents()
-                                               .stream()
-                                               .map(event -> EventDto.from(
+        List<EventDto<EVENT>> freshEventDtos = concert.uncommittedEvents()
+                                                      .stream()
+                                                      .map(event -> EventDto.from(
                                                        concert.getId().id(),
                                                        0,
                                                        event))
-                                               .toList();
+                                                      .toList();
         existingEventDtos.addAll(freshEventDtos);
 
         idToEventDtoMap.put(concert.getId(), existingEventDtos);
     }
 
-    private AGGREGATE concertFromEvents(List<EventDto> existingEventDtos) {
+    private AGGREGATE concertFromEvents(List<EventDto<EVENT>> existingEventDtos) {
         List<EVENT> events = existingEventDtos
                 .stream()
                 .map(existingEventDto -> (EVENT) existingEventDto.toDomain())
