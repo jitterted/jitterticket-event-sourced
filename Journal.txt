@@ -1,6 +1,9 @@
 Thursday, April 3, 2025
 =======================
 
+Next Time: Modify ConcertProjector so that it has all the details needed to render the list of concerts available for a customer to buy a ticket for, which means adding additional fields to the projector
+
+
 [Design]
 * {per @Suigi} To start, we'll create an in-memory Projector that always loops over all existing events in order to derive the information it needs to provide (e.g., which concerts are in the future and have tickets remaining)
 
