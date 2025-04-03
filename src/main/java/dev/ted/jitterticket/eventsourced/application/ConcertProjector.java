@@ -8,8 +8,10 @@ import java.util.stream.Stream;
 
 public class ConcertProjector {
 
-    public ConcertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
+    public ConcertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        this.concertStore = concertStore;
     }
 
     public Stream<ConcertId> allConcerts() {
