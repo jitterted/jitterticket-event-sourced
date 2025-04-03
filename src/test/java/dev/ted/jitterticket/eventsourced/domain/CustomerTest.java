@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -14,11 +15,14 @@ class CustomerTest {
 
         @Test
         void registerCustomerGeneratesCustomerRegistered() {
-            Customer customer = Customer.register("customer name", "email@example.com");
+            CustomerId customerId = new CustomerId(UUID.randomUUID());
+            Customer customer = Customer.register(
+                    customerId,
+                    "customer name", "email@example.com");
 
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
-                            new CustomerRegistered("customer name", "email@example.com")
+                            new CustomerRegistered(customerId, "customer name", "email@example.com")
                     );
         }
     }
@@ -28,11 +32,14 @@ class CustomerTest {
 
         @Test
         void customerRegisteredUpdatesNameAndEmail() {
+            CustomerId customerId = new CustomerId(UUID.randomUUID());
             CustomerRegistered customerRegistered = new CustomerRegistered(
-                    "customer name", "email@example.com");
+                    customerId, "customer name", "email@example.com");
 
             Customer customer = Customer.reconstitute(List.of(customerRegistered));
 
+            assertThat(customer.getId())
+                    .isEqualTo(customerId);
             assertThat(customer.name())
                     .isEqualTo("customer name");
             assertThat(customer.email())

@@ -3,6 +3,7 @@ package dev.ted.jitterticket.eventsourced.adapter.out.store;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.CustomerRegistered;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import org.junit.jupiter.api.Test;
@@ -94,7 +95,9 @@ class EventDtoTest {
                                                   4))
                 , Arguments.of(new ConcertRescheduled(LocalDateTime.now(),
                                                       LocalTime.now().minusHours(1)))
-                , Arguments.of(new CustomerRegistered("customer name", "email@example.com"))
+                , Arguments.of(new CustomerRegistered(new CustomerId(UUID.randomUUID()),
+                                                      "customer name",
+                                                      "email@example.com"))
         );
     }
 }

@@ -1,5 +1,5 @@
 package dev.ted.jitterticket.eventsourced.domain;
 
-public record CustomerRegistered(String customerName, String email)
+public record CustomerRegistered(CustomerId customerId, String customerName, String email)
         implements CustomerEvent {
 }

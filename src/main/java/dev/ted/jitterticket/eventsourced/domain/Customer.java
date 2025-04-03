@@ -8,8 +8,8 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     private String name;
     private String email;
 
-    public static Customer register(String name, String email) {
-        return new Customer(name, email);
+    public static Customer register(CustomerId customerId, String name, String email) {
+        return new Customer(customerId, name, email);
     }
 
     public static Customer reconstitute(List<CustomerEvent> customerEvents) {
@@ -20,14 +20,15 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
         customerEvents.forEach(this::apply);
     }
 
-    private Customer(String name, String email) {
-        enqueue(new CustomerRegistered(name, email));
+    private Customer(CustomerId customerId, String name, String email) {
+        enqueue(new CustomerRegistered(customerId, name, email));
     }
 
     @Override
     protected void apply(CustomerEvent customerEvent) {
         switch (customerEvent) {
-            case CustomerRegistered(String customerName, String email) -> {
+            case CustomerRegistered(CustomerId customerId, String customerName, String email) -> {
+                setId(customerId);
                 this.name = customerName;
                 this.email = email;
             }
