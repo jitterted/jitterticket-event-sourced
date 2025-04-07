@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Events</title>
+</head>
+<body>
+<h1>On-Sale Events</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Event ID</th>
+        <th>Artist</th>
+        <th>Date and Time</th>
+        <th>Tickets</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="event : ${events}">
+        <td th:text="${event.id}"></td>
+        <td th:text="${event.artist}"></td>
+        <td th:text="${event.dateTime}"></td>
+        <td><a th:href="@{/events/{id}(id=${event.id})}">Buy Tickets</a></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

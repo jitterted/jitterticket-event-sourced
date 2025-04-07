@@ -1,6 +1,9 @@
 Monday, April 7, 2025
 =====================
 
+[Spring Framework]
+* MockMvcTester without any Spring configuration will use the default InternalResourceViewResolver, which prevents "dispatch loops" that don't actually make sense for the resolver (Thymeleaf) we use in production, but it's too painful to manually wire the ThymeleafResolver. Perhaps can configure the UrlBasedViewResolver which doesn't care about dispatch loops?
+
 [Heuristic]
 * Projected read-models should have all the information needed to render a customer/user-facing view
 
