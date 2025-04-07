@@ -74,7 +74,8 @@ class ConcertProjectorTest {
                                         LocalTime.of(19, 0));
         concertStore.save(rescheduledConcert);
 
-        Stream<ConcertTicketView> allConcertTicketViews = concertProjector.allConcertTicketViews();
+        Stream<ConcertTicketView> allConcertTicketViews =
+                concertProjector.allConcertTicketViews();
 
         assertThat(allConcertTicketViews)
                 .containsExactly(new ConcertTicketView(

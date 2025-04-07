@@ -34,16 +34,10 @@ public class ConcertProjector {
                                              _, _) ->
                                              views.put(concertId,
                                                     new ConcertTicketView(concertId, artist, ticketPrice, showDateTime, doorsTime));
+
                                      case ConcertRescheduled(ConcertId concertId, LocalDateTime newShowDateTime, LocalTime newDoorsTime) -> {
                                          ConcertTicketView oldView = views.get(concertId);
-                                         ConcertTicketView rescheduledView =
-                                                 new ConcertTicketView(
-                                                         oldView.concertId(),
-                                                         oldView.artist(),
-                                                         oldView.ticketPrice(),
-                                                         newShowDateTime,
-                                                         newDoorsTime
-                                                 );
+                                         ConcertTicketView rescheduledView = rescheduleTo(newShowDateTime, newDoorsTime, oldView);
                                          views.put(concertId, rescheduledView);
                                      }
 
@@ -53,6 +47,16 @@ public class ConcertProjector {
                              }
                     );
         return views.values().stream();
+    }
+
+    private ConcertTicketView rescheduleTo(LocalDateTime newShowDateTime, LocalTime newDoorsTime, ConcertTicketView oldView) {
+        return new ConcertTicketView(
+                oldView.concertId(),
+                oldView.artist(),
+                oldView.ticketPrice(),
+                newShowDateTime,
+                newDoorsTime
+        );
     }
 }
 
