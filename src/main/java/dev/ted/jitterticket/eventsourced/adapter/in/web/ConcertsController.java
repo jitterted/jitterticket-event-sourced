@@ -9,6 +9,7 @@ public class ConcertsController {
 
     @GetMapping("/concerts")
     public String ticketableConcerts(Model model) {
+        model.addAttribute("concerts", "");
         return "concerts";
     }
 

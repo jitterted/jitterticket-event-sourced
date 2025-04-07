@@ -17,5 +17,7 @@ class ConcertsControllerTest {
 
         assertThat(viewName)
                 .isEqualTo("concerts");
+        assertThat(model.getAttribute("concerts"))
+                .isNotNull();
     }
 }
