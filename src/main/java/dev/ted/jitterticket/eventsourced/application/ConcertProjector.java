@@ -17,8 +17,18 @@ public class ConcertProjector {
 
     public Stream<ConcertId> allConcerts() {
         return concertStore.allEvents()
-                .filter(concertEvent -> concertEvent instanceof ConcertScheduled)
-                .map(concertEvent -> ((ConcertScheduled)concertEvent).concertId());
+                           .filter(concertEvent -> concertEvent instanceof ConcertScheduled)
+                           .map(concertEvent -> ((ConcertScheduled) concertEvent).concertId());
     }
 
+    public Stream<ConcertTicketView> allConcertTicketViews() {
+        return concertStore.allEvents()
+                           .filter(concertEvent -> concertEvent instanceof ConcertScheduled)
+                           .map(concertEvent ->
+                               new ConcertTicketView(
+                                       ((ConcertScheduled) concertEvent).concertId(),
+                                       null, 0, null, null
+                               ));
+    }
 }
+

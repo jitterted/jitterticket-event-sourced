@@ -19,9 +19,9 @@ class ConcertProjectorTest {
     void noConcertsCreatedProjectorReturnsNoConcerts() {
         ConcertProjector concertProjector = new ConcertProjector(EventStore.forConcerts());
 
-        Stream<ConcertId> concertIds = concertProjector.allConcerts();
+        Stream<ConcertTicketView> concertTicketViews = concertProjector.allConcertTicketViews();
 
-        assertThat(concertIds)
+        assertThat(concertTicketViews)
                 .isEmpty();
     }
 
@@ -34,9 +34,10 @@ class ConcertProjectorTest {
         concertStore.save(createConcertWithId(secondConcertId));
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
 
-        Stream<ConcertId> allConcertIds = concertProjector.allConcerts();
+        Stream<ConcertTicketView> allConcertTicketViews = concertProjector.allConcertTicketViews();
 
-        assertThat(allConcertIds)
+        assertThat(allConcertTicketViews)
+                .extracting(ConcertTicketView::concertId)
                 .containsExactlyInAnyOrder(firstConcertId, secondConcertId);
     }
 

@@ -1,3 +1,10 @@
+Monday, April 7, 2025
+=====================
+
+[Heuristic]
+* Projected read-models should have all the information needed to render a customer/user-facing view
+
+
 Thursday, April 3, 2025
 =======================
 
