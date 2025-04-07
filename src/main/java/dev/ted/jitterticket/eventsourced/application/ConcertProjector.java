@@ -3,6 +3,7 @@ package dev.ted.jitterticket.eventsourced.application;
 import dev.ted.jitterticket.eventsourced.domain.Concert;
 import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.ConcertScheduled;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,19 @@ public class ConcertProjector {
                                              _, _) ->
                                              views.put(concertId,
                                                     new ConcertTicketView(concertId, artist, ticketPrice, showDateTime, doorsTime));
+                                     case ConcertRescheduled(ConcertId concertId, LocalDateTime newShowDateTime, LocalTime newDoorsTime) -> {
+                                         ConcertTicketView oldView = views.get(concertId);
+                                         ConcertTicketView rescheduledView =
+                                                 new ConcertTicketView(
+                                                         oldView.concertId(),
+                                                         oldView.artist(),
+                                                         oldView.ticketPrice(),
+                                                         newShowDateTime,
+                                                         newDoorsTime
+                                                 );
+                                         views.put(concertId, rescheduledView);
+                                     }
+
                                      default -> {
                                      }
                                  }

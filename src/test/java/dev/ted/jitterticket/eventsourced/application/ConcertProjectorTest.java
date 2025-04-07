@@ -4,7 +4,6 @@ import dev.ted.jitterticket.eventsourced.domain.Concert;
 import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -61,7 +60,6 @@ class ConcertProjectorTest {
     }
 
     @Test
-    @Disabled("dev.ted.jitterticket.eventsourced.application.ConcertProjectorTest 4/7/25 12:39 — until we have Aggregate root IDs inside the events")
     void projectorReturnsSingleConcertForSavedAndRescheduledConcerts() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);

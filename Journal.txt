@@ -4,6 +4,9 @@ Monday, April 7, 2025
 [Heuristic]
 * Projected read-models should have all the information needed to render a customer/user-facing view
 
+* Following from the heuristic above, for ease of conversion we're adding the Aggregate's IDs to the event objects themselves instead of pulling them from the "wrapper/envelope" EventDto that already has the Aggregate's ID.
+  Later on we can do more work in EventDto, since the DTO already has the ID, when converting from the DTO back into the event via enrichment (and not store the ID in the JSON blob), but that's an optimization: not having duplicate information in the JSON that's already in the event record/row.
+
 
 Thursday, April 3, 2025
 =======================

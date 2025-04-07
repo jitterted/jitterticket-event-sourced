@@ -24,7 +24,7 @@ public class EventDto<EVENT extends Event> {
         -----------------------------------------------------------------
         0       | 0         | ConcertScheduled   | {id: 0, artist: "Judy", ... }
         1       | 0         | ConcertScheduled   | {id: 1, artist: "Betty", ... }
-        0       | 1         | ConcertRescheduled | {newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
+        0       | 1         | ConcertRescheduled | {id: 0, newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
     */
 
 
