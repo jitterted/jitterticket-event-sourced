@@ -20,4 +20,15 @@ public class ConcertFactory {
                                 4
         );
     }
+
+    public static Concert createConcertWith(ConcertId firstConcertId, String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime) {
+        return Concert.schedule(firstConcertId,
+                                artist,
+                                ticketPrice,
+                                showDateTime,
+                                doorsTime,
+                                100,
+                                4
+        );
+    }
 }

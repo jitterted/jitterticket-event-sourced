@@ -24,11 +24,15 @@ public class ConcertProjector {
     public Stream<ConcertTicketView> allConcertTicketViews() {
         return concertStore.allEvents()
                            .filter(concertEvent -> concertEvent instanceof ConcertScheduled)
-                           .map(concertEvent ->
-                               new ConcertTicketView(
-                                       ((ConcertScheduled) concertEvent).concertId(),
-                                       null, 0, null, null
-                               ));
+                           .map(concertEvent -> (ConcertScheduled) concertEvent)
+                           .map(concertScheduled ->
+                                        new ConcertTicketView(
+                                                concertScheduled.concertId(),
+                                                concertScheduled.artist(),
+                                                concertScheduled.ticketPrice(),
+                                                concertScheduled.showDateTime(),
+                                                concertScheduled.doorsTime()
+                                        ));
     }
 }
 
