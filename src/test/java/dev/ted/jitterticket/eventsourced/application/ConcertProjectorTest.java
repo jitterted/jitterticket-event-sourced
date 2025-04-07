@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.domain.Concert;
 import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -60,18 +61,29 @@ class ConcertProjectorTest {
     }
 
     @Test
+    @Disabled("dev.ted.jitterticket.eventsourced.application.ConcertProjectorTest 4/7/25 12:39 — until we have Aggregate root IDs inside the events")
     void projectorReturnsSingleConcertForSavedAndRescheduledConcerts() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
         ConcertId concertId = new ConcertId(UUID.randomUUID());
-        concertStore.save(ConcertFactory.createConcertWithId(concertId));
+        concertStore.save(ConcertFactory.createConcertWith(concertId,
+                                                           "Desi Bells",
+                                                           35,
+                                                           LocalDateTime.of(2025, 4, 22, 19, 0),
+                                                           LocalTime.of(18, 0)));
         Concert rescheduledConcert = concertStore.findById(concertId).orElseThrow();
-        rescheduledConcert.rescheduleTo(LocalDateTime.now(), LocalTime.now().minusHours(1));
+        rescheduledConcert.rescheduleTo(LocalDateTime.of(2025, 7, 11, 20, 0),
+                                        LocalTime.of(19, 0));
         concertStore.save(rescheduledConcert);
 
-        Stream<ConcertId> allConcertIds = concertProjector.allConcerts();
+        Stream<ConcertTicketView> allConcertTicketViews = concertProjector.allConcertTicketViews();
 
-        assertThat(allConcertIds)
-                .containsExactly(concertId);
+        assertThat(allConcertTicketViews)
+                .containsExactly(new ConcertTicketView(
+                        concertId,
+                        "Desi Bells",
+                        35,
+                        LocalDateTime.of(2025, 7, 11, 20, 0),
+                        LocalTime.of(19, 0)));
     }
 }

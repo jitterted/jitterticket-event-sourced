@@ -13,6 +13,21 @@ public class EventDto<EVENT extends Event> {
     private final String eventType;
     private final String json; // blob of data - schemaless
 
+    /*
+        Table schema:
+
+        PK AggRootId
+           EventId
+        JSON String eventContent
+
+        AggRootID | EventId  | EventType         |  JSON Content
+        -----------------------------------------------------------------
+        0       | 0         | ConcertScheduled   | {id: 0, artist: "Judy", ... }
+        1       | 0         | ConcertScheduled   | {id: 1, artist: "Betty", ... }
+        0       | 1         | ConcertRescheduled | {newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
+    */
+
+
     // -- the following mapper and maps should be externalized to some configuration
     //    so that when adding (and especially renaming) classes, the mapping works
 //    private final ObjectMapper objectMapper = new ObjectMapper();

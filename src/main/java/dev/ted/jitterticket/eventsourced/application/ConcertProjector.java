@@ -5,6 +5,10 @@ import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.ConcertScheduled;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class ConcertProjector {
@@ -15,24 +19,26 @@ public class ConcertProjector {
         this.concertStore = concertStore;
     }
 
-    public Stream<ConcertId> allConcerts() {
-        return concertStore.allEvents()
-                           .filter(concertEvent -> concertEvent instanceof ConcertScheduled)
-                           .map(concertEvent -> ((ConcertScheduled) concertEvent).concertId());
-    }
-
     public Stream<ConcertTicketView> allConcertTicketViews() {
-        return concertStore.allEvents()
-                           .filter(concertEvent -> concertEvent instanceof ConcertScheduled)
-                           .map(concertEvent -> (ConcertScheduled) concertEvent)
-                           .map(concertScheduled ->
-                                        new ConcertTicketView(
-                                                concertScheduled.concertId(),
-                                                concertScheduled.artist(),
-                                                concertScheduled.ticketPrice(),
-                                                concertScheduled.showDateTime(),
-                                                concertScheduled.doorsTime()
-                                        ));
+        Map<ConcertId, ConcertTicketView> views = new HashMap<>();
+        concertStore.allEvents()
+                    .forEach(concertEvent -> {
+                                 switch (concertEvent) {
+                                     case ConcertScheduled(
+                                             ConcertId concertId,
+                                             String artist,
+                                             int ticketPrice,
+                                             LocalDateTime showDateTime,
+                                             LocalTime doorsTime,
+                                             _, _) ->
+                                             views.put(concertId,
+                                                    new ConcertTicketView(concertId, artist, ticketPrice, showDateTime, doorsTime));
+                                     default -> {
+                                     }
+                                 }
+                             }
+                    );
+        return views.values().stream();
     }
 }
 
