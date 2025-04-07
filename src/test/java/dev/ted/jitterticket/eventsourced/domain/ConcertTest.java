@@ -47,7 +47,9 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new ConcertRescheduled(newShowDateTime, newDoorsTime));
+                            new ConcertRescheduled(concert.getId(),
+                                                   newShowDateTime,
+                                                   newDoorsTime));
         }
 
     }
@@ -101,10 +103,11 @@ public class ConcertTest {
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
             String artist = "Rescheduler Artist Name";
-            ConcertScheduled concertScheduled = new ConcertScheduled(new ConcertId(UUID.randomUUID()), artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+            ConcertId concertId = new ConcertId(UUID.randomUUID());
+            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
             LocalTime newDoorsTime = originalDoorsTime.minusHours(1);
-            ConcertRescheduled concertRescheduled = new ConcertRescheduled(newShowDateTime, newDoorsTime);
+            ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, newShowDateTime, newDoorsTime);
 
             List<ConcertEvent> concertEvents = List.of(concertScheduled,
                                                        concertRescheduled);

@@ -87,13 +87,15 @@ class EventDtoTest {
 
     public static Stream<Arguments> events() {
         return Stream.of(
-                Arguments.of(new ConcertScheduled(new ConcertId(UUID.randomUUID()), "artist",
+                Arguments.of(new ConcertScheduled(new ConcertId(UUID.randomUUID()),
+                                                  "artist",
                                                   99,
                                                   LocalDateTime.now(),
                                                   LocalTime.now().minusHours(1),
                                                   100,
                                                   4))
-                , Arguments.of(new ConcertRescheduled(LocalDateTime.now(),
+                , Arguments.of(new ConcertRescheduled(new ConcertId(UUID.randomUUID()),
+                                                      LocalDateTime.now(),
                                                       LocalTime.now().minusHours(1)))
                 , Arguments.of(new CustomerRegistered(new CustomerId(UUID.randomUUID()),
                                                       "customer name",

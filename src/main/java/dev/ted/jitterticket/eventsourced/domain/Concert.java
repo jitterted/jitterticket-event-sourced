@@ -61,7 +61,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
             }
 
             case ConcertRescheduled(
-                    LocalDateTime newShowDateTime,
+                    ConcertId concertId, LocalDateTime newShowDateTime,
                     LocalTime newDoorsTime
             ) -> {
                 this.showDateTime = newShowDateTime;
@@ -98,7 +98,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                              LocalTime newDoorsTime) {
         // validation: new times must be X amount of time in the future
         ConcertRescheduled concertRescheduled =
-                new ConcertRescheduled(newShowDateTime, newDoorsTime);
+                new ConcertRescheduled(getId(), newShowDateTime, newDoorsTime);
         enqueue(concertRescheduled);
     }
 
