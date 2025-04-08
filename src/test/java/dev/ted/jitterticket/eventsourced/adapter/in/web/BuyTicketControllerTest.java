@@ -56,7 +56,10 @@ class BuyTicketControllerTest {
         BuyTicketController buyTicketController = new BuyTicketController(EventStore.forConcerts());
         String concertUuidString = UUID.randomUUID().toString();
 
-        String redirectString = buyTicketController.buyTickets(concertUuidString);
+        String redirectString = buyTicketController
+                .buyTickets(concertUuidString,
+                            new TicketOrderForm(UUID.randomUUID().toString(),
+                                                4));
 
         assertThat(redirectString)
                 .isEqualTo("redirect:/confirmations/af05fc05-2de1-46d8-9568-01381029feb7");
