@@ -11,13 +11,13 @@
 <h2 th:text="${concert.showTime}">8:00PM</h2>
 <h2 th:text="${concert.ticketPrice}">$38</h2>
 <form th:action="@{/concerts/{id}/concerts(id=${concert.concertId})}"
-      th:object="${ticketOrder}"
+      th:object="${ticketOrderForm}"
       method="post">
     <label th:for="${#ids.prev('customerId')}">Customer ID:
-    <input type="text" name="customerId" th:value="*{customerId}">
+    <input type="text" th:field="*{customerId}">
     </label>
-    <label th:for="${#ids.prev('ticketCount')}">Number of tickets:
-    <input type="number" th:field="*{ticketCount}" min="1" required>
+    <label th:for="${#ids.prev('quantity')}">Number of tickets:
+    <input type="number" th:field="*{quantity}" min="1" required>
     </label>
     <button type="submit">Buy Tickets</button>
 </form>
