@@ -8,18 +8,20 @@
 <table>
     <thead>
     <tr>
-        <th>Event ID</th>
+        <th>Concert ID</th>
         <th>Artist</th>
-        <th>Date and Time</th>
+        <th>Date</th>
+        <th>Time</th>
         <th>Tickets</th>
     </tr>
     </thead>
     <tbody>
-    <tr th:each="event : ${events}">
-        <td th:text="${event.id}"></td>
-        <td th:text="${event.artist}"></td>
-        <td th:text="${event.dateTime}"></td>
-        <td><a th:href="@{/events/{id}(id=${event.id})}">Buy Tickets</a></td>
+    <tr th:each="concert : ${concerts}">
+        <td th:text="${concert.id}"></td>
+        <td th:text="${concert.artist}"></td>
+        <td th:text="${concert.showDate}"></td>
+        <td th:text="${concert.showTime}"></td>
+        <td><a th:href="@{/concerts/{id}(id=${concert.id})}">Buy Tickets</a></td>
     </tr>
     </tbody>
 </table>

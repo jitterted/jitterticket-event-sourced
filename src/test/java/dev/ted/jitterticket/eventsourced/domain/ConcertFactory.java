@@ -21,8 +21,8 @@ public class ConcertFactory {
         );
     }
 
-    public static Concert createConcertWith(ConcertId firstConcertId, String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime) {
-        return Concert.schedule(firstConcertId,
+    public static Concert createConcertWith(ConcertId concertId, String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime) {
+        return Concert.schedule(concertId,
                                 artist,
                                 ticketPrice,
                                 showDateTime,
