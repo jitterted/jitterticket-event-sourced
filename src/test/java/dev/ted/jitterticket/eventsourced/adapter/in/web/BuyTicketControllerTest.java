@@ -45,7 +45,9 @@ class BuyTicketControllerTest {
                         "September 15, 2025", "9:00\u202FPM"
                 ));
         TicketOrderForm ticketOrderForm = (TicketOrderForm) model.getAttribute("ticketOrderForm");
-        assertThat(ticketOrderForm)
-                .isNotNull();
+        assertThat(ticketOrderForm.customerId())
+                .isNotBlank();
+        assertThat(ticketOrderForm.quantity())
+                .isEqualTo(2);
     }
 }

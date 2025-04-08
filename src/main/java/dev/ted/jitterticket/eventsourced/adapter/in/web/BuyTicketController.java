@@ -25,9 +25,9 @@ public class BuyTicketController {
     @GetMapping("/concerts/{concertId}")
     public String buyTicketsView(Model model,
                                  @PathVariable("concertId") String concertId) {
-        ConcertView concertView = concertViewFor(concertId);
-        model.addAttribute("concert", concertView);
-        model.addAttribute("ticketOrderForm", new TicketOrderForm(UUID.randomUUID().toString(), 2));
+        model.addAttribute("concert", concertViewFor(concertId));
+        model.addAttribute("ticketOrderForm", new TicketOrderForm(
+                UUID.randomUUID().toString(), 2));
         return "buy-tickets";
     }
 
