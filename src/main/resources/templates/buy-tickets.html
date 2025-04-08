@@ -13,10 +13,10 @@
 <form th:action="@{/concerts/{id}/concerts(id=${concert.concertId})}"
       th:object="${ticketOrderForm}"
       method="post">
-    <label th:for="${#ids.prev('customerId')}">Customer ID:
+    <label th:for="${#ids.next('customerId')}">Customer ID:
     <input type="text" th:field="*{customerId}">
     </label>
-    <label th:for="${#ids.prev('quantity')}">Number of tickets:
+    <label th:for="${#ids.next('quantity')}">Number of tickets:
     <input type="number" th:field="*{quantity}" min="1" required>
     </label>
     <button type="submit">Buy Tickets</button>
