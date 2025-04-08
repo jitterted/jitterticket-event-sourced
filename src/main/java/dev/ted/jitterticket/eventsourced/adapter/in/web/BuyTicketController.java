@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.UUID;
 
@@ -29,6 +30,11 @@ public class BuyTicketController {
         model.addAttribute("ticketOrderForm", new TicketOrderForm(
                 UUID.randomUUID().toString(), 2));
         return "buy-tickets";
+    }
+
+    @PostMapping("/concerts/{concertId}")
+    public String buyTickets(@PathVariable("concertId") String concertId) {
+        return "redirect:/";
     }
 
     private ConcertView concertViewFor(String concertId) {

@@ -29,7 +29,7 @@ class BuyTicketControllerMvcTest {
     EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
     @Test
-    void getToBuyTicketViewEndpointReturns200() {
+    void getToBuyTicketViewEndpointReturns200Ok() {
         ConcertId concertId = new ConcertId(UUID.randomUUID());
         concertStore.save(Concert.schedule(
                 concertId,
@@ -46,4 +46,12 @@ class BuyTicketControllerMvcTest {
            .hasStatus2xxSuccessful();
     }
 
+    @Test
+    void postToBuyTicketEndpointRedirects() {
+        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        mvc.post()
+           .uri("/concerts/" + concertId.id().toString())
+           .assertThat()
+           .hasStatus3xxRedirection();
+    }
 }
