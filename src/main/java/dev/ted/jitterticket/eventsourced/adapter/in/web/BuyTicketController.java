@@ -20,5 +20,6 @@ public class BuyTicketController {
         return "buy-tickets";
     }
 
-    private record TicketOrderForm(String customerId, int quantity) {}
 }
+
+record TicketOrderForm(String customerId, int quantity) {}
