@@ -1,3 +1,13 @@
+Tuesday, April 8, 2025
+======================
+
+[Junie]
+* (reminder to post feedback on tests that fail that aren't Junie's fault, i.e., they weren't passing before)
+
+[IntelliJ IDEA]
+* Recognize in a Thymeleaf HTML template that the input field _does_ have a label, but the "for" is a TH: variable (see buy-tickets.html's form)
+
+
 Monday, April 7, 2025
 =====================
 

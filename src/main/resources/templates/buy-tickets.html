@@ -1,24 +1,220 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Concert</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concert Tickets</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: green;
+            --background-color: #f9f9f9;
+            --text-color: #333;
+            --light-gray: #ecf0f1;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .concert-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .concert-title {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .concert-id {
+            display: inline-block;
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 15px;
+            background-color: var(--light-gray);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .concert-details {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detail-item {
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #777;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .ticket-price {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .price-tag {
+            display: inline-block;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            padding: 10px 20px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+        }
+
+        .ticket-form {
+            background-color: var(--light-gray);
+            padding: 30px;
+            border-radius: var(--border-radius);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .concert-title {
+                font-size: 2rem;
+            }
+
+            .detail-item {
+                min-width: 100%;
+            }
+
+            .price-tag {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<h1 th:text="${concert.artist}">Jittery Pigs</h1>
-<small th:text="${concert.concertId}">af05fc05-2de1-46d8-9568-01381029feb7</small>
-<h2 th:text="${concert.showDate}">August 3, 2025</h2>
-<h3 th:text="${concert.showTime}">8:00PM</h3>
-<h2 th:text="${concert.ticketPrice}">$38</h2>
-<form th:action="@{/concerts/{id}/concerts(id=${concert.concertId})}"
-      th:object="${ticketOrderForm}"
-      method="post">
-    <label th:for="${#ids.next('customerId')}">Customer ID:
-    <input type="text" th:field="*{customerId}">
-    </label>
-    <label th:for="${#ids.next('quantity')}">Number of tickets:
-    <input type="number" th:field="*{quantity}" min="1" required>
-    </label>
-    <button type="submit">Buy Tickets</button>
-</form>
+    <div class="container">
+        <div class="concert-header">
+            <h1 class="concert-title" th:text="${concert.artist}">Jittery Pigs</h1>
+            <span class="concert-id" th:text="${concert.concertId}">af05fc05-2de1-46d8-9568-01381029feb7</span>
+        </div>
+
+        <div class="concert-details">
+            <div class="detail-item">
+                <div class="detail-label">Date</div>
+                <div class="detail-value" th:text="${concert.showDate}">August 3, 2025</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Time</div>
+                <div class="detail-value" th:text="${concert.showTime}">8:00PM</div>
+            </div>
+        </div>
+
+        <div class="ticket-price">
+            <span class="price-tag" th:text="${concert.ticketPrice}">$38</span>
+        </div>
+
+        <div class="ticket-form">
+            <h2 class="form-title">Purchase Tickets</h2>
+            <form th:action="@{/concerts/{id}/concerts(id=${concert.concertId})}"
+                  th:object="${ticketOrderForm}"
+                  method="post">
+                <div class="form-group">
+                    <label th:for="${#ids.next('customerId')}">Customer ID:</label>
+                    <input type="text" th:field="*{customerId}">
+                </div>
+                <div class="form-group">
+                    <label th:for="${#ids.next('quantity')}">Number of tickets:</label>
+                    <input type="number" th:field="*{quantity}" min="1" required>
+                </div>
+                <button type="submit">Buy Tickets</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
