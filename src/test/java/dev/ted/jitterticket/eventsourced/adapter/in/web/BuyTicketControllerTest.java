@@ -50,4 +50,15 @@ class BuyTicketControllerTest {
         assertThat(ticketOrderForm.quantity())
                 .isEqualTo(2);
     }
+
+    @Test
+    void placeTicketOrderRedirectsToOrderConfirmationPage() {
+        BuyTicketController buyTicketController = new BuyTicketController(EventStore.forConcerts());
+        String concertUuidString = UUID.randomUUID().toString();
+
+        String redirectString = buyTicketController.buyTickets(concertUuidString);
+
+        assertThat(redirectString)
+                .isEqualTo("redirect:/confirmations/af05fc05-2de1-46d8-9568-01381029feb7");
+    }
 }

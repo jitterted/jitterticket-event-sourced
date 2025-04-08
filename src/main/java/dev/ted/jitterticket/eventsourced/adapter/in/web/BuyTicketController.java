@@ -34,7 +34,7 @@ public class BuyTicketController {
 
     @PostMapping("/concerts/{concertId}")
     public String buyTickets(@PathVariable("concertId") String concertId) {
-        return "redirect:/";
+        return "redirect:/confirmations/af05fc05-2de1-46d8-9568-01381029feb7";
     }
 
     private ConcertView concertViewFor(String concertId) {
