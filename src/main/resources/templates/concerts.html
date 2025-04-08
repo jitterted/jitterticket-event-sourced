@@ -17,11 +17,12 @@
     </thead>
     <tbody>
     <tr th:each="concert : ${concerts}">
-        <td th:text="${concert.id}"></td>
-        <td th:text="${concert.artist}"></td>
-        <td th:text="${concert.showDate}"></td>
-        <td th:text="${concert.showTime}"></td>
-        <td><a th:href="@{/concerts/{id}(id=${concert.id})}">Buy Tickets</a></td>
+        <td th:text="${concert.concertId}">af05fc05-2de1-46d8-9568-01381029feb7</td>
+        <td th:text="${concert.artist}">Jittery Pigs</td>
+        <td th:text="${concert.showDate}">August 3, 2025</td>
+        <td th:text="${concert.showTime}">8:00 PM</td>
+        <td th:text="${concert.ticketPrice}">$38</td>
+        <td><a th:href="@{/concerts/{id}(id=${concert.concertId})}">Buy Tickets</a></td>
     </tr>
     </tbody>
 </table>
