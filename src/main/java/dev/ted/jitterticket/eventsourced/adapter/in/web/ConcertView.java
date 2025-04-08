@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
+import dev.ted.jitterticket.eventsourced.domain.Concert;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
 
 import java.time.LocalDateTime;
@@ -16,11 +17,9 @@ public record ConcertView(
                               String artist,
                               LocalDateTime showDateTime,
                               int ticketPrice) {
-        String showDate = showDateTime
-                .toLocalDate()
+        String showDate = showDateTime.toLocalDate()
                 .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG));
-        String showTime = showDateTime
-                .toLocalTime()
+        String showTime = showDateTime.toLocalTime()
                 .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
         String ticketPriceString = "$" + ticketPrice;
 
@@ -29,5 +28,13 @@ public record ConcertView(
                                ticketPriceString,
                                showDate,
                                showTime);
+    }
+
+    static ConcertView from(Concert concert) {
+        return create(concert.getId(),
+                      concert.artist(),
+                      concert.showDateTime(),
+                      concert.ticketPrice()
+        );
     }
 }
