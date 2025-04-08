@@ -7,10 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.List;
-import java.util.function.Function;
 
 @Controller
 public class ConcertsController {
@@ -26,29 +23,17 @@ public class ConcertsController {
     public String ticketableConcerts(Model model) {
         List<ConcertView> concertViews =
                 concertProjector.allConcertTicketViews()
-                                .map(toConcertView())
+                                .map(this::convertToConcertView)
                                 .toList();
         model.addAttribute("concerts", concertViews);
         return "concerts";
     }
 
-    private Function<ConcertTicketView, ConcertView> toConcertView() {
-        return concertTicketView ->
-        {
-            String showDate = concertTicketView.showDateTime()
-                                               .toLocalDate()
-                                               .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG));
-            String showTime = concertTicketView.showDateTime()
-                                               .toLocalTime()
-                                               .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
-            String ticketPrice = "$" + concertTicketView.ticketPrice();
-
-            return new ConcertView(concertTicketView.concertId().id().toString(),
-                                   concertTicketView.artist(),
-                                   ticketPrice,
-                                   showDate,
-                                   showTime);
-        };
+    private ConcertView convertToConcertView(ConcertTicketView concertTicketView) {
+        return ConcertView.create(concertTicketView.concertId(),
+                                  concertTicketView.artist(),
+                                  concertTicketView.showDateTime(),
+                                  concertTicketView.ticketPrice());
     }
 
 }
