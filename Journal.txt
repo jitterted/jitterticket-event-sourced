@@ -24,8 +24,8 @@ Next Time: Modify ConcertProjector so that it has all the details needed to rend
 
 * Learned a lot about generics in making EventStore generic
 
-[Junie Issue]
-* When asking a question (instead of having it do work), the answers ended up in a markdown file instead of in its chat area
+[Junie Issue: Fixed]
+* When asking a question (instead of having it do work), the answers ended up in a markdown file instead of in its chat area.
 
 
 Wednesday, April 2, 2025

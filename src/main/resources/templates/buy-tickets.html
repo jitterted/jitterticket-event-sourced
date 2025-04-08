@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Concert</title>
+</head>
+<body>
+<h1>Concert</h1>
+<small th:text="${concert.concertId}">af05fc05-2de1-46d8-9568-01381029feb7</small>
+<h2 th:text="${concert.artist}">Jittery Pigs</h2>
+<h2 th:text="${concert.showDate}">August 3, 2025</h2>
+<h2 th:text="${concert.showTime}">8:00PM</h2>
+<h2 th:text="${concert.ticketPrice}">$38</h2>
+<form th:action="@{/concerts/{id}/concerts(id=${concert.concertId})}"
+      th:object="${ticketOrder}"
+      method="post">
+    <label th:for="${#ids.prev('customerId')}">Customer ID:
+    <input type="text" name="customerId" th:value="*{customerId}">
+    </label>
+    <label th:for="${#ids.prev('ticketCount')}">Number of tickets:
+    <input type="number" th:field="*{ticketCount}" min="1" required>
+    </label>
+    <button type="submit">Buy Tickets</button>
+</form>
+</body>
+</html>
