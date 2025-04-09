@@ -201,7 +201,7 @@
 
         <div class="ticket-form">
             <h2 class="form-title">Purchase Tickets</h2>
-            <form th:action="@{/concerts/{id}/concerts(id=${concert.concertId})}"
+            <form th:action="@{/concerts/{id}(id=${concert.concertId})}"
                   th:object="${ticketOrderForm}"
                   method="post">
                 <div class="form-group">
