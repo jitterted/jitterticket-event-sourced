@@ -149,6 +149,20 @@ public class ConcertTest {
                     .as("Artist should not have changed")
                     .isEqualTo(artist);
         }
+
+        @Test
+        void ticketsBoughtUpdatesAvailableTicketCount() {
+            ConcertScheduled concertScheduled =
+                    createConcertScheduledEventWithCapacityOf(100);
+            TicketsBought ticketsBought = new TicketsBought(
+                    concertScheduled.concertId(), CustomerId.createRandom(), 6);
+
+            Concert concert = Concert.reconstitute(List.of(concertScheduled,
+                                                           ticketsBought));
+
+            assertThat(concert.availableTicketCount())
+                    .isEqualTo(100 - 6);
+        }
     }
 
 }

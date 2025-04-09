@@ -69,8 +69,9 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 this.showDateTime = newShowDateTime;
                 this.doorsTime = newDoorsTime;
             }
-            case TicketsBought ticketsBought -> {
-            }
+
+            case TicketsBought(ConcertId concertId, _, int quantity) ->
+                    this.availableTicketCount -= quantity;
         }
     }
 
