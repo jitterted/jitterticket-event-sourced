@@ -114,4 +114,8 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 .add("maxTicketsPerPurchase=" + maxTicketsPerPurchase)
                 .toString();
     }
+
+    public int availableTicketCount() {
+        return -1;
+    }
 }
