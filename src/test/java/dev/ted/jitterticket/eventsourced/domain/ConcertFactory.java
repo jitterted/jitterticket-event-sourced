@@ -31,4 +31,15 @@ public class ConcertFactory {
                                 4
         );
     }
+
+    public static Concert createWithCapacity(int capacity) {
+        return Concert.schedule(new ConcertId(UUID.randomUUID()),
+                         "Headliner",
+                         99,
+                         LocalDateTime.now(),
+                         LocalTime.now().minusHours(1),
+                         capacity,
+                         4
+        );
+    }
 }

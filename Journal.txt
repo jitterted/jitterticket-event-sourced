@@ -1,6 +1,13 @@
 Wednesday, April 9, 2025
 ========================
 
+[IntelliJ IDEA Bug]
+* F6 Move: when the method isn't static, it prompts to make static and THEN move, so makes it static, but then does NOT continue with the move operation
+
+[Junie]
+* What's the problem with the (default) IntelliJ Light theme that it complains about?
+
+  > Current theme IntelliJ Light may not be supported by Junie. If you encounter any issues, please change to a default theme and reopen the project.
 
 
 Tuesday, April 8, 2025
