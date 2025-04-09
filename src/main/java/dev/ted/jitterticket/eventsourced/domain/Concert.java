@@ -116,6 +116,6 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     }
 
     public int availableTicketCount() {
-        return -1;
+        return capacity;
     }
 }

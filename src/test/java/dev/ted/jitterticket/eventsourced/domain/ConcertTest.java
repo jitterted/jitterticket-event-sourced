@@ -93,6 +93,8 @@ public class ConcertTest {
                     .isEqualTo(capacity);
             assertThat(concert.maxTicketsPerPurchase())
                     .isEqualTo(maxTicketsPerPurchase);
+            assertThat(concert.availableTicketCount())
+                    .isEqualTo(capacity);
         }
 
         @Test
