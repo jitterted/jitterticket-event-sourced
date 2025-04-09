@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Purchase Confirmation</title>
+</head>
+<body>
+    <div>
+        <div>
+            <h1>Congrats!</h1>
+            <p>You've bought <span th:text="${numberOfTickets}">2</span> tickets for the
+               <span th:text="${artist}">Crimson Waves</span> show on
+               <span th:text="${#temporals.format(showDateTime, 'MMMM d, yyyy h:mm a')}">December 15, 2025 8:00 PM</span>.
+            </p>
+            <div>
+                <a href="/concerts">Back to Concerts Page</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
