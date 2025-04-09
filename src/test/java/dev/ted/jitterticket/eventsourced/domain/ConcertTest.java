@@ -54,7 +54,8 @@ public class ConcertTest {
 
         @Test
         void buyTicketsGeneratesTicketsBought() {
-            ConcertScheduled concertScheduled = createConcertScheduledEventWithCapacityOf(100);
+            ConcertScheduled concertScheduled =
+                    createConcertScheduledEventWithCapacityOf(100);
             Concert concert = Concert.reconstitute(List.of(concertScheduled));
             CustomerId customerId = CustomerId.createRandom();
 

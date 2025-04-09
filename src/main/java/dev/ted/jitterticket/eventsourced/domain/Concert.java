@@ -111,7 +111,8 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     }
 
     public void buyTickets(CustomerId customerId, int quantity) {
-
+        TicketsBought ticketsBought = new TicketsBought(getId(), customerId, quantity);
+        enqueue(ticketsBought);
     }
 
     @Override
