@@ -14,6 +14,8 @@ public class BuyTicketsUseCase {
     }
 
     public void buyTickets(ConcertId concertId, CustomerId customerId, int quantity) {
-
+        Concert concert = concertStore.findById(concertId).orElseThrow();
+        concert.buyTickets(customerId, quantity);
+        concertStore.save(concert);
     }
 }
