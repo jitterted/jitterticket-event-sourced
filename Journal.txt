@@ -1,6 +1,12 @@
 Wednesday, April 9, 2025
 ========================
 
+[Design Decision]
+* For buying tickets, we don't think we need to load the Customer Aggregate, because Concert will generate the "TicketsReceived" event on the Customer's behalf
+
+    * To display the ticket order confirmation, we load the Customer,
+      then ask the Customer for the TicketOrder associated with the TicketOrderId
+
 [IntelliJ IDEA Bug]
 * F6 Move: when the method isn't static, it prompts to make static and THEN move, so makes it static, but then does NOT continue with the move operation
 

@@ -14,8 +14,15 @@ public class BuyTicketsUseCase {
     }
 
     public void buyTickets(ConcertId concertId, CustomerId customerId, int quantity) {
+        // check if customer already has the max number of tickets for this concert
+        // customer.canBuyTicketsFor(concertId, quantity)
+        // ?? are use cases allowed to make decisions?
         Concert concert = concertStore.findById(concertId).orElseThrow();
         concert.buyTickets(customerId, quantity);
+        // events: * TicketsBought(concertId, customerId, ...)
+        //         * TicketsReceived(customerId, concertId, ticketOrderId??...)
         concertStore.save(concert);
+        // return ticketOrderId inside of a Result object (success/failure)
+        // later: notify customer of ticket purchase with a PDF and a link
     }
 }
