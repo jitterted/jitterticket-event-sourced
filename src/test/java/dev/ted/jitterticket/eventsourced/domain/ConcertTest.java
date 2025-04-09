@@ -52,6 +52,28 @@ public class ConcertTest {
                                                    newDoorsTime));
         }
 
+        @Test
+        void buyTicketsGeneratesTicketsBought() {
+            ConcertScheduled concertScheduled = createConcertScheduledEventWithCapacityOf(100);
+            Concert concert = Concert.reconstitute(List.of(concertScheduled));
+            CustomerId customerId = CustomerId.createRandom();
+
+            concert.buyTickets(customerId, 2);
+
+            assertThat(concert.uncommittedEvents())
+                    .containsExactly(
+                            new TicketsBought(concert.getId(), customerId, 2)
+                    );
+        }
+
+    }
+
+    static ConcertScheduled createConcertScheduledEventWithCapacityOf(int capacity) {
+        LocalTime originalDoorsTime = LocalTime.of(19, 0);
+        int ticketPrice = 35;
+        int maxTicketsPerPurchase = 4;
+        String artist = "Irrelevant Artist Name";
+        return new ConcertScheduled(new ConcertId(UUID.randomUUID()), artist, ticketPrice, LocalDateTime.of(2025, 11, 11, 20, 0), originalDoorsTime, capacity, maxTicketsPerPurchase);
     }
 
     static ConcertScheduled createConcertScheduledEvent(LocalDateTime originalShowDateTime, LocalTime originalDoorsTime) {

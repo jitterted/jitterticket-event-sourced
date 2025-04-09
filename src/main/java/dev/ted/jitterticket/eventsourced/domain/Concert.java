@@ -13,6 +13,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     private LocalTime doorsTime;
     private int capacity;
     private int maxTicketsPerPurchase;
+    private int availableTicketCount;
 
     private Concert(List<ConcertEvent> concertEvents) {
         concertEvents.forEach(this::apply);
@@ -57,6 +58,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 this.showDateTime = showDateTime;
                 this.doorsTime = doorsTime;
                 this.capacity = capacity;
+                this.availableTicketCount = capacity;
                 this.maxTicketsPerPurchase = maxTicketsPerPurchase;
             }
 
@@ -66,6 +68,8 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
             ) -> {
                 this.showDateTime = newShowDateTime;
                 this.doorsTime = newDoorsTime;
+            }
+            case TicketsBought ticketsBought -> {
             }
         }
     }
@@ -102,6 +106,14 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
         enqueue(concertRescheduled);
     }
 
+    public int availableTicketCount() {
+        return availableTicketCount;
+    }
+
+    public void buyTickets(CustomerId customerId, int quantity) {
+
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", Concert.class.getSimpleName() + "[", "]")
@@ -112,10 +124,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 .add("doorsTime=" + doorsTime)
                 .add("capacity=" + capacity)
                 .add("maxTicketsPerPurchase=" + maxTicketsPerPurchase)
+                .add("availableTicketCount=" + availableTicketCount)
                 .toString();
-    }
-
-    public int availableTicketCount() {
-        return capacity;
     }
 }

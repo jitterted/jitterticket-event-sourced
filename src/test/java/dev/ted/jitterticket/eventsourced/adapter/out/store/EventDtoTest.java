@@ -6,6 +6,7 @@ import dev.ted.jitterticket.eventsourced.domain.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.CustomerRegistered;
 import dev.ted.jitterticket.eventsourced.domain.Event;
+import dev.ted.jitterticket.eventsourced.domain.TicketsBought;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -87,19 +88,23 @@ class EventDtoTest {
 
     public static Stream<Arguments> events() {
         return Stream.of(
-                Arguments.of(new ConcertScheduled(new ConcertId(UUID.randomUUID()),
+                Arguments.of(new ConcertScheduled(ConcertId.createRandom(),
                                                   "artist",
                                                   99,
                                                   LocalDateTime.now(),
                                                   LocalTime.now().minusHours(1),
                                                   100,
                                                   4))
-                , Arguments.of(new ConcertRescheduled(new ConcertId(UUID.randomUUID()),
+                , Arguments.of(new ConcertRescheduled(ConcertId.createRandom(),
                                                       LocalDateTime.now(),
                                                       LocalTime.now().minusHours(1)))
-                , Arguments.of(new CustomerRegistered(new CustomerId(UUID.randomUUID()),
+                , Arguments.of(new CustomerRegistered(CustomerId.createRandom(),
                                                       "customer name",
                                                       "email@example.com"))
+                , Arguments.of(new TicketsBought(ConcertId.createRandom(),
+                                                 CustomerId.createRandom(),
+                                                 6))
         );
     }
+
 }

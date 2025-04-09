@@ -1,6 +1,6 @@
 package dev.ted.jitterticket.eventsourced.domain;
 
 public sealed interface ConcertEvent extends Event
-        permits ConcertRescheduled, ConcertScheduled {
+        permits ConcertRescheduled, ConcertScheduled, TicketsBought {
     ConcertId concertId();
 }
