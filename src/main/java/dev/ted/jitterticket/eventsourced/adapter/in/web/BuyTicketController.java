@@ -1,9 +1,11 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
+import dev.ted.jitterticket.eventsourced.application.BuyTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Concert;
 import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.CustomerId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,10 +37,10 @@ public class BuyTicketController {
     @PostMapping("/concerts/{concertId}")
     public String buyTickets(@PathVariable("concertId") String concertId,
                              TicketOrderForm ticketOrderForm) {
-        // new BuyTicketsUseCase(concertStore)
-        //     .buyTickets(concertId,
-        //                 ticketOrderForm.customerId(),
-        //                 ticketOrderForm.quantity());
+        new BuyTicketsUseCase(concertStore)
+                .buyTickets(new ConcertId(UUID.fromString(concertId)),
+                            new CustomerId(UUID.fromString(ticketOrderForm.customerId())),
+                            ticketOrderForm.quantity());
         return "redirect:/confirmations/af05fc05-2de1-46d8-9568-01381029feb7";
     }
 
