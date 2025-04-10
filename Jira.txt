@@ -1,0 +1,17 @@
+# Simplifying Assumptions
+
+    * Ticket purchases don't require payment information (payments "always succeed")
+    * Little contention for tickets (no waiting room)
+    * No Auth (supply your own CustomerID!)
+
+# To Do
+
+* concert.buyTickets() needs to generate two (3?) events
+    1. [Concert aggregate stream] TicketsSold(concertId, customerId, ...)
+    2. [Customer aggregate stream] TicketsReceived(customerId, concertId, ticketOrderId??...)
+    ?? (don't think I need this) [Customer aggregate stream for orders] TicketsOrdered(...purchaseId)
+
+* concert.buyTickets() needs to return the TicketOrderId
+
+* Rename buy/bought to purchase/purchased
+
