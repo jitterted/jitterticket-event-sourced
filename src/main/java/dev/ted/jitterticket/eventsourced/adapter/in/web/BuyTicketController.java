@@ -43,8 +43,11 @@ public class BuyTicketController {
                 new ConcertId(UUID.fromString(concertId)),
                 new CustomerId(UUID.fromString(ticketOrderForm.customerId())),
                 ticketOrderForm.quantity());
-        return "redirect:/confirmations/af05fc05-2de1-46d8-9568-01381029feb7";
+        String ticketOrderUuid = "af05fc05-2de1-46d8-9568-01381029feb7";
+        return "redirect:/confirmations/" + ticketOrderUuid;
     }
+
+    // @GetMapping("/confirmations/{ticketOrderId}?customerId={customerId}
 
     private ConcertView concertViewFor(String concertId) {
         return concertStore.findById(
