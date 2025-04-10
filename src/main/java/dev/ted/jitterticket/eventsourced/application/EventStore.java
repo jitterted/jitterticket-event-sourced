@@ -45,7 +45,7 @@ public class EventStore<
         return idToEventDtoMap
                 .keySet()
                 .stream()
-                .map(id -> concertFromEvents(idToEventDtoMap.get(id)));
+                .map(id -> aggregateFromEvents(idToEventDtoMap.get(id)));
     }
 
     public void save(AGGREGATE aggregate) {
@@ -67,7 +67,7 @@ public class EventStore<
         idToEventDtoMap.put(aggregate.getId(), existingEventDtos);
     }
 
-    private AGGREGATE concertFromEvents(List<EventDto<EVENT>> existingEventDtos) {
+    private AGGREGATE aggregateFromEvents(List<EventDto<EVENT>> existingEventDtos) {
         List<EVENT> events = existingEventDtos
                 .stream()
                 .map(EventDto::toDomain)
@@ -77,7 +77,7 @@ public class EventStore<
 
     public Optional<AGGREGATE> findById(ID id) {
         return Optional.ofNullable(idToEventDtoMap.get(id))
-                       .map(this::concertFromEvents);
+                       .map(this::aggregateFromEvents);
     }
 
     public Stream<EVENT> allEvents() {
