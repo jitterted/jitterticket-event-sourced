@@ -2,9 +2,9 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.TixConfiguration;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
-import dev.ted.jitterticket.eventsourced.domain.Concert;
-import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
-import dev.ted.jitterticket.eventsourced.domain.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

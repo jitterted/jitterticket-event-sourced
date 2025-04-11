@@ -1,10 +1,10 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.domain.Concert;
-import dev.ted.jitterticket.eventsourced.domain.ConcertFactory;
-import dev.ted.jitterticket.eventsourced.domain.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;

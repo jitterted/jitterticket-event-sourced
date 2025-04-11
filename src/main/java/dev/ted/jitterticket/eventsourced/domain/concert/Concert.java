@@ -1,4 +1,7 @@
-package dev.ted.jitterticket.eventsourced.domain;
+package dev.ted.jitterticket.eventsourced.domain.concert;
+
+import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;

@@ -1,4 +1,6 @@
-package dev.ted.jitterticket.eventsourced.domain;
+package dev.ted.jitterticket.eventsourced.domain.customer;
+
+import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 
 import java.util.List;
 import java.util.StringJoiner;

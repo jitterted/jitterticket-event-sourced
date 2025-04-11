@@ -1,5 +1,7 @@
 package dev.ted.jitterticket.eventsourced.domain;
 
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

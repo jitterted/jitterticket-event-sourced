@@ -1,15 +1,15 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.EventDto;
-import dev.ted.jitterticket.eventsourced.domain.Concert;
-import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
-import dev.ted.jitterticket.eventsourced.domain.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.Customer;
-import dev.ted.jitterticket.eventsourced.domain.CustomerEvent;
-import dev.ted.jitterticket.eventsourced.domain.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 
 import java.util.ArrayList;
 import java.util.Collection;

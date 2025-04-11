@@ -1,4 +1,4 @@
-package dev.ted.jitterticket.eventsourced.domain;
+package dev.ted.jitterticket.eventsourced.domain.customer;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

@@ -6,6 +6,8 @@
 
 # To Do
 
+* Check the EventDtoTest to ensure it's finding all of the concrete (record) events for the "parameterized" test
+
 * concert.buyTickets() needs to generate two (3?) events
     1. [Concert aggregate stream] TicketsSold(concertId, customerId, ...)
     2. [Customer aggregate stream] TicketsReceived(customerId, concertId, ticketOrderId??...)

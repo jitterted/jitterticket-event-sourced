@@ -2,10 +2,10 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.BuyTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
-import dev.ted.jitterticket.eventsourced.domain.Concert;
-import dev.ted.jitterticket.eventsourced.domain.ConcertEvent;
-import dev.ted.jitterticket.eventsourced.domain.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.CustomerId;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

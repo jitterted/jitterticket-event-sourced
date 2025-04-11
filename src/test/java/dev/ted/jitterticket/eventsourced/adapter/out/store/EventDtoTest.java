@@ -1,12 +1,14 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store;
 
-import dev.ted.jitterticket.eventsourced.domain.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.ConcertRescheduled;
-import dev.ted.jitterticket.eventsourced.domain.ConcertScheduled;
-import dev.ted.jitterticket.eventsourced.domain.CustomerId;
-import dev.ted.jitterticket.eventsourced.domain.CustomerRegistered;
 import dev.ted.jitterticket.eventsourced.domain.Event;
-import dev.ted.jitterticket.eventsourced.domain.TicketsBought;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsBought;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -39,14 +41,28 @@ class EventDtoTest {
                 .containsAll(allEventClasses);
     }
 
+    @Test
+    void atLeastOneConcreteImplementationForEachEventInterface() {
+        assertThat(allConcreteImplementationsOf(ConcertEvent.class))
+                .as("No concrete implementations found for ConcertEvent")
+                .hasSizeGreaterThanOrEqualTo(1);
+
+        assertThat(allConcreteImplementationsOf(CustomerEvent.class))
+                .as("No concrete implementations found for CustomerEvent")
+                .hasSizeGreaterThanOrEqualTo(1);
+    }
+
     private Set<String> findAllConcreteEventClasses() {
-        return findAllConcreteImplementations(Event.class)
-                .stream()
+        Set<Class<?>> allEventClasses = new HashSet<>();
+        allEventClasses.addAll(allConcreteImplementationsOf(ConcertEvent.class));
+        allEventClasses.addAll(allConcreteImplementationsOf(CustomerEvent.class));
+
+        return allEventClasses.stream()
                 .map(Class::getSimpleName)
                 .collect(Collectors.toSet());
     }
 
-    private Set<Class<?>> findAllConcreteImplementations(Class<?> sealedInterface) {
+    private Set<Class<?>> allConcreteImplementationsOf(Class<?> sealedInterface) {
         Set<Class<?>> result = new HashSet<>();
 
         if (!sealedInterface.isInterface() && !Modifier.isAbstract(sealedInterface.getModifiers())) {
@@ -68,7 +84,7 @@ class EventDtoTest {
                 result.add(subclass);
             } else {
                 // This is an interface or abstract class, recurse into it
-                result.addAll(findAllConcreteImplementations(subclass));
+                result.addAll(allConcreteImplementationsOf(subclass));
             }
         }
 

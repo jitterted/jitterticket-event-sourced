@@ -1,4 +1,6 @@
-package dev.ted.jitterticket.eventsourced.domain;
+package dev.ted.jitterticket.eventsourced.domain.concert;
+
+import dev.ted.jitterticket.eventsourced.domain.Id;
 
 import java.util.UUID;
 

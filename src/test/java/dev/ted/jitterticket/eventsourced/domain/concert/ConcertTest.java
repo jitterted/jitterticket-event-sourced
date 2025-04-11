@@ -1,5 +1,6 @@
-package dev.ted.jitterticket.eventsourced.domain;
+package dev.ted.jitterticket.eventsourced.domain.concert;
 
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

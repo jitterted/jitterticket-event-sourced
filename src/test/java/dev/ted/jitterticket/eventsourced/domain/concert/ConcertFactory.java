@@ -1,4 +1,4 @@
-package dev.ted.jitterticket.eventsourced.domain;
+package dev.ted.jitterticket.eventsourced.domain.concert;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
