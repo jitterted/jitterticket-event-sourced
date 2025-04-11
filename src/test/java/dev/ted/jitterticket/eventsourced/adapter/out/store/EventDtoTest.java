@@ -9,7 +9,6 @@ import dev.ted.jitterticket.eventsourced.domain.concert.TicketsBought;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -27,39 +26,39 @@ import static org.assertj.core.api.Assertions.*;
 
 class EventDtoTest {
 
-    @Test
-    void allEventsAreTested() {
-        Set<String> allEventClasses = findAllConcreteEventClasses();
+    @ParameterizedTest
+    @MethodSource("eventInterfaces")
+    void allEventsAreTested(Class<?> eventInterface) {
+        Set<String> concreteClassNames =
+                allConcreteImplementationsOf(eventInterface)
+                        .stream()
+                        .map(Class::getSimpleName)
+                        .collect(Collectors.toSet());
 
-        Set<String> eventClassesCoveredByParameterizedTest = events()
-                .map(arg -> arg.get()[0].getClass())
-                .map(Class::getSimpleName)
-                .collect(Collectors.toSet());
+        Set<String> eventClassesCoveredByParameterizedTest =
+                events()
+                        .map(arg -> arg.get()[0].getClass())
+                        .map(Class::getSimpleName)
+                        .collect(Collectors.toSet());
 
         assertThat(eventClassesCoveredByParameterizedTest)
-                .as("Missing some Events from the parameterized test")
-                .containsAll(allEventClasses);
+                .as("Missing some Events from the parameterized test for " + eventInterface.getSimpleName())
+                .containsAll(concreteClassNames);
     }
 
-    @Test
-    void atLeastOneConcreteImplementationForEachEventInterface() {
-        assertThat(allConcreteImplementationsOf(ConcertEvent.class))
-                .as("No concrete implementations found for ConcertEvent")
-                .hasSizeGreaterThanOrEqualTo(1);
-
-        assertThat(allConcreteImplementationsOf(CustomerEvent.class))
-                .as("No concrete implementations found for CustomerEvent")
+    @ParameterizedTest
+    @MethodSource("eventInterfaces")
+    void atLeastOneConcreteImplementationForEachEventInterface(Class<?> eventInterface) {
+        assertThat(allConcreteImplementationsOf(eventInterface))
+                .as("No concrete implementations found for " + eventInterface.getSimpleName())
                 .hasSizeGreaterThanOrEqualTo(1);
     }
 
-    private Set<String> findAllConcreteEventClasses() {
-        Set<Class<?>> allEventClasses = new HashSet<>();
-        allEventClasses.addAll(allConcreteImplementationsOf(ConcertEvent.class));
-        allEventClasses.addAll(allConcreteImplementationsOf(CustomerEvent.class));
-
-        return allEventClasses.stream()
-                .map(Class::getSimpleName)
-                .collect(Collectors.toSet());
+    public static Stream<Arguments> eventInterfaces() {
+        return Stream.of(
+                Arguments.of(ConcertEvent.class),
+                Arguments.of(CustomerEvent.class)
+        );
     }
 
     private Set<Class<?>> allConcreteImplementationsOf(Class<?> sealedInterface) {
