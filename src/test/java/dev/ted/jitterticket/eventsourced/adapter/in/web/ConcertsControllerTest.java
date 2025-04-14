@@ -13,7 +13,6 @@ import org.springframework.ui.Model;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -24,7 +23,7 @@ class ConcertsControllerTest {
     void ticketableConcertsAddedToModel() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
-        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        ConcertId concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.createConcertWith(concertId,
                                                            "The Sonic Waves",
                                                            45,

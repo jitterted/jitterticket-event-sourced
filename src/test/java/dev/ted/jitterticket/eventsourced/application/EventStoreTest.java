@@ -34,7 +34,7 @@ class EventStoreTest {
     @Test
     void findByIdReturnsSavedConcert() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
-        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        ConcertId concertId = ConcertId.createRandom();
         Concert concert = Concert.schedule(concertId,
                                            "Headliner",
                                            99,

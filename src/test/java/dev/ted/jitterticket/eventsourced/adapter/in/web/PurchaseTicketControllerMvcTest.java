@@ -30,7 +30,7 @@ class PurchaseTicketControllerMvcTest {
 
     @Test
     void getToBuyTicketViewEndpointReturns200Ok() {
-        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        ConcertId concertId = ConcertId.createRandom();
         concertStore.save(Concert.schedule(
                 concertId,
                 "Blue Note Quartet",
@@ -48,7 +48,7 @@ class PurchaseTicketControllerMvcTest {
 
     @Test
     void postToBuyTicketEndpointRedirects() {
-        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        ConcertId concertId = ConcertId.createRandom();
         mvc.post()
            .formField("customerId", UUID.randomUUID().toString())
            .formField("quantity", "2")

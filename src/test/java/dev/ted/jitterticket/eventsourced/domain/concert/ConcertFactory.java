@@ -2,11 +2,10 @@ package dev.ted.jitterticket.eventsourced.domain.concert;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.UUID;
 
 public class ConcertFactory {
     public static Concert createConcert() {
-        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        ConcertId concertId = ConcertId.createRandom();
         return createConcertWithId(concertId);
     }
 
@@ -33,7 +32,7 @@ public class ConcertFactory {
     }
 
     public static Concert createWithCapacity(int capacity) {
-        return Concert.schedule(new ConcertId(UUID.randomUUID()),
+        return Concert.schedule(ConcertId.createRandom(),
                          "Headliner",
                          99,
                          LocalDateTime.now(),

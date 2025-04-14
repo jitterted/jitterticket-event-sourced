@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -28,13 +27,13 @@ class ConcertProjectorTest {
     @Test
     void projectorReturnsConcertsSavedInConcertStore() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
-        ConcertId firstConcertId = new ConcertId(UUID.randomUUID());
+        ConcertId firstConcertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.createConcertWith(firstConcertId,
                                                            "First Concert",
                                                            99,
                                                            LocalDateTime.of(2025, 4, 20, 20, 0),
                                                            LocalTime.of(19, 0)));
-        ConcertId secondConcertId = new ConcertId(UUID.randomUUID());
+        ConcertId secondConcertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.createConcertWith(secondConcertId,
                                                            "Second Concert",
                                                            111,
@@ -63,7 +62,7 @@ class ConcertProjectorTest {
     void projectorReturnsSingleConcertForSavedAndRescheduledConcerts() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
-        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        ConcertId concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.createConcertWith(concertId,
                                                            "Desi Bells",
                                                            35,

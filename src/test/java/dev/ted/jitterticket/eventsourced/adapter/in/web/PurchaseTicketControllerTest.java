@@ -19,7 +19,7 @@ class PurchaseTicketControllerTest {
     @Test
     void buyTicketsViewPutsConcertAndTicketOrderIntoModel() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
-        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        ConcertId concertId = ConcertId.createRandom();
         concertStore.save(Concert.schedule(
                 concertId,
                 "Midnight Rebels",
@@ -55,7 +55,7 @@ class PurchaseTicketControllerTest {
     void placeTicketOrderRedirectsToOrderConfirmationPage() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
         PurchaseTicketController purchaseTicketController = new PurchaseTicketController(concertStore);
-        ConcertId concertId = new ConcertId(UUID.randomUUID());
+        ConcertId concertId = ConcertId.createRandom();
         int initialCapacity = 100;
         concertStore.save(Concert.schedule(concertId, "Pulse Wave", 40, LocalDateTime.of(2025, 11, 8, 22, 30), LocalTime.of(21, 0), initialCapacity, 4));
         String customerUuid = UUID.randomUUID().toString();

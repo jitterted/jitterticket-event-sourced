@@ -73,7 +73,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 this.doorsTime = newDoorsTime;
             }
 
-            case TicketsSold(_, int quantity, int totalPaid) ->
+            case TicketsSold(_, int quantity, _) ->
                     this.availableTicketCount -= quantity;
         }
     }

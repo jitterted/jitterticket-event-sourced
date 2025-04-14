@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -24,7 +23,7 @@ public class ConcertTest {
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
             String artist = "Headliner";
-            ConcertId concertId = new ConcertId(UUID.randomUUID());
+            ConcertId concertId = ConcertId.createRandom();
             Concert concert = Concert.schedule(concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
 
             List<ConcertEvent> events = concert.uncommittedEvents();
@@ -75,7 +74,7 @@ public class ConcertTest {
         int ticketPrice = 35;
         int maxTicketsPerPurchase = 4;
         String artist = "Irrelevant Artist Name";
-        return new ConcertScheduled(new ConcertId(UUID.randomUUID()), artist, ticketPrice, LocalDateTime.of(2025, 11, 11, 20, 0), originalDoorsTime, capacity, maxTicketsPerPurchase);
+        return new ConcertScheduled(ConcertId.createRandom(), artist, ticketPrice, LocalDateTime.of(2025, 11, 11, 20, 0), originalDoorsTime, capacity, maxTicketsPerPurchase);
     }
 
     static ConcertScheduled createConcertScheduledEvent(LocalDateTime originalShowDateTime, LocalTime originalDoorsTime) {
@@ -83,7 +82,7 @@ public class ConcertTest {
         int capacity = 100;
         int maxTicketsPerPurchase = 4;
         String artist = "Irrelevant Artist Name";
-        return new ConcertScheduled(new ConcertId(UUID.randomUUID()), artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+        return new ConcertScheduled(ConcertId.createRandom(), artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
     }
 
     @Nested
@@ -97,7 +96,7 @@ public class ConcertTest {
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
             String artist = "Headliner";
-            ConcertId concertId = new ConcertId(UUID.randomUUID());
+            ConcertId concertId = ConcertId.createRandom();
             ConcertScheduled concertScheduled = new ConcertScheduled(concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
             List<ConcertEvent> concertEvents = List.of(concertScheduled);
 
@@ -129,7 +128,7 @@ public class ConcertTest {
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
             String artist = "Rescheduler Artist Name";
-            ConcertId concertId = new ConcertId(UUID.randomUUID());
+            ConcertId concertId = ConcertId.createRandom();
             ConcertScheduled concertScheduled = new ConcertScheduled(concertId, artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
             LocalTime newDoorsTime = originalDoorsTime.minusHours(1);
