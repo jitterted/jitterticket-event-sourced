@@ -8,7 +8,7 @@
 
 [X] Check the EventDtoTest to ensure it's finding all of the concrete (record) events for the "parameterized" test
 
-* Rename buy/bought to purchase/purchased
+[X] Rename buy/bought to purchase/purchased
 
 * concert.purchaseTickets() needs to generate two (3?) events
     1. [Concert aggregate stream] TicketsSold(concertId, customerId, ...)

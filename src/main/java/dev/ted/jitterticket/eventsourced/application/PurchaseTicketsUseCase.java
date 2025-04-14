@@ -23,7 +23,7 @@ public class PurchaseTicketsUseCase {
         // ?? are use cases allowed to make decisions?
         return concertStore.findById(concertId)
                            .map(concert -> {
-                               concert.buyTickets(customerId, quantity);
+                               concert.purchaseTickets(customerId, quantity);
                                // events: * TicketsSold(concertId, ...)
                                //         * TicketsPurchased(customerId, concertId, ticketOrderId??...)
                                concertStore.save(concert);

@@ -54,24 +54,27 @@ public class ConcertTest {
 
         @Test
         void purchaseTicketsGeneratesTicketsPurchasedAndTicketsSold() {
+            int ticketPrice = 35;
             ConcertScheduled concertScheduled =
-                    createConcertScheduledEventWithCapacityOf(100);
+                    createConcertScheduledEventWithCapacityOf(100, ticketPrice);
             Concert concert = Concert.reconstitute(List.of(concertScheduled));
+            ConcertId concertId = concert.getId();
             CustomerId customerId = CustomerId.createRandom();
+            int quantity = 2;
 
-            concert.buyTickets(customerId, 2);
+            concert.purchaseTickets(customerId, quantity);
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new TicketsSold(concert.getId(), 2, -1)
+                            new TicketsSold(concertId, quantity, -1)
+//                            , new TicketsPurchased(customerId, concertId, quantity, quantity * ticketPrice)
                     );
         }
 
     }
 
-    static ConcertScheduled createConcertScheduledEventWithCapacityOf(int capacity) {
+    static ConcertScheduled createConcertScheduledEventWithCapacityOf(int capacity, int ticketPrice) {
         LocalTime originalDoorsTime = LocalTime.of(19, 0);
-        int ticketPrice = 35;
         int maxTicketsPerPurchase = 4;
         String artist = "Irrelevant Artist Name";
         return new ConcertScheduled(ConcertId.createRandom(), artist, ticketPrice, LocalDateTime.of(2025, 11, 11, 20, 0), originalDoorsTime, capacity, maxTicketsPerPurchase);
@@ -153,7 +156,7 @@ public class ConcertTest {
         @Test
         void ticketsPurchasedUpdatesAvailableTicketCount() {
             ConcertScheduled concertScheduled =
-                    createConcertScheduledEventWithCapacityOf(100);
+                    createConcertScheduledEventWithCapacityOf(100, 35);
             TicketsSold ticketsSold = new TicketsSold(
                     concertScheduled.concertId(), 6, -1);
 
