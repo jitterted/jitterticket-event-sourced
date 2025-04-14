@@ -9,6 +9,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
+import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -118,6 +119,10 @@ class EventDtoTest {
                                                       "email@example.com"))
                 , Arguments.of(new TicketsSold(ConcertId.createRandom(),
                                                6, -1))
+                , Arguments.of(new TicketsPurchased(
+                        CustomerId.createRandom(),
+                        ConcertId.createRandom(),
+                        4, 100))
         );
     }
 
