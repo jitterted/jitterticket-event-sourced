@@ -53,7 +53,7 @@ public class ConcertTest {
         }
 
         @Test
-        void purchaseTicketsGeneratesTicketsPurchasedAndTicketsSold() {
+        void purchaseTicketsGeneratesTicketsPurchased() {
             int ticketPrice = 35;
             ConcertScheduled concertScheduled =
                     createConcertScheduledEventWithCapacityOf(100, ticketPrice);
@@ -67,7 +67,6 @@ public class ConcertTest {
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
                             new TicketsSold(concertId, quantity, -1)
-//                            , new TicketsPurchased(customerId, concertId, quantity, quantity * ticketPrice)
                     );
         }
 

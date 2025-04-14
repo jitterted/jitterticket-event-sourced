@@ -1,3 +1,10 @@
+Monday, April 14, 2025
+======================
+
+[Event-Sourcing]
+* Concert can only generate ConcertEvents, and Customer can only generate CustomerEvents, so I can't assert (through ConcertTest) that the uncommitted events from Concert.purchaseTickets() generates a Customer-oriented TicketsPurchased event
+
+
 Wednesday, April 9, 2025
 ========================
 
