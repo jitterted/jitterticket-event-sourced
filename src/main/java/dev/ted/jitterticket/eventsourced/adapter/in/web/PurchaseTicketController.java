@@ -39,7 +39,7 @@ public class PurchaseTicketController {
     @PostMapping("/concerts/{concertId}")
     public String buyTickets(@PathVariable("concertId") String concertId,
                              TicketOrderForm ticketOrderForm) {
-        purchaseTicketsUseCase.buyTickets(
+        purchaseTicketsUseCase.purchaseTickets(
                 new ConcertId(UUID.fromString(concertId)),
                 new CustomerId(UUID.fromString(ticketOrderForm.customerId())),
                 ticketOrderForm.quantity());

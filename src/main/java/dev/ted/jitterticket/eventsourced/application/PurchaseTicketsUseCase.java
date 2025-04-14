@@ -17,7 +17,7 @@ public class PurchaseTicketsUseCase {
         this.concertStore = concertStore;
     }
 
-    public Optional<TicketOrderId> buyTickets(ConcertId concertId, CustomerId customerId, int quantity) {
+    public Optional<TicketOrderId> purchaseTickets(ConcertId concertId, CustomerId customerId, int quantity) {
         // check if customer already has the max number of tickets for this concert
         // customer.canBuyTicketsFor(concertId, quantity)
         // ?? are use cases allowed to make decisions?

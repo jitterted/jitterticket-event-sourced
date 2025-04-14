@@ -22,7 +22,7 @@ class PurchaseTicketsUseCaseTest {
         ConcertId invalidConcertId = ConcertId.createRandom();
 
         Optional<TicketOrderId> ticketOrderIdOptional =
-                purchaseTicketsUseCase.buyTickets(invalidConcertId, customerId, 1);
+                purchaseTicketsUseCase.purchaseTickets(invalidConcertId, customerId, 1);
 
         assertThat(ticketOrderIdOptional)
                 .as("Ticket order should have failed and therefore returned an empty TicketOrderId")
@@ -37,7 +37,7 @@ class PurchaseTicketsUseCaseTest {
         PurchaseTicketsUseCase purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore);
         CustomerId customerId = new CustomerId(UUID.randomUUID());
 
-        Optional<TicketOrderId> ticketOrderId = purchaseTicketsUseCase.buyTickets(concertBefore.getId(), customerId, 4);
+        Optional<TicketOrderId> ticketOrderId = purchaseTicketsUseCase.purchaseTickets(concertBefore.getId(), customerId, 4);
 
         assertThat(ticketOrderId)
                 .as("TicketOrderId should have been returned for a successful ticket purchase")
