@@ -6,14 +6,15 @@
 
 # To Do
 
-* Check the EventDtoTest to ensure it's finding all of the concrete (record) events for the "parameterized" test
-
-* concert.buyTickets() needs to generate two (3?) events
-    1. [Concert aggregate stream] TicketsSold(concertId, customerId, ...)
-    2. [Customer aggregate stream] TicketsReceived(customerId, concertId, ticketOrderId??...)
-    ?? (don't think I need this) [Customer aggregate stream for orders] TicketsOrdered(...purchaseId)
-
-* concert.buyTickets() needs to return the TicketOrderId
+[X] Check the EventDtoTest to ensure it's finding all of the concrete (record) events for the "parameterized" test
 
 * Rename buy/bought to purchase/purchased
+
+* concert.purchaseTickets() needs to generate two (3?) events
+    1. [Concert aggregate stream] TicketsSold(concertId, customerId, ...)
+    2. [Customer aggregate stream] TicketsPurchased(customerId, concertId, ticketOrderId??...)
+    ?? (don't think I need this) [Customer aggregate stream for orders] TicketsOrdered(...purchaseId)
+
+* concert.purchaseTickets() needs to return the TicketOrderId
+
 
