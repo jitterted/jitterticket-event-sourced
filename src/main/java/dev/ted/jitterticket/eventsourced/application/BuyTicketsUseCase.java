@@ -24,7 +24,7 @@ public class BuyTicketsUseCase {
         return concertStore.findById(concertId)
                            .map(concert -> {
                                concert.buyTickets(customerId, quantity);
-                               // events: * TicketsBought(concertId, customerId, ...)
+                               // events: * TicketsSold(concertId, customerId, ...)
                                //         * TicketsReceived(customerId, concertId, ticketOrderId??...)
                                concertStore.save(concert);
                                return new TicketOrderId(UUID.randomUUID());

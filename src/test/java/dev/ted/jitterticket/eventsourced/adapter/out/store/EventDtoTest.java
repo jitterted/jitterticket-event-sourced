@@ -5,7 +5,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketsBought;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
@@ -116,9 +116,8 @@ class EventDtoTest {
                 , Arguments.of(new CustomerRegistered(CustomerId.createRandom(),
                                                       "customer name",
                                                       "email@example.com"))
-                , Arguments.of(new TicketsBought(ConcertId.createRandom(),
-                                                 CustomerId.createRandom(),
-                                                 6))
+                , Arguments.of(new TicketsSold(ConcertId.createRandom(),
+                                               6, -1))
         );
     }
 

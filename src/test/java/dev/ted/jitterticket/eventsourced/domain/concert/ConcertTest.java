@@ -54,7 +54,7 @@ public class ConcertTest {
         }
 
         @Test
-        void buyTicketsGeneratesTicketsBought() {
+        void purchaseTicketsGeneratesTicketsPurchasedAndTicketsSold() {
             ConcertScheduled concertScheduled =
                     createConcertScheduledEventWithCapacityOf(100);
             Concert concert = Concert.reconstitute(List.of(concertScheduled));
@@ -64,7 +64,7 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new TicketsBought(concert.getId(), customerId, 2)
+                            new TicketsSold(concert.getId(), 2, -1)
                     );
         }
 
@@ -155,11 +155,11 @@ public class ConcertTest {
         void ticketsBoughtUpdatesAvailableTicketCount() {
             ConcertScheduled concertScheduled =
                     createConcertScheduledEventWithCapacityOf(100);
-            TicketsBought ticketsBought = new TicketsBought(
-                    concertScheduled.concertId(), CustomerId.createRandom(), 6);
+            TicketsSold ticketsSold = new TicketsSold(
+                    concertScheduled.concertId(), 6, -1);
 
             Concert concert = Concert.reconstitute(List.of(concertScheduled,
-                                                           ticketsBought));
+                                                           ticketsSold));
 
             assertThat(concert.availableTicketCount())
                     .isEqualTo(100 - 6);

@@ -65,15 +65,15 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 this.maxTicketsPerPurchase = maxTicketsPerPurchase;
             }
 
-            case ConcertRescheduled(
-                    ConcertId concertId, LocalDateTime newShowDateTime,
-                    LocalTime newDoorsTime
+            case ConcertRescheduled(_,
+                                    LocalDateTime newShowDateTime,
+                                    LocalTime newDoorsTime
             ) -> {
                 this.showDateTime = newShowDateTime;
                 this.doorsTime = newDoorsTime;
             }
 
-            case TicketsBought(ConcertId concertId, _, int quantity) ->
+            case TicketsSold(_, int quantity, int totalPaid) ->
                     this.availableTicketCount -= quantity;
         }
     }
@@ -115,8 +115,8 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     }
 
     public void buyTickets(CustomerId customerId, int quantity) {
-        TicketsBought ticketsBought = new TicketsBought(getId(), customerId, quantity);
-        enqueue(ticketsBought);
+        TicketsSold ticketsSold = new TicketsSold(getId(), quantity, -1);
+        enqueue(ticketsSold);
     }
 
     @Override
