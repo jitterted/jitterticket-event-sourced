@@ -9,11 +9,11 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import java.util.Optional;
 import java.util.UUID;
 
-public class BuyTicketsUseCase {
+public class PurchaseTicketsUseCase {
 
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
-    public BuyTicketsUseCase(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    public PurchaseTicketsUseCase(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         this.concertStore = concertStore;
     }
 
@@ -24,8 +24,8 @@ public class BuyTicketsUseCase {
         return concertStore.findById(concertId)
                            .map(concert -> {
                                concert.buyTickets(customerId, quantity);
-                               // events: * TicketsSold(concertId, customerId, ...)
-                               //         * TicketsReceived(customerId, concertId, ticketOrderId??...)
+                               // events: * TicketsSold(concertId, ...)
+                               //         * TicketsPurchased(customerId, concertId, ticketOrderId??...)
                                concertStore.save(concert);
                                return new TicketOrderId(UUID.randomUUID());
                            });

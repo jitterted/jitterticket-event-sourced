@@ -1,7 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.BuyTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
@@ -16,15 +16,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.util.UUID;
 
 @Controller
-public class BuyTicketController {
+public class PurchaseTicketController {
 
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
-    private final BuyTicketsUseCase buyTicketsUseCase;
+    private final PurchaseTicketsUseCase purchaseTicketsUseCase;
 
     @Autowired
-    public BuyTicketController(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    public PurchaseTicketController(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         this.concertStore = concertStore;
-        buyTicketsUseCase = new BuyTicketsUseCase(concertStore);
+        purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore);
     }
 
     @GetMapping("/concerts/{concertId}")
@@ -33,13 +33,13 @@ public class BuyTicketController {
         model.addAttribute("concert", concertViewFor(concertId));
         model.addAttribute("ticketOrderForm", new TicketOrderForm(
                 UUID.randomUUID().toString(), 2));
-        return "buy-tickets";
+        return "purchase-tickets";
     }
 
     @PostMapping("/concerts/{concertId}")
     public String buyTickets(@PathVariable("concertId") String concertId,
                              TicketOrderForm ticketOrderForm) {
-        buyTicketsUseCase.buyTickets(
+        purchaseTicketsUseCase.buyTickets(
                 new ConcertId(UUID.fromString(concertId)),
                 new CustomerId(UUID.fromString(ticketOrderForm.customerId())),
                 ticketOrderForm.quantity());

@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
-class BuyTicketControllerTest {
+class PurchaseTicketControllerTest {
 
     @Test
     void buyTicketsViewPutsConcertAndTicketOrderIntoModel() {
@@ -28,14 +28,14 @@ class BuyTicketControllerTest {
                 LocalTime.of(20, 0),
                 150,
                 4));
-        BuyTicketController buyTicketController = new BuyTicketController(concertStore);
+        PurchaseTicketController purchaseTicketController = new PurchaseTicketController(concertStore);
         String concertIdString = concertId.id().toString();
 
         Model model = new ConcurrentModel();
-        String viewName = buyTicketController.buyTicketsView(model, concertIdString);
+        String viewName = purchaseTicketController.buyTicketsView(model, concertIdString);
 
         assertThat(viewName)
-                .isEqualTo("buy-tickets");
+                .isEqualTo("purchase-tickets");
         ConcertView concertView = (ConcertView) model.getAttribute("concert");
         assertThat(concertView)
                 .isEqualTo(new ConcertView(
@@ -54,14 +54,14 @@ class BuyTicketControllerTest {
     @Test
     void placeTicketOrderRedirectsToOrderConfirmationPage() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
-        BuyTicketController buyTicketController = new BuyTicketController(concertStore);
+        PurchaseTicketController purchaseTicketController = new PurchaseTicketController(concertStore);
         ConcertId concertId = new ConcertId(UUID.randomUUID());
         int initialCapacity = 100;
         concertStore.save(Concert.schedule(concertId, "Pulse Wave", 40, LocalDateTime.of(2025, 11, 8, 22, 30), LocalTime.of(21, 0), initialCapacity, 4));
         String customerUuid = UUID.randomUUID().toString();
 
         int numberOfTicketsToBuy = 4;
-        String redirectString = buyTicketController
+        String redirectString = purchaseTicketController
                 .buyTickets(concertId.id().toString(),
                             new TicketOrderForm(customerUuid,
                                                 numberOfTicketsToBuy));

@@ -152,7 +152,7 @@ public class ConcertTest {
         }
 
         @Test
-        void ticketsBoughtUpdatesAvailableTicketCount() {
+        void ticketsPurchasedUpdatesAvailableTicketCount() {
             ConcertScheduled concertScheduled =
                     createConcertScheduledEventWithCapacityOf(100);
             TicketsSold ticketsSold = new TicketsSold(

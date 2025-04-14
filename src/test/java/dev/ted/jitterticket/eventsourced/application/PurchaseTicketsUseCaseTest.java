@@ -12,17 +12,17 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
-class BuyTicketsUseCaseTest {
+class PurchaseTicketsUseCaseTest {
 
     @Test
     void failureOfBuyTicketsReturnsEmptyOptional() {
         var concertStore = EventStore.forConcerts();
-        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(concertStore);
+        PurchaseTicketsUseCase purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore);
         CustomerId customerId = new CustomerId(UUID.randomUUID());
         ConcertId invalidConcertId = ConcertId.createRandom();
 
         Optional<TicketOrderId> ticketOrderIdOptional =
-                buyTicketsUseCase.buyTickets(invalidConcertId, customerId, 1);
+                purchaseTicketsUseCase.buyTickets(invalidConcertId, customerId, 1);
 
         assertThat(ticketOrderIdOptional)
                 .as("Ticket order should have failed and therefore returned an empty TicketOrderId")
@@ -34,10 +34,10 @@ class BuyTicketsUseCaseTest {
         var concertStore = EventStore.forConcerts();
         Concert concertBefore = ConcertFactory.createWithCapacity(100);
         concertStore.save(concertBefore);
-        BuyTicketsUseCase buyTicketsUseCase = new BuyTicketsUseCase(concertStore);
+        PurchaseTicketsUseCase purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore);
         CustomerId customerId = new CustomerId(UUID.randomUUID());
 
-        Optional<TicketOrderId> ticketOrderId = buyTicketsUseCase.buyTickets(concertBefore.getId(), customerId, 4);
+        Optional<TicketOrderId> ticketOrderId = purchaseTicketsUseCase.buyTickets(concertBefore.getId(), customerId, 4);
 
         assertThat(ticketOrderId)
                 .as("TicketOrderId should have been returned for a successful ticket purchase")
