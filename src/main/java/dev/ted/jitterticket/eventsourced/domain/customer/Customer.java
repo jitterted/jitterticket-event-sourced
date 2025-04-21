@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.domain.customer;
 
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
 import java.util.List;
 import java.util.StringJoiner;
@@ -33,6 +34,11 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                 setId(customerId);
                 this.name = customerName;
                 this.email = email;
+            }
+            case TicketsPurchased(CustomerId customerId,
+                                  ConcertId concertId,
+                                  int quantity,
+                                  int paidAmount) -> {
             }
         }
     }

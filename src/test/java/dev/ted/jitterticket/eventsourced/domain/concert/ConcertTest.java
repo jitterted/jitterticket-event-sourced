@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.domain.concert;
 
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -53,7 +54,7 @@ public class ConcertTest {
         }
 
         @Test
-        void purchaseTicketsGeneratesTicketsPurchased() {
+        void purchaseTicketsGeneratesTicketsSold() {
             int ticketPrice = 35;
             ConcertScheduled concertScheduled =
                     createConcertScheduledEventWithCapacityOf(100, ticketPrice);
@@ -153,17 +154,21 @@ public class ConcertTest {
         }
 
         @Test
-        void ticketsPurchasedUpdatesAvailableTicketCount() {
-            ConcertScheduled concertScheduled =
-                    createConcertScheduledEventWithCapacityOf(100, 35);
+        void ticketsSoldUpdatesAvailableTicketCount() {
+            ConcertScheduled concertScheduled = scheduleConcertWithCapacityOf(100);
+            int quantitySold = 6;
             TicketsSold ticketsSold = new TicketsSold(
-                    concertScheduled.concertId(), 6, -1);
+                    concertScheduled.concertId(), quantitySold, -1);
 
             Concert concert = Concert.reconstitute(List.of(concertScheduled,
                                                            ticketsSold));
 
             assertThat(concert.availableTicketCount())
-                    .isEqualTo(100 - 6);
+                    .isEqualTo(100 - quantitySold);
+        }
+
+        private @NotNull ConcertScheduled scheduleConcertWithCapacityOf(int capacity) {
+            return createConcertScheduledEventWithCapacityOf(capacity, 35);
         }
     }
 

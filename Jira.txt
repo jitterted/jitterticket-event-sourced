@@ -12,6 +12,7 @@
 
 * concert.purchaseTickets() needs to generate two (3?) events
     1. [Concert aggregate stream] TicketsSold(concertId, customerId, ...)
+        [ ] Implement the total paid (dollar amount)
     2. [Customer aggregate stream] TicketsPurchased(customerId, concertId, ticketOrderId??...)
     ?? (don't think I need this) [Customer aggregate stream for orders] TicketsOrdered(...purchaseId)
 
