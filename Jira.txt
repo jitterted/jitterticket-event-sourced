@@ -11,11 +11,11 @@
 [X] Rename buy/bought to purchase/purchased
 
 * concert.purchaseTickets() needs to generate two (3?) events
-    1. [Concert aggregate stream] TicketsSold(concertId, customerId, ...)
-        [ ] Implement the total paid (dollar amount)
-    2. [Customer aggregate stream] TicketsPurchased(customerId, concertId, ticketOrderId??...)
+    [ ] 1. [Concert aggregate stream] TicketsSold(concertId, customerId, ...)
+        [ ] Implement the total paid (dollar amount) -- would be used for a projection of concert total sales
+    [X] 2. [Customer aggregate stream] TicketsPurchased(customerId, concertId, ticketOrderId??...)
     ?? (don't think I need this) [Customer aggregate stream for orders] TicketsOrdered(...purchaseId)
 
-* concert.purchaseTickets() needs to return the TicketOrderId
+[ ] concert.purchaseTickets() needs to return the TicketOrderId
 
-
+[ ] Complete the customer purchase confirmation screen

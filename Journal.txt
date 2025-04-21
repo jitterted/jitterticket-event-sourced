@@ -1,6 +1,8 @@
 Monday, April 21, 2025
 ======================
 
+Next Time: generate TicketOrder with an ID that is used for the "ticket purchase confirmation" screen for the Customer
+
 [Caution]
 * Still easy to mix up newly created Aggregates: reconstituted from events (which results in empty uncommittedEvents) vs. registered via command (which results in a single event in uncommittedEvents), the latter which is required for saving.
   Unsure how to better protect against these kinds of mistakes: perhaps a createForTestWithEmptyUncommittedEvents() method on Customer (or whatever Aggregate)?
@@ -21,7 +23,7 @@ Monday, April 21, 2025
 Monday, April 14, 2025
 ======================
 
-Next Time: tests against the purchaseTicketsUseCase that verify that uncommitted events from both Concert and Customer are generated
+[X] Next Time: tests against the purchaseTicketsUseCase that verify that uncommitted events from both Concert and Customer are generated
 
 
 [Event-Sourcing]
