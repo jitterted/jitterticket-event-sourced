@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -11,6 +12,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
     private String name;
     private String email;
+    private final List<TicketOrder> ticketOrders = new ArrayList<>();
 
     public static Customer register(CustomerId customerId, String name, String email) {
         return new Customer(customerId, name, email);
@@ -36,10 +38,12 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                 this.name = customerName;
                 this.email = email;
             }
-            case TicketsPurchased(CustomerId customerId,
-                                  ConcertId concertId,
-                                  int quantity,
-                                  int paidAmount) -> {
+            case TicketsPurchased(
+                    _,
+                    ConcertId concertId,
+                    int quantity,
+                    int paidAmount) -> {
+                ticketOrders.add(new TicketOrder(concertId, quantity, paidAmount));
             }
         }
     }
@@ -52,7 +56,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     }
 
     public List<TicketOrder> ticketOrders() {
-        return null;
+        return ticketOrders;
     }
 
     public String name() {
@@ -72,5 +76,5 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                 .toString();
     }
 
-    public record TicketOrder(ConcertId concertId) {}
+    public record TicketOrder(ConcertId concertId, int quantity, int amountPaid) {}
 }

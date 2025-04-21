@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventsourced.domain.customer;
 
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -73,7 +74,23 @@ class CustomerTest {
 
         @Test
         void ticketsPurchasedAddsTicketOrder() {
-            
+            CustomerId customerId = CustomerId.createRandom();
+            CustomerRegistered customerRegistered = new CustomerRegistered(
+                    customerId, "customer name", "email@example.com");
+            ConcertId concertId = ConcertId.createRandom();
+            int quantity = 8;
+            int amountPaid = quantity * 45;
+            TicketsPurchased ticketsPurchased = new TicketsPurchased(
+                    customerId, concertId, quantity, amountPaid);
+
+            Customer customer = Customer.reconstitute(List.of(customerRegistered,
+                                                              ticketsPurchased));
+
+            assertThat(customer.ticketOrders())
+                    .containsExactly(
+                            new Customer.TicketOrder(
+                                    concertId, quantity, amountPaid)
+                    );
         }
     }
 
