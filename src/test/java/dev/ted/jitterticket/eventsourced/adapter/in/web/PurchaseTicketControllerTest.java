@@ -2,24 +2,23 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import org.junit.jupiter.api.Disabled;
+import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
 class PurchaseTicketControllerTest {
 
     @Test
-    void buyTicketsViewPutsConcertAndTicketOrderIntoModel() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+    void purchaseTicketsViewPutsConcertAndTicketOrderIntoModel() {
+        var concertStore = EventStore.forConcerts();
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(Concert.schedule(
                 concertId,
@@ -29,11 +28,12 @@ class PurchaseTicketControllerTest {
                 LocalTime.of(20, 0),
                 150,
                 4));
-        PurchaseTicketController purchaseTicketController = new PurchaseTicketController(concertStore);
+        var customerStore = EventStore.forCustomers();
+        PurchaseTicketController purchaseTicketController = new PurchaseTicketController(concertStore, customerStore);
         String concertIdString = concertId.id().toString();
 
         Model model = new ConcurrentModel();
-        String viewName = purchaseTicketController.buyTicketsView(model, concertIdString);
+        String viewName = purchaseTicketController.purchaseTicketsView(model, concertIdString);
 
         assertThat(viewName)
                 .isEqualTo("purchase-tickets");
@@ -53,20 +53,23 @@ class PurchaseTicketControllerTest {
     }
 
     @Test
-    @Disabled("dev.ted.jitterticket.eventsourced.adapter.in.web.PurchaseTicketControllerTest 4/21/25 14:20 — until use case fully working")
     void placeTicketOrderRedirectsToOrderConfirmationPage() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
-        PurchaseTicketController purchaseTicketController = new PurchaseTicketController(concertStore);
+        var concertStore = EventStore.forConcerts();
+        var customerStore = EventStore.forCustomers();
+        PurchaseTicketController purchaseTicketController =
+                new PurchaseTicketController(concertStore, customerStore);
         ConcertId concertId = ConcertId.createRandom();
         int initialCapacity = 100;
         concertStore.save(Concert.schedule(concertId, "Pulse Wave", 40, LocalDateTime.of(2025, 11, 8, 22, 30), LocalTime.of(21, 0), initialCapacity, 4));
-        String customerUuid = UUID.randomUUID().toString();
+        CustomerId customerId = CustomerId.createRandom();
+        customerStore.save(Customer.register(customerId, "Customer Name", "customer@example.com"));
 
         int numberOfTicketsToBuy = 4;
         String redirectString = purchaseTicketController
                 .buyTickets(concertId.id().toString(),
-                            new TicketOrderForm(customerUuid,
-                                                numberOfTicketsToBuy));
+                            new TicketOrderForm(
+                                    customerId.id().toString(),
+                                    numberOfTicketsToBuy));
 
         String ticketOrderUuid = "af05fc05-2de1-46d8-9568-01381029feb7";
         assertThat(redirectString)

@@ -1,7 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.junit.jupiter.api.Test;
@@ -26,7 +25,7 @@ class ConcertProjectorTest {
 
     @Test
     void projectorReturnsConcertsSavedInConcertStore() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        var concertStore = EventStore.forConcerts();
         ConcertId firstConcertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.createConcertWith(firstConcertId,
                                                            "First Concert",
@@ -60,7 +59,7 @@ class ConcertProjectorTest {
 
     @Test
     void projectorReturnsSingleConcertForSavedAndRescheduledConcerts() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        var concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.createConcertWith(concertId,

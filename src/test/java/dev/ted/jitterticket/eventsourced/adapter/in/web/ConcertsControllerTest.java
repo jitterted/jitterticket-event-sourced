@@ -2,8 +2,6 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
-import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.junit.jupiter.api.Test;
@@ -21,7 +19,7 @@ class ConcertsControllerTest {
 
     @Test
     void ticketableConcertsAddedToModel() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        var concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.createConcertWith(concertId,

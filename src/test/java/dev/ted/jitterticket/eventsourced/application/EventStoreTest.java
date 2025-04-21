@@ -23,7 +23,7 @@ class EventStoreTest {
 
     @Test
     void findByIdForNonExistingConcertReturnsEmptyOptional() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        var concertStore = EventStore.forConcerts();
 
         ConcertId concertId = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440000"));
         assertThat(concertStore.findById(concertId))
@@ -33,7 +33,7 @@ class EventStoreTest {
 
     @Test
     void findByIdReturnsSavedConcert() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        var concertStore = EventStore.forConcerts();
         ConcertId concertId = ConcertId.createRandom();
         Concert concert = Concert.schedule(concertId,
                                            "Headliner",
@@ -56,7 +56,7 @@ class EventStoreTest {
 
     @Test
     void findByIdReturnsDifferentInstanceOfConcert() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        var concertStore = EventStore.forConcerts();
         Concert savedConcert = ConcertFactory.createConcert();
         concertStore.save(savedConcert);
 
@@ -83,7 +83,7 @@ class EventStoreTest {
 
     @Test
     void eventStoreReturnsAllEventsAcrossAllSavedAggregatesInOrder() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        var concertStore = EventStore.forConcerts();
         Concert originalConcert = ConcertFactory.createConcert();
         concertStore.save(originalConcert);
         Concert rescheduledConcert = concertStore.findById(originalConcert.getId()).orElseThrow();

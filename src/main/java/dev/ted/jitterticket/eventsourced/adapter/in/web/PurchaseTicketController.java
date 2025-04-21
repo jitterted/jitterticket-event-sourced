@@ -5,6 +5,8 @@ import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,14 +24,15 @@ public class PurchaseTicketController {
     private final PurchaseTicketsUseCase purchaseTicketsUseCase;
 
     @Autowired
-    public PurchaseTicketController(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    public PurchaseTicketController(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+                                    EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
         this.concertStore = concertStore;
-        purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore, EventStore.forCustomers());
+        purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore, customerStore);
     }
 
     @GetMapping("/concerts/{concertId}")
-    public String buyTicketsView(Model model,
-                                 @PathVariable("concertId") String concertId) {
+    public String purchaseTicketsView(Model model,
+                                      @PathVariable("concertId") String concertId) {
         model.addAttribute("concert", concertViewFor(concertId));
         model.addAttribute("ticketOrderForm", new TicketOrderForm(
                 UUID.randomUUID().toString(), 2));

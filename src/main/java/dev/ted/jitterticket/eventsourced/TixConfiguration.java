@@ -5,6 +5,9 @@ import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,8 +18,16 @@ import java.time.LocalTime;
 public class TixConfiguration {
 
     @Bean
+    public EventStore<CustomerId, CustomerEvent, Customer> customerStore() {
+        var customerStore = EventStore.forCustomers();
+        customerStore.save(Customer.register(
+                CustomerId.createRandom(), "Sample Customer", "sample@example.com"));
+        return customerStore;
+    }
+
+    @Bean
     public EventStore<ConcertId, ConcertEvent, Concert> concertStore() {
-        EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
+        var concertStore = EventStore.forConcerts();
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(Concert.schedule(
                 concertId,
