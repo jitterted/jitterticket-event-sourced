@@ -1,5 +1,7 @@
 package dev.ted.jitterticket.eventsourced.domain.customer;
 
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -16,15 +18,39 @@ class CustomerTest {
         @Test
         void registerCustomerGeneratesCustomerRegistered() {
             CustomerId customerId = new CustomerId(UUID.randomUUID());
+
             Customer customer = Customer.register(
-                    customerId,
-                    "customer name", "email@example.com");
+                    customerId, "customer name", "email@example.com");
 
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
-                            new CustomerRegistered(customerId, "customer name", "email@example.com")
+                            new CustomerRegistered(customerId,
+                                                   "customer name",
+                                                   "email@example.com")
                     );
         }
+
+        @Test
+        void purchaseTicketsGeneratesTicketsPurchased() {
+            CustomerId customerId = CustomerId.createRandom();
+            CustomerRegistered customerRegistered = new CustomerRegistered(
+                    customerId, "customer name", "email@example.com");
+            Customer customer = Customer.reconstitute(List.of(customerRegistered));
+            int quantity = 4;
+            Concert concert = ConcertFactory.withTicketPriceOf(35);
+            int paidAmount = quantity * 35;
+
+            customer.purchaseTickets(concert, quantity);
+
+            assertThat(customer.uncommittedEvents())
+                    .containsExactly(
+                            new TicketsPurchased(customerId,
+                                                 concert.getId(),
+                                                 quantity,
+                                                 paidAmount)
+                    );
+        }
+
     }
 
     @Nested

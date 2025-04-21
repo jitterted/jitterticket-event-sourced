@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.domain.customer;
 
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
 import java.util.List;
@@ -62,6 +63,13 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
     public List<TicketOrder> ticketOrders() {
         return null;
+    }
+
+    public void purchaseTickets(Concert concert, int quantity) {
+        int paidAmount = quantity * concert.ticketPrice();
+        TicketsPurchased ticketsPurchased =
+                new TicketsPurchased(getId(), concert.getId(), quantity, paidAmount);
+        enqueue(ticketsPurchased);
     }
 
     public record TicketOrder(ConcertId concertId) {}

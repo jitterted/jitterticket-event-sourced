@@ -42,6 +42,17 @@ public class ConcertFactory {
         );
     }
 
+    public static Concert withTicketPriceOf(int ticketPrice) {
+        return Concert.schedule(ConcertId.createRandom(),
+                                "Headliner",
+                                ticketPrice,
+                                LocalDateTime.now(),
+                                LocalTime.now().minusHours(1),
+                                100,
+                                4
+        );
+    }
+
     static class Events {
 
         static ConcertScheduled createConcertScheduledEventWithCapacityOf(int capacity, int ticketPrice) {

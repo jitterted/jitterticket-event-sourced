@@ -1,6 +1,9 @@
 Monday, April 21, 2025
 ======================
 
+[IntelliJ IDEA Bug]
+* Can't seem to use the Make Static refactoring on an extracted test setup helper method. Check to see if it's still broken in 2025.1. Check if issue was already filed?
+
 [IntelliJ IDEA: Feature]
 * When moving (static) methods, would like to be able to move to a new static nested class (right now it tries to create a new package)
 
