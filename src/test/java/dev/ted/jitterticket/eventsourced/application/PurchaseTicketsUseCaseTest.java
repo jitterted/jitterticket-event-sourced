@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Test;
 
@@ -17,12 +18,13 @@ class PurchaseTicketsUseCaseTest {
     @Test
     void failureOfBuyTicketsReturnsEmptyOptional() {
         var concertStore = EventStore.forConcerts();
-        PurchaseTicketsUseCase purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore);
+        PurchaseTicketsUseCase purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore, EventStore.forCustomers());
         CustomerId customerId = new CustomerId(UUID.randomUUID());
         ConcertId invalidConcertId = ConcertId.createRandom();
 
         Optional<TicketOrderId> ticketOrderIdOptional =
-                purchaseTicketsUseCase.purchaseTickets(invalidConcertId, customerId, 1);
+                purchaseTicketsUseCase.purchaseTickets(invalidConcertId,
+                                                       customerId, 1);
 
         assertThat(ticketOrderIdOptional)
                 .as("Ticket order should have failed and therefore returned an empty TicketOrderId")
@@ -34,8 +36,13 @@ class PurchaseTicketsUseCaseTest {
         var concertStore = EventStore.forConcerts();
         Concert concertBefore = ConcertFactory.createWithCapacity(100);
         concertStore.save(concertBefore);
-        PurchaseTicketsUseCase purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore);
+        var customerStore = EventStore.forCustomers();
         CustomerId customerId = new CustomerId(UUID.randomUUID());
+        Customer customer = Customer.register(customerId, "Cust Omer", "customer@example.com");
+        customerStore.save(customer);
+
+        PurchaseTicketsUseCase purchaseTicketsUseCase =
+                new PurchaseTicketsUseCase(concertStore, customerStore);
 
         Optional<TicketOrderId> ticketOrderId = purchaseTicketsUseCase.purchaseTickets(concertBefore.getId(), customerId, 4);
 

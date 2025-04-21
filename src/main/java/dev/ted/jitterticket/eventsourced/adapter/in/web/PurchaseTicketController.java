@@ -24,7 +24,7 @@ public class PurchaseTicketController {
     @Autowired
     public PurchaseTicketController(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         this.concertStore = concertStore;
-        purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore);
+        purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore, EventStore.forCustomers());
     }
 
     @GetMapping("/concerts/{concertId}")

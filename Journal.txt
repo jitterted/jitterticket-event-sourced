@@ -1,6 +1,9 @@
 Monday, April 21, 2025
 ======================
 
+[IntelliJ IDEA: Feature]
+* When moving (static) methods, would like to be able to move to a new static nested class (right now it tries to create a new package)
+
 [IntelliJ IDEA: Bug?]
 * Getting error trying to launch JUnit in 2025.1 release.
 
