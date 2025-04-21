@@ -70,7 +70,7 @@ class EventStoreTest {
     @Test
     void eventStoreCanStoreCustomers() {
         EventStore<CustomerId, CustomerEvent, Customer> customerStore = EventStore.forCustomers();
-        Customer savedCustomer = Customer.register(new CustomerId(UUID.randomUUID()), "name", "email@example.com");
+        Customer savedCustomer = Customer.register(CustomerId.createRandom(), "name", "email@example.com");
         customerStore.save(savedCustomer);
 
         Optional<Customer> foundCustomer = customerStore.findById(savedCustomer.getId());

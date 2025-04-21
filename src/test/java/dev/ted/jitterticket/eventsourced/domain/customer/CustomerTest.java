@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -17,7 +16,7 @@ class CustomerTest {
 
         @Test
         void registerCustomerGeneratesCustomerRegistered() {
-            CustomerId customerId = new CustomerId(UUID.randomUUID());
+            CustomerId customerId = CustomerId.createRandom();
 
             Customer customer = Customer.register(
                     customerId, "customer name", "email@example.com");
@@ -58,7 +57,7 @@ class CustomerTest {
 
         @Test
         void customerRegisteredUpdatesNameAndEmail() {
-            CustomerId customerId = new CustomerId(UUID.randomUUID());
+            CustomerId customerId = CustomerId.createRandom();
             CustomerRegistered customerRegistered = new CustomerRegistered(
                     customerId, "customer name", "email@example.com");
 
@@ -70,6 +69,11 @@ class CustomerTest {
                     .isEqualTo("customer name");
             assertThat(customer.email())
                     .isEqualTo("email@example.com");
+        }
+
+        @Test
+        void ticketsPurchasedAddsTicketOrder() {
+            
         }
     }
 

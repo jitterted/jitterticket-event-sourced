@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -20,7 +19,7 @@ class PurchaseTicketsUseCaseTest {
     void failureOfBuyTicketsReturnsEmptyOptional() {
         var concertStore = EventStore.forConcerts();
         PurchaseTicketsUseCase purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore, EventStore.forCustomers());
-        CustomerId customerId = new CustomerId(UUID.randomUUID());
+        CustomerId customerId = CustomerId.createRandom();
         ConcertId invalidConcertId = ConcertId.createRandom();
 
         Optional<TicketOrderId> ticketOrderIdOptional =
@@ -40,7 +39,7 @@ class PurchaseTicketsUseCaseTest {
         concertStore.save(concertBefore);
         ConcertId concertId = concertBefore.getId();
         var customerStore = EventStore.forCustomers();
-        CustomerId customerId = new CustomerId(UUID.randomUUID());
+        CustomerId customerId = CustomerId.createRandom();
         Customer customer = Customer.register(customerId, "Cust Omer", "customer@example.com");
         customerStore.save(customer);
 

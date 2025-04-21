@@ -44,6 +44,17 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
         }
     }
 
+    public void purchaseTickets(Concert concert, int quantity) {
+        int paidAmount = quantity * concert.ticketPrice();
+        TicketsPurchased ticketsPurchased =
+                new TicketsPurchased(getId(), concert.getId(), quantity, paidAmount);
+        enqueue(ticketsPurchased);
+    }
+
+    public List<TicketOrder> ticketOrders() {
+        return null;
+    }
+
     public String name() {
         return name;
     }
@@ -59,17 +70,6 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                 .add("name='" + name + "'")
                 .add("email='" + email + "'")
                 .toString();
-    }
-
-    public List<TicketOrder> ticketOrders() {
-        return null;
-    }
-
-    public void purchaseTickets(Concert concert, int quantity) {
-        int paidAmount = quantity * concert.ticketPrice();
-        TicketsPurchased ticketsPurchased =
-                new TicketsPurchased(getId(), concert.getId(), quantity, paidAmount);
-        enqueue(ticketsPurchased);
     }
 
     public record TicketOrder(ConcertId concertId) {}

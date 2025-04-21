@@ -4,8 +4,6 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.*;
 
 class EventSourcedAggregateTest {
@@ -21,7 +19,7 @@ class EventSourcedAggregateTest {
             }
         };
 
-        CustomerRegistered event = new CustomerRegistered(new CustomerId(UUID.randomUUID()), "name", "email");
+        CustomerRegistered event = new CustomerRegistered(CustomerId.createRandom(), "name", "email");
         eventSourcedAggregate.enqueue(event);
 
         assertThat(eventSourcedAggregate.appliedEvent)
