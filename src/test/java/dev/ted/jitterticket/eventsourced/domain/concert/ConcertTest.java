@@ -62,7 +62,7 @@ public class ConcertTest {
             CustomerId customerId = CustomerId.createRandom();
             int quantity = 2;
 
-            concert.purchaseTickets(customerId, quantity);
+            concert.sellTicketsTo(customerId, quantity);
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(

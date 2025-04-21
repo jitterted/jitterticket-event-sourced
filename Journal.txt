@@ -1,6 +1,10 @@
 Monday, April 21, 2025
 ======================
 
+[Caution]
+* Still easy to mix up newly created Aggregates: reconstituted from events (which results in empty uncommittedEvents) vs. registered via command (which results in a single event in uncommittedEvents), the latter which is required for saving.
+  Unsure how to better protect against these kinds of mistakes: perhaps a createForTestWithEmptyUncommittedEvents() method on Customer (or whatever Aggregate)?
+
 [IntelliJ IDEA: Feature]
 [ ] Ability to exclude a replacement from the replace dialog (it's available in the replace tool window, so why not the dialog?)
 

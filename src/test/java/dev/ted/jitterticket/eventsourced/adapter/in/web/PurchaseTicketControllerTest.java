@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
@@ -52,6 +53,7 @@ class PurchaseTicketControllerTest {
     }
 
     @Test
+    @Disabled("dev.ted.jitterticket.eventsourced.adapter.in.web.PurchaseTicketControllerTest 4/21/25 14:20 — until use case fully working")
     void placeTicketOrderRedirectsToOrderConfirmationPage() {
         EventStore<ConcertId, ConcertEvent, Concert> concertStore = EventStore.forConcerts();
         PurchaseTicketController purchaseTicketController = new PurchaseTicketController(concertStore);

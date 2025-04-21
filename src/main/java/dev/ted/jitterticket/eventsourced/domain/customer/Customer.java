@@ -38,12 +38,14 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                 this.name = customerName;
                 this.email = email;
             }
+
             case TicketsPurchased(
                     _,
                     ConcertId concertId,
                     int quantity,
                     int paidAmount) -> {
-                ticketOrders.add(new TicketOrder(concertId, quantity, paidAmount));
+                ticketOrders.add(
+                        new TicketOrder(concertId, quantity, paidAmount));
             }
         }
     }

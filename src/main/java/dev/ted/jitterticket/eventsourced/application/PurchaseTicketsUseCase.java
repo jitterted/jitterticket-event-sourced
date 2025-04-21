@@ -16,7 +16,8 @@ public class PurchaseTicketsUseCase {
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
 
-    public PurchaseTicketsUseCase(EventStore<ConcertId, ConcertEvent, Concert> concertStore, EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
+    public PurchaseTicketsUseCase(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+                                  EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
         this.concertStore = concertStore;
         this.customerStore = customerStore;
     }
@@ -25,12 +26,14 @@ public class PurchaseTicketsUseCase {
         // check if customer already has the max number of tickets for this concert
         // customer.canBuyTicketsFor(concertId, quantity)
         // ?? are use cases allowed to make decisions?
+        Customer customer = customerStore.findById(customerId)
+                                         .orElseThrow(() -> new RuntimeException("Customer not found for ID: " + customerId));
         return concertStore.findById(concertId)
                            .map(concert -> {
-                               concert.purchaseTickets(customerId, quantity);
-                               // events: * TicketsSold(concertId, ...)
-                               //         * TicketsPurchased(customerId, concertId, ticketOrderId??...)
+                               concert.sellTicketsTo(customerId, quantity);
                                concertStore.save(concert);
+                               customer.purchaseTickets(concert, quantity);
+                               customerStore.save(customer);
                                return new TicketOrderId(UUID.randomUUID());
                            });
 

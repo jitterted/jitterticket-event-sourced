@@ -7,3 +7,4 @@
     * Ticket Order
 * Purchase - verb & noun - gaining a ticket in exchange for a payment
   * was Bought/Buy
+* Sell/Sale - tickets are SOLD by the Concert and are PURCHASED by Customers
