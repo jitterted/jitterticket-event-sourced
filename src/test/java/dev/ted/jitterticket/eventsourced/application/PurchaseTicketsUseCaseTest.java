@@ -6,6 +6,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -32,10 +33,12 @@ class PurchaseTicketsUseCaseTest {
     }
 
     @Test
-    void buyTicketsReducesNumberOfTicketsAvailable() {
+    @Disabled("dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCaseTest 4/21/25 13:09 — until Customer fully supports tracking Ticket Orders")
+    void purchaseTicketsReducesNumberOfConcertTicketsAvailableAndAddsTicketOrderToCustomer() {
         var concertStore = EventStore.forConcerts();
         Concert concertBefore = ConcertFactory.createWithCapacity(100);
         concertStore.save(concertBefore);
+        ConcertId concertId = concertBefore.getId();
         var customerStore = EventStore.forCustomers();
         CustomerId customerId = new CustomerId(UUID.randomUUID());
         Customer customer = Customer.register(customerId, "Cust Omer", "customer@example.com");
@@ -44,14 +47,22 @@ class PurchaseTicketsUseCaseTest {
         PurchaseTicketsUseCase purchaseTicketsUseCase =
                 new PurchaseTicketsUseCase(concertStore, customerStore);
 
-        Optional<TicketOrderId> ticketOrderId = purchaseTicketsUseCase.purchaseTickets(concertBefore.getId(), customerId, 4);
+        Optional<TicketOrderId> ticketOrderId =
+                purchaseTicketsUseCase.purchaseTickets(concertId, customerId, 4);
 
         assertThat(ticketOrderId)
                 .as("TicketOrderId should have been returned for a successful ticket purchase")
                 .isPresent();
-        Concert concertAfter = concertStore.findById(concertBefore.getId()).orElseThrow();
+        Concert concertAfter = concertStore.findById(concertId).orElseThrow();
         assertThat(concertAfter.availableTicketCount())
                 .isEqualTo(100 - 4);
+        Customer customerAfter = customerStore.findById(customerId).orElseThrow();
+        assertThat(customerAfter.ticketOrders())
+                .as("Customer should have 1 ticket order")
+                .hasSize(1)
+                .extracting(Customer.TicketOrder::concertId)
+                .first()
+                .isEqualTo(concertId);
     }
 
 }

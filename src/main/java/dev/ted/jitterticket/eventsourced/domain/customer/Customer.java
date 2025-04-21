@@ -59,4 +59,10 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                 .add("email='" + email + "'")
                 .toString();
     }
+
+    public List<TicketOrder> ticketOrders() {
+        return null;
+    }
+
+    public record TicketOrder(ConcertId concertId) {}
 }
