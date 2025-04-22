@@ -20,6 +20,6 @@
 [X] Add TicketOrderId to the TicketPurchased event (was concert.purchaseTickets() needs to return the TicketOrderId)
 
 [ ] Complete the customer purchase confirmation screen
-    [ ] Redirect (after POST to purchase tickets) to new endpoint:
+    [X] Redirect (after POST to purchase tickets) to new endpoint:
     [ ] New endpoint for /customers/{customerId}/confirmations/{ticketOrderId}
         [ ] Load Customer, Load Concert => TicketOrderView
