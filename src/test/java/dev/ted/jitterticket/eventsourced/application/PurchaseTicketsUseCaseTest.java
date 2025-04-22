@@ -35,16 +35,18 @@ class PurchaseTicketsUseCaseTest {
 
     @Test
     void purchaseTicketsReducesNumberOfConcertTicketsAvailableAndAddsTicketOrderToCustomer() {
-        var concertStore = EventStore.forConcerts();
+        Customer customer = CustomerFactory.newlyRegistered();
         Concert concertBefore = ConcertFactory.createWithCapacity(100);
+        TicketOrderId expectedTicketOrderUuid = new TicketOrderId(UUID.randomUUID());
+        var concertStore = EventStore.forConcerts();
         concertStore.save(concertBefore);
         ConcertId concertId = concertBefore.getId();
         var customerStore = EventStore.forCustomers();
-        Customer customer = CustomerFactory.newlyRegistered();
         customerStore.save(customer);
-        UUID expectedTicketOrderUuid = UUID.randomUUID();
         PurchaseTicketsUseCase purchaseTicketsUseCase =
-                new PurchaseTicketsUseCase(concertStore, customerStore);
+                PurchaseTicketsUseCase.createForTest(concertStore,
+                                                     customerStore,
+                                                     expectedTicketOrderUuid);
 
         Optional<TicketOrderId> ticketOrderId =
                 purchaseTicketsUseCase.purchaseTickets(concertId, customer.getId(), 4);
@@ -52,9 +54,8 @@ class PurchaseTicketsUseCaseTest {
         assertThat(ticketOrderId)
                 .as("TicketOrderId should have been returned for a successful ticket purchase")
                 .isPresent()
-//                .get()
-//                .isEqualTo(new TicketOrderId(expectedTicketOrderUuid))
-        ;
+                .get()
+                .isEqualTo(expectedTicketOrderUuid);
         Concert concertAfter = concertStore.findById(concertId).orElseThrow();
         assertThat(concertAfter.availableTicketCount())
                 .isEqualTo(100 - 4);
