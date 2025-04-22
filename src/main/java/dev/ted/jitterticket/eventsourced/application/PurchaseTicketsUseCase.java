@@ -9,23 +9,25 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class PurchaseTicketsUseCase {
 
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
-    private TicketOrderId expectedTicketOrderUuid;
+    private final TicketOrderIdGenerator ticketOrderIdGenerator;
 
     public PurchaseTicketsUseCase(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
                                   EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
         this.concertStore = concertStore;
         this.customerStore = customerStore;
+        this.ticketOrderIdGenerator = () -> new TicketOrderId(UUID.randomUUID());
     }
 
     public PurchaseTicketsUseCase(EventStore<ConcertId, ConcertEvent, Concert> concertStore, EventStore<CustomerId, CustomerEvent, Customer> customerStore, TicketOrderId expectedTicketOrderUuid) {
         this.concertStore = concertStore;
         this.customerStore = customerStore;
-        this.expectedTicketOrderUuid = expectedTicketOrderUuid;
+        this.ticketOrderIdGenerator = () -> expectedTicketOrderUuid;
     }
 
     static PurchaseTicketsUseCase createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
@@ -46,14 +48,14 @@ public class PurchaseTicketsUseCase {
                                concertStore.save(concert);
                                customer.purchaseTickets(concert, quantity);
                                customerStore.save(customer);
-                               return nextTicketOrderId();
+                               return ticketOrderIdGenerator.nextTicketOrderId();
                            });
 
         // return ticketOrderId inside of a Result object (success/failure)
         // later: notify customer of ticket purchase with a PDF and a link
     }
 
-    private TicketOrderId nextTicketOrderId() {
-        return expectedTicketOrderUuid;
+    interface TicketOrderIdGenerator {
+        TicketOrderId nextTicketOrderId();
     }
 }
