@@ -24,7 +24,9 @@ public class PurchaseTicketsUseCase {
         this.ticketOrderIdGenerator = () -> new TicketOrderId(UUID.randomUUID());
     }
 
-    public PurchaseTicketsUseCase(EventStore<ConcertId, ConcertEvent, Concert> concertStore, EventStore<CustomerId, CustomerEvent, Customer> customerStore, TicketOrderId expectedTicketOrderUuid) {
+    private PurchaseTicketsUseCase(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+                                   EventStore<CustomerId, CustomerEvent, Customer> customerStore,
+                                   TicketOrderId expectedTicketOrderUuid) {
         this.concertStore = concertStore;
         this.customerStore = customerStore;
         this.ticketOrderIdGenerator = () -> expectedTicketOrderUuid;
@@ -55,6 +57,7 @@ public class PurchaseTicketsUseCase {
         // later: notify customer of ticket purchase with a PDF and a link
     }
 
+    @FunctionalInterface
     interface TicketOrderIdGenerator {
         TicketOrderId nextTicketOrderId();
     }
