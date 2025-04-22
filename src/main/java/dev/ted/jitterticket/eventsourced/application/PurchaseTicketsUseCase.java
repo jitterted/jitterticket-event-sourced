@@ -24,7 +24,7 @@ public class PurchaseTicketsUseCase {
 
     public Optional<TicketOrderId> purchaseTickets(ConcertId concertId, CustomerId customerId, int quantity) {
         // check if customer already has the max number of tickets for this concert
-        // customer.canBuyTicketsFor(concertId, quantity)
+        // customer.canPurchaseTicketsFor(concertId, quantity)
         // ?? are use cases allowed to make decisions?
         Customer customer = customerStore.findById(customerId)
                                          .orElseThrow(() -> new RuntimeException("Customer not found for ID: " + customerId));

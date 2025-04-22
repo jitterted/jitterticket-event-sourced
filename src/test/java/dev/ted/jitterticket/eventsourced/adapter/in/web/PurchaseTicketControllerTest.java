@@ -64,12 +64,12 @@ class PurchaseTicketControllerTest {
         CustomerId customerId = CustomerId.createRandom();
         customerStore.save(Customer.register(customerId, "Customer Name", "customer@example.com"));
 
-        int numberOfTicketsToBuy = 4;
+        int numberOfTicketsToPurchase = 4;
         String redirectString = purchaseTicketController
-                .buyTickets(concertId.id().toString(),
-                            new TicketOrderForm(
+                .purchaseTickets(concertId.id().toString(),
+                                 new TicketOrderForm(
                                     customerId.id().toString(),
-                                    numberOfTicketsToBuy));
+                                    numberOfTicketsToPurchase));
 
         String ticketOrderUuid = "af05fc05-2de1-46d8-9568-01381029feb7";
         assertThat(redirectString)
@@ -77,6 +77,6 @@ class PurchaseTicketControllerTest {
 
         Concert concert = concertStore.findById(concertId).orElseThrow();
         assertThat(concert.availableTicketCount())
-                .isEqualTo(initialCapacity - numberOfTicketsToBuy);
+                .isEqualTo(initialCapacity - numberOfTicketsToPurchase);
     }
 }

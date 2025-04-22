@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.*;
 class PurchaseTicketsUseCaseTest {
 
     @Test
-    void failureOfBuyTicketsReturnsEmptyOptional() {
+    void failureOfPurchaseTicketsReturnsEmptyOptional() {
         var concertStore = EventStore.forConcerts();
         var customerStore = EventStore.forCustomers();
         Customer customer = CustomerFactory.newlyRegistered();
