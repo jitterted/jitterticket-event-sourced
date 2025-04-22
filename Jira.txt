@@ -17,6 +17,9 @@
     [X] 2. [Customer aggregate stream] TicketsPurchased(customerId, concertId, ticketOrderId??...)
     ?? (don't think I need this) [Customer aggregate stream for orders] TicketsOrdered(...purchaseId)
 
-[ ] concert.purchaseTickets() needs to return the TicketOrderId
+[X] Add TicketOrderId to the TicketPurchased event (was concert.purchaseTickets() needs to return the TicketOrderId)
 
 [ ] Complete the customer purchase confirmation screen
+    [ ] Redirect (after POST to purchase tickets) to new endpoint:
+    [ ] New endpoint for /customers/{customerId}/ticket-orders/{ticketOrderId}
+        [ ] Load Customer, Load Concert => TicketOrderView

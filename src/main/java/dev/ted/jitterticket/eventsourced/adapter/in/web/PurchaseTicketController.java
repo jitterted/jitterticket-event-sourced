@@ -47,7 +47,8 @@ public class PurchaseTicketController {
                 new CustomerId(UUID.fromString(ticketOrderForm.customerId())),
                 ticketOrderForm.quantity());
         String ticketOrderUuid = "af05fc05-2de1-46d8-9568-01381029feb7";
-        return "redirect:/confirmations/" + ticketOrderUuid;
+        return "redirect:/customers/" + ticketOrderForm.customerId() +
+               "/confirmations/" + ticketOrderUuid;
     }
 
     // @GetMapping("/confirmations/{ticketOrderId}?customerId={customerId}

@@ -68,12 +68,14 @@ class PurchaseTicketControllerTest {
         String redirectString = purchaseTicketController
                 .purchaseTickets(concertId.id().toString(),
                                  new TicketOrderForm(
-                                    customerId.id().toString(),
-                                    numberOfTicketsToPurchase));
+                                         customerId.id().toString(),
+                                         numberOfTicketsToPurchase));
 
-        String ticketOrderUuid = "af05fc05-2de1-46d8-9568-01381029feb7";
+        String ticketOrderUuidString = "af05fc05-2de1-46d8-9568-01381029feb7";
+        String customerUuidString = customerId.id().toString();
         assertThat(redirectString)
-                .isEqualTo("redirect:/confirmations/" + ticketOrderUuid);
+                .isEqualTo("redirect:/customers/" + customerUuidString
+                           + "/confirmations/" + ticketOrderUuidString);
 
         Concert concert = concertStore.findById(concertId).orElseThrow();
         assertThat(concert.availableTicketCount())
