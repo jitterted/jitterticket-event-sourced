@@ -35,6 +35,29 @@ class PurchaseTicketsUseCaseTest {
 
     @Test
     void purchaseTicketsReducesNumberOfConcertTicketsAvailableAndAddsTicketOrderToCustomer() {
+        Fixture fixture = createUseCase();
+
+        Optional<TicketOrderId> ticketOrderId =
+                fixture.purchaseTicketsUseCase.purchaseTickets(fixture.concertId, fixture.customer.getId(), 4);
+
+        assertThat(ticketOrderId)
+                .as("TicketOrderId should have been returned for a successful ticket purchase")
+                .isPresent()
+                .get()
+                .isEqualTo(fixture.expectedTicketOrderUuid);
+        Concert concertAfter = fixture.concertStore.findById(fixture.concertId).orElseThrow();
+        assertThat(concertAfter.availableTicketCount())
+                .isEqualTo(100 - 4);
+        Customer customerAfter = fixture.customerStore.findById(fixture.customer.getId()).orElseThrow();
+        assertThat(customerAfter.ticketOrders())
+                .as("Customer should have 1 ticket order")
+                .hasSize(1)
+                .extracting(Customer.TicketOrder::concertId)
+                .first()
+                .isEqualTo(fixture.concertId);
+    }
+
+    private static Fixture createUseCase() {
         Customer customer = CustomerFactory.newlyRegistered();
         Concert concertBefore = ConcertFactory.createWithCapacity(100);
         TicketOrderId expectedTicketOrderUuid = new TicketOrderId(UUID.randomUUID());
@@ -47,25 +70,9 @@ class PurchaseTicketsUseCaseTest {
                 PurchaseTicketsUseCase.createForTest(concertStore,
                                                      customerStore,
                                                      expectedTicketOrderUuid);
-
-        Optional<TicketOrderId> ticketOrderId =
-                purchaseTicketsUseCase.purchaseTickets(concertId, customer.getId(), 4);
-
-        assertThat(ticketOrderId)
-                .as("TicketOrderId should have been returned for a successful ticket purchase")
-                .isPresent()
-                .get()
-                .isEqualTo(expectedTicketOrderUuid);
-        Concert concertAfter = concertStore.findById(concertId).orElseThrow();
-        assertThat(concertAfter.availableTicketCount())
-                .isEqualTo(100 - 4);
-        Customer customerAfter = customerStore.findById(customer.getId()).orElseThrow();
-        assertThat(customerAfter.ticketOrders())
-                .as("Customer should have 1 ticket order")
-                .hasSize(1)
-                .extracting(Customer.TicketOrder::concertId)
-                .first()
-                .isEqualTo(concertId);
+        return new Fixture(customer, expectedTicketOrderUuid, concertStore, concertId, customerStore, purchaseTicketsUseCase);
     }
+
+    private record Fixture(Customer customer, TicketOrderId expectedTicketOrderUuid, EventStore<ConcertId,dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent, Concert> concertStore, ConcertId concertId, EventStore<dev.ted.jitterticket.eventsourced.domain.customer.CustomerId,dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent, Customer> customerStore, PurchaseTicketsUseCase purchaseTicketsUseCase) {}
 
 }
