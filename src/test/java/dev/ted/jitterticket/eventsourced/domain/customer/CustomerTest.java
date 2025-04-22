@@ -3,7 +3,6 @@ package dev.ted.jitterticket.eventsourced.domain.customer;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.concert.CustomerFactory;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

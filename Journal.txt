@@ -1,3 +1,10 @@
+Tuesday, April 22, 2025
+=======================
+
+[IntelliJ IDEA]
+[ ] Multi-caret (Ctrl-G) no more occurrences not displaying?
+
+
 Monday, April 21, 2025
 ======================
 
@@ -17,7 +24,7 @@ Next Time: generate TicketOrder with an ID that is used for the "ticket purchase
 [ ] When moving (static) methods, would like to be able to move to a new static nested class (right now it tries to create a new package)
 
 [IntelliJ IDEA: Bug?]
-[ ] Getting error trying to launch JUnit in 2025.1 release.
+[X] Getting error trying to launch JUnit in 2025.1 release.
 
 
 Monday, April 14, 2025

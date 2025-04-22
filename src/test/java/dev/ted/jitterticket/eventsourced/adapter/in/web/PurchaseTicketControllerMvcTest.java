@@ -5,6 +5,10 @@ import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +18,6 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.UUID;
 
 @Tag("mvc")
 @Tag("spring")
@@ -28,8 +31,11 @@ class PurchaseTicketControllerMvcTest {
     @Autowired
     EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
+    @Autowired
+    EventStore<CustomerId, CustomerEvent, Customer> customerStore;
+
     @Test
-    void getToBuyTicketViewEndpointReturns200Ok() {
+    void getToPurchaseTicketViewEndpointReturns200Ok() {
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(Concert.schedule(
                 concertId,
@@ -47,10 +53,12 @@ class PurchaseTicketControllerMvcTest {
     }
 
     @Test
-    void postToBuyTicketEndpointRedirects() {
+    void postToPurchaseTicketEndpointRedirects() {
+        Customer customer = CustomerFactory.newlyRegistered();
+        customerStore.save(customer);
         ConcertId concertId = ConcertId.createRandom();
         mvc.post()
-           .formField("customerId", UUID.randomUUID().toString())
+           .formField("customerId", customer.getId().id().toString())
            .formField("quantity", "2")
            .uri("/concerts/" + concertId.id().toString())
            .assertThat()

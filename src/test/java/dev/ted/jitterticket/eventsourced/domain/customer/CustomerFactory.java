@@ -1,8 +1,4 @@
-package dev.ted.jitterticket.eventsourced.domain.concert;
-
-import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
-import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
-import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
+package dev.ted.jitterticket.eventsourced.domain.customer;
 
 import java.util.List;
 

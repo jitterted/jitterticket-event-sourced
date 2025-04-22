@@ -18,10 +18,6 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     private int maxTicketsPerPurchase;
     private int availableTicketCount;
 
-    private Concert(List<ConcertEvent> concertEvents) {
-        concertEvents.forEach(this::apply);
-    }
-
     public static Concert schedule(ConcertId concertId,
                                    String artist,
                                    int ticketPrice,
@@ -32,15 +28,19 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
         return new Concert(concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
     }
 
-    public static Concert reconstitute(List<ConcertEvent> concertEvents) {
-        return new Concert(concertEvents);
-    }
-
     private Concert(ConcertId concertId, String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
         ConcertScheduled concertScheduled = new ConcertScheduled(
                 concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
         );
         enqueue(concertScheduled);
+    }
+
+    public static Concert reconstitute(List<ConcertEvent> concertEvents) {
+        return new Concert(concertEvents);
+    }
+
+    private Concert(List<ConcertEvent> concertEvents) {
+        concertEvents.forEach(this::apply);
     }
 
     @Override
