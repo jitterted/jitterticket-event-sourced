@@ -16,7 +16,7 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.*;
 
-class PurchaseTicketControllerTest {
+class PurchaseTicketsControllerTest {
 
     @Test
     void purchaseTicketsViewPutsConcertAndTicketOrderIntoModel() {
@@ -31,12 +31,12 @@ class PurchaseTicketControllerTest {
                 150,
                 4));
         var customerStore = EventStore.forCustomers();
-        PurchaseTicketController purchaseTicketController =
-                new PurchaseTicketController(concertStore, new PurchaseTicketsUseCase(concertStore, customerStore));
+        PurchaseTicketsController purchaseTicketsController =
+                new PurchaseTicketsController(concertStore, new PurchaseTicketsUseCase(concertStore, customerStore));
         String concertIdString = concertId.id().toString();
 
         Model model = new ConcurrentModel();
-        String viewName = purchaseTicketController.purchaseTicketsView(model, concertIdString);
+        String viewName = purchaseTicketsController.purchaseTicketsView(model, concertIdString);
 
         assertThat(viewName)
                 .isEqualTo("purchase-tickets");
@@ -64,8 +64,8 @@ class PurchaseTicketControllerTest {
                 PurchaseTicketsUseCase.createForTest(concertStore,
                                                      customerStore,
                                                      ticketOrderId);
-        PurchaseTicketController purchaseTicketController =
-                new PurchaseTicketController(concertStore, purchaseTicketsUseCase);
+        PurchaseTicketsController purchaseTicketsController =
+                new PurchaseTicketsController(concertStore, purchaseTicketsUseCase);
         ConcertId concertId = ConcertId.createRandom();
         int initialCapacity = 100;
         concertStore.save(Concert.schedule(concertId, "Pulse Wave", 40, LocalDateTime.of(2025, 11, 8, 22, 30), LocalTime.of(21, 0), initialCapacity, 4));
@@ -73,7 +73,7 @@ class PurchaseTicketControllerTest {
         customerStore.save(Customer.register(customerId, "Customer Name", "customer@example.com"));
 
         int numberOfTicketsToPurchase = 4;
-        String redirectString = purchaseTicketController
+        String redirectString = purchaseTicketsController
                 .purchaseTickets(concertId.id().toString(),
                                  new TicketOrderForm(
                                          customerId.id().toString(),

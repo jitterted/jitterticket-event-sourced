@@ -21,9 +21,9 @@ import java.time.LocalTime;
 
 @Tag("mvc")
 @Tag("spring")
-@WebMvcTest(PurchaseTicketController.class)
+@WebMvcTest(PurchaseTicketsController.class)
 @Import(TixConfiguration.class)
-class PurchaseTicketControllerMvcTest {
+class PurchaseTicketsControllerMvcTest {
 
     @Autowired
     MockMvcTester mvc;
@@ -36,15 +36,7 @@ class PurchaseTicketControllerMvcTest {
 
     @Test
     void getToPurchaseTicketViewEndpointReturns200Ok() {
-        ConcertId concertId = ConcertId.createRandom();
-        concertStore.save(Concert.schedule(
-                concertId,
-                "Blue Note Quartet",
-                35,
-                LocalDateTime.of(2025, 8, 22, 19, 30),
-                LocalTime.of(18, 30),
-                75,
-                2));
+        ConcertId concertId = createSavedConcert();
 
         mvc.get()
            .uri("/concerts/" + concertId.id().toString())
@@ -56,12 +48,25 @@ class PurchaseTicketControllerMvcTest {
     void postToPurchaseTicketEndpointRedirects() {
         Customer customer = CustomerFactory.newlyRegistered();
         customerStore.save(customer);
-        ConcertId concertId = ConcertId.createRandom();
+        ConcertId concertId = createSavedConcert();
         mvc.post()
            .formField("customerId", customer.getId().id().toString())
            .formField("quantity", "2")
            .uri("/concerts/" + concertId.id().toString())
            .assertThat()
            .hasStatus3xxRedirection();
+    }
+
+    private ConcertId createSavedConcert() {
+        ConcertId concertId = ConcertId.createRandom();
+        concertStore.save(Concert.schedule(
+                concertId,
+                "Blue Note Quartet",
+                35,
+                LocalDateTime.of(2025, 8, 22, 19, 30),
+                LocalTime.of(18, 30),
+                75,
+                2));
+        return concertId;
     }
 }

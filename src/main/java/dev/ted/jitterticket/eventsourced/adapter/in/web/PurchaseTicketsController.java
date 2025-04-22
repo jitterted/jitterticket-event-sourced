@@ -18,14 +18,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Controller
-public class PurchaseTicketController {
+public class PurchaseTicketsController {
 
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
     private final PurchaseTicketsUseCase purchaseTicketsUseCase;
 
     @Autowired
-    public PurchaseTicketController(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-                                    PurchaseTicketsUseCase purchaseTicketsUseCase) {
+    public PurchaseTicketsController(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+                                     PurchaseTicketsUseCase purchaseTicketsUseCase) {
         this.concertStore = concertStore;
         this.purchaseTicketsUseCase = purchaseTicketsUseCase;
     }
