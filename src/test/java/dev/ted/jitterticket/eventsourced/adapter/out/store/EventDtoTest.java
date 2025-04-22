@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store;
 
 import dev.ted.jitterticket.eventsourced.domain.Event;
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
@@ -121,8 +122,8 @@ class EventDtoTest {
                                                6, -1))
                 , Arguments.of(new TicketsPurchased(
                         CustomerId.createRandom(),
-                        ConcertId.createRandom(),
-                        4, 100))
+                        TicketOrderId.createRandom(),
+                        ConcertId.createRandom(), 4, 100))
         );
     }
 

@@ -44,10 +44,10 @@ class PurchaseTicketsUseCaseTest {
                                                      fixture.customerStore(),
                                                      expectedTicketOrderId);
 
-        Optional<TicketOrderId> ticketOrderId =
+        Optional<TicketOrderId> actualTicketOrderId =
                 purchaseTicketsUseCase.purchaseTickets(fixture.concertId(), fixture.customer().getId(), ticketPurchaseQuantity);
 
-        assertThat(ticketOrderId)
+        assertThat(actualTicketOrderId)
                 .as("TicketOrderId should have been returned for a successful ticket purchase")
                 .isPresent()
                 .get()
@@ -59,9 +59,9 @@ class PurchaseTicketsUseCaseTest {
         assertThat(customerAfter.ticketOrders())
                 .as("Customer should have 1 ticket order")
                 .hasSize(1)
-                .extracting(Customer.TicketOrder::concertId)
+                .extracting(Customer.TicketOrder::ticketOrderId, Customer.TicketOrder::concertId)
                 .first()
-                .isEqualTo(fixture.concertId());
+                .isEqualTo(tuple(expectedTicketOrderId, fixture.concertId()));
     }
 
     @Test

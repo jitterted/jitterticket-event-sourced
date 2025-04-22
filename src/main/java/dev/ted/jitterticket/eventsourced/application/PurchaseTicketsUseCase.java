@@ -48,9 +48,10 @@ public class PurchaseTicketsUseCase {
                            .map(concert -> {
                                concert.sellTicketsTo(customerId, quantity);
                                concertStore.save(concert);
-                               customer.purchaseTickets(concert, quantity);
+                               TicketOrderId ticketOrderId = ticketOrderIdGenerator.nextTicketOrderId();
+                               customer.purchaseTickets(concert, ticketOrderId, quantity);
                                customerStore.save(customer);
-                               return ticketOrderIdGenerator.nextTicketOrderId();
+                               return ticketOrderId;
                            });
 
         // return ticketOrderId inside of a Result object (success/failure)

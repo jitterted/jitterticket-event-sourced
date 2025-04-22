@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.domain.customer;
 
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
@@ -36,15 +37,16 @@ class CustomerTest {
             int quantity = 4;
             Concert concert = ConcertFactory.withTicketPriceOf(35);
             int paidAmount = quantity * 35;
+            TicketOrderId ticketOrderId = TicketOrderId.createRandom();
 
-            customer.purchaseTickets(concert, quantity);
+            customer.purchaseTickets(concert, ticketOrderId, quantity);
 
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
                             new TicketsPurchased(customer.getId(),
+                                                 ticketOrderId,
                                                  concert.getId(),
-                                                 quantity,
-                                                 paidAmount)
+                                                 quantity, paidAmount)
                     );
         }
 
@@ -77,8 +79,9 @@ class CustomerTest {
             ConcertId concertId = ConcertId.createRandom();
             int quantity = 8;
             int amountPaid = quantity * 45;
+            TicketOrderId ticketOrderId = TicketOrderId.createRandom();
             TicketsPurchased ticketsPurchased = new TicketsPurchased(
-                    customerId, concertId, quantity, amountPaid);
+                    customerId, ticketOrderId, concertId, quantity, amountPaid);
 
             Customer customer = Customer.reconstitute(List.of(customerRegistered,
                                                               ticketsPurchased));
@@ -86,7 +89,7 @@ class CustomerTest {
             assertThat(customer.ticketOrders())
                     .containsExactly(
                             new Customer.TicketOrder(
-                                    concertId, quantity, amountPaid)
+                                    ticketOrderId, concertId, quantity, amountPaid)
                     );
         }
     }

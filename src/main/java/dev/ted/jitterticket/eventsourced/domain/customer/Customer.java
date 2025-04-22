@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.domain.customer;
 
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
@@ -33,7 +34,9 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     @Override
     protected void apply(CustomerEvent customerEvent) {
         switch (customerEvent) {
-            case CustomerRegistered(CustomerId customerId, String customerName, String email) -> {
+            case CustomerRegistered(CustomerId customerId,
+                                    String customerName,
+                                    String email) -> {
                 setId(customerId);
                 this.name = customerName;
                 this.email = email;
@@ -41,19 +44,21 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
             case TicketsPurchased(
                     _,
+                    TicketOrderId ticketOrderId,
                     ConcertId concertId,
                     int quantity,
                     int paidAmount) -> {
                 ticketOrders.add(
-                        new TicketOrder(concertId, quantity, paidAmount));
+                        new TicketOrder(ticketOrderId, concertId,
+                                        quantity, paidAmount));
             }
         }
     }
 
-    public void purchaseTickets(Concert concert, int quantity) {
+    public void purchaseTickets(Concert concert, TicketOrderId ticketOrderId, int quantity) {
         int paidAmount = quantity * concert.ticketPrice();
         TicketsPurchased ticketsPurchased =
-                new TicketsPurchased(getId(), concert.getId(), quantity, paidAmount);
+                new TicketsPurchased(getId(), ticketOrderId, concert.getId(), quantity, paidAmount);
         enqueue(ticketsPurchased);
     }
 
@@ -78,5 +83,8 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                 .toString();
     }
 
-    public record TicketOrder(ConcertId concertId, int quantity, int amountPaid) {}
+    public record TicketOrder(TicketOrderId ticketOrderId,
+                              ConcertId concertId,
+                              int quantity,
+                              int amountPaid) {}
 }
