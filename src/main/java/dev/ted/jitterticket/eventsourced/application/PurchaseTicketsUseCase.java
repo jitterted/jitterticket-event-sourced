@@ -34,10 +34,14 @@ public class PurchaseTicketsUseCase {
                                concertStore.save(concert);
                                customer.purchaseTickets(concert, quantity);
                                customerStore.save(customer);
-                               return new TicketOrderId(UUID.randomUUID());
+                               return nextTicketOrderId();
                            });
 
         // return ticketOrderId inside of a Result object (success/failure)
         // later: notify customer of ticket purchase with a PDF and a link
+    }
+
+    private static TicketOrderId nextTicketOrderId() {
+        return new TicketOrderId(UUID.randomUUID());
     }
 }

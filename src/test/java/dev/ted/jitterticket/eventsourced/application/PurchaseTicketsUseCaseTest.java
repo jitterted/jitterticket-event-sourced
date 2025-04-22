@@ -9,6 +9,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -41,7 +42,7 @@ class PurchaseTicketsUseCaseTest {
         var customerStore = EventStore.forCustomers();
         Customer customer = CustomerFactory.newlyRegistered();
         customerStore.save(customer);
-
+        UUID expectedTicketOrderUuid = UUID.randomUUID();
         PurchaseTicketsUseCase purchaseTicketsUseCase =
                 new PurchaseTicketsUseCase(concertStore, customerStore);
 
@@ -50,7 +51,10 @@ class PurchaseTicketsUseCaseTest {
 
         assertThat(ticketOrderId)
                 .as("TicketOrderId should have been returned for a successful ticket purchase")
-                .isPresent();
+                .isPresent()
+//                .get()
+//                .isEqualTo(new TicketOrderId(expectedTicketOrderUuid))
+        ;
         Concert concertAfter = concertStore.findById(concertId).orElseThrow();
         assertThat(concertAfter.availableTicketCount())
                 .isEqualTo(100 - 4);
