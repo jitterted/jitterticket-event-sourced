@@ -1,6 +1,8 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
@@ -29,7 +31,8 @@ class PurchaseTicketControllerTest {
                 150,
                 4));
         var customerStore = EventStore.forCustomers();
-        PurchaseTicketController purchaseTicketController = new PurchaseTicketController(concertStore, customerStore);
+        PurchaseTicketController purchaseTicketController =
+                new PurchaseTicketController(concertStore, new PurchaseTicketsUseCase(concertStore, customerStore));
         String concertIdString = concertId.id().toString();
 
         Model model = new ConcurrentModel();
@@ -56,8 +59,13 @@ class PurchaseTicketControllerTest {
     void placeTicketOrderRedirectsToOrderConfirmationPage() {
         var concertStore = EventStore.forConcerts();
         var customerStore = EventStore.forCustomers();
+        TicketOrderId ticketOrderId = TicketOrderId.createRandom();
+        PurchaseTicketsUseCase purchaseTicketsUseCase =
+                PurchaseTicketsUseCase.createForTest(concertStore,
+                                                     customerStore,
+                                                     ticketOrderId);
         PurchaseTicketController purchaseTicketController =
-                new PurchaseTicketController(concertStore, customerStore);
+                new PurchaseTicketController(concertStore, purchaseTicketsUseCase);
         ConcertId concertId = ConcertId.createRandom();
         int initialCapacity = 100;
         concertStore.save(Concert.schedule(concertId, "Pulse Wave", 40, LocalDateTime.of(2025, 11, 8, 22, 30), LocalTime.of(21, 0), initialCapacity, 4));
@@ -71,7 +79,7 @@ class PurchaseTicketControllerTest {
                                          customerId.id().toString(),
                                          numberOfTicketsToPurchase));
 
-        String ticketOrderUuidString = "af05fc05-2de1-46d8-9568-01381029feb7";
+        String ticketOrderUuidString = ticketOrderId.id().toString();
         String customerUuidString = customerId.id().toString();
         assertThat(redirectString)
                 .isEqualTo("redirect:/customers/" + customerUuidString

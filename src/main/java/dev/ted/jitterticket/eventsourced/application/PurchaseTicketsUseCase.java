@@ -32,9 +32,10 @@ public class PurchaseTicketsUseCase {
         this.ticketOrderIdGenerator = () -> expectedTicketOrderUuid;
     }
 
-    static PurchaseTicketsUseCase createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-                                                EventStore<CustomerId, CustomerEvent, Customer> customerStore,
-                                                TicketOrderId expectedTicketOrderUuid) {
+    public static PurchaseTicketsUseCase createForTest(
+            EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+            EventStore<CustomerId, CustomerEvent, Customer> customerStore,
+            TicketOrderId expectedTicketOrderUuid) {
         return new PurchaseTicketsUseCase(concertStore, customerStore, expectedTicketOrderUuid);
     }
 

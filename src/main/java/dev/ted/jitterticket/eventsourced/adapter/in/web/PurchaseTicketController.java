@@ -2,11 +2,10 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
-import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -25,9 +25,9 @@ public class PurchaseTicketController {
 
     @Autowired
     public PurchaseTicketController(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-                                    EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
+                                    PurchaseTicketsUseCase purchaseTicketsUseCase) {
         this.concertStore = concertStore;
-        purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore, customerStore);
+        this.purchaseTicketsUseCase = purchaseTicketsUseCase;
     }
 
     @GetMapping("/concerts/{concertId}")
@@ -42,11 +42,14 @@ public class PurchaseTicketController {
     @PostMapping("/concerts/{concertId}")
     public String purchaseTickets(@PathVariable("concertId") String concertId,
                                   TicketOrderForm ticketOrderForm) {
-        purchaseTicketsUseCase.purchaseTickets(
-                new ConcertId(UUID.fromString(concertId)),
-                new CustomerId(UUID.fromString(ticketOrderForm.customerId())),
-                ticketOrderForm.quantity());
-        String ticketOrderUuid = "af05fc05-2de1-46d8-9568-01381029feb7";
+        Optional<TicketOrderId> ticketOrderId = purchaseTicketsUseCase
+                .purchaseTickets(
+                        new ConcertId(UUID.fromString(concertId)),
+                        new CustomerId(UUID.fromString(ticketOrderForm.customerId())),
+                        ticketOrderForm.quantity());
+        String ticketOrderUuid = ticketOrderId.map(TicketOrderId::id)
+                                              .map(UUID::toString)
+                                              .orElseThrow();
         return "redirect:/customers/" + ticketOrderForm.customerId() +
                "/confirmations/" + ticketOrderUuid;
     }

@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventsourced;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
@@ -16,6 +17,13 @@ import java.time.LocalTime;
 
 @Configuration
 public class TixConfiguration {
+
+    @Bean
+    PurchaseTicketsUseCase purchaseTicketsUseCase(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
+                                                  EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new PurchaseTicketsUseCase(concertStore, customerStore);
+    }
+
 
     @Bean
     public EventStore<CustomerId, CustomerEvent, Customer> customerStore() {
