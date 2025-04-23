@@ -34,8 +34,9 @@ public class PurchaseTicketsController {
     public String purchaseTicketsView(Model model,
                                       @PathVariable("concertId") String concertId) {
         model.addAttribute("concert", concertViewFor(concertId));
+        String customerUuidString = "68f5b2c2-d70d-4992-ad78-c94809ae9a6a";
         model.addAttribute("ticketOrderForm", new TicketOrderForm(
-                UUID.randomUUID().toString(), 2));
+                customerUuidString, 2));
         return "purchase-tickets";
     }
 

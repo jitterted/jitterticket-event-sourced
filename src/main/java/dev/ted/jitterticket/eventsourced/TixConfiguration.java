@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.UUID;
 
 @Configuration
 public class TixConfiguration {
@@ -29,7 +30,8 @@ public class TixConfiguration {
     public EventStore<CustomerId, CustomerEvent, Customer> customerStore() {
         var customerStore = EventStore.forCustomers();
         customerStore.save(Customer.register(
-                CustomerId.createRandom(), "Sample Customer", "sample@example.com"));
+                new CustomerId(UUID.fromString("68f5b2c2-d70d-4992-ad78-c94809ae9a6a")),
+                "Sample Customer", "sample@example.com"));
         return customerStore;
     }
 
