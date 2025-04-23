@@ -22,7 +22,7 @@ public class ConcertsController {
     @GetMapping("/concerts")
     public String ticketableConcerts(Model model) {
         List<ConcertView> concertViews =
-                concertProjector.allConcertTicketViews()
+                concertProjector.allConcertSummaries()
                                 .map(this::convertToConcertView)
                                 .toList();
         model.addAttribute("concerts", concertViews);

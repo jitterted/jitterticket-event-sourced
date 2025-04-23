@@ -56,8 +56,6 @@ class EventViewerControllerTest {
         assertThat(concertList)
                 .hasSize(1)
                 .extracting(ConcertListView::concertId, ConcertListView::artist)
-                .containsExactly(
-                        org.assertj.core.api.Assertions.tuple(concertId.id().toString(), artist)
-                );
+                .containsExactly(tuple(concertId.id().toString(), artist));
     }
 }

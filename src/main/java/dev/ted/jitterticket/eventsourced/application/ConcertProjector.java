@@ -20,7 +20,7 @@ public class ConcertProjector {
         this.concertStore = concertStore;
     }
 
-    public Stream<ConcertSummary> allConcertTicketViews() {
+    public Stream<ConcertSummary> allConcertSummaries() {
         Map<ConcertId, ConcertSummary> views = new HashMap<>();
         concertStore.allEvents()
                     .forEach(concertEvent -> {

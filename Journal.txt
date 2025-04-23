@@ -1,8 +1,11 @@
 Wednesday, April 23, 2025
 =========================
+
 [Junie]
 [ ] "Start again" implies that it will _start_, when really it's "edit the prompt".
 
+[IntelliJ IDEA Bug]
+[ ] Renamed a Thymeleaf template in a subdirectory and when it renamed it in the controller method's return value (view name), it dropped the subdirectory name: "event-viewer/concerts" became "concert-aggregates", which breaks the app.
 
 Tuesday, April 22, 2025
 =======================
