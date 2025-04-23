@@ -77,6 +77,11 @@ Run these tests before submitting a pull request:
 4. **Use meaningful names**: Classes, methods, and variables should have descriptive names
 5. **Avoid duplication**: Extract common code into reusable methods or classes
 
+### Naming Conventions
+
+1. **View suffix**: The "View" suffix should only be used in web adapters (Controllers, etc.) for classes that represent data to be displayed in the UI
+2. **Summary suffix**: The "Summary" suffix should be used in the Domain package for projection classes
+
 ## Event Sourcing Guidelines
 
 1. **Events are immutable**: Once created, events should never be modified
