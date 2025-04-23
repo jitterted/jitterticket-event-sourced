@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
@@ -31,10 +32,7 @@ public class CustomersController {
                                            @PathVariable("ticketOrderId") String ticketOrderId) {
         Customer customer = customerStore.findById(new CustomerId(UUID.fromString(customerId)))
                                          .orElseThrow(() -> new RuntimeException("Customer not found for ID: " + customerId));
-        Customer.TicketOrder ticketOrder = customer.ticketOrders().stream()
-                                                    .filter(order -> order.ticketOrderId().id().toString().equals(ticketOrderId))
-                                                    .findFirst()
-                                                    .orElseThrow(() -> new RuntimeException("Ticket order not found for ID: " + ticketOrderId));
+        Customer.TicketOrder ticketOrder = customer.ticketFor(new TicketOrderId(UUID.fromString(ticketOrderId)));
         Concert concert = concertStore.findById(ticketOrder.concertId())
                                               .orElseThrow(() -> new RuntimeException("Concert not found for ID: " + ticketOrder.concertId()));
 

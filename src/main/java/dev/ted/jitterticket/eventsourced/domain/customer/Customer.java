@@ -31,6 +31,13 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
         enqueue(new CustomerRegistered(customerId, name, email));
     }
 
+    public TicketOrder ticketFor(TicketOrderId ticketOrderId) {
+        return ticketOrders().stream()
+                             .filter(order -> order.ticketOrderId().equals(ticketOrderId))
+                             .findFirst()
+                             .orElseThrow(() -> new RuntimeException("Ticket order not found for ID: " + ticketOrderId.id()));
+    }
+
     @Override
     protected void apply(CustomerEvent customerEvent) {
         switch (customerEvent) {
