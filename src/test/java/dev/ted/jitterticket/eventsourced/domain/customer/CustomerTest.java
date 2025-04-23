@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -94,6 +95,20 @@ class CustomerTest {
                     .isPresent()
                     .get()
                     .isEqualTo(expectedTicketOrder);
+        }
+
+        @Test
+        void ticketOrderForUnknownTicketIdIsEmptyOptional() {
+            CustomerId customerId = CustomerId.createRandom();
+            CustomerRegistered customerRegistered = new CustomerRegistered(
+                    customerId, "customer name", "email@example.com");
+            Customer customer = Customer.reconstitute(List.of(customerRegistered));
+
+            Optional<Customer.TicketOrder> ticketOrder = customer.ticketOrderFor(TicketOrderId.createRandom());
+
+            assertThat(ticketOrder)
+                    .as("Expected no Ticket Order for the unknown Ticket Order ID")
+                    .isEmpty();
         }
     }
 
