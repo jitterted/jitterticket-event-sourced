@@ -124,6 +124,16 @@ public class TixConfiguration {
                 LocalTime.of(19, 30),
                 175,
                 4));
+
+        // h/t sadukie
+        concertStore.save(Concert.schedule(
+                ConcertId.createRandom(),
+                "Jagged Arrays",
+                50,
+                LocalDateTime.of(2025, 10, 3, 20, 0),
+                LocalTime.of(19, 0),
+                150,
+                6));
         return concertStore;
     }
 

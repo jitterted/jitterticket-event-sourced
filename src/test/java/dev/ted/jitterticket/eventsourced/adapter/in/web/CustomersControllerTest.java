@@ -1,27 +1,53 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.TixConfiguration;
-import org.junit.jupiter.api.Tag;
+import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.ui.ConcurrentModel;
 
-@Tag("mvc")
-@Tag("spring")
-@WebMvcTest(CustomersController.class)
-@Import(TixConfiguration.class)
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.*;
+
 class CustomersControllerTest {
 
-    @Autowired
-    MockMvcTester mvc;
-
     @Test
-    void getToCustomerTicketPurchaseConfirmationReturns200Ok() {
-        mvc.get()
-           .uri("/customers/asdf/confirmations/qwerty")
-           .assertThat()
-           .hasStatus2xxSuccessful();
+    void viewIncludesPurchaseConfirmationDetails() {
+        var concertStore = EventStore.forConcerts();
+        String artist = "Character Set";
+        LocalDateTime showDateTime = LocalDateTime.now();
+        Concert concert = ConcertFactory.createConcertWith(ConcertId.createRandom(),
+                                                               artist,
+                                                               42,
+                                                               showDateTime,
+                                                               showDateTime.minusHours(1).toLocalTime());
+        concertStore.save(concert);
+        var customerStore = EventStore.forCustomers();
+        Customer customer = CustomerFactory.newlyRegistered();
+        customerStore.save(customer);
+        int ticketQuantity = 3;
+        TicketOrderId ticketOrderId = TicketOrderId.createRandom();
+        customer.purchaseTickets(concert, ticketOrderId, ticketQuantity);
+        customerStore.save(customer);
+        CustomersController customersController = new CustomersController(customerStore, concertStore);
+
+        ConcurrentModel model = new ConcurrentModel();
+        String viewName = customersController.viewPurchaseConfirmation(model,
+                                                                       customer.getId().id().toString(),
+                                                                       ticketOrderId.id().toString());
+
+        assertThat(viewName)
+                .isEqualTo("purchase-confirmation");
+        assertThat(model)
+                .containsAllEntriesOf(
+                        Map.of("numberOfTickets", ticketQuantity,
+                               "artist", artist,
+                               "showDateTime", showDateTime));
     }
 }
