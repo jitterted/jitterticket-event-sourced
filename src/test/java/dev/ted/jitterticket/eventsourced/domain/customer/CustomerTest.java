@@ -92,6 +92,7 @@ class CustomerTest {
             assertThat(customer.ticketOrders())
                     .containsExactly(expectedTicketOrder);
             assertThat(customer.ticketOrderFor(ticketOrderId))
+                    .as("Expected ticketOrderFor() to find the ticket order by its ID")
                     .isPresent()
                     .get()
                     .isEqualTo(expectedTicketOrder);

@@ -5,8 +5,9 @@ import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 
@@ -14,7 +15,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
     private String name;
     private String email;
-    private final List<TicketOrder> ticketOrders = new ArrayList<>();
+    private final Map<TicketOrderId, TicketOrder> ticketOrdersByTicketOrderId = new HashMap<>();
 
     public static Customer register(CustomerId customerId, String name, String email) {
         return new Customer(customerId, name, email);
@@ -33,10 +34,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     }
 
     public Optional<TicketOrder> ticketOrderFor(TicketOrderId ticketOrderId) {
-        return ticketOrders()
-                .stream()
-                .filter(order -> order.ticketOrderId().equals(ticketOrderId))
-                .findFirst();
+        return Optional.ofNullable(ticketOrdersByTicketOrderId.get(ticketOrderId));
     }
 
     @Override
@@ -59,9 +57,9 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                     int quantity,
                     int paidAmount
             ) -> {
-                ticketOrders.add(
-                        new TicketOrder(ticketOrderId, concertId,
-                                        quantity, paidAmount));
+                TicketOrder ticketOrder = new TicketOrder(
+                        ticketOrderId, concertId, quantity, paidAmount);
+                ticketOrdersByTicketOrderId.put(ticketOrderId, ticketOrder);
             }
         }
     }
@@ -74,7 +72,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     }
 
     public List<TicketOrder> ticketOrders() {
-        return ticketOrders;
+        return ticketOrdersByTicketOrderId.values().stream().toList();
     }
 
     public String name() {
