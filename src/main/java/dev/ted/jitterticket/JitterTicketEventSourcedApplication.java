@@ -1,4 +1,4 @@
-package dev.ted.jitterticket.eventsourced;
+package dev.ted.jitterticket;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

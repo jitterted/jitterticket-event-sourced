@@ -1,4 +1,4 @@
-package dev.ted.jitterticket.eventsourced.adapter.in.web;
+package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
 import dev.ted.jitterticket.TixConfiguration;
 import org.junit.jupiter.api.Tag;
@@ -10,20 +10,18 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 @Tag("mvc")
 @Tag("spring")
-@WebMvcTest(ConcertsController.class)
+@WebMvcTest(EventViewerController.class)
 @Import(TixConfiguration.class)
-class ConcertsControllerMvcTest {
+class EventViewerControllerMvcTest {
 
     @Autowired
     MockMvcTester mvc;
 
     @Test
-    void getToConcertsViewEndpointReturns200() {
-
+    void getConcertListEndpointReturns200Ok() {
         mvc.get()
-           .uri("/concerts")
+           .uri("/event-viewer")
            .assertThat()
            .hasStatus2xxSuccessful();
     }
-
 }

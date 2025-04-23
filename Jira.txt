@@ -6,6 +6,13 @@
 
 # To Do
 
+[ ] Time-travel event viewer
+    [ ] Show all Concerts, select a specific one to see its event stream history
+    [ ] Show all events for a specific Aggregate type with a specific Agg ID
+        - In reverse chronological (event) order
+    [ ] Show state of the Aggregate as of a specific event - defaults to most recent
+        [ ] Clicking on an event moves the "current" pointer to that event, updating the displayed state of the Aggregate
+
 [X] Check the EventDtoTest to ensure it's finding all of the concrete (record) events for the "parameterized" test
 
 [X] Rename buy/bought to purchase/purchased
@@ -19,7 +26,7 @@
 
 [X] Add TicketOrderId to the TicketPurchased event (was concert.purchaseTickets() needs to return the TicketOrderId)
 
-[ ] Complete the customer purchase confirmation screen
+[X] Complete the customer purchase confirmation screen
     [X] Redirect (after POST to purchase tickets) to new endpoint:
     [X] New endpoint for /customers/{customerId}/confirmations/{ticketOrderId}
         [X] Load Customer, Load Concert => TicketOrderView

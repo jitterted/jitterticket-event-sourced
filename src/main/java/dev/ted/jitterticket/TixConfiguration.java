@@ -1,4 +1,4 @@
-package dev.ted.jitterticket.eventsourced;
+package dev.ted.jitterticket;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;

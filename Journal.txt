@@ -1,6 +1,7 @@
 Wednesday, April 23, 2025
 =========================
-
+[Junie]
+[ ] "Start again" implies that it will _start_, when really it's "edit the prompt".
 
 
 Tuesday, April 22, 2025

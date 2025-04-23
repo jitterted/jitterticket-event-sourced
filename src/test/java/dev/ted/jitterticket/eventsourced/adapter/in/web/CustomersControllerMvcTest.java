@@ -1,6 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.TixConfiguration;
+import dev.ted.jitterticket.TixConfiguration;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;

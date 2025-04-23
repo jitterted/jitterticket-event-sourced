@@ -45,6 +45,10 @@ Tests in this project are categorized using JUnit 5 tags:
 - **Spring Tests**: Tests that require the Spring context (`@Tag("spring")`)
 - **MVC Tests**: Tests for web controllers (`@Tag("mvc")`)
 
+### Mocking Guidelines
+
+- **Avoid Mockito**: Do not use Mockito or other mocking frameworks unless explicitly asked to do so. Instead, use real implementations, in-memory repositories, or simple test doubles created manually.
+
 ### Running Tests
 
 #### I/O-Free Tests
