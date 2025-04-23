@@ -17,7 +17,7 @@ class ConcertProjectorTest {
     void noConcertsCreatedProjectorReturnsNoConcerts() {
         ConcertProjector concertProjector = new ConcertProjector(EventStore.forConcerts());
 
-        Stream<ConcertTicketView> concertTicketViews = concertProjector.allConcertTicketViews();
+        Stream<ConcertSummary> concertTicketViews = concertProjector.allConcertTicketViews();
 
         assertThat(concertTicketViews)
                 .isEmpty();
@@ -40,20 +40,20 @@ class ConcertProjectorTest {
                                                            LocalTime.of(19, 30)));
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
 
-        Stream<ConcertTicketView> allConcertTicketViews = concertProjector.allConcertTicketViews();
+        Stream<ConcertSummary> allConcertTicketViews = concertProjector.allConcertTicketViews();
 
         assertThat(allConcertTicketViews)
                 .containsExactlyInAnyOrder(
-                        new ConcertTicketView(firstConcertId,
-                                              "First Concert",
-                                              99,
-                                              LocalDateTime.of(2025, 4, 20, 20, 0),
-                                              LocalTime.of(19, 0))
-                        , new ConcertTicketView(secondConcertId,
-                                                "Second Concert",
-                                                111,
-                                                LocalDateTime.of(2025, 4, 21, 21, 0),
-                                                LocalTime.of(19, 30))
+                        new ConcertSummary(firstConcertId,
+                                           "First Concert",
+                                           99,
+                                           LocalDateTime.of(2025, 4, 20, 20, 0),
+                                           LocalTime.of(19, 0))
+                        , new ConcertSummary(secondConcertId,
+                                             "Second Concert",
+                                             111,
+                                             LocalDateTime.of(2025, 4, 21, 21, 0),
+                                             LocalTime.of(19, 30))
                 );
     }
 
@@ -72,11 +72,11 @@ class ConcertProjectorTest {
                                         LocalTime.of(19, 0));
         concertStore.save(rescheduledConcert);
 
-        Stream<ConcertTicketView> allConcertTicketViews =
+        Stream<ConcertSummary> allConcertTicketViews =
                 concertProjector.allConcertTicketViews();
 
         assertThat(allConcertTicketViews)
-                .containsExactly(new ConcertTicketView(
+                .containsExactly(new ConcertSummary(
                         concertId,
                         "Desi Bells",
                         35,

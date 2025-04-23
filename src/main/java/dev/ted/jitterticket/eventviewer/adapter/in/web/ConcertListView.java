@@ -1,21 +1,13 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.ConcertTicketView;
+import dev.ted.jitterticket.eventsourced.application.ConcertSummary;
 
-/**
- * View object for displaying concert list with only ConcertId and Artist.
- */
-public record ConcertListView(
-        String concertId,
-        String artist) {
+public record ConcertListView(String concertId, String artist) {
     
-    /**
-     * Creates a ConcertListView from a ConcertTicketView.
-     */
-    public static ConcertListView from(ConcertTicketView concertTicketView) {
+    public static ConcertListView from(ConcertSummary concertSummary) {
         return new ConcertListView(
-                concertTicketView.concertId().id().toString(),
-                concertTicketView.artist()
+                concertSummary.concertId().id().toString(),
+                concertSummary.artist()
         );
     }
 }

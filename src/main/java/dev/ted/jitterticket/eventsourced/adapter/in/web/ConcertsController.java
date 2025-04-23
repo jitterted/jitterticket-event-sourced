@@ -1,7 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertProjector;
-import dev.ted.jitterticket.eventsourced.application.ConcertTicketView;
+import dev.ted.jitterticket.eventsourced.application.ConcertSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,11 +29,11 @@ public class ConcertsController {
         return "concerts";
     }
 
-    private ConcertView convertToConcertView(ConcertTicketView concertTicketView) {
-        return ConcertView.create(concertTicketView.concertId(),
-                                  concertTicketView.artist(),
-                                  concertTicketView.showDateTime(),
-                                  concertTicketView.ticketPrice());
+    private ConcertView convertToConcertView(ConcertSummary concertSummary) {
+        return ConcertView.create(concertSummary.concertId(),
+                                  concertSummary.artist(),
+                                  concertSummary.showDateTime(),
+                                  concertSummary.ticketPrice());
     }
 
 }

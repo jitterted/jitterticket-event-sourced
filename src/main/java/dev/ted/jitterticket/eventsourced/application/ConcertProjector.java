@@ -20,8 +20,8 @@ public class ConcertProjector {
         this.concertStore = concertStore;
     }
 
-    public Stream<ConcertTicketView> allConcertTicketViews() {
-        Map<ConcertId, ConcertTicketView> views = new HashMap<>();
+    public Stream<ConcertSummary> allConcertTicketViews() {
+        Map<ConcertId, ConcertSummary> views = new HashMap<>();
         concertStore.allEvents()
                     .forEach(concertEvent -> {
                                  switch (concertEvent) {
@@ -33,11 +33,11 @@ public class ConcertProjector {
                                              LocalTime doorsTime,
                                              _, _) ->
                                              views.put(concertId,
-                                                    new ConcertTicketView(concertId, artist, ticketPrice, showDateTime, doorsTime));
+                                                    new ConcertSummary(concertId, artist, ticketPrice, showDateTime, doorsTime));
 
                                      case ConcertRescheduled(ConcertId concertId, LocalDateTime newShowDateTime, LocalTime newDoorsTime) -> {
-                                         ConcertTicketView oldView = views.get(concertId);
-                                         ConcertTicketView rescheduledView = rescheduleTo(newShowDateTime, newDoorsTime, oldView);
+                                         ConcertSummary oldView = views.get(concertId);
+                                         ConcertSummary rescheduledView = rescheduleTo(newShowDateTime, newDoorsTime, oldView);
                                          views.put(concertId, rescheduledView);
                                      }
 
@@ -49,8 +49,8 @@ public class ConcertProjector {
         return views.values().stream();
     }
 
-    private ConcertTicketView rescheduleTo(LocalDateTime newShowDateTime, LocalTime newDoorsTime, ConcertTicketView oldView) {
-        return new ConcertTicketView(
+    private ConcertSummary rescheduleTo(LocalDateTime newShowDateTime, LocalTime newDoorsTime, ConcertSummary oldView) {
+        return new ConcertSummary(
                 oldView.concertId(),
                 oldView.artist(),
                 oldView.ticketPrice(),
