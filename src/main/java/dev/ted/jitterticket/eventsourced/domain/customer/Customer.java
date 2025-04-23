@@ -7,6 +7,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
@@ -31,19 +32,21 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
         enqueue(new CustomerRegistered(customerId, name, email));
     }
 
-    public TicketOrder ticketFor(TicketOrderId ticketOrderId) {
-        return ticketOrders().stream()
-                             .filter(order -> order.ticketOrderId().equals(ticketOrderId))
-                             .findFirst()
-                             .orElseThrow(() -> new RuntimeException("Ticket order not found for ID: " + ticketOrderId.id()));
+    public Optional<TicketOrder> ticketOrderFor(TicketOrderId ticketOrderId) {
+        return ticketOrders()
+                .stream()
+                .filter(order -> order.ticketOrderId().equals(ticketOrderId))
+                .findFirst();
     }
 
     @Override
     protected void apply(CustomerEvent customerEvent) {
         switch (customerEvent) {
-            case CustomerRegistered(CustomerId customerId,
-                                    String customerName,
-                                    String email) -> {
+            case CustomerRegistered(
+                    CustomerId customerId,
+                    String customerName,
+                    String email
+            ) -> {
                 setId(customerId);
                 this.name = customerName;
                 this.email = email;
@@ -54,7 +57,8 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                     TicketOrderId ticketOrderId,
                     ConcertId concertId,
                     int quantity,
-                    int paidAmount) -> {
+                    int paidAmount
+            ) -> {
                 ticketOrders.add(
                         new TicketOrder(ticketOrderId, concertId,
                                         quantity, paidAmount));

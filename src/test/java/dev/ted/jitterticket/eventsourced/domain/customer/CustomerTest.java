@@ -86,11 +86,14 @@ class CustomerTest {
             Customer customer = Customer.reconstitute(List.of(customerRegistered,
                                                               ticketsPurchased));
 
+            Customer.TicketOrder expectedTicketOrder = new Customer.TicketOrder(
+                    ticketOrderId, concertId, quantity, amountPaid);
             assertThat(customer.ticketOrders())
-                    .containsExactly(
-                            new Customer.TicketOrder(
-                                    ticketOrderId, concertId, quantity, amountPaid)
-                    );
+                    .containsExactly(expectedTicketOrder);
+            assertThat(customer.ticketOrderFor(ticketOrderId))
+                    .isPresent()
+                    .get()
+                    .isEqualTo(expectedTicketOrder);
         }
     }
 

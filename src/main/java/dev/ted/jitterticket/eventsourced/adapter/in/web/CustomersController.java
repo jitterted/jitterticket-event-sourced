@@ -28,11 +28,13 @@ public class CustomersController {
 
     @GetMapping("/customers/{customerId}/confirmations/{ticketOrderId}")
     public String viewPurchaseConfirmation(Model model,
-                                           @PathVariable("customerId") String customerId,
-                                           @PathVariable("ticketOrderId") String ticketOrderId) {
-        Customer customer = customerStore.findById(new CustomerId(UUID.fromString(customerId)))
-                                         .orElseThrow(() -> new RuntimeException("Customer not found for ID: " + customerId));
-        Customer.TicketOrder ticketOrder = customer.ticketFor(new TicketOrderId(UUID.fromString(ticketOrderId)));
+                                           @PathVariable("customerId") String customerUuidString,
+                                           @PathVariable("ticketOrderId") String ticketOrderUuidString) {
+        Customer customer = customerStore.findById(new CustomerId(UUID.fromString(customerUuidString)))
+                                         .orElseThrow(() -> new RuntimeException("Customer not found for ID: " + customerUuidString));
+        TicketOrderId ticketOrderId = new TicketOrderId(UUID.fromString(ticketOrderUuidString));
+        Customer.TicketOrder ticketOrder = customer.ticketOrderFor(ticketOrderId)
+                                                   .orElseThrow(() -> new RuntimeException("Ticket order not found for ID: " + ticketOrderId.id()));
         Concert concert = concertStore.findById(ticketOrder.concertId())
                                               .orElseThrow(() -> new RuntimeException("Concert not found for ID: " + ticketOrder.concertId()));
 
