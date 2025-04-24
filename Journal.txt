@@ -1,3 +1,9 @@
+Thursday, April 24, 2025
+========================
+
+* When using `Model` in a test, we can't (as easily) assert on its contents, but when declaring the variable as a `ConcurrentModel`, which extends ConcurrentHashMap, AssertJ treats it as a Map, which is more convenient.
+
+
 Wednesday, April 23, 2025
 =========================
 

@@ -2,9 +2,11 @@ package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
@@ -66,31 +68,41 @@ class EventViewerControllerTest {
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
 
         ConcertId concertId = ConcertId.createRandom();
+        String concertIdAsString = concertId.id().toString();
         String artist = "Test Artist";
         LocalDateTime showDateTime = LocalDateTime.of(2025, 7, 26, 20, 0);
         LocalTime doorsTime = LocalTime.of(19, 0);
 
-        concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
-                                                             artist,
-                                                             100,
-                                                             showDateTime,
-                                                             doorsTime));
+        Concert concert = ConcertFactory.scheduleConcertWith(concertId,
+                                                               artist,
+                                                               100,
+                                                               showDateTime,
+                                                               doorsTime);
+        concert.rescheduleTo(showDateTime.plusMonths(2), doorsTime);
+        concertStore.save(concert);
 
         EventViewerController controller = new EventViewerController(concertProjector, concertStore);
-        Model model = new ConcurrentModel();
+        ConcurrentModel model = new ConcurrentModel();
 
-        String viewName = controller.showConcertEvents(concertId.id().toString(), model);
+        String viewName = controller.showConcertEvents(concertIdAsString, model);
 
         assertThat(viewName)
                 .isEqualTo("event-viewer/concert-events");
 
-        assertThat(model.getAttribute("concertId"))
-                .isEqualTo(concertId.id().toString());
+        assertThat(model)
+                .containsEntry("concertId", concertIdAsString);
 
         List<ConcertEvent> events = (List<ConcertEvent>) model.getAttribute("events");
         assertThat(events)
-                .hasSize(1);
+                .hasSize(2);
 
+        assertThat(model)
+                .extracting("projectedState", InstanceOfAssertFactories.list(String.class))
+                .containsExactly("Artist: Test Artist",
+                                 "Show Time: " + showDateTime.plusMonths(2),
+                                 "Doors Time: " + concert.doorsTime(),
+                                 "Tickets Remaining: " + concert.availableTicketCount()
+                );
     }
 
 }

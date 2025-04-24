@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/event-viewer")
@@ -40,12 +41,19 @@ public class EventViewerController {
     @GetMapping("/{concertId}")
     public String showConcertEvents(@PathVariable("concertId") String concertIdString,
                                     Model model) {
-        ConcertId concertId = new ConcertId(java.util.UUID.fromString(concertIdString));
+        ConcertId concertId = new ConcertId(UUID.fromString(concertIdString));
         List<ConcertEvent> concertEvents = concertStore
-                .eventsForAggregate(concertId)
-                .reversed();
+                .eventsForAggregate(concertId);
         model.addAttribute("concertId", concertIdString);
-        model.addAttribute("events", concertEvents);
+        model.addAttribute("events", concertEvents.reversed());
+        Concert concert = Concert.reconstitute(concertEvents);
+        model.addAttribute("projectedState", List.of(
+                                   "Artist: " + concert.artist(),
+                                   "Show Time: " + concert.showDateTime(),
+                                   "Doors Time: " + concert.doorsTime(),
+                                   "Tickets Remaining: " + concert.availableTicketCount()
+                           )
+        );
         return "event-viewer/concert-events";
     }
 }

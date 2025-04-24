@@ -22,6 +22,11 @@
             padding: 8px 0;
             border-bottom: 1px solid #eee;
         }
+
+        .event-selected {
+            border-top: 1px dashed darkgreen;
+            background-color: palegreen;
+        }
     </style>
 </head>
 <body>
@@ -32,7 +37,9 @@
     <div class="header">Event Details</div>
 
     <div class="event-row" th:each="event : ${events}">
-        <div class="event-details" th:text="${event}">ConcertScheduled[concertId=ConcertId[id=af05fc05-2de1-46d8-9568-01381029feb7], artist=Jittery Pigs, ticketPrice=2500, showDateTime=2023-12-15T20:00, doorsTime=19:00, capacity=250, maxTicketsPerPurchase=4]</div>
+        <div class="event-details"
+             th:classappend="${selectedEventId == event.id} ? 'event-selected' : ''"
+             th:text="${event}">ConcertScheduled[concertId=ConcertId[id=af05fc05-2de1-46d8-9568-01381029feb7], artist=Jittery Pigs, ticketPrice=2500, showDateTime=2023-12-15T20:00, doorsTime=19:00, capacity=250, maxTicketsPerPurchase=4]</div>
     </div>
 </div>
 
