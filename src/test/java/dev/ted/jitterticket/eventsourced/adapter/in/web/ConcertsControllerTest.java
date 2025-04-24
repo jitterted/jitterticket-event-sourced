@@ -22,11 +22,11 @@ class ConcertsControllerTest {
         var concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
         ConcertId concertId = ConcertId.createRandom();
-        concertStore.save(ConcertFactory.createConcertWith(concertId,
-                                                           "The Sonic Waves",
-                                                           45,
-                                                           LocalDateTime.of(2025, 7, 26, 20, 0),
-                                                           LocalTime.of(19, 0)));
+        concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
+                                                             "The Sonic Waves",
+                                                             45,
+                                                             LocalDateTime.of(2025, 7, 26, 20, 0),
+                                                             LocalTime.of(19, 0)));
 
         ConcertsController concertsController = new ConcertsController(concertProjector);
 

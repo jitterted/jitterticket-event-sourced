@@ -22,7 +22,7 @@ public class ConcertFactory {
         );
     }
 
-    public static Concert createConcertWith(ConcertId concertId, String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime) {
+    public static Concert scheduleConcertWith(ConcertId concertId, String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime) {
         return Concert.schedule(concertId,
                                 artist,
                                 ticketPrice,

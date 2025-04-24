@@ -7,11 +7,11 @@
 # To Do
 
 [ ] Time-travel event viewer
-    [ ] Show all Concerts, select a specific one to see its event stream history
-    [ ] Show all events for a specific Aggregate type with a specific Agg ID
-        - In reverse chronological (event) order
+    [X] Show all Concerts, select a specific one to see its event stream history
+        [ ] In reverse chronological (event) order
     [ ] Show state of the Aggregate as of a specific event - defaults to most recent
         [ ] Clicking on an event moves the "current" pointer to that event, updating the displayed state of the Aggregate
+    [ ] Generalize to events for any Aggregate type for a specific Agg ID
 
 [ ] EventSourcedAggregate.uncommittedEvents() returns the internal mutable list! At least return a copy (preferably an unmodifiable List, or perhaps just a Stream)
 

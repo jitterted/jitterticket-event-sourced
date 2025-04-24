@@ -22,11 +22,11 @@ class CustomersControllerTest {
         var concertStore = EventStore.forConcerts();
         String artist = "Character Set";
         LocalDateTime showDateTime = LocalDateTime.now();
-        Concert concert = ConcertFactory.createConcertWith(ConcertId.createRandom(),
-                                                               artist,
-                                                               42,
-                                                               showDateTime,
-                                                               showDateTime.minusHours(1).toLocalTime());
+        Concert concert = ConcertFactory.scheduleConcertWith(ConcertId.createRandom(),
+                                                             artist,
+                                                             42,
+                                                             showDateTime,
+                                                             showDateTime.minusHours(1).toLocalTime());
         concertStore.save(concert);
         var customerStore = EventStore.forCustomers();
         Customer customer = CustomerFactory.newlyRegistered();

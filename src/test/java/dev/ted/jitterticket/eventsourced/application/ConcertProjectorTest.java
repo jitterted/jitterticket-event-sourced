@@ -27,17 +27,17 @@ class ConcertProjectorTest {
     void projectorReturnsConcertsSavedInConcertStore() {
         var concertStore = EventStore.forConcerts();
         ConcertId firstConcertId = ConcertId.createRandom();
-        concertStore.save(ConcertFactory.createConcertWith(firstConcertId,
-                                                           "First Concert",
-                                                           99,
-                                                           LocalDateTime.of(2025, 4, 20, 20, 0),
-                                                           LocalTime.of(19, 0)));
+        concertStore.save(ConcertFactory.scheduleConcertWith(firstConcertId,
+                                                             "First Concert",
+                                                             99,
+                                                             LocalDateTime.of(2025, 4, 20, 20, 0),
+                                                             LocalTime.of(19, 0)));
         ConcertId secondConcertId = ConcertId.createRandom();
-        concertStore.save(ConcertFactory.createConcertWith(secondConcertId,
-                                                           "Second Concert",
-                                                           111,
-                                                           LocalDateTime.of(2025, 4, 21, 21, 0),
-                                                           LocalTime.of(19, 30)));
+        concertStore.save(ConcertFactory.scheduleConcertWith(secondConcertId,
+                                                             "Second Concert",
+                                                             111,
+                                                             LocalDateTime.of(2025, 4, 21, 21, 0),
+                                                             LocalTime.of(19, 30)));
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
 
         Stream<ConcertSummary> allConcertTicketViews = concertProjector.allConcertSummaries();
@@ -62,11 +62,11 @@ class ConcertProjectorTest {
         var concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
         ConcertId concertId = ConcertId.createRandom();
-        concertStore.save(ConcertFactory.createConcertWith(concertId,
-                                                           "Desi Bells",
-                                                           35,
-                                                           LocalDateTime.of(2025, 4, 22, 19, 0),
-                                                           LocalTime.of(18, 0)));
+        concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
+                                                             "Desi Bells",
+                                                             35,
+                                                             LocalDateTime.of(2025, 4, 22, 19, 0),
+                                                             LocalTime.of(18, 0)));
         Concert rescheduledConcert = concertStore.findById(concertId).orElseThrow();
         rescheduledConcert.rescheduleTo(LocalDateTime.of(2025, 7, 11, 20, 0),
                                         LocalTime.of(19, 0));

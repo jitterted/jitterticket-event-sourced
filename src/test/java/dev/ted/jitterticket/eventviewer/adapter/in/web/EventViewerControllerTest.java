@@ -42,11 +42,11 @@ class EventViewerControllerTest {
         LocalDateTime showDateTime = LocalDateTime.of(2025, 7, 26, 20, 0);
         LocalTime doorsTime = LocalTime.of(19, 0);
 
-        concertStore.save(ConcertFactory.createConcertWith(concertId, 
-                artist, 
-                100, 
-                showDateTime, 
-                doorsTime));
+        concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
+                                                             artist,
+                                                             100,
+                                                             showDateTime,
+                                                             doorsTime));
 
         EventViewerController controller = new EventViewerController(concertProjector, concertStore);
         Model model = new ConcurrentModel();
@@ -61,7 +61,7 @@ class EventViewerControllerTest {
     }
 
     @Test
-    void showConcertEventsReturnsCorrectViewName() {
+    void showConcertEventsReturnsCorrectViewNameWithAllEvents() {
         var concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
 
@@ -70,11 +70,11 @@ class EventViewerControllerTest {
         LocalDateTime showDateTime = LocalDateTime.of(2025, 7, 26, 20, 0);
         LocalTime doorsTime = LocalTime.of(19, 0);
 
-        concertStore.save(ConcertFactory.createConcertWith(concertId, 
-                artist, 
-                100, 
-                showDateTime, 
-                doorsTime));
+        concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
+                                                             artist,
+                                                             100,
+                                                             showDateTime,
+                                                             doorsTime));
 
         EventViewerController controller = new EventViewerController(concertProjector, concertStore);
         Model model = new ConcurrentModel();
@@ -83,34 +83,14 @@ class EventViewerControllerTest {
 
         assertThat(viewName)
                 .isEqualTo("event-viewer/concert-events");
-    }
-
-    @Test
-    void showConcertEventsAddsCorrectAttributesToModel() {
-        var concertStore = EventStore.forConcerts();
-        ConcertProjector concertProjector = new ConcertProjector(concertStore);
-
-        ConcertId concertId = ConcertId.createRandom();
-        String artist = "Test Artist";
-        LocalDateTime showDateTime = LocalDateTime.of(2025, 7, 26, 20, 0);
-        LocalTime doorsTime = LocalTime.of(19, 0);
-
-        concertStore.save(ConcertFactory.createConcertWith(concertId, 
-                artist, 
-                100, 
-                showDateTime, 
-                doorsTime));
-
-        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
-        Model model = new ConcurrentModel();
-
-        controller.showConcertEvents(concertId.id().toString(), model);
 
         assertThat(model.getAttribute("concertId"))
                 .isEqualTo(concertId.id().toString());
 
         List<ConcertEvent> events = (List<ConcertEvent>) model.getAttribute("events");
         assertThat(events)
-                .isNotEmpty();
+                .hasSize(1);
+
     }
+
 }
