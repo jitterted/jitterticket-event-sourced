@@ -11,8 +11,8 @@
         [X] In reverse chronological (event) order
     [X] Show state of the Aggregate
     [ ] Show state as of a specific ("selected"?) event - defaults to most recent
-        [ ] Add selected event ID to the show events URL as a Query Param
-        [ ] Clicking on an event moves the "current" pointer to that event, updating the displayed state of the Aggregate
+        [X] Add selected event ID to the show events URL as a Query Param
+        [X] Clicking on an event moves the "current" pointer to that event
         [ ] Create a sublist of the events up to (and including) the selected event, then reconstitute the aggregate from the sublist
     [ ] Generalize to events for any Aggregate type for a specific Agg ID
 
