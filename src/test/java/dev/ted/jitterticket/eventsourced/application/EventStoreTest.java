@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -69,7 +71,7 @@ class EventStoreTest {
 
     @Test
     void eventStoreCanStoreCustomers() {
-        EventStore<CustomerId, CustomerEvent, Customer> customerStore = EventStore.forCustomers();
+        var customerStore = EventStore.forCustomers();
         Customer savedCustomer = Customer.register(CustomerId.createRandom(), "name", "email@example.com");
         customerStore.save(savedCustomer);
 
@@ -95,5 +97,43 @@ class EventStoreTest {
         assertThat(concertEventStream)
                 .hasExactlyElementsOfTypes(ConcertScheduled.class,
                                            ConcertRescheduled.class);
+    }
+
+    @Test
+    void exactlyAllEventsForSpecifiedConcertAggregateAreReturned() {
+        var concertStore = EventStore.forConcerts();
+        ConcertId concertId = ConcertId.createRandom();
+        Concert concert = Concert.schedule(concertId, "artist", 30, LocalDateTime.now(), LocalTime.now().minusHours(1), 100, 8);
+        concert.rescheduleTo(LocalDateTime.now(), LocalTime.now().minusHours(1));
+        concert.rescheduleTo(LocalDateTime.now().plusMonths(2), LocalTime.now().minusHours(1));
+        concert.sellTicketsTo(CustomerId.createRandom(), 4);
+        concert.sellTicketsTo(CustomerId.createRandom(), 2);
+        concert.sellTicketsTo(CustomerId.createRandom(), 4);
+        concert.sellTicketsTo(CustomerId.createRandom(), 1);
+        List<ConcertEvent> allEventsForConcert = concert.uncommittedEvents();
+        concertStore.save(concert);
+
+        List<ConcertEvent> eventsForAggregate =
+                concertStore.eventsForAggregate(concertId);
+
+        assertThat(eventsForAggregate)
+                .containsExactlyElementsOf(allEventsForConcert);
+    }
+
+    @Test
+    void exactlyAllEventsForSpecifiedCustomerAggregateAreReturned() {
+        var customerStore = EventStore.forCustomers();
+        CustomerId customerId = CustomerId.createRandom();
+        Customer customer = Customer.register(customerId, "customer name", "customer@example.com");
+        Concert concert = ConcertFactory.createConcert();
+        customer.purchaseTickets(concert, TicketOrderId.createRandom(), 4);
+        customer.purchaseTickets(concert, TicketOrderId.createRandom(), 2);
+        List<CustomerEvent> allEventsForCustomer = customer.uncommittedEvents();
+        customerStore.save(customer);
+
+        List<CustomerEvent> eventsForAggregate = customerStore.eventsForAggregate(customerId);
+
+        assertThat(eventsForAggregate)
+                .containsExactlyElementsOf(allEventsForCustomer);
     }
 }

@@ -86,4 +86,11 @@ public class EventStore<
                               .flatMap(Collection::stream)
                               .map(EventDto::toDomain);
     }
+
+    public List<EVENT> eventsForAggregate(ID id) {
+        return idToEventDtoMap.get(id)
+                              .stream()
+                              .map(EventDto::toDomain)
+                              .toList();
+    }
 }
