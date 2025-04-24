@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,12 +41,14 @@ public class EventViewerController {
 
     @GetMapping("/{concertId}")
     public String showConcertEvents(@PathVariable("concertId") String concertIdString,
+                                    @RequestParam(value = "selectedIndex", required = false, defaultValue = "0") int selectedIndex,
                                     Model model) {
         ConcertId concertId = new ConcertId(UUID.fromString(concertIdString));
         List<ConcertEvent> concertEvents = concertStore
                 .eventsForAggregate(concertId);
         model.addAttribute("concertId", concertIdString);
         model.addAttribute("events", concertEvents.reversed());
+        model.addAttribute("selectedIndex", selectedIndex);
         Concert concert = Concert.reconstitute(concertEvents);
         model.addAttribute("projectedState", List.of(
                                    "Artist: " + concert.artist(),

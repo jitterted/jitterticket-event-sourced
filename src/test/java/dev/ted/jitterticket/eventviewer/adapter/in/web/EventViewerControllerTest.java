@@ -63,34 +63,17 @@ class EventViewerControllerTest {
     }
 
     @Test
-    void showConcertEventsReturnsCorrectViewNameWithAllEvents() {
-        var concertStore = EventStore.forConcerts();
-        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+    void showConcertEventsReturnsCorrectViewNameAndModelContents() {
+        Fixture fixture = createAndSaveConcertWithMultipleEvents();
 
-        ConcertId concertId = ConcertId.createRandom();
-        String concertIdAsString = concertId.id().toString();
-        String artist = "Test Artist";
-        LocalDateTime showDateTime = LocalDateTime.of(2025, 7, 26, 20, 0);
-        LocalTime doorsTime = LocalTime.of(19, 0);
-
-        Concert concert = ConcertFactory.scheduleConcertWith(concertId,
-                                                               artist,
-                                                               100,
-                                                               showDateTime,
-                                                               doorsTime);
-        concert.rescheduleTo(showDateTime.plusMonths(2), doorsTime);
-        concertStore.save(concert);
-
-        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
         ConcurrentModel model = new ConcurrentModel();
-
-        String viewName = controller.showConcertEvents(concertIdAsString, model);
+        String viewName = fixture.controller().showConcertEvents(fixture.concertIdAsString, 0, model);
 
         assertThat(viewName)
                 .isEqualTo("event-viewer/concert-events");
 
         assertThat(model)
-                .containsEntry("concertId", concertIdAsString);
+                .containsEntry("concertId", fixture.concertIdAsString);
 
         List<ConcertEvent> events = (List<ConcertEvent>) model.getAttribute("events");
         assertThat(events)
@@ -98,11 +81,60 @@ class EventViewerControllerTest {
 
         assertThat(model)
                 .extracting("projectedState", InstanceOfAssertFactories.list(String.class))
-                .containsExactly("Artist: Test Artist",
-                                 "Show Time: " + showDateTime.plusMonths(2),
-                                 "Doors Time: " + concert.doorsTime(),
-                                 "Tickets Remaining: " + concert.availableTicketCount()
+                .containsExactly("Artist: " + fixture.concert().artist(),
+                                 "Show Time: " + fixture.concert().showDateTime(),
+                                 "Doors Time: " + fixture.concert().doorsTime(),
+                                 "Tickets Remaining: " + fixture.concert().availableTicketCount()
                 );
+    }
+
+    @Test
+    void defaultSelectedEventForShowConcertIsMostRecentEvent() {
+        Fixture fixture = createAndSaveConcertWithMultipleEvents();
+
+        ConcurrentModel model = new ConcurrentModel();
+        fixture.controller().showConcertEvents(fixture.concertIdAsString, 0, model);
+
+        assertThat(model)
+                .containsEntry("selectedIndex", 0);
+    }
+
+    @Test
+    void selectedEventForShowConcertIsSelectedIndexFromQueryParam() {
+        Fixture fixture = createAndSaveConcertWithMultipleEvents();
+
+        ConcurrentModel model = new ConcurrentModel();
+        fixture.controller().showConcertEvents(fixture.concertIdAsString,
+                                               2,
+                                               model);
+
+        assertThat(model)
+                .containsEntry("selectedIndex", 2);
+    }
+
+    private static Fixture createAndSaveConcertWithMultipleEvents() {
+        var concertStore = EventStore.forConcerts();
+        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+
+        ConcertId concertId = ConcertId.createRandom();
+        Concert concert = scheduleAndRescheduleAndSave(concertId, concertStore);
+
+        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
+        return new Fixture(concertId.id().toString(), concert, controller);
+    }
+
+    private record Fixture(String concertIdAsString, Concert concert, EventViewerController controller) {}
+
+    private static Concert scheduleAndRescheduleAndSave(ConcertId concertId, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        Concert concert = ConcertFactory.scheduleConcertWith(
+                concertId,
+                "Test Artist",
+                100,
+                LocalDateTime.of(2025, 7, 26, 20, 0),
+                LocalTime.of(19, 0));
+        concert.rescheduleTo(concert.showDateTime().plusMonths(2), concert.doorsTime());
+        concertStore.save(concert);
+        return concert;
     }
 
 }

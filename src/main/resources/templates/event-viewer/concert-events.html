@@ -52,9 +52,9 @@
     </div>
 
     <div class="events-column">
-        <div class="event-row" th:each="event : ${events}">
-            <!--             th:classappend="${selectedEventId == event.id} ? 'event-selected' : ''"-->
+        <div class="event-row" th:each="event, rowStat : ${events}">
             <div class="event-details"
+                 th:classappend="${selectedIndex == rowStat.index} ? 'event-selected' : ''"
                  th:text="${event}">
                 ConcertScheduled[concertId=ConcertId[id=af05fc05-2de1-46d8-9568-01381029feb7],
                 artist=Jittery Pigs, ticketPrice=2500, showDateTime=2023-12-15T20:00, doorsTime=19:00,
