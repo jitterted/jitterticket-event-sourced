@@ -15,6 +15,12 @@
             padding-bottom: 5px;
             margin-bottom: 10px;
         }
+
+        .events-column {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
         .event-row {
             display: contents;
         }
@@ -27,6 +33,11 @@
             border-top: 1px dashed darkgreen;
             background-color: palegreen;
         }
+
+        .projected-state {
+            grid-column: 2;
+            grid-row: 2;
+        }
     </style>
 </head>
 <body>
@@ -36,10 +47,20 @@
 <div class="grid-container">
     <div class="header">Event Details</div>
 
-    <div class="event-row" th:each="event : ${events}">
-        <div class="event-details"
-             th:classappend="${selectedEventId == event.id} ? 'event-selected' : ''"
-             th:text="${event}">ConcertScheduled[concertId=ConcertId[id=af05fc05-2de1-46d8-9568-01381029feb7], artist=Jittery Pigs, ticketPrice=2500, showDateTime=2023-12-15T20:00, doorsTime=19:00, capacity=250, maxTicketsPerPurchase=4]</div>
+    <div class="projected-state">
+        <p th:text="${projectedState}">Artist: Test Artist...</p>
+    </div>
+
+    <div class="events-column">
+        <div class="event-row" th:each="event : ${events}">
+            <!--             th:classappend="${selectedEventId == event.id} ? 'event-selected' : ''"-->
+            <div class="event-details"
+                 th:text="${event}">
+                ConcertScheduled[concertId=ConcertId[id=af05fc05-2de1-46d8-9568-01381029feb7],
+                artist=Jittery Pigs, ticketPrice=2500, showDateTime=2023-12-15T20:00, doorsTime=19:00,
+                capacity=250, maxTicketsPerPurchase=4]
+            </div>
+        </div>
     </div>
 </div>
 
