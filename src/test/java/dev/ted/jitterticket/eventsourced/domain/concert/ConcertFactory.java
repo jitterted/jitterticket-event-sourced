@@ -53,16 +53,16 @@ public class ConcertFactory {
         );
     }
 
-    static class Events {
+    public static class Events {
 
-        static ConcertScheduled createConcertScheduledEventWithCapacityOf(int capacity, int ticketPrice) {
+        public static ConcertScheduled scheduledConcertWithCapacityAndTicketPrice(int capacity, int ticketPrice) {
             LocalTime originalDoorsTime = LocalTime.of(19, 0);
             int maxTicketsPerPurchase = 4;
             String artist = "Irrelevant Artist Name";
             return new ConcertScheduled(ConcertId.createRandom(), artist, ticketPrice, LocalDateTime.of(2025, 11, 11, 20, 0), originalDoorsTime, capacity, maxTicketsPerPurchase);
         }
 
-        static ConcertScheduled createConcertScheduledEvent(LocalDateTime originalShowDateTime, LocalTime originalDoorsTime) {
+        public static ConcertScheduled scheduledConcert(LocalDateTime originalShowDateTime, LocalTime originalDoorsTime) {
             int ticketPrice = 35;
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
@@ -70,8 +70,12 @@ public class ConcertFactory {
             return new ConcertScheduled(ConcertId.createRandom(), artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
         }
 
-        static ConcertScheduled scheduleConcertWithCapacityOf(int capacity) {
-            return createConcertScheduledEventWithCapacityOf(capacity, 35);
+        public static ConcertScheduled scheduledConcertWithCapacityOf(int capacity) {
+            return scheduledConcertWithCapacityAndTicketPrice(capacity, 35);
+        }
+
+        public static ConcertScheduled scheduledConcert() {
+            return scheduledConcertWithCapacityAndTicketPrice(100, 35);
         }
     }
 

@@ -38,7 +38,7 @@ public class ConcertTest {
         void rescheduleConcertGeneratesConcertRescheduled() {
             LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
             LocalTime originalDoorsTime = LocalTime.of(19, 0);
-            ConcertScheduled concertScheduled = ConcertFactory.Events.createConcertScheduledEvent(originalShowDateTime, originalDoorsTime);
+            ConcertScheduled concertScheduled = ConcertFactory.Events.scheduledConcert(originalShowDateTime, originalDoorsTime);
             Concert concert = Concert.reconstitute(List.of(concertScheduled));
 
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
@@ -56,7 +56,7 @@ public class ConcertTest {
         void purchaseTicketsGeneratesTicketsSold() {
             int ticketPrice = 35;
             ConcertScheduled concertScheduled =
-                    ConcertFactory.Events.createConcertScheduledEventWithCapacityOf(100, ticketPrice);
+                    ConcertFactory.Events.scheduledConcertWithCapacityAndTicketPrice(100, ticketPrice);
             Concert concert = Concert.reconstitute(List.of(concertScheduled));
             ConcertId concertId = concert.getId();
             CustomerId customerId = CustomerId.createRandom();
@@ -139,7 +139,7 @@ public class ConcertTest {
 
         @Test
         void ticketsSoldUpdatesAvailableTicketCount() {
-            ConcertScheduled concertScheduled = ConcertFactory.Events.scheduleConcertWithCapacityOf(100);
+            ConcertScheduled concertScheduled = ConcertFactory.Events.scheduledConcertWithCapacityOf(100);
             int quantitySold = 6;
             TicketsSold ticketsSold = new TicketsSold(
                     concertScheduled.concertId(), quantitySold, -1);
