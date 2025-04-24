@@ -1,5 +1,7 @@
 package dev.ted.jitterticket.eventsourced.domain.concert;
 
+import dev.ted.jitterticket.eventsourced.application.EventStore;
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -51,6 +53,21 @@ public class ConcertFactory {
                                 100,
                                 4
         );
+    }
+
+    public static class Store {
+        public static ConcertId createSavedConcertIn(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+            ConcertId concertId = ConcertId.createRandom();
+            concertStore.save(Concert.schedule(
+                    concertId,
+                    "Blue Note Quartet",
+                    35,
+                    LocalDateTime.of(2025, 8, 22, 19, 30),
+                    LocalTime.of(18, 30),
+                    75,
+                    2));
+            return concertId;
+        }
     }
 
     public static class Events {

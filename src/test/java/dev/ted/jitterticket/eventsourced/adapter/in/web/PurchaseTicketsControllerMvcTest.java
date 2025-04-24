@@ -4,6 +4,7 @@ import dev.ted.jitterticket.TixConfiguration;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
@@ -15,9 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
-
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Tag("mvc")
 @Tag("spring")
@@ -36,7 +34,7 @@ class PurchaseTicketsControllerMvcTest {
 
     @Test
     void getToPurchaseTicketViewEndpointReturns200Ok() {
-        ConcertId concertId = createSavedConcert();
+        ConcertId concertId = ConcertFactory.Store.createSavedConcertIn(concertStore);
 
         mvc.get()
            .uri("/concerts/" + concertId.id().toString())
@@ -48,7 +46,7 @@ class PurchaseTicketsControllerMvcTest {
     void postToPurchaseTicketEndpointRedirects() {
         Customer customer = CustomerFactory.newlyRegistered();
         customerStore.save(customer);
-        ConcertId concertId = createSavedConcert();
+        ConcertId concertId = ConcertFactory.Store.createSavedConcertIn(concertStore);
         mvc.post()
            .formField("customerId", customer.getId().id().toString())
            .formField("quantity", "2")
@@ -57,16 +55,4 @@ class PurchaseTicketsControllerMvcTest {
            .hasStatus3xxRedirection();
     }
 
-    private ConcertId createSavedConcert() {
-        ConcertId concertId = ConcertId.createRandom();
-        concertStore.save(Concert.schedule(
-                concertId,
-                "Blue Note Quartet",
-                35,
-                LocalDateTime.of(2025, 8, 22, 19, 30),
-                LocalTime.of(18, 30),
-                75,
-                2));
-        return concertId;
-    }
 }

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Concert Events</title>
+</head>
+<body>
+<h1>Concert Events</h1>
+<h2>Concert ID: <span th:text="${concertId}">af05fc05-2de1-46d8-9568-01381029feb7</span></h2>
+<table>
+    <thead>
+    <tr>
+        <th>Event Details</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="event : ${events}">
+        <td th:text="${event}">ConcertScheduled[concertId=ConcertId[id=af05fc05-2de1-46d8-9568-01381029feb7], artist=Jittery Pigs, ticketPrice=2500, showDateTime=2023-12-15T20:00, doorsTime=19:00, capacity=250, maxTicketsPerPurchase=4]</td>
+    </tr>
+    </tbody>
+</table>
+<p><a th:href="@{/event-viewer}">Back to Concert List</a></p>
+</body>
+</html>

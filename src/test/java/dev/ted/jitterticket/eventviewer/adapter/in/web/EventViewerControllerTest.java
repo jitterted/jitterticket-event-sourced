@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.junit.jupiter.api.Test;
@@ -22,13 +23,13 @@ class EventViewerControllerTest {
         var concertStore = EventStore.forConcerts();
         ConcertProjector concertProjector = new ConcertProjector(concertStore);
 
-        EventViewerController controller = new EventViewerController(concertProjector);
+        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
         Model model = new ConcurrentModel();
 
         String viewName = controller.listConcerts(model);
 
         assertThat(viewName)
-                .isEqualTo("event-viewer/concerts");
+                .isEqualTo("event-viewer/concert-aggregates");
     }
 
     @Test
@@ -47,7 +48,7 @@ class EventViewerControllerTest {
                 showDateTime, 
                 doorsTime));
 
-        EventViewerController controller = new EventViewerController(concertProjector);
+        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
         Model model = new ConcurrentModel();
 
         controller.listConcerts(model);
@@ -57,5 +58,59 @@ class EventViewerControllerTest {
                 .hasSize(1)
                 .extracting(ConcertListView::concertId, ConcertListView::artist)
                 .containsExactly(tuple(concertId.id().toString(), artist));
+    }
+
+    @Test
+    void showConcertEventsReturnsCorrectViewName() {
+        var concertStore = EventStore.forConcerts();
+        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+
+        ConcertId concertId = ConcertId.createRandom();
+        String artist = "Test Artist";
+        LocalDateTime showDateTime = LocalDateTime.of(2025, 7, 26, 20, 0);
+        LocalTime doorsTime = LocalTime.of(19, 0);
+
+        concertStore.save(ConcertFactory.createConcertWith(concertId, 
+                artist, 
+                100, 
+                showDateTime, 
+                doorsTime));
+
+        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
+        Model model = new ConcurrentModel();
+
+        String viewName = controller.showConcertEvents(concertId.id().toString(), model);
+
+        assertThat(viewName)
+                .isEqualTo("event-viewer/concert-events");
+    }
+
+    @Test
+    void showConcertEventsAddsCorrectAttributesToModel() {
+        var concertStore = EventStore.forConcerts();
+        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+
+        ConcertId concertId = ConcertId.createRandom();
+        String artist = "Test Artist";
+        LocalDateTime showDateTime = LocalDateTime.of(2025, 7, 26, 20, 0);
+        LocalTime doorsTime = LocalTime.of(19, 0);
+
+        concertStore.save(ConcertFactory.createConcertWith(concertId, 
+                artist, 
+                100, 
+                showDateTime, 
+                doorsTime));
+
+        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
+        Model model = new ConcurrentModel();
+
+        controller.showConcertEvents(concertId.id().toString(), model);
+
+        assertThat(model.getAttribute("concertId"))
+                .isEqualTo(concertId.id().toString());
+
+        List<ConcertEvent> events = (List<ConcertEvent>) model.getAttribute("events");
+        assertThat(events)
+                .isNotEmpty();
     }
 }

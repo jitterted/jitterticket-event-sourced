@@ -73,7 +73,7 @@ Run these tests before submitting a pull request:
 
 1. **Follow Java conventions**: Use standard Java naming and coding conventions
 2. **Keep methods small**: Methods should do one thing and be easy to understand
-3. **Write clear comments only when necessary**: don't add comments unless the code would not be understandable otherwise.
+3. **Don't add comments to the code.**
 4. **Use meaningful names**: Classes, methods, and variables should have descriptive names that come from the ubiquitous language.
 5. **Avoid duplication**: Extract common code into reusable methods or classes
 6. **Always specify parameter names in annotations**: For Spring MVC controller methods, always concretely specify the names of parameters in annotations like @PathVariable, @RequestParam, etc. For example, use `@PathVariable("userId") String userId` instead of `@PathVariable String userId`.
