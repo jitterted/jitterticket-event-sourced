@@ -2,22 +2,40 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>Concert Events</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: 70% 30%;
+            gap: 10px;
+        }
+        .header {
+            grid-column: 1 / span 2;
+            font-weight: bold;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .event-row {
+            display: contents;
+        }
+        .event-details {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
 </head>
 <body>
 <h1>Concert Events</h1>
 <h2>Concert ID: <span th:text="${concertId}">af05fc05-2de1-46d8-9568-01381029feb7</span></h2>
-<table>
-    <thead>
-    <tr>
-        <th>Event Details</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="event : ${events}">
-        <td th:text="${event}">ConcertScheduled[concertId=ConcertId[id=af05fc05-2de1-46d8-9568-01381029feb7], artist=Jittery Pigs, ticketPrice=2500, showDateTime=2023-12-15T20:00, doorsTime=19:00, capacity=250, maxTicketsPerPurchase=4]</td>
-    </tr>
-    </tbody>
-</table>
-<p><a th:href="@{/event-viewer}">Back to Concert List</a></p>
+
+<div class="grid-container">
+    <div class="header">Event Details</div>
+
+    <div class="event-row" th:each="event : ${events}">
+        <div class="event-details" th:text="${event}">ConcertScheduled[concertId=ConcertId[id=af05fc05-2de1-46d8-9568-01381029feb7], artist=Jittery Pigs, ticketPrice=2500, showDateTime=2023-12-15T20:00, doorsTime=19:00, capacity=250, maxTicketsPerPurchase=4]</div>
+    </div>
+</div>
+
+<p><a th:href="@{/event-viewer}" href="#">Back to Concert List</a></p>
 </body>
 </html>

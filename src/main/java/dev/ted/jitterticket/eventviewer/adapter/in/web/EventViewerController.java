@@ -31,8 +31,8 @@ public class EventViewerController {
     public String listConcerts(Model model) {
         List<ConcertListView> concertListViews =
                 concertProjector.allConcertSummaries()
-                        .map(ConcertListView::from)
-                        .toList();
+                                .map(ConcertListView::from)
+                                .toList();
         model.addAttribute("concerts", concertListViews);
         return "event-viewer/concert-aggregates";
     }
@@ -41,8 +41,9 @@ public class EventViewerController {
     public String showConcertEvents(@PathVariable("concertId") String concertIdString,
                                     Model model) {
         ConcertId concertId = new ConcertId(java.util.UUID.fromString(concertIdString));
-        List<ConcertEvent> concertEvents =
-                concertStore.eventsForAggregate(concertId);
+        List<ConcertEvent> concertEvents = concertStore
+                .eventsForAggregate(concertId)
+                .reversed();
         model.addAttribute("concertId", concertIdString);
         model.addAttribute("events", concertEvents);
         return "event-viewer/concert-events";
