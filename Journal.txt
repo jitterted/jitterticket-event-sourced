@@ -7,6 +7,10 @@ Wednesday, April 23, 2025
 [IntelliJ IDEA Bug]
 [ ] Renamed a Thymeleaf template in a subdirectory and when it renamed it in the controller method's return value (view name), it dropped the subdirectory name: "event-viewer/concerts" became "concert-aggregates", which breaks the app.
 
+[ ] If a method is @Deprecated, but is completely unused, would be nice if it showed that method as unused (grayed out)
+
+[ ] When adding a (currently unused) field as a parameter to the constructor, it should bring up the "Change Signature" refactoring so we can do the change safely
+
 Tuesday, April 22, 2025
 =======================
 

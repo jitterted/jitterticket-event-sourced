@@ -13,6 +13,8 @@
     [ ] Show state of the Aggregate as of a specific event - defaults to most recent
         [ ] Clicking on an event moves the "current" pointer to that event, updating the displayed state of the Aggregate
 
+[ ] EventSourcedAggregate.uncommittedEvents() returns the internal mutable list! At least return a copy (preferably an unmodifiable List, or perhaps just a Stream)
+
 [X] Check the EventDtoTest to ensure it's finding all of the concrete (record) events for the "parameterized" test
 
 [X] Rename buy/bought to purchase/purchased

@@ -73,9 +73,11 @@ Run these tests before submitting a pull request:
 
 1. **Follow Java conventions**: Use standard Java naming and coding conventions
 2. **Keep methods small**: Methods should do one thing and be easy to understand
-3. **Write clear comments**: Especially for complex business logic
-4. **Use meaningful names**: Classes, methods, and variables should have descriptive names
+3. **Write clear comments only when necessary**: don't add comments unless the code would not be understandable otherwise.
+4. **Use meaningful names**: Classes, methods, and variables should have descriptive names that come from the ubiquitous language.
 5. **Avoid duplication**: Extract common code into reusable methods or classes
+6. **Always specify parameter names in annotations**: For Spring MVC controller methods, always concretely specify the names of parameters in annotations like @PathVariable, @RequestParam, etc. For example, use `@PathVariable("userId") String userId` instead of `@PathVariable String userId`.
+7. **Import static methods**: Use static imports for the following methods instead of using fully-qualified names in the code: for test assertions, use `import static org.assertj.core.api.Assertions.*;` and then call `tuple(a, b)` instead of `Assertions.tuple(a, b)`.
 
 ### Naming Conventions
 
