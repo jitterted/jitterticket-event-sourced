@@ -13,7 +13,6 @@ import java.util.StringJoiner;
 
 public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
-    protected long maxEventSequenceNumber = 0L;
     private String name;
     private String email;
     private final Map<TicketOrderId, TicketOrder> ticketOrdersByTicketOrderId = new HashMap<>();
@@ -69,10 +68,6 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
         TicketsPurchased ticketsPurchased =
                 new TicketsPurchased(getId(), nextEventSequenceNumber(), ticketOrderId, concert.getId(), quantity, paidAmount);
         enqueue(ticketsPurchased);
-    }
-
-    private Long nextEventSequenceNumber() {
-        return maxEventSequenceNumber++;
     }
 
     public List<TicketOrder> ticketOrders() {
