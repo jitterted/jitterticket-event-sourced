@@ -61,13 +61,13 @@ public class EventStore<
     public void save(ID aggregateId, List<EVENT> uncommittedEvents) {
         List<EventDto<EVENT>> existingEventDtos = idToEventDtoMap
                 .computeIfAbsent(aggregateId, _ -> new ArrayList<>());
-        List<EventDto<EVENT>> freshEventDtos = uncommittedEvents
-                                                        .stream()
-                                                        .map(event -> EventDto.from(
-                                                                aggregateId.id(),
-                                                                0L,
-                                                                event))
-                                                        .toList();
+        List<EventDto<EVENT>> freshEventDtos =
+                uncommittedEvents.stream()
+                                 .map(event -> EventDto.from(
+                                         aggregateId.id(),
+                                         event.eventSequence(), // max(sequence) from existing events)
+                                         event))
+                                 .toList();
         existingEventDtos.addAll(freshEventDtos);
 
         idToEventDtoMap.put(aggregateId, existingEventDtos);

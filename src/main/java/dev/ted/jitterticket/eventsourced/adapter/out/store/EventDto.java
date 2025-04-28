@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class EventDto<EVENT extends Event> {
     private final UUID aggRootId; // ID for the Aggregate Root
-    private final long eventSequence;
+    private final Long eventSequence;
     private final String eventType;
     private final String json; // blob of data - schemaless
 
@@ -24,10 +24,10 @@ public class EventDto<EVENT extends Event> {
 
         AggRootId | EventSequence | Sequence?? | Version | Timestamp | EventType          |  JSON Content
         ----------------------------------------------------------------------------------------------------------------
-        0         | 0             |            |         |           | ConcertScheduled   | {id: 0, artist: "Judy", ... }
-        1         | 0             |            |         |           | ConcertScheduled   | {id: 1, artist: "Betty", ... }
-        0         | 1             |            |         |           | TicketsSold        | {id: 0, quantity: 4, totalPaid: 120 }
-        0         | 2             |            |         |           | ConcertRescheduled | {id: 0, newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
+        0         | 0             |            |         |           | ConcertScheduled   | {id: 0, eventSequence: 0, artist: "Judy", ... }
+        1         | 0             |            |         |           | ConcertScheduled   | {id: 1, eventSequence: 0, artist: "Betty", ... }
+        0         | 1             |            |         |           | TicketsSold        | {id: 0, eventSequence: 1, quantity: 4, totalPaid: 120 }
+        0         | 2             |            |         |           | ConcertRescheduled | {id: 0, eventSequence: 2, newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
     */
 
 

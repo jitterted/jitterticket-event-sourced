@@ -13,6 +13,7 @@ import java.util.StringJoiner;
 
 public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
+    protected long maxEventSequenceNumber = 0L;
     private String name;
     private String email;
     private final Map<TicketOrderId, TicketOrder> ticketOrdersByTicketOrderId = new HashMap<>();
@@ -30,7 +31,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     }
 
     private Customer(CustomerId customerId, String name, String email) {
-        enqueue(new CustomerRegistered(customerId, 0L, name, email));
+        enqueue(new CustomerRegistered(customerId, nextEventSequenceNumber(), name, email));
     }
 
     public Optional<TicketOrder> ticketOrderFor(TicketOrderId ticketOrderId) {
@@ -41,8 +42,8 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     protected void apply(CustomerEvent customerEvent) {
         switch (customerEvent) {
             case CustomerRegistered(
-                    CustomerId customerId,
-                    Long eventSequence, String customerName,
+                    CustomerId customerId, _,
+                    String customerName,
                     String email
             ) -> {
                 setId(customerId);
@@ -50,9 +51,8 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
                 this.email = email;
             }
 
-            case TicketsPurchased(
-                    _,
-                    Long eventSequence, TicketOrderId ticketOrderId,
+            case TicketsPurchased(_, _,
+                    TicketOrderId ticketOrderId,
                     ConcertId concertId,
                     int quantity,
                     int paidAmount
@@ -67,8 +67,12 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     public void purchaseTickets(Concert concert, TicketOrderId ticketOrderId, int quantity) {
         int paidAmount = quantity * concert.ticketPrice();
         TicketsPurchased ticketsPurchased =
-                new TicketsPurchased(getId(), 0L, ticketOrderId, concert.getId(), quantity, paidAmount);
+                new TicketsPurchased(getId(), nextEventSequenceNumber(), ticketOrderId, concert.getId(), quantity, paidAmount);
         enqueue(ticketsPurchased);
+    }
+
+    private Long nextEventSequenceNumber() {
+        return maxEventSequenceNumber++;
     }
 
     public List<TicketOrder> ticketOrders() {

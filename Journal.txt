@@ -2,6 +2,13 @@ Monday, April 28, 2025
 ======================
 
 [Design Decision]
+* Where to update/increment the EVENT SEQUENCE Number?
+    1. Update it on-the-fly during storage in the EventStore
+        This would be annoying, because Events are Records, so would have to create a new record, copying over most of the information, with the new record having the correct sequence. This would be difficult, because each Event record is different, so each Event would need a "wither" for updating the sequence.
+    ✅2. Increment/track it in the EventSourcedAggregate:
+        This is probably the place to do it, since the aggregate can retain the "high water mark" of event sequence numbers and hand them out when the events are created by the Aggregate.
+
+[Design Decision]
 * Need to store a Concert from its events (for testing, when I need to be explicit about the events, e.g., in the test `projectsStateOnlyThroughSelectedEvent`), but if we want to create/store from events, we either need to:
     1. Create an alternate way of instantiating the Concert from events so they also get enqueued (to end up in the uncommittedEvents list), otherwise the EventStore can't save it (reconstituted Concerts have no uncommitted events), or
     2. Add a method to EventStore that takes the list of events directly, instead of from the Aggregate.
