@@ -27,6 +27,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
     private Customer(List<CustomerEvent> customerEvents) {
         customerEvents.forEach(this::apply);
+        super.lastLoadedEventSequenceNumber = customerEvents.getLast().eventSequence();
     }
 
     private Customer(CustomerId customerId, String name, String email) {
