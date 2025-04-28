@@ -6,7 +6,6 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -90,27 +89,24 @@ class ConcertSummaryProjectorTest {
     }
 
     @Test
-    @Disabled("ConcertSummaryProjectorTest.projectsStateOnlyThroughSelectedEvent - Until we have EventSequence numbers on all Event objects")
-    void projectsStateOnlyThroughSelectedEvent() {
+    void projectsStateOnlyThroughDesiredEvent() {
         var concertStore = EventStore.forConcerts();
         ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
         ConcertId concertId = ConcertId.createRandom();
         LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
         LocalTime originalDoorsTime = LocalTime.of(18, 0);
-        ConcertScheduled concertScheduled = new ConcertScheduled(
-                concertId, 0L, "Headliner", 45,
-                originalShowDateTime, originalDoorsTime,
-                150, 8);
-        TicketsSold ticketsSold = new TicketsSold(concertId, 0L, 4, 4 * 45);
-        ConcertRescheduled concertRescheduled = new ConcertRescheduled(
-                concertId, 0L, originalShowDateTime.plusMonths(2).plusHours(1),
-                originalDoorsTime.plusHours(1));
+        ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0L, "Headliner", 45, originalShowDateTime, originalDoorsTime, 150, 8);
+        TicketsSold ticketsSold = new TicketsSold(concertId, 1L, 4, 4 * 45);
+        ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 2L, originalShowDateTime.plusMonths(2).plusHours(1), originalDoorsTime.plusHours(1));
         concertStore.save(concertId, List.of(concertScheduled, ticketsSold, concertRescheduled));
 
-        long eventSequenceNumber = 1;// second event
-        var concertWithEvents = concertSummaryProjector.concertWithEventsThrough(concertId, eventSequenceNumber);
+        long desiredEventSequenceNumber = ticketsSold.eventSequence();
+        var concertWithEvents = concertSummaryProjector.concertWithEventsThrough(concertId, desiredEventSequenceNumber);
 
         assertThat(concertWithEvents.concertEvents())
                 .containsExactly(concertScheduled, ticketsSold);
+        assertThat(concertWithEvents.concert().showDateTime())
+                .as("Show Date/Time should be the original as we shouldn't have played back the rescheduling event")
+                .isEqualTo(originalShowDateTime);
     }
 }

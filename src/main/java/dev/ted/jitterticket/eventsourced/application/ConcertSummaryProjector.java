@@ -68,8 +68,14 @@ public class ConcertSummaryProjector {
         return new ConcertWithEvents(concertEvents, concert);
     }
 
-    public ConcertWithEvents concertWithEventsThrough(ConcertId concertId, Long eventSequenceNumber) {
-        return null;
+    public ConcertWithEvents concertWithEventsThrough(ConcertId concertId, Long desiredEventSequenceNumber) {
+        List<ConcertEvent> concertEvents = concertStore
+                .eventsForAggregate(concertId)
+                .stream()
+                .filter(concertEvent -> concertEvent.eventSequence() <= desiredEventSequenceNumber)
+                .toList();
+        Concert concert = Concert.reconstitute(concertEvents);
+        return new ConcertWithEvents(concertEvents, concert);
     }
 
     public record ConcertWithEvents(List<ConcertEvent> concertEvents, Concert concert) {}
