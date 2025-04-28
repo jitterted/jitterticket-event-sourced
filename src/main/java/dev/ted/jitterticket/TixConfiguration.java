@@ -1,6 +1,6 @@
 package dev.ted.jitterticket;
 
-import dev.ted.jitterticket.eventsourced.application.ConcertProjector;
+import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -154,8 +154,8 @@ public class TixConfiguration {
     }
 
     @Bean
-    public ConcertProjector concertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new ConcertProjector(concertStore);
+    public ConcertSummaryProjector concertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new ConcertSummaryProjector(concertStore);
     }
 
 }

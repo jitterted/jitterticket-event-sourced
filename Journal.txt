@@ -1,3 +1,28 @@
+Monday, April 28, 2025
+======================
+
+[Design Decision]
+* Need to store a Concert from its events (for testing, when I need to be explicit about the events, e.g., in the test `projectsStateOnlyThroughSelectedEvent`), but if we want to create/store from events, we either need to:
+    1. Create an alternate way of instantiating the Concert from events so they also get enqueued (to end up in the uncommittedEvents list), otherwise the EventStore can't save it (reconstituted Concerts have no uncommitted events), or
+    2. Add a method to EventStore that takes the list of events directly, instead of from the Aggregate.
+  (1) is painful because creating an alternate constructor that enqueues and doesn't just apply is very awkward (because there's already a constructor that takes a list of events—HOWEVER, we could change the constructor to be a no-arg constructor and do the apply() in the static reconstitute method). In addition, we're creating the Concert aggregate, but only using it as a container for the uncommitted events, so it's a bit of a waste to apply the events when we don't care about the state of Concert.
+  (2) is more straightforward and allows us to be explicit about the events without creating a "throwaway" Concert object.
+
+
+[IntelliJ IDEA Bug? 11:15am]
+[ ] When introducing a variable for `concertWithEvents.concert()` in the following code:
+
+    ```java
+    model.addAttribute("projectedState", List.of(
+                    "Artist: " + concertWithEvents.concert().artist(),
+                    "Show Time: " + concertWithEvents.concert().showDateTime(),
+                    "Doors Time: " + concertWithEvents.concert().doorsTime(),
+                    "Tickets Remaining: " + concertWithEvents.concert().availableTicketCount()));
+    ```
+
+    it does not offer to name the variable, it just creates `concert` as the name and completes.
+
+
 Thursday, April 24, 2025
 ========================
 

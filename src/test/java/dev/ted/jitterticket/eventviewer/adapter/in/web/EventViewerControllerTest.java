@@ -1,6 +1,6 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.ConcertProjector;
+import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -23,9 +23,9 @@ class EventViewerControllerTest {
     @Test
     void listConcertsReturnsCorrectViewName() {
         var concertStore = EventStore.forConcerts();
-        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
 
-        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
+        EventViewerController controller = new EventViewerController(concertSummaryProjector, concertStore);
         Model model = new ConcurrentModel();
 
         String viewName = controller.listConcerts(model);
@@ -37,7 +37,7 @@ class EventViewerControllerTest {
     @Test
     void listConcertsAddsCorrectAttributesToModel() {
         var concertStore = EventStore.forConcerts();
-        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
 
         ConcertId concertId = ConcertId.createRandom();
         String artist = "Test Artist";
@@ -50,7 +50,7 @@ class EventViewerControllerTest {
                                                              showDateTime,
                                                              doorsTime));
 
-        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
+        EventViewerController controller = new EventViewerController(concertSummaryProjector, concertStore);
         Model model = new ConcurrentModel();
 
         controller.listConcerts(model);
@@ -114,12 +114,12 @@ class EventViewerControllerTest {
 
     private static Fixture createAndSaveConcertWithMultipleEvents() {
         var concertStore = EventStore.forConcerts();
-        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
 
         ConcertId concertId = ConcertId.createRandom();
         Concert concert = scheduleAndRescheduleAndSave(concertId, concertStore);
 
-        EventViewerController controller = new EventViewerController(concertProjector, concertStore);
+        EventViewerController controller = new EventViewerController(concertSummaryProjector, concertStore);
         return new Fixture(concertId.id().toString(), concert, controller);
     }
 

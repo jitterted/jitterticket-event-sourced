@@ -49,22 +49,28 @@ public class EventStore<
     }
 
     public void save(AGGREGATE aggregate) {
-        if (aggregate.getId() == null) {
+        ID aggregateId = aggregate.getId();
+        if (aggregateId == null) {
             throw new IllegalArgumentException("The Aggregate " + aggregate + " must have an ID");
         }
+        List<EVENT> uncommittedEvents = aggregate.uncommittedEvents();
+
+        save(aggregateId, uncommittedEvents);
+    }
+
+    public void save(ID aggregateId, List<EVENT> uncommittedEvents) {
         List<EventDto<EVENT>> existingEventDtos = idToEventDtoMap
-                .computeIfAbsent(aggregate.getId(),
-                                 _ -> new ArrayList<>());
-        List<EventDto<EVENT>> freshEventDtos = aggregate.uncommittedEvents()
+                .computeIfAbsent(aggregateId, _ -> new ArrayList<>());
+        List<EventDto<EVENT>> freshEventDtos = uncommittedEvents
                                                         .stream()
                                                         .map(event -> EventDto.from(
-                                                                aggregate.getId().id(),
+                                                                aggregateId.id(),
                                                                 0,
                                                                 event))
                                                         .toList();
         existingEventDtos.addAll(freshEventDtos);
 
-        idToEventDtoMap.put(aggregate.getId(), existingEventDtos);
+        idToEventDtoMap.put(aggregateId, existingEventDtos);
     }
 
     private AGGREGATE aggregateFromEvents(List<EventDto<EVENT>> existingEventDtos) {

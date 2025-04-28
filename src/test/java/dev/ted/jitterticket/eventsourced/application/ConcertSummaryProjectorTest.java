@@ -3,21 +3,25 @@ package dev.ted.jitterticket.eventsourced.application;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
-class ConcertProjectorTest {
+class ConcertSummaryProjectorTest {
 
     @Test
     void noConcertsCreatedProjectorReturnsNoConcerts() {
-        ConcertProjector concertProjector = new ConcertProjector(EventStore.forConcerts());
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(EventStore.forConcerts());
 
-        Stream<ConcertSummary> concertTicketViews = concertProjector.allConcertSummaries();
+        Stream<ConcertSummary> concertTicketViews = concertSummaryProjector.allConcertSummaries();
 
         assertThat(concertTicketViews)
                 .isEmpty();
@@ -38,9 +42,9 @@ class ConcertProjectorTest {
                                                              111,
                                                              LocalDateTime.of(2025, 4, 21, 21, 0),
                                                              LocalTime.of(19, 30)));
-        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
 
-        Stream<ConcertSummary> allConcertTicketViews = concertProjector.allConcertSummaries();
+        Stream<ConcertSummary> allConcertTicketViews = concertSummaryProjector.allConcertSummaries();
 
         assertThat(allConcertTicketViews)
                 .containsExactlyInAnyOrder(
@@ -60,7 +64,7 @@ class ConcertProjectorTest {
     @Test
     void projectorReturnsSingleConcertForSavedAndRescheduledConcerts() {
         var concertStore = EventStore.forConcerts();
-        ConcertProjector concertProjector = new ConcertProjector(concertStore);
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
                                                              "Desi Bells",
@@ -73,7 +77,7 @@ class ConcertProjectorTest {
         concertStore.save(rescheduledConcert);
 
         Stream<ConcertSummary> allConcertTicketViews =
-                concertProjector.allConcertSummaries();
+                concertSummaryProjector.allConcertSummaries();
 
         assertThat(allConcertTicketViews)
                 .containsExactly(new ConcertSummary(
@@ -82,5 +86,26 @@ class ConcertProjectorTest {
                         35,
                         LocalDateTime.of(2025, 7, 11, 20, 0),
                         LocalTime.of(19, 0)));
+    }
+
+    @Test
+    void projectsStateOnlyThroughSelectedEvent() {
+        var concertStore = EventStore.forConcerts();
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
+        ConcertId concertId = ConcertId.createRandom();
+        LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
+        LocalTime originalDoorsTime = LocalTime.of(18, 0);
+        ConcertScheduled concertScheduled = new ConcertScheduled(
+                concertId, "Headliner", 45,
+                originalShowDateTime, originalDoorsTime,
+                150, 8);
+        TicketsSold ticketsSold = new TicketsSold(concertId, 4, 4 * 45);
+        ConcertRescheduled concertRescheduled = new ConcertRescheduled(
+                concertId, originalShowDateTime.plusMonths(2).plusHours(1),
+                originalDoorsTime.plusHours(1));
+
+        concertStore.save(concertId, List.of(concertScheduled, ticketsSold, concertRescheduled));
+
+
     }
 }

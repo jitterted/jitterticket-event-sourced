@@ -1,6 +1,6 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.ConcertProjector;
+import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -20,21 +20,21 @@ import java.util.UUID;
 @RequestMapping("/event-viewer")
 public class EventViewerController {
 
-    private final ConcertProjector concertProjector;
+    private final ConcertSummaryProjector concertSummaryProjector;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
     @Autowired
-    public EventViewerController(ConcertProjector concertProjector, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        this.concertProjector = concertProjector;
+    public EventViewerController(ConcertSummaryProjector concertSummaryProjector, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        this.concertSummaryProjector = concertSummaryProjector;
         this.concertStore = concertStore;
     }
 
     @GetMapping
     public String listConcerts(Model model) {
         List<ConcertListView> concertListViews =
-                concertProjector.allConcertSummaries()
-                                .map(ConcertListView::from)
-                                .toList();
+                concertSummaryProjector.allConcertSummaries()
+                                       .map(ConcertListView::from)
+                                       .toList();
         model.addAttribute("concerts", concertListViews);
         return "event-viewer/concert-aggregates";
     }
@@ -43,20 +43,20 @@ public class EventViewerController {
     public String showConcertEvents(@PathVariable("concertId") String concertIdString,
                                     @RequestParam(value = "selectedIndex", required = false, defaultValue = "0") int selectedIndex,
                                     Model model) {
-        ConcertId concertId = new ConcertId(UUID.fromString(concertIdString));
-        List<ConcertEvent> concertEvents = concertStore
-                .eventsForAggregate(concertId);
         model.addAttribute("concertId", concertIdString);
-        model.addAttribute("events", concertEvents.reversed());
         model.addAttribute("selectedIndex", selectedIndex);
-        Concert concert = Concert.reconstitute(concertEvents);
-        model.addAttribute("projectedState", List.of(
+        ConcertId concertId = new ConcertId(UUID.fromString(concertIdString));
+        ConcertSummaryProjector.ConcertWithEvents concertWithEvents = concertSummaryProjector.concertWithEventsFor(concertId);
+        model.addAttribute("events", concertWithEvents.concertEvents().reversed());
+        Concert concert = concertWithEvents.concert();
+        model.addAttribute("projectedState",
+                           List.of(
                                    "Artist: " + concert.artist(),
                                    "Show Time: " + concert.showDateTime(),
                                    "Doors Time: " + concert.doorsTime(),
                                    "Tickets Remaining: " + concert.availableTicketCount()
-                           )
-        );
+                           ));
         return "event-viewer/concert-events";
     }
+
 }
