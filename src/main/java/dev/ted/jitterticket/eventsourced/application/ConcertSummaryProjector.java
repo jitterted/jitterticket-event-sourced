@@ -67,5 +67,9 @@ public class ConcertSummaryProjector {
         return new ConcertWithEvents(concertEvents, concert);
     }
 
+    public ConcertWithEvents concertWithEventsThrough(ConcertId concertId, long eventSequenceNumber) {
+        return null;
+    }
+
     public record ConcertWithEvents(List<ConcertEvent> concertEvents, Concert concert) {}
 }

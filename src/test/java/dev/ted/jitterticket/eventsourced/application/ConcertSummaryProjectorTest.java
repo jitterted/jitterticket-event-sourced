@@ -6,6 +6,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -89,6 +90,7 @@ class ConcertSummaryProjectorTest {
     }
 
     @Test
+    @Disabled("ConcertSummaryProjectorTest.projectsStateOnlyThroughSelectedEvent - Until we have EventSequence numbers on all Event objects")
     void projectsStateOnlyThroughSelectedEvent() {
         var concertStore = EventStore.forConcerts();
         ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
@@ -103,9 +105,12 @@ class ConcertSummaryProjectorTest {
         ConcertRescheduled concertRescheduled = new ConcertRescheduled(
                 concertId, originalShowDateTime.plusMonths(2).plusHours(1),
                 originalDoorsTime.plusHours(1));
-
         concertStore.save(concertId, List.of(concertScheduled, ticketsSold, concertRescheduled));
 
+        long eventSequenceNumber = 1;// second event
+        var concertWithEvents = concertSummaryProjector.concertWithEventsThrough(concertId, eventSequenceNumber);
 
+        assertThat(concertWithEvents.concertEvents())
+                .containsExactly(concertScheduled, ticketsSold);
     }
 }

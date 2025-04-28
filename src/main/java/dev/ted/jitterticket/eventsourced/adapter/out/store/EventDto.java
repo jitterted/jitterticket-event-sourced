@@ -9,22 +9,25 @@ import java.util.UUID;
 
 public class EventDto<EVENT extends Event> {
     private final UUID aggRootId; // ID for the Aggregate Root
-    private final int eventId;
+    private final long eventSequence;
     private final String eventType;
     private final String json; // blob of data - schemaless
 
     /*
         Table schema:
 
-        PK AggRootId
-           EventId
+        PK   AggRootId
+             EventSequence (monotonically increasing per AggRootId)
+             Sequence?? (this might be a globally ordered sequence from the DB?)
+             Version (for versioning the schema)
         JSON String eventContent
 
-        AggRootID | EventId  | Sequence | Version | Timestamp | EventType          |  JSON Content
-        -----------------------------------------------------------------------------------------------------------------
-        0         | 0        |          |         |           | ConcertScheduled   | {id: 0, artist: "Judy", ... }
-        1         | 0        |          |         |           | ConcertScheduled   | {id: 1, artist: "Betty", ... }
-        0         | 1        |          |         |           | ConcertRescheduled | {id: 0, newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
+        AggRootId | EventSequence | Sequence?? | Version | Timestamp | EventType          |  JSON Content
+        ----------------------------------------------------------------------------------------------------------------
+        0         | 0             |            |         |           | ConcertScheduled   | {id: 0, artist: "Judy", ... }
+        1         | 0             |            |         |           | ConcertScheduled   | {id: 1, artist: "Betty", ... }
+        0         | 1             |            |         |           | TicketsSold        | {id: 0, quantity: 4, totalPaid: 120 }
+        0         | 2             |            |         |           | ConcertRescheduled | {id: 0, newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
     */
 
 
@@ -32,12 +35,12 @@ public class EventDto<EVENT extends Event> {
     //    so that when adding (and especially renaming) classes, the mapping works
 //    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public EventDto(UUID aggRootId, int eventId, String eventClassName, String json) {
+    public EventDto(UUID aggRootId, int eventSequence, String eventClassName, String json) {
         if (eventClassName == null) {
             throw new IllegalArgumentException("Event class name cannot be null, JSON is: " + json);
         }
         this.aggRootId = aggRootId;
-        this.eventId = eventId;
+        this.eventSequence = eventSequence;
         this.eventType = eventClassName;
         this.json = json;
     }
