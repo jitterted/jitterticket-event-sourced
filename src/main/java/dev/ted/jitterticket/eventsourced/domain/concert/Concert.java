@@ -40,7 +40,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     }
 
     private Concert(List<ConcertEvent> concertEvents) {
-        concertEvents.forEach(this::apply);
+        applyAll(concertEvents);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                              LocalTime newDoorsTime) {
         // validation: new times must be X amount of time in the future
         ConcertRescheduled concertRescheduled =
-                new ConcertRescheduled(getId(), 0L, newShowDateTime, newDoorsTime);
+                new ConcertRescheduled(getId(), nextEventSequenceNumber(), newShowDateTime, newDoorsTime);
         enqueue(concertRescheduled);
     }
 
@@ -115,7 +115,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     }
 
     public void sellTicketsTo(CustomerId customerId, int quantity) {
-        TicketsSold ticketsSold = new TicketsSold(getId(), 0L, quantity, -1);
+        TicketsSold ticketsSold = new TicketsSold(getId(), nextEventSequenceNumber(), quantity, -1);
         enqueue(ticketsSold);
     }
 

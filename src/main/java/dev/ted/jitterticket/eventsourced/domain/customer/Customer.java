@@ -29,11 +29,6 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
         applyAll(customerEvents);
     }
 
-    protected void applyAll(List<CustomerEvent> loadedEvents) {
-        loadedEvents.forEach(this::apply);
-        lastLoadedEventSequenceNumber = loadedEvents.getLast().eventSequence();
-    }
-
 
     private Customer(CustomerId customerId, String name, String email) {
         enqueue(new CustomerRegistered(customerId, nextEventSequenceNumber(), name, email));

@@ -48,7 +48,8 @@ public class ConcertTest {
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
                             new ConcertRescheduled(concert.getId(),
-                                                   0L, newShowDateTime,
+                                                   1L,
+                                                   newShowDateTime,
                                                    newDoorsTime));
         }
 
@@ -66,7 +67,7 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new TicketsSold(concertId, 0L, quantity, -1)
+                            new TicketsSold(concertId, 1L, quantity, -1)
                     );
         }
 

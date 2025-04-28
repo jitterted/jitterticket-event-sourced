@@ -4,7 +4,6 @@ import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +33,6 @@ class CustomerTest {
         }
 
         @Test
-        @Disabled("Until we finish the event sequence number functionality")
         void purchaseTicketsGeneratesTicketsPurchased() {
             Customer customer = CustomerFactory.reconstituteWithRegisteredEvent();
             int quantity = 4;
@@ -47,7 +45,7 @@ class CustomerTest {
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
                             new TicketsPurchased(customer.getId(),
-                                                 0L,
+                                                 1L,
                                                  ticketOrderId,
                                                  concert.getId(),
                                                  quantity, paidAmount)

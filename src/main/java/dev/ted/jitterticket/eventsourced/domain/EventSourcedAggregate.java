@@ -13,6 +13,11 @@ public abstract class EventSourcedAggregate<EVENT extends Event, ID extends Id> 
         apply(event);
     }
 
+    protected void applyAll(List<EVENT> loadedEvents) {
+        loadedEvents.forEach(this::apply);
+        lastLoadedEventSequenceNumber = loadedEvents.getLast().eventSequence();
+    }
+
     protected abstract void apply(EVENT event);
 
     public List<EVENT> uncommittedEvents() {
