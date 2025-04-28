@@ -19,7 +19,7 @@ class EventSourcedAggregateTest {
             }
         };
 
-        CustomerRegistered event = new CustomerRegistered(CustomerId.createRandom(), "name", "email");
+        CustomerRegistered event = new CustomerRegistered(CustomerId.createRandom(), 0L, "name", "email");
         eventSourcedAggregate.enqueue(event);
 
         assertThat(eventSourcedAggregate.appliedEvent)

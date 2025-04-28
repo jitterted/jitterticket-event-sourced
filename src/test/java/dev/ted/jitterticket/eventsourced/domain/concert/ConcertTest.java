@@ -30,7 +30,7 @@ public class ConcertTest {
 
             assertThat(events)
                     .containsExactly(new ConcertScheduled(
-                            concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
+                            concertId, 0L, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
                     ));
         }
 
@@ -48,7 +48,7 @@ public class ConcertTest {
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
                             new ConcertRescheduled(concert.getId(),
-                                                   newShowDateTime,
+                                                   0L, newShowDateTime,
                                                    newDoorsTime));
         }
 
@@ -66,7 +66,7 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new TicketsSold(concertId, quantity, -1)
+                            new TicketsSold(concertId, 0L, quantity, -1)
                     );
         }
 
@@ -84,7 +84,7 @@ public class ConcertTest {
             int maxTicketsPerPurchase = 4;
             String artist = "Headliner";
             ConcertId concertId = ConcertId.createRandom();
-            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0L, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
             List<ConcertEvent> concertEvents = List.of(concertScheduled);
 
             Concert concert = Concert.reconstitute(concertEvents);
@@ -116,10 +116,10 @@ public class ConcertTest {
             int maxTicketsPerPurchase = 4;
             String artist = "Rescheduler Artist Name";
             ConcertId concertId = ConcertId.createRandom();
-            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0L, artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
             LocalTime newDoorsTime = originalDoorsTime.minusHours(1);
-            ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, newShowDateTime, newDoorsTime);
+            ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 0L, newShowDateTime, newDoorsTime);
 
             List<ConcertEvent> concertEvents = List.of(concertScheduled,
                                                        concertRescheduled);
@@ -142,7 +142,7 @@ public class ConcertTest {
             ConcertScheduled concertScheduled = ConcertFactory.Events.scheduledConcertWithCapacityOf(100);
             int quantitySold = 6;
             TicketsSold ticketsSold = new TicketsSold(
-                    concertScheduled.concertId(), quantitySold, -1);
+                    concertScheduled.concertId(), 0L, quantitySold, -1);
 
             Concert concert = Concert.reconstitute(List.of(concertScheduled,
                                                            ticketsSold));

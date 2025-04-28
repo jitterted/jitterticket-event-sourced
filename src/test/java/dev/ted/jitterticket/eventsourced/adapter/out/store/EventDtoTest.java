@@ -95,7 +95,7 @@ class EventDtoTest {
     @ParameterizedTest
     @MethodSource("events")
     void eventRoundTripConversion(Event sourceEvent) {
-        EventDto<Event> eventDto = EventDto.from(UUID.randomUUID(), 14, sourceEvent);
+        EventDto<Event> eventDto = EventDto.from(UUID.randomUUID(), 14L, sourceEvent);
 
         Event actual = eventDto.toDomain();
 
@@ -106,23 +106,23 @@ class EventDtoTest {
     public static Stream<Arguments> events() {
         return Stream.of(
                 Arguments.of(new ConcertScheduled(ConcertId.createRandom(),
-                                                  "artist",
+                                                  0L, "artist",
                                                   99,
                                                   LocalDateTime.now(),
                                                   LocalTime.now().minusHours(1),
                                                   100,
                                                   4))
                 , Arguments.of(new ConcertRescheduled(ConcertId.createRandom(),
-                                                      LocalDateTime.now(),
+                                                      0L, LocalDateTime.now(),
                                                       LocalTime.now().minusHours(1)))
                 , Arguments.of(new CustomerRegistered(CustomerId.createRandom(),
-                                                      "customer name",
+                                                      0L, "customer name",
                                                       "email@example.com"))
                 , Arguments.of(new TicketsSold(ConcertId.createRandom(),
-                                               6, -1))
+                                               0L, 6, -1))
                 , Arguments.of(new TicketsPurchased(
                         CustomerId.createRandom(),
-                        TicketOrderId.createRandom(),
+                        0L, TicketOrderId.createRandom(),
                         ConcertId.createRandom(), 4, 100))
         );
     }

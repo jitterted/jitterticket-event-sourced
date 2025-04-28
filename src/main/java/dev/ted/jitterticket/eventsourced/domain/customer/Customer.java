@@ -30,7 +30,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     }
 
     private Customer(CustomerId customerId, String name, String email) {
-        enqueue(new CustomerRegistered(customerId, name, email));
+        enqueue(new CustomerRegistered(customerId, 0L, name, email));
     }
 
     public Optional<TicketOrder> ticketOrderFor(TicketOrderId ticketOrderId) {
@@ -42,7 +42,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
         switch (customerEvent) {
             case CustomerRegistered(
                     CustomerId customerId,
-                    String customerName,
+                    Long eventSequence, String customerName,
                     String email
             ) -> {
                 setId(customerId);
@@ -52,7 +52,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
             case TicketsPurchased(
                     _,
-                    TicketOrderId ticketOrderId,
+                    Long eventSequence, TicketOrderId ticketOrderId,
                     ConcertId concertId,
                     int quantity,
                     int paidAmount
@@ -67,7 +67,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     public void purchaseTickets(Concert concert, TicketOrderId ticketOrderId, int quantity) {
         int paidAmount = quantity * concert.ticketPrice();
         TicketsPurchased ticketsPurchased =
-                new TicketsPurchased(getId(), ticketOrderId, concert.getId(), quantity, paidAmount);
+                new TicketsPurchased(getId(), 0L, ticketOrderId, concert.getId(), quantity, paidAmount);
         enqueue(ticketsPurchased);
     }
 

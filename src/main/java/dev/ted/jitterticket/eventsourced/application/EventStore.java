@@ -65,7 +65,7 @@ public class EventStore<
                                                         .stream()
                                                         .map(event -> EventDto.from(
                                                                 aggregateId.id(),
-                                                                0,
+                                                                0L,
                                                                 event))
                                                         .toList();
         existingEventDtos.addAll(freshEventDtos);

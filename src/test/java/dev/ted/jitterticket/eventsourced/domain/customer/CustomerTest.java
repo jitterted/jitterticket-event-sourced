@@ -27,7 +27,7 @@ class CustomerTest {
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
                             new CustomerRegistered(customerId,
-                                                   "customer name",
+                                                   0L, "customer name",
                                                    "email@example.com")
                     );
         }
@@ -45,7 +45,7 @@ class CustomerTest {
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
                             new TicketsPurchased(customer.getId(),
-                                                 ticketOrderId,
+                                                 0L, ticketOrderId,
                                                  concert.getId(),
                                                  quantity, paidAmount)
                     );
@@ -60,7 +60,7 @@ class CustomerTest {
         void customerRegisteredUpdatesNameAndEmail() {
             CustomerId customerId = CustomerId.createRandom();
             CustomerRegistered customerRegistered = new CustomerRegistered(
-                    customerId, "customer name", "email@example.com");
+                    customerId, 0L, "customer name", "email@example.com");
 
             Customer customer = Customer.reconstitute(List.of(customerRegistered));
 
@@ -76,13 +76,13 @@ class CustomerTest {
         void ticketsPurchasedAddsTicketOrder() {
             CustomerId customerId = CustomerId.createRandom();
             CustomerRegistered customerRegistered = new CustomerRegistered(
-                    customerId, "customer name", "email@example.com");
+                    customerId, 0L, "customer name", "email@example.com");
             ConcertId concertId = ConcertId.createRandom();
             int quantity = 8;
             int amountPaid = quantity * 45;
             TicketOrderId ticketOrderId = TicketOrderId.createRandom();
             TicketsPurchased ticketsPurchased = new TicketsPurchased(
-                    customerId, ticketOrderId, concertId, quantity, amountPaid);
+                    customerId, 0L, ticketOrderId, concertId, quantity, amountPaid);
 
             Customer customer = Customer.reconstitute(List.of(customerRegistered,
                                                               ticketsPurchased));
@@ -102,7 +102,7 @@ class CustomerTest {
         void ticketOrderForUnknownTicketIdIsEmptyOptional() {
             CustomerId customerId = CustomerId.createRandom();
             CustomerRegistered customerRegistered = new CustomerRegistered(
-                    customerId, "customer name", "email@example.com");
+                    customerId, 0L, "customer name", "email@example.com");
             Customer customer = Customer.reconstitute(List.of(customerRegistered));
 
             Optional<Customer.TicketOrder> ticketOrder = customer.ticketOrderFor(TicketOrderId.createRandom());

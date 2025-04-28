@@ -76,7 +76,7 @@ public class ConcertFactory {
             LocalTime originalDoorsTime = LocalTime.of(19, 0);
             int maxTicketsPerPurchase = 4;
             String artist = "Irrelevant Artist Name";
-            return new ConcertScheduled(ConcertId.createRandom(), artist, ticketPrice, LocalDateTime.of(2025, 11, 11, 20, 0), originalDoorsTime, capacity, maxTicketsPerPurchase);
+            return new ConcertScheduled(ConcertId.createRandom(), 0L, artist, ticketPrice, LocalDateTime.of(2025, 11, 11, 20, 0), originalDoorsTime, capacity, maxTicketsPerPurchase);
         }
 
         public static ConcertScheduled scheduledConcert(LocalDateTime originalShowDateTime, LocalTime originalDoorsTime) {
@@ -84,7 +84,7 @@ public class ConcertFactory {
             int capacity = 100;
             int maxTicketsPerPurchase = 4;
             String artist = "Irrelevant Artist Name";
-            return new ConcertScheduled(ConcertId.createRandom(), artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+            return new ConcertScheduled(ConcertId.createRandom(), 0L, artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
         }
 
         public static ConcertScheduled scheduledConcertWithCapacityOf(int capacity) {

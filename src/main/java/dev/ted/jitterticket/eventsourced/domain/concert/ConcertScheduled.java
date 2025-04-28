@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public record ConcertScheduled(ConcertId concertId,
+                               Long eventSequence,
                                String artist,
                                int ticketPrice,
                                LocalDateTime showDateTime,

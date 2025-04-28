@@ -28,7 +28,7 @@ public class ConcertSummaryProjector {
                                  switch (concertEvent) {
                                      case ConcertScheduled(
                                              ConcertId concertId,
-                                             String artist,
+                                             Long eventSequence, String artist,
                                              int ticketPrice,
                                              LocalDateTime showDateTime,
                                              LocalTime doorsTime,
@@ -36,7 +36,8 @@ public class ConcertSummaryProjector {
                                              views.put(concertId,
                                                     new ConcertSummary(concertId, artist, ticketPrice, showDateTime, doorsTime));
 
-                                     case ConcertRescheduled(ConcertId concertId, LocalDateTime newShowDateTime, LocalTime newDoorsTime) -> {
+                                     case ConcertRescheduled(ConcertId concertId, Long eventSequence,
+                                                             LocalDateTime newShowDateTime, LocalTime newDoorsTime) -> {
                                          ConcertSummary oldView = views.get(concertId);
                                          ConcertSummary rescheduledView = rescheduleTo(newShowDateTime, newDoorsTime, oldView);
                                          views.put(concertId, rescheduledView);
@@ -67,7 +68,7 @@ public class ConcertSummaryProjector {
         return new ConcertWithEvents(concertEvents, concert);
     }
 
-    public ConcertWithEvents concertWithEventsThrough(ConcertId concertId, long eventSequenceNumber) {
+    public ConcertWithEvents concertWithEventsThrough(ConcertId concertId, Long eventSequenceNumber) {
         return null;
     }
 

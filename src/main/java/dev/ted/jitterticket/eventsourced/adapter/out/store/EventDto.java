@@ -35,7 +35,7 @@ public class EventDto<EVENT extends Event> {
     //    so that when adding (and especially renaming) classes, the mapping works
 //    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public EventDto(UUID aggRootId, int eventSequence, String eventClassName, String json) {
+    public EventDto(UUID aggRootId, Long eventSequence, String eventClassName, String json) {
         if (eventClassName == null) {
             throw new IllegalArgumentException("Event class name cannot be null, JSON is: " + json);
         }
@@ -45,14 +45,14 @@ public class EventDto<EVENT extends Event> {
         this.json = json;
     }
 
-    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggRootId, int eventId, EVENT event) {
+    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggRootId, Long eventSequence, EVENT event) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
         try {
             String json = objectMapper.writeValueAsString(event);
             String fullyQualifiedClassName = event.getClass().getName();
-            return new EventDto<>(aggRootId, eventId, fullyQualifiedClassName, json);
+            return new EventDto<>(aggRootId, eventSequence, fullyQualifiedClassName, json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

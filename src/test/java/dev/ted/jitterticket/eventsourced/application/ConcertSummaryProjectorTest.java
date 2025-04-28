@@ -98,12 +98,12 @@ class ConcertSummaryProjectorTest {
         LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
         LocalTime originalDoorsTime = LocalTime.of(18, 0);
         ConcertScheduled concertScheduled = new ConcertScheduled(
-                concertId, "Headliner", 45,
+                concertId, 0L, "Headliner", 45,
                 originalShowDateTime, originalDoorsTime,
                 150, 8);
-        TicketsSold ticketsSold = new TicketsSold(concertId, 4, 4 * 45);
+        TicketsSold ticketsSold = new TicketsSold(concertId, 0L, 4, 4 * 45);
         ConcertRescheduled concertRescheduled = new ConcertRescheduled(
-                concertId, originalShowDateTime.plusMonths(2).plusHours(1),
+                concertId, 0L, originalShowDateTime.plusMonths(2).plusHours(1),
                 originalDoorsTime.plusHours(1));
         concertStore.save(concertId, List.of(concertScheduled, ticketsSold, concertRescheduled));
 
