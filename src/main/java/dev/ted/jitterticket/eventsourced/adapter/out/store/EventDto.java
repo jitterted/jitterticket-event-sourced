@@ -52,9 +52,6 @@ public class EventDto<EVENT extends Event> {
         try {
             String json = objectMapper.writeValueAsString(event);
             String fullyQualifiedClassName = event.getClass().getName();
-            if (fullyQualifiedClassName == null) {
-                throw new IllegalArgumentException("Unknown event class: " + event.getClass().getSimpleName());
-            }
             return new EventDto<>(aggRootId, eventId, fullyQualifiedClassName, json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
