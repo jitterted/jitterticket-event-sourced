@@ -95,9 +95,9 @@ class ConcertSummaryProjectorTest {
         ConcertId concertId = ConcertId.createRandom();
         LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
         LocalTime originalDoorsTime = LocalTime.of(18, 0);
-        ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0L, "Headliner", 45, originalShowDateTime, originalDoorsTime, 150, 8);
-        TicketsSold ticketsSold = new TicketsSold(concertId, 1L, 4, 4 * 45);
-        ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 2L, originalShowDateTime.plusMonths(2).plusHours(1), originalDoorsTime.plusHours(1));
+        ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0, "Headliner", 45, originalShowDateTime, originalDoorsTime, 150, 8);
+        TicketsSold ticketsSold = new TicketsSold(concertId, 1, 4, 4 * 45);
+        ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 2, originalShowDateTime.plusMonths(2).plusHours(1), originalDoorsTime.plusHours(1));
         concertStore.save(concertId, List.of(concertScheduled, ticketsSold, concertRescheduled));
 
         long desiredEventSequenceNumber = ticketsSold.eventSequence();

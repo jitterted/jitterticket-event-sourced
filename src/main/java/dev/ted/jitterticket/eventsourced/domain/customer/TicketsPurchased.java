@@ -4,7 +4,7 @@ import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
 public record TicketsPurchased(CustomerId customerId,
-                               Long eventSequence,
+                               Integer eventSequence,
                                TicketOrderId ticketOrderId,
                                ConcertId concertId,
                                int quantity,

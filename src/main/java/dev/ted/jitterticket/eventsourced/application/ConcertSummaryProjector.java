@@ -27,8 +27,8 @@ public class ConcertSummaryProjector {
                     .forEach(concertEvent -> {
                                  switch (concertEvent) {
                                      case ConcertScheduled(
-                                             ConcertId concertId,
-                                             Long eventSequence, String artist,
+                                             ConcertId concertId, _,
+                                             String artist,
                                              int ticketPrice,
                                              LocalDateTime showDateTime,
                                              LocalTime doorsTime,
@@ -36,7 +36,7 @@ public class ConcertSummaryProjector {
                                              views.put(concertId,
                                                     new ConcertSummary(concertId, artist, ticketPrice, showDateTime, doorsTime));
 
-                                     case ConcertRescheduled(ConcertId concertId, Long eventSequence,
+                                     case ConcertRescheduled(ConcertId concertId, _,
                                                              LocalDateTime newShowDateTime, LocalTime newDoorsTime) -> {
                                          ConcertSummary oldView = views.get(concertId);
                                          ConcertSummary rescheduledView = rescheduleTo(newShowDateTime, newDoorsTime, oldView);

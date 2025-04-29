@@ -5,7 +5,7 @@ import java.util.List;
 
 public abstract class EventSourcedAggregate<EVENT extends Event, ID extends Id> {
     private final List<EVENT> uncommittedEvents = new ArrayList<>();
-    protected long lastLoadedEventSequenceNumber = -1L;
+    protected int lastLoadedEventSequenceNumber = -1;
     private ID id;
 
     protected void enqueue(EVENT event) {
@@ -32,7 +32,7 @@ public abstract class EventSourcedAggregate<EVENT extends Event, ID extends Id> 
         this.id = id;
     }
 
-    protected Long nextEventSequenceNumber() {
+    protected Integer nextEventSequenceNumber() {
         return ++lastLoadedEventSequenceNumber;
     }
 }

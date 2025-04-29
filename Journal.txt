@@ -1,3 +1,10 @@
+Tuesday, April 29, 2025
+=======================
+
+[IntelliJ IDEA Bug/Missing Feature?]
+* Viewing Parameter Info on a Record Deconstruction Pattern in a switch block doesn't show anything
+* When refactor: Migrate Type in a Record component (property), it did not migrate the type in the switch pattern deconstruction for those records
+
 Monday, April 28, 2025
 ======================
 

@@ -6,7 +6,7 @@ public class CustomerFactory {
 
     public static Customer reconstituteWithRegisteredEvent() {
         CustomerRegistered customerRegistered = new CustomerRegistered(
-                CustomerId.createRandom(), 0L, "customer name", "email@example.com");
+                CustomerId.createRandom(), 0, "customer name", "email@example.com");
         return Customer.reconstitute(List.of(customerRegistered));
     }
 

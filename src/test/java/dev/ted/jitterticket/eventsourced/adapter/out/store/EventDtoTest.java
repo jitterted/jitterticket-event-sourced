@@ -96,7 +96,7 @@ class EventDtoTest {
     @MethodSource("events")
     void eventRoundTripConversion(Event sourceEvent) {
         EventDto<Event> eventDto = EventDto.from(UUID.randomUUID(),
-                                                 14L,
+                                                 14,
                                                  sourceEvent);
 
         Event actual = eventDto.toDomain();
@@ -108,23 +108,23 @@ class EventDtoTest {
     public static Stream<Arguments> events() {
         return Stream.of(
                 Arguments.of(new ConcertScheduled(ConcertId.createRandom(),
-                                                  0L, "artist",
+                                                  0, "artist",
                                                   99,
                                                   LocalDateTime.now(),
                                                   LocalTime.now().minusHours(1),
                                                   100,
                                                   4))
                 , Arguments.of(new ConcertRescheduled(ConcertId.createRandom(),
-                                                      0L, LocalDateTime.now(),
+                                                      0, LocalDateTime.now(),
                                                       LocalTime.now().minusHours(1)))
                 , Arguments.of(new CustomerRegistered(CustomerId.createRandom(),
-                                                      0L, "customer name",
+                                                      0, "customer name",
                                                       "email@example.com"))
                 , Arguments.of(new TicketsSold(ConcertId.createRandom(),
-                                               0L, 6, -1))
+                                               0, 6, -1))
                 , Arguments.of(new TicketsPurchased(
                         CustomerId.createRandom(),
-                        0L, TicketOrderId.createRandom(),
+                        0, TicketOrderId.createRandom(),
                         ConcertId.createRandom(), 4, 100))
         );
     }

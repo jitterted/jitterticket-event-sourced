@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class EventDto<EVENT extends Event> {
     private final UUID aggRootId; // ID for the Aggregate Root
-    private final Long eventSequence;
+    private final Integer eventSequence;
     private final String eventType;
     private final String json; // blob of data - schemaless
 
@@ -35,7 +35,7 @@ public class EventDto<EVENT extends Event> {
     //    so that when adding (and especially renaming) classes, the mapping works
 //    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public EventDto(UUID aggRootId, Long eventSequence, String eventClassName, String json) {
+    public EventDto(UUID aggRootId, Integer eventSequence, String eventClassName, String json) {
         if (eventClassName == null) {
             throw new IllegalArgumentException("Event class name cannot be null, JSON is: " + json);
         }
@@ -45,7 +45,7 @@ public class EventDto<EVENT extends Event> {
         this.json = json;
     }
 
-    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggRootId, Long eventSequence, EVENT event) {
+    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggRootId, Integer eventSequence, EVENT event) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public record ConcertRescheduled(ConcertId concertId,
-                                 Long eventSequence,
+                                 Integer eventSequence,
                                  LocalDateTime newShowDateTime,
                                  LocalTime newDoorsTime)
         implements ConcertEvent {
