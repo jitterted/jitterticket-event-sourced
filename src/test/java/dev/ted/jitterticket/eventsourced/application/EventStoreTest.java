@@ -111,14 +111,14 @@ class EventStoreTest {
         concert.sellTicketsTo(CustomerId.createRandom(), 2);
         concert.sellTicketsTo(CustomerId.createRandom(), 4);
         concert.sellTicketsTo(CustomerId.createRandom(), 1);
-        List<ConcertEvent> allEventsForConcert = concert.uncommittedEvents();
+        Stream<ConcertEvent> allEventsForConcert = concert.uncommittedEvents();
         concertStore.save(concert);
 
         List<ConcertEvent> eventsForAggregate =
                 concertStore.eventsForAggregate(concertId);
 
         assertThat(eventsForAggregate)
-                .containsExactlyElementsOf(allEventsForConcert);
+                .containsExactlyElementsOf(allEventsForConcert.toList());
     }
 
     @Test
@@ -129,13 +129,13 @@ class EventStoreTest {
         Concert concert = ConcertFactory.createConcert();
         customer.purchaseTickets(concert, TicketOrderId.createRandom(), 4);
         customer.purchaseTickets(concert, TicketOrderId.createRandom(), 2);
-        List<CustomerEvent> allEventsForCustomer = customer.uncommittedEvents();
+        Stream<CustomerEvent> allEventsForCustomer = customer.uncommittedEvents();
         customerStore.save(customer);
 
         List<CustomerEvent> eventsForAggregate = customerStore.eventsForAggregate(customerId);
 
         assertThat(eventsForAggregate)
-                .containsExactlyElementsOf(allEventsForCustomer);
+                .containsExactlyElementsOf(allEventsForCustomer.toList());
     }
 
     @Test
@@ -153,7 +153,7 @@ class EventStoreTest {
                 concertId, 0, originalShowDateTime.plusMonths(2).plusHours(1),
                 originalDoorsTime.plusHours(1));
 
-        concertStore.save(concertId, List.of(concertScheduled, ticketsSold, concertRescheduled));
+        concertStore.save(concertId, Stream.of(concertScheduled, ticketsSold, concertRescheduled));
 
         assertThat(concertStore.eventsForAggregate(concertId))
                 .containsExactly(concertScheduled, ticketsSold, concertRescheduled);

@@ -10,13 +10,13 @@
     [X] Show all Concerts, select a specific one to see its event stream history
         [X] In reverse chronological (event) order
     [X] Show state of the Aggregate
-    [ ] Show state as of a specific ("selected"?) event - defaults to most recent
+    [X] Show state as of a specific ("selected"?) event - defaults to most recent
         [X] Add selected event ID to the show events URL as a Query Param
         [X] Clicking on an event moves the "current" pointer to that event
-        [ ] Create a sublist of the events up to (and including) the selected event, then reconstitute the aggregate from the sublist
+        [X] Create a sublist of the events up to (and including) the selected event, then reconstitute the aggregate from the sublist
     [ ] Generalize to events for any Aggregate type for a specific Agg ID
 
-[ ] EventSourcedAggregate.uncommittedEvents() returns the internal mutable list! At least return a copy (preferably an unmodifiable List, or perhaps just a Stream)
+[X] EventSourcedAggregate.uncommittedEvents() returns the internal mutable list! At least return a copy (preferably an unmodifiable List, or perhaps just a Stream)
 
 [X] Check the EventDtoTest to ensure it's finding all of the concrete (record) events for the "parameterized" test
 

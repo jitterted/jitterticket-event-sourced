@@ -4,6 +4,7 @@ Tuesday, April 29, 2025
 [IntelliJ IDEA Bug/Missing Feature?]
 * Viewing Parameter Info on a Record Deconstruction Pattern in a switch block doesn't show anything
 * When refactoring to Migrate Type in a Record component (property), it did not migrate the type in the switch pattern deconstruction for those records (e.g., Long eventSequence to Integer)
+* Type migration of List<EVENT> to Stream<EVENT> messed up the tests that were using concrete types, so it changed List<ConcertEvent> to Stream<EVENT>!
 
 
 Monday, April 28, 2025

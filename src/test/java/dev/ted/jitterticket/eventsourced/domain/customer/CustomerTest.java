@@ -26,9 +26,9 @@ class CustomerTest {
 
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
-                            new CustomerRegistered(customerId,
-                                                   0, "customer name",
-                                                   "email@example.com")
+                            new CustomerRegistered[]{new CustomerRegistered(customerId,
+                                                                            0, "customer name",
+                                                                            "email@example.com")}
                     );
         }
 
@@ -44,11 +44,11 @@ class CustomerTest {
 
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
-                            new TicketsPurchased(customer.getId(),
-                                                 1,
-                                                 ticketOrderId,
-                                                 concert.getId(),
-                                                 quantity, paidAmount)
+                            new TicketsPurchased[]{new TicketsPurchased(customer.getId(),
+                                                                        1,
+                                                                        ticketOrderId,
+                                                                        concert.getId(),
+                                                                        quantity, paidAmount)}
                     );
         }
 

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -98,7 +97,7 @@ class ConcertSummaryProjectorTest {
         ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0, "Headliner", 45, originalShowDateTime, originalDoorsTime, 150, 8);
         TicketsSold ticketsSold = new TicketsSold(concertId, 1, 4, 4 * 45);
         ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 2, originalShowDateTime.plusMonths(2).plusHours(1), originalDoorsTime.plusHours(1));
-        concertStore.save(concertId, List.of(concertScheduled, ticketsSold, concertRescheduled));
+        concertStore.save(concertId, Stream.of(concertScheduled, ticketsSold, concertRescheduled));
 
         int desiredEventSequenceNumber = ticketsSold.eventSequence();
         var concertWithEvents = concertSummaryProjector.concertWithEventsThrough(concertId, desiredEventSequenceNumber);

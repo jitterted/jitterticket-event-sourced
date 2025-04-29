@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -26,12 +27,12 @@ public class ConcertTest {
             ConcertId concertId = ConcertId.createRandom();
             Concert concert = Concert.schedule(concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
 
-            List<ConcertEvent> events = concert.uncommittedEvents();
+            Stream<ConcertEvent> events = concert.uncommittedEvents();
 
             assertThat(events)
-                    .containsExactly(new ConcertScheduled(
+                    .containsExactly(new ConcertScheduled[]{new ConcertScheduled(
                             concertId, 0, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
-                    ));
+                    )});
         }
 
         @Test
@@ -47,10 +48,10 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new ConcertRescheduled(concert.getId(),
-                                                   1,
-                                                   newShowDateTime,
-                                                   newDoorsTime));
+                            new ConcertRescheduled[]{new ConcertRescheduled(concert.getId(),
+                                                                            1,
+                                                                            newShowDateTime,
+                                                                            newDoorsTime)});
         }
 
         @Test
@@ -67,7 +68,7 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new TicketsSold(concertId, 1, quantity, -1)
+                            new TicketsSold[]{new TicketsSold(concertId, 1, quantity, -1)}
                     );
         }
 

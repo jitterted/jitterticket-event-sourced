@@ -53,17 +53,16 @@ public class EventStore<
         if (aggregateId == null) {
             throw new IllegalArgumentException("The Aggregate " + aggregate + " must have an ID");
         }
-        List<EVENT> uncommittedEvents = aggregate.uncommittedEvents();
+        Stream<EVENT> uncommittedEvents = aggregate.uncommittedEvents();
 
         save(aggregateId, uncommittedEvents);
     }
 
-    public void save(ID aggregateId, List<EVENT> uncommittedEvents) {
+    public void save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
         List<EventDto<EVENT>> existingEventDtos = idToEventDtoMap
                 .computeIfAbsent(aggregateId, _ -> new ArrayList<>());
         List<EventDto<EVENT>> freshEventDtos =
-                uncommittedEvents.stream()
-                                 .map(event -> EventDto.from(
+                uncommittedEvents.map(event -> EventDto.from(
                                          aggregateId.id(),
                                          event.eventSequence(), // max(sequence) from existing events)
                                          event))
