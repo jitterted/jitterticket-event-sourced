@@ -41,13 +41,16 @@ public class EventViewerController {
 
     @GetMapping("/{concertId}")
     public String showConcertEvents(@PathVariable("concertId") String concertIdString,
-                                    @RequestParam(value = "selectedIndex", required = false, defaultValue = "0") int selectedIndex,
+                                    @RequestParam(value = "selectedEvent", required = false, defaultValue = "-1") int selectedEvent,
                                     Model model) {
         model.addAttribute("concertId", concertIdString);
-        model.addAttribute("selectedIndex", selectedIndex);
         ConcertId concertId = new ConcertId(UUID.fromString(concertIdString));
-        ConcertSummaryProjector.ConcertWithEvents concertWithEvents = concertSummaryProjector.concertWithEventsFor(concertId);
-        model.addAttribute("events", concertWithEvents.concertEvents().reversed());
+        if (selectedEvent == -1) {
+            selectedEvent = concertSummaryProjector.concertWithAllEventsFor(concertId).concertEvents().getLast().eventSequence();
+        }
+        model.addAttribute("selectedEvent", selectedEvent);
+        ConcertSummaryProjector.ConcertWithEvents concertWithEvents = concertSummaryProjector.concertWithEventsThrough(concertId, selectedEvent);
+        model.addAttribute("events", concertStore.eventsForAggregate(concertId).reversed());
         Concert concert = concertWithEvents.concert();
         model.addAttribute("projectedState",
                            List.of(

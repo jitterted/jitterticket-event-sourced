@@ -100,7 +100,7 @@ class ConcertSummaryProjectorTest {
         ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 2, originalShowDateTime.plusMonths(2).plusHours(1), originalDoorsTime.plusHours(1));
         concertStore.save(concertId, List.of(concertScheduled, ticketsSold, concertRescheduled));
 
-        long desiredEventSequenceNumber = ticketsSold.eventSequence();
+        int desiredEventSequenceNumber = ticketsSold.eventSequence();
         var concertWithEvents = concertSummaryProjector.concertWithEventsThrough(concertId, desiredEventSequenceNumber);
 
         assertThat(concertWithEvents.concertEvents())

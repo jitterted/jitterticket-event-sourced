@@ -6,6 +6,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ConcurrentModel;
@@ -63,11 +64,11 @@ class EventViewerControllerTest {
     }
 
     @Test
-    void showConcertEventsReturnsCorrectViewNameAndModelContents() {
-        Fixture fixture = createAndSaveConcertWithMultipleEvents();
+    void showConcertEventsReturnsCorrectViewNameAndModelContentsForMostRecentEvent() {
+        Fixture fixture = createAndSaveConcertWithThreeEvents();
 
         ConcurrentModel model = new ConcurrentModel();
-        String viewName = fixture.controller().showConcertEvents(fixture.concertIdAsString, 0, model);
+        String viewName = fixture.controller().showConcertEvents(fixture.concertIdAsString, -1, model);
 
         assertThat(viewName)
                 .isEqualTo("event-viewer/concert-events");
@@ -77,7 +78,7 @@ class EventViewerControllerTest {
 
         List<ConcertEvent> events = (List<ConcertEvent>) model.getAttribute("events");
         assertThat(events)
-                .hasSize(2);
+                .hasSize(fixture.concertEvents.size());
 
         assertThat(model)
                 .extracting("projectedState", InstanceOfAssertFactories.list(String.class))
@@ -90,42 +91,38 @@ class EventViewerControllerTest {
 
     @Test
     void defaultSelectedEventForShowConcertIsMostRecentEvent() {
-        Fixture fixture = createAndSaveConcertWithMultipleEvents();
+        Fixture fixture = createAndSaveConcertWithThreeEvents();
 
         ConcurrentModel model = new ConcurrentModel();
-        fixture.controller().showConcertEvents(fixture.concertIdAsString, 0, model);
+        int selectedEventAsDefault = -1;
+        fixture.controller().showConcertEvents(fixture.concertIdAsString, selectedEventAsDefault, model);
 
+        Integer defaultSelectedEvent = fixture.concertEvents.getLast().eventSequence();
         assertThat(model)
-                .containsEntry("selectedIndex", 0);
+                .containsEntry("selectedEvent", defaultSelectedEvent);
     }
 
     @Test
-    void selectedEventForShowConcertIsSelectedIndexFromQueryParam() {
-        Fixture fixture = createAndSaveConcertWithMultipleEvents();
+    void selectedEventForShowConcertShowsStateAsOfSelectedEventWithAllEventsDisplayed() {
+        Fixture fixture = createAndSaveConcertWithThreeEvents();
 
         ConcurrentModel model = new ConcurrentModel();
         fixture.controller().showConcertEvents(fixture.concertIdAsString,
-                                               2,
+                                               1,
                                                model);
 
         assertThat(model)
-                .containsEntry("selectedIndex", 2);
+                .containsEntry("selectedEvent", 1)
+                .extracting("events", InstanceOfAssertFactories.list(ConcertEvent.class))
+                .as("All events for the concert should be displayed, regardless of selected event")
+                .hasSize(fixture.concertEvents.size());
     }
 
-    private static Fixture createAndSaveConcertWithMultipleEvents() {
+    private static Fixture createAndSaveConcertWithThreeEvents() {
         var concertStore = EventStore.forConcerts();
         ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
 
         ConcertId concertId = ConcertId.createRandom();
-        Concert concert = scheduleAndRescheduleAndSave(concertId, concertStore);
-
-        EventViewerController controller = new EventViewerController(concertSummaryProjector, concertStore);
-        return new Fixture(concertId.id().toString(), concert, controller);
-    }
-
-    private record Fixture(String concertIdAsString, Concert concert, EventViewerController controller) {}
-
-    private static Concert scheduleAndRescheduleAndSave(ConcertId concertId, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         Concert concert = ConcertFactory.scheduleConcertWith(
                 concertId,
                 "Test Artist",
@@ -133,8 +130,14 @@ class EventViewerControllerTest {
                 LocalDateTime.of(2025, 7, 26, 20, 0),
                 LocalTime.of(19, 0));
         concert.rescheduleTo(concert.showDateTime().plusMonths(2), concert.doorsTime());
+        concert.sellTicketsTo(CustomerId.createRandom(), 4);
         concertStore.save(concert);
-        return concert;
+
+        EventViewerController controller = new EventViewerController(concertSummaryProjector, concertStore);
+        return new Fixture(concertId.id().toString(), concert, controller, concertStore.eventsForAggregate(concertId));
     }
+
+    private record Fixture(String concertIdAsString, Concert concert, EventViewerController controller,
+                           List<ConcertEvent> concertEvents) {}
 
 }
