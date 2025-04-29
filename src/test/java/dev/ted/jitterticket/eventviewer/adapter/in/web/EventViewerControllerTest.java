@@ -9,6 +9,8 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 
@@ -68,7 +70,9 @@ class EventViewerControllerTest {
         Fixture fixture = createAndSaveConcertWithThreeEvents();
 
         ConcurrentModel model = new ConcurrentModel();
-        String viewName = fixture.controller().showConcertEvents(fixture.concertIdAsString, -1, model);
+        int selectedEventSequence = fixture.concertEvents.getLast().eventSequence();
+        String viewName = fixture.controller().showConcertEvents(
+                fixture.concertIdAsString, selectedEventSequence, model);
 
         assertThat(viewName)
                 .isEqualTo("event-viewer/concert-events");
@@ -100,6 +104,20 @@ class EventViewerControllerTest {
         Integer defaultSelectedEvent = fixture.concertEvents.getLast().eventSequence();
         assertThat(model)
                 .containsEntry("selectedEvent", defaultSelectedEvent);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-999, 3, 999})
+    void outOfRangeSelectedEventsAreClampedToMostRecentEvent(int badSelectedEvent) {
+        Fixture fixture = createAndSaveConcertWithThreeEvents();
+
+        ConcurrentModel model = new ConcurrentModel();
+        fixture.controller().showConcertEvents(fixture.concertIdAsString,
+                                               badSelectedEvent, model);
+
+        Integer mostRecentEventSequence = fixture.concertEvents.getLast().eventSequence();
+        assertThat(model)
+                .containsEntry("selectedEvent", mostRecentEventSequence);
     }
 
     @Test

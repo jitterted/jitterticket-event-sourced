@@ -40,6 +40,6 @@ class EventViewerControllerMvcTest {
            .uri("/event-viewer/" + concertId.id())
            .assertThat()
            .hasStatus2xxSuccessful()
-           .model().containsEntry("selectedIndex", -1);
+           .model().containsEntry("selectedEvent", 0);
     }
 }

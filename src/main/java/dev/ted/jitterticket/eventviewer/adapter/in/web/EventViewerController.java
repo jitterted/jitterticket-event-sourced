@@ -45,13 +45,14 @@ public class EventViewerController {
                                     Model model) {
         model.addAttribute("concertId", concertIdString);
         ConcertId concertId = new ConcertId(UUID.fromString(concertIdString));
-        if (selectedEvent == -1) {
-            selectedEvent = concertSummaryProjector.concertWithAllEventsFor(concertId).concertEvents().getLast().eventSequence();
+        List<ConcertEvent> allConcertEvents = concertStore.eventsForAggregate(concertId);
+        if (selectedEvent < 0 || selectedEvent > allConcertEvents.getLast().eventSequence()) {
+            selectedEvent = allConcertEvents.getLast().eventSequence();
         }
         model.addAttribute("selectedEvent", selectedEvent);
-        ConcertSummaryProjector.ConcertWithEvents concertWithEvents = concertSummaryProjector.concertWithEventsThrough(concertId, selectedEvent);
-        model.addAttribute("events", concertStore.eventsForAggregate(concertId).reversed());
-        Concert concert = concertWithEvents.concert();
+        model.addAttribute("events", allConcertEvents.reversed());
+
+        Concert concert = reconstituteThroughSelectedEventSequence(selectedEvent, allConcertEvents);
         model.addAttribute("projectedState",
                            List.of(
                                    "Artist: " + concert.artist(),
@@ -60,6 +61,18 @@ public class EventViewerController {
                                    "Tickets Remaining: " + concert.availableTicketCount()
                            ));
         return "event-viewer/concert-events";
+    }
+
+    private static Concert reconstituteThroughSelectedEventSequence(int selectedEvent, List<ConcertEvent> allConcertEvents) {
+        int eventIndex = allConcertEvents.size() - 1;
+        for (int i = 0; i < allConcertEvents.size(); i++) {
+            if (allConcertEvents.get(i).eventSequence() == selectedEvent) {
+                eventIndex = i;
+                break;
+            }
+        }
+        List<ConcertEvent> selectedConcertEvents = allConcertEvents.subList(0, eventIndex + 1);
+        return Concert.reconstitute(selectedConcertEvents);
     }
 
 }
