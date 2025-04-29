@@ -141,14 +141,18 @@ public class TixConfiguration {
                 LocalDateTime.of(2025, 7, 26, 20, 0),
                 LocalTime.of(19, 0),
                 100,
-                4);
+                8);
 
         sonicWavesConcert.rescheduleTo(
                 LocalDateTime.of(2025, 8, 2, 21, 0),
                 LocalTime.of(20, 0));
 
-        sonicWavesConcert.sellTicketsTo(CustomerId.createRandom(), 10);
-        sonicWavesConcert.sellTicketsTo(CustomerId.createRandom(), 5);
+        sonicWavesConcert.sellTicketsTo(CustomerId.createRandom(), 8);
+        sonicWavesConcert.sellTicketsTo(CustomerId.createRandom(), 4);
+        sonicWavesConcert.sellTicketsTo(CustomerId.createRandom(), 2);
+        sonicWavesConcert.sellTicketsTo(CustomerId.createRandom(), 1);
+        sonicWavesConcert.sellTicketsTo(CustomerId.createRandom(), 2);
+        sonicWavesConcert.sellTicketsTo(CustomerId.createRandom(), 3);
 
         concertStore.save(sonicWavesConcert);
     }

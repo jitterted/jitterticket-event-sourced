@@ -80,8 +80,9 @@ class EventViewerControllerTest {
         assertThat(model)
                 .containsEntry("concertId", fixture.concertIdAsString);
 
-        List<ConcertEvent> events = (List<ConcertEvent>) model.getAttribute("events");
+        List<EventView> events = (List<EventView>) model.getAttribute("events");
         assertThat(events)
+                .hasOnlyElementsOfType(EventView.class)
                 .hasSize(fixture.concertEvents.size());
 
         assertThat(model)

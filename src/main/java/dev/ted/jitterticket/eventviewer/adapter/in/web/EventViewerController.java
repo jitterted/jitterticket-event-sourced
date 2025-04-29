@@ -50,7 +50,7 @@ public class EventViewerController {
             selectedEvent = allConcertEvents.getLast().eventSequence();
         }
         model.addAttribute("selectedEvent", selectedEvent);
-        model.addAttribute("events", allConcertEvents.reversed());
+        model.addAttribute("events", eventViewsOf(allConcertEvents));
 
         Concert concert = reconstituteThroughSelectedEventSequence(selectedEvent, allConcertEvents);
         model.addAttribute("projectedState",
@@ -61,6 +61,12 @@ public class EventViewerController {
                                    "Tickets Remaining: " + concert.availableTicketCount()
                            ));
         return "event-viewer/concert-events";
+    }
+
+    private static List<EventView> eventViewsOf(List<ConcertEvent> allConcertEvents) {
+        return allConcertEvents.reversed().stream()
+                               .map(EventView::of)
+                               .toList();
     }
 
     private static Concert reconstituteThroughSelectedEventSequence(int selectedEvent, List<ConcertEvent> allConcertEvents) {

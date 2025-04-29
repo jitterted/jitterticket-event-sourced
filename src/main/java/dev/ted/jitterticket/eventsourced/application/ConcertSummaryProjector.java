@@ -61,13 +61,6 @@ public class ConcertSummaryProjector {
         );
     }
 
-    public ConcertWithEvents concertWithAllEventsFor(ConcertId concertId) {
-        List<ConcertEvent> concertEvents = concertStore
-                .eventsForAggregate(concertId);
-        Concert concert = Concert.reconstitute(concertEvents);
-        return new ConcertWithEvents(concertEvents, concert);
-    }
-
     public ConcertWithEvents concertWithEventsThrough(ConcertId concertId, int desiredEventSequenceNumber) {
         List<ConcertEvent> concertEvents = concertStore
                 .eventsForAggregate(concertId)

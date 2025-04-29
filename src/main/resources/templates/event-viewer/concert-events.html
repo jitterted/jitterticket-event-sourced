@@ -7,6 +7,8 @@
             display: grid;
             grid-template-columns: 70% 30%;
             gap: 10px;
+            height: 80vh;
+            margin-bottom: 20px;
         }
 
         .header {
@@ -20,6 +22,8 @@
         .events-column {
             grid-column: 1;
             grid-row: 2;
+            overflow-y: auto;
+            padding-right: 10px;
         }
 
         .event-row {
@@ -28,12 +32,11 @@
 
         .event-details {
             padding: 8px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #aaa;
         }
 
         .event-selected {
-            border-top: 1px dashed darkgreen;
-            background-color: palegreen;
+            background-color: #d8ffd8;
         }
 
         .event-link {
@@ -55,21 +58,24 @@
     <div class="header">Event Details</div>
 
     <div class="projected-state">
-        <p th:text="${projectedState}">Artist: Test Artist...</p>
+        <div th:each="stateItem : ${projectedState}" style="margin-bottom: 8px;">
+            <div th:text="${stateItem}" style="display: block;">Artist: Sonic Waves</div>
+        </div>
     </div>
 
     <div class="events-column">
-        <div class="event-row" th:each="event : ${events}">
+        <div class="event-row" th:each="eventView : ${events}">
             <div class="event-details"
-                 th:classappend="${selectedEvent == event.eventSequence} ? 'event-selected' : ''">
+                 th:classappend="${selectedEvent >= eventView.eventSequence} ? 'event-selected' : ''">
                 <a class="event-link"
                    href="#"
-                   th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${event.eventSequence})}"
-                   th:text="${event}">
-                    ConcertScheduled[concertId=ConcertId[id=af05fc05-2de1-46d8-9568-01381029feb7],
-                    artist=Jittery Pigs, ticketPrice=2500, showDateTime=2023-12-15T20:00,
-                    doorsTime=19:00,
-                    capacity=250, maxTicketsPerPurchase=4]
+                   th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
+                   >
+                    <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
+                    <div th:each="field : ${eventView.fields()}">
+                        <strong th:text="${field.name()}">Artist</strong>:
+                        <span th:text="${field.value()}">Sonic Waves</span>
+                    </div>
                 </a>
             </div>
         </div>
