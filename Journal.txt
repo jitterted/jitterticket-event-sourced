@@ -7,6 +7,7 @@ Monday, April 28, 2025
         This would be annoying, because Events are Records, so would have to create a new record, copying over most of the information, with the new record having the correct sequence. This would be difficult, because each Event record is different, so each Event would need a "wither" for updating the sequence.
     ✅2. Increment/track it in the EventSourcedAggregate:
         This is probably the place to do it, since the aggregate can retain the "high water mark" of event sequence numbers and hand them out when the events are created by the Aggregate.
+    => It's very annoying to use Records for the event objects themselves, because we can't easily update the event sequence number (nor the aggregate ID), so have to have those numbers/IDs at the time the aggregate creates & enqueues the events. If they were classes, the base EventSourcedAggregate could assign those values.
 
 [Design Decision]
 * Need to store a Concert from its events (for testing, when I need to be explicit about the events, e.g., in the test `projectsStateOnlyThroughSelectedEvent`), but if we want to create/store from events, we either need to:

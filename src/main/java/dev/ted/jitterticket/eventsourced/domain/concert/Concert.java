@@ -30,7 +30,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
 
     private Concert(ConcertId concertId, String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
         ConcertScheduled concertScheduled = new ConcertScheduled(
-                concertId, 0L, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
+                concertId, nextEventSequenceNumber(), artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
         );
         enqueue(concertScheduled);
     }
@@ -47,8 +47,8 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     protected void apply(ConcertEvent concertEvent) {
         switch (concertEvent) {
             case ConcertScheduled(
-                    ConcertId concertId,
-                    Long eventSequence, String artist,
+                    ConcertId concertId, _,
+                    String artist,
                     int ticketPrice,
                     LocalDateTime showDateTime,
                     LocalTime doorsTime,
@@ -65,15 +65,14 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 this.maxTicketsPerPurchase = maxTicketsPerPurchase;
             }
 
-            case ConcertRescheduled(_,
-                                    Long eventSequence, LocalDateTime newShowDateTime,
+            case ConcertRescheduled(_, _, LocalDateTime newShowDateTime,
                                     LocalTime newDoorsTime
             ) -> {
                 this.showDateTime = newShowDateTime;
                 this.doorsTime = newDoorsTime;
             }
 
-            case TicketsSold(_, Long eventSequence, int quantity, _) ->
+            case TicketsSold(_, _, int quantity, _) ->
                     this.availableTicketCount -= quantity;
         }
     }

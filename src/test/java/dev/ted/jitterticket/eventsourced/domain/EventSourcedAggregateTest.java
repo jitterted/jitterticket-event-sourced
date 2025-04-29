@@ -49,6 +49,17 @@ class EventSourcedAggregateTest {
     }
 
     @Test
+    void eventSequenceNumbersAssignedUponCommandExecutionForConcert() {
+        Concert concert = ConcertFactory.createConcert();
+        concert.rescheduleTo(concert.showDateTime().plusMonths(1), concert.doorsTime());
+        concert.sellTicketsTo(CustomerId.createRandom(), 4);
+
+        assertThat(concert.uncommittedEvents())
+                .extracting(Event::eventSequence)
+                .containsExactly(0L, 1L, 2L);
+    }
+
+    @Test
     void eventSequenceAssignmentTakesIntoAccountEventsLoadedDuringReconstitution() {
         CustomerId customerId = CustomerId.createRandom();
         CustomerRegistered customerRegistered = new CustomerRegistered(
@@ -64,6 +75,7 @@ class EventSourcedAggregateTest {
                 .extracting(Event::eventSequence)
                 .containsExactly(2L);
     }
+
     @Test
     void eventSequenceAssignmentTakesIntoAccountEventsLoadedDuringReconstitutionForConcert() {
         ConcertId concertId = ConcertId.createRandom();
