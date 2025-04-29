@@ -9,7 +9,6 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -61,15 +60,4 @@ public class ConcertSummaryProjector {
         );
     }
 
-    public ConcertWithEvents concertWithEventsThrough(ConcertId concertId, int desiredEventSequenceNumber) {
-        List<ConcertEvent> concertEvents = concertStore
-                .eventsForAggregate(concertId)
-                .stream()
-                .filter(concertEvent -> concertEvent.eventSequence() <= desiredEventSequenceNumber)
-                .toList();
-        Concert concert = Concert.reconstitute(concertEvents);
-        return new ConcertWithEvents(concertEvents, concert);
-    }
-
-    public record ConcertWithEvents(List<ConcertEvent> concertEvents, Concert concert) {}
 }

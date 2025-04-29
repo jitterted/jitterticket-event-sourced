@@ -3,9 +3,6 @@ package dev.ted.jitterticket.eventsourced.application;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -87,25 +84,4 @@ class ConcertSummaryProjectorTest {
                         LocalTime.of(19, 0)));
     }
 
-    @Test
-    void projectsStateOnlyThroughDesiredEvent() {
-        var concertStore = EventStore.forConcerts();
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
-        ConcertId concertId = ConcertId.createRandom();
-        LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
-        LocalTime originalDoorsTime = LocalTime.of(18, 0);
-        ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0, "Headliner", 45, originalShowDateTime, originalDoorsTime, 150, 8);
-        TicketsSold ticketsSold = new TicketsSold(concertId, 1, 4, 4 * 45);
-        ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 2, originalShowDateTime.plusMonths(2).plusHours(1), originalDoorsTime.plusHours(1));
-        concertStore.save(concertId, Stream.of(concertScheduled, ticketsSold, concertRescheduled));
-
-        int desiredEventSequenceNumber = ticketsSold.eventSequence();
-        var concertWithEvents = concertSummaryProjector.concertWithEventsThrough(concertId, desiredEventSequenceNumber);
-
-        assertThat(concertWithEvents.concertEvents())
-                .containsExactly(concertScheduled, ticketsSold);
-        assertThat(concertWithEvents.concert().showDateTime())
-                .as("Show Date/Time should be the original as we shouldn't have played back the rescheduling event")
-                .isEqualTo(originalShowDateTime);
-    }
 }
