@@ -14,9 +14,15 @@
             --border-color: #e0e0e0;
         }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-            line-height: 1.6;
+            line-height: 1.5;
             color: var(--primary-color);
             background-color: #fff;
             padding: 20px;
@@ -37,19 +43,16 @@
         h1 {
             font-size: 2.2rem;
             margin-bottom: 0.5rem;
-            color: var(--primary-color);
         }
 
         h2 {
             font-size: 1.5rem;
             margin-bottom: 1.5rem;
-            color: var(--secondary-color);
         }
 
         h3 {
             font-size: 1.2rem;
             margin-bottom: 0.75rem;
-            color: var(--primary-color);
         }
 
         a {
@@ -63,23 +66,31 @@
             text-decoration: underline;
         }
 
-        .grid-container {
-            display: grid;
-            grid-template-columns: 70% 30%;
-            flex: 0 1 auto; /* don't grow, can shrink, auto basis */
-            border-radius: 8px;
-            overflow: hidden;
+        header {
+            background-color: #3b82f6;
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10; /* Ensure header stays on top */
+        }
+
+        main {
+            flex: 1; /* Take up all available space */
+            background-color: #f9fafb;
+            padding: 0; /* Remove padding as we'll handle it in the columns */
+            overflow: hidden; /* Prevent overflow at the main level */
+        }
+
+        .main-container {
+            display: flex;
+            height: 100%;
         }
 
         .events-column {
-            grid-column: 1;
-            grid-row: 1;
+            width: 70%;
             overflow-y: auto;
             padding: 0 15px 0 0;
-        }
-
-        .event-row {
-            display: contents;
+            margin-bottom: 1rem;
         }
 
         .event-details {
@@ -97,6 +108,9 @@
         .event-selected {
             background-color: rgba(76, 175, 80, 0.1);
             border-left: 4px solid var(--accent-color);
+            &:hover {
+                background-color: rgba(76, 175, 80, 0.3);
+            }
         }
 
         .event-link {
@@ -110,10 +124,9 @@
         }
 
         .projected-state {
-            grid-column: 2;
-            grid-row: 1;
+            width: 30%;
+            padding: 2rem;
             background-color: var(--light-bg);
-            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
@@ -159,77 +172,142 @@
             color: var(--secondary-color);
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .grid-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto;
-                height: auto;
-            }
-
-            .events-column {
-                grid-column: 1;
-                grid-row: 2;
-                padding: 0;
-                margin-bottom: 20px;
-            }
-
-            .projected-state {
-                grid-column: 1;
-                grid-row: 1;
-                margin-bottom: 20px;
-            }
-
-            body {
-                padding: 15px;
-            }
-
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            h2 {
-                font-size: 1.3rem;
-            }
+        footer {
+            padding: 1rem 0;
         }
-
     </style>
 </head>
 <body>
 <header>
     <h1>Concert Events</h1>
-    <h2>Concert ID: <span th:text="${concertId}">af05fc05-2de1-46d8-9568-01381029feb7</span></h2>
+    <h3>Concert ID: <span th:text="${concertId}">af05fc05-2de1-46d8-9568-01381029feb7</span></h3>
 </header>
 
-<div class="grid-container">
-    <div class="projected-state">
-        <h3>Projected State</h3>
-        <div th:each="stateItem : ${projectedState}" class="state-item">
-            <div th:text="${stateItem}">Artist: Sonic Waves</div>
-        </div>
-    </div>
-
-    <div class="events-column">
-        <div class="event-row" th:each="eventView : ${events}">
-            <div class="event-details"
-                 th:classappend="${selectedEvent >= eventView.eventSequence} ? 'event-selected' : ''">
-                <a class="event-link"
-                   href="#"
-                   th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
-                   >
-                    <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
-                    <div th:each="field : ${eventView.fields()}" class="event-field">
-                        <strong th:text="${field.name()}">Artist</strong>:
-                        <span th:text="${field.value()}">Sonic Waves</span>
-                    </div>
-                </a>
+<main>
+    <div class="main-container">
+        <div class="events-column">
+            <div class="event-row" th:each="eventView : ${events}">
+                <div class="event-details"
+                     th:classappend="${selectedEvent >= eventView.eventSequence} ? 'event-selected' : ''">
+                    <a class="event-link"
+                       href="#"
+                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
+                    >
+                        <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                            <strong th:text="${field.name()}">Artist</strong>:
+                            <span th:text="${field.value()}">Sonic Waves</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="event-details event-selected" th:remove="all">
+                    <a class="event-link"
+                       href="#"
+                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
+                    >
+                        <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                            <strong th:text="${field.name()}">Artist</strong>:
+                            <span th:text="${field.value()}">Sonic Waves</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="event-details event-selected" th:remove="all">
+                    <a class="event-link"
+                       href="#"
+                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
+                    >
+                        <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                            <strong th:text="${field.name()}">eventSequence</strong>:
+                            <span th:text="${field.value()}">5</span>
+                        </div>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                            <strong th:text="${field.name()}">Artist</strong>:
+                            <span th:text="${field.value()}">Sonic Waves</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="event-details event-selected" th:remove="all">
+                    <a class="event-link"
+                       href="#"
+                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
+                    >
+                        <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">eventSequence</strong>:
+                                <span th:text="${field.value()}">4</span>
+                            </div>
+                            <strong th:text="${field.name()}">Artist</strong>:
+                            <span th:text="${field.value()}">Sonic Waves</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="event-details event-selected" th:remove="all">
+                    <a class="event-link"
+                       href="#"
+                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
+                    >
+                        <h3 th:text="${eventView.eventName()}">ConcertRescheduled</h3>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                            <strong th:text="${field.name()}">eventSequence</strong>:
+                            <span th:text="${field.value()}">3</span>
+                        </div>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                            <strong th:text="${field.name()}">newShowDateTime</strong>:
+                            <span th:text="${field.value()}">2025-09-20T21:00</span>
+                        </div>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">                            <strong th:text="${field.name()}">newShowDateTime</strong>:
+                            <strong th:text="${field.name()}">newDoorsTime</strong>:
+                            <span th:text="${field.value()}">20:00</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="event-details event-selected" th:remove="all">
+                    <a class="event-link"
+                       href="#"
+                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
+                    >
+                        <h3 th:text="${eventView.eventName()}">ConcertRescheduled</h3>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                            <strong th:text="${field.name()}">eventSequence</strong>:
+                            <span th:text="${field.value()}">2</span>
+                        </div>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                            <strong th:text="${field.name()}">newShowDateTime</strong>:
+                            <span th:text="${field.value()}">2025-09-20T21:00</span>
+                        </div>
+                        <div th:each="field : ${eventView.fields()}" class="event-field">                            <strong th:text="${field.name()}">newShowDateTime</strong>:
+                            <strong th:text="${field.name()}">newDoorsTime</strong>:
+                            <span th:text="${field.value()}">20:00</span>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="footer">
+        <div class="projected-state">
+            <h3>Projected State</h3>
+            <div th:each="stateItem : ${projectedState}" class="state-item">
+                <div th:text="${stateItem}">Artist: Sonic Waves</div>
+                <div th:remove="all">
+                    Show Time: 2025-08-02T21:00
+                </div>
+                <div th:remove="all">
+                    Doors Time: 20:00
+                </div>
+                <div th:remove="all">
+                    Tickets Remaining: 83
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer>
     <a th:href="@{/event-viewer}" href="#" class="back-link">Back to Concert List</a>
-</div>
+</footer>
 </body>
 </html>
