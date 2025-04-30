@@ -19,10 +19,11 @@
             line-height: 1.6;
             color: var(--primary-color);
             background-color: #fff;
-            margin: 0;
             padding: 20px;
             max-width: 1200px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
         }
 
         h1, h2, h3 {
@@ -64,10 +65,10 @@
             display: grid;
             grid-template-columns: 70% 30%;
             gap: 20px;
-            height: 80vh;
-            margin-bottom: 30px;
+            height: calc(100vh - 200px); /* Explicitly calculate height to leave room for header and footer */
             border-radius: 8px;
             overflow: hidden;
+            margin-bottom: 20px;
         }
 
         .events-column {
@@ -118,12 +119,13 @@
         }
 
         .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 8px 16px;
+            position: sticky;
+            bottom: 0;
             background-color: var(--light-bg);
+            padding: 8px 16px;
             border-radius: 4px;
             transition: background-color 0.2s;
+            z-index: 1;
         }
 
         .back-link:hover {
@@ -191,6 +193,10 @@
                 font-size: 1.3rem;
             }
         }
+
+        header {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -226,6 +232,8 @@
     </div>
 </div>
 
-<p><a th:href="@{/event-viewer}" href="#" class="back-link">Back to Concert List</a></p>
+<div class="footer">
+    <a th:href="@{/event-viewer}" href="#" class="back-link">Back to Concert List</a>
+</div>
 </body>
 </html>
