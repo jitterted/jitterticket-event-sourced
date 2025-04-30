@@ -26,9 +26,17 @@ class EventViewerControllerMvcTest {
     EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
     @Test
-    void getConcertListEndpointReturns200Ok() {
+    void getEventViewerProjectionChoicesReturns200Ok() {
         mvc.get()
            .uri("/event-viewer")
+           .assertThat()
+           .hasStatus2xxSuccessful();
+    }
+
+    @Test
+    void getConcertListEndpointReturns200Ok() {
+        mvc.get()
+           .uri("/event-viewer/concerts")
            .assertThat()
            .hasStatus2xxSuccessful();
     }
@@ -37,7 +45,7 @@ class EventViewerControllerMvcTest {
     void getConcertEventsEndpointReturns200Ok() {
         ConcertId concertId = ConcertFactory.Store.createSavedConcertIn(concertStore);
         mvc.get()
-           .uri("/event-viewer/" + concertId.id())
+           .uri("/event-viewer/concerts/" + concertId.id())
            .assertThat()
            .hasStatus2xxSuccessful()
            .model().containsEntry("selectedEvent", 0);

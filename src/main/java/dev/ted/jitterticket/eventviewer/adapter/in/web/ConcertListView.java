@@ -4,7 +4,7 @@ import dev.ted.jitterticket.eventsourced.application.ConcertSummary;
 
 public record ConcertListView(String concertId, String artist) {
     
-    public static ConcertListView from(ConcertSummary concertSummary) {
+    public static ConcertListView of(ConcertSummary concertSummary) {
         return new ConcertListView(
                 concertSummary.concertId().id().toString(),
                 concertSummary.artist()

@@ -30,16 +30,22 @@ public class EventViewerController {
     }
 
     @GetMapping
+    public String listProjectionChoices(Model model) {
+        return "event-viewer/projection-choices";
+    }
+
+
+    @GetMapping("/concerts")
     public String listConcerts(Model model) {
         List<ConcertListView> concertListViews =
                 concertSummaryProjector.allConcertSummaries()
-                                       .map(ConcertListView::from)
+                                       .map(ConcertListView::of)
                                        .toList();
         model.addAttribute("concerts", concertListViews);
         return "event-viewer/concert-aggregates";
     }
 
-    @GetMapping("/{concertId}")
+    @GetMapping("/concerts/{concertId}")
     public String showConcertEvents(@PathVariable("concertId") String concertIdString,
                                     @RequestParam(value = "selectedEvent", required = false, defaultValue = "-1") int selectedEvent,
                                     Model model) {

@@ -15,6 +15,7 @@
         [X] Clicking on an event moves the "current" pointer to that event
         [X] Create a sublist of the events up to (and including) the selected event, then reconstitute the aggregate from the sublist
     [X] Improve layout of events in the event list
+===>> CURRENT TASK:
     [ ] Generalize to events for any Aggregate type for a specific Agg ID
 
 [ ] Convert Events from Record to Class
