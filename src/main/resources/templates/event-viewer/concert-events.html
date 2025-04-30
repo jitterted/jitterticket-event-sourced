@@ -22,8 +22,10 @@
             padding: 20px;
             max-width: 1200px;
             margin: 0 auto;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         h1, h2, h3 {
@@ -64,11 +66,9 @@
         .grid-container {
             display: grid;
             grid-template-columns: 70% 30%;
-            gap: 20px;
-            height: calc(100vh - 200px); /* Explicitly calculate height to leave room for header and footer */
+            flex: 0 1 auto; /* don't grow, can shrink, auto basis */
             border-radius: 8px;
             overflow: hidden;
-            margin-bottom: 20px;
         }
 
         .events-column {
@@ -137,7 +137,6 @@
         }
 
         .state-item > div {
-            display: block;
             margin-bottom: 12px;
             padding: 8px;
             background-color: white;
@@ -194,9 +193,6 @@
             }
         }
 
-        header {
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
