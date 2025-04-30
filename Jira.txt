@@ -17,7 +17,11 @@
     [X] Improve layout of events in the event list
     [ ] Generalize to events for any Aggregate type for a specific Agg ID
 
-[ ] Clean up ConcertSummaryProjector (remove concertWithEventsThrough()).
+[ ] Convert Events from Record to Class
+
+[ ] Persistence! File and then database
+
+[X] Clean up ConcertSummaryProjector (remove concertWithEventsThrough()).
 
 [X] EventSourcedAggregate.uncommittedEvents() returns the internal mutable list! At least return a copy (preferably an unmodifiable List, or perhaps just a Stream)
 

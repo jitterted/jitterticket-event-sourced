@@ -1,21 +1,80 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Concert Events</title>
     <style>
+        /* Modern typography and spacing */
+        :root {
+            --primary-color: #333;
+            --secondary-color: #666;
+            --accent-color: #4CAF50;
+            --light-bg: #f8f9fa;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            color: var(--primary-color);
+            background-color: #fff;
+            margin: 0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            margin-top: 0;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary-color);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        a {
+            color: #2962FF;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #0039CB;
+            text-decoration: underline;
+        }
+
         .grid-container {
             display: grid;
             grid-template-columns: 70% 30%;
-            gap: 10px;
+            gap: 20px;
             height: 80vh;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .events-column {
             grid-column: 1;
-            grid-row: 2;
+            grid-row: 1;
             overflow-y: auto;
-            padding-right: 10px;
+            padding: 0 15px 0 0;
         }
 
         .event-row {
@@ -23,33 +82,128 @@
         }
 
         .event-details {
-            padding: 8px 0;
-            border-bottom: 1px solid #aaa;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .event-details:hover {
+            background-color: var(--light-bg);
         }
 
         .event-selected {
-            background-color: #d8ffd8;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid var(--accent-color);
         }
 
         .event-link {
-            color: #111;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: block;
+        }
+
+        .event-link:hover {
             text-decoration: none;
         }
 
         .projected-state {
             grid-column: 2;
-            grid-row: 2;
+            grid-row: 1;
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 16px;
+            background-color: var(--light-bg);
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .back-link:hover {
+            background-color: #e9ecef;
+        }
+
+        .state-item {
+            margin-bottom: 15px;
+        }
+
+        .state-item > div {
+            display: block;
+            margin-bottom: 12px;
+            padding: 8px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .event-field {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .event-field strong {
+            display: inline-block;
+            min-width: 80px;
+            font-weight: 600;
+        }
+
+        .event-field span {
+            color: var(--secondary-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                height: auto;
+            }
+
+            .events-column {
+                grid-column: 1;
+                grid-row: 2;
+                padding: 0;
+                margin-bottom: 20px;
+            }
+
+            .projected-state {
+                grid-column: 1;
+                grid-row: 1;
+                margin-bottom: 20px;
+            }
+
+            body {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
         }
     </style>
 </head>
 <body>
-<h1>Concert Events</h1>
-<h2>Concert ID: <span th:text="${concertId}">af05fc05-2de1-46d8-9568-01381029feb7</span></h2>
+<header>
+    <h1>Concert Events</h1>
+    <h2>Concert ID: <span th:text="${concertId}">af05fc05-2de1-46d8-9568-01381029feb7</span></h2>
+</header>
 
 <div class="grid-container">
     <div class="projected-state">
-        <div th:each="stateItem : ${projectedState}" style="margin-bottom: 8px;">
-            <div th:text="${stateItem}" style="display: block;">Artist: Sonic Waves</div>
+        <h3>Projected State</h3>
+        <div th:each="stateItem : ${projectedState}" class="state-item">
+            <div th:text="${stateItem}">Artist: Sonic Waves</div>
         </div>
     </div>
 
@@ -62,7 +216,7 @@
                    th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
                    >
                     <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
-                    <div th:each="field : ${eventView.fields()}">
+                    <div th:each="field : ${eventView.fields()}" class="event-field">
                         <strong th:text="${field.name()}">Artist</strong>:
                         <span th:text="${field.value()}">Sonic Waves</span>
                     </div>
@@ -72,6 +226,6 @@
     </div>
 </div>
 
-<p><a th:href="@{/event-viewer}" href="#">Back to Concert List</a></p>
+<p><a th:href="@{/event-viewer}" href="#" class="back-link">Back to Concert List</a></p>
 </body>
 </html>
