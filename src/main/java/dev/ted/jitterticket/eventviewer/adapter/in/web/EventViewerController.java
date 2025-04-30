@@ -1,10 +1,7 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
-import dev.ted.jitterticket.eventsourced.application.EventStore;
-import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,29 +12,32 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Controller
 @RequestMapping("/event-viewer")
 public class EventViewerController {
 
     private final ConcertSummaryProjector concertSummaryProjector;
-    private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
+    private final Function<List<? extends Event>, List<String>> eventsToStrings;
+    private final Function<UUID, List<? extends Event>> uuidToAllEventsForConcert;
 
     @Autowired
-    public EventViewerController(ConcertSummaryProjector concertSummaryProjector, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    public EventViewerController(ConcertSummaryProjector concertSummaryProjector,
+                                 ProjectionChoice concertProjectionChoice) {
         this.concertSummaryProjector = concertSummaryProjector;
-        this.concertStore = concertStore;
+        this.uuidToAllEventsForConcert = concertProjectionChoice.uuidToAllEvents();
+        this.eventsToStrings = concertProjectionChoice.eventsToStrings();
     }
 
     @GetMapping
     public String listProjectionChoices(Model model) {
-        model.addAttribute("projections", List.of(new EventViewerController.ProjectionChoice("Concerts", "/event-viewer/concerts"),
-                                                  new EventViewerController.ProjectionChoice("Concert Summaries", "/event-viewer/concert-summaries"),
-                                                  new EventViewerController.ProjectionChoice("Customers", "/event-viewer/customers")));
+        model.addAttribute("projections",
+                           List.of(new ProjectionChoice("Concerts", "/event-viewer/concerts", uuidToAllEventsForConcert, eventsToStrings),
+                                   new ProjectionChoice("Concert Summaries", "/event-viewer/concert-summaries", null, null),
+                                   new ProjectionChoice("Customers", "/event-viewer/customers", null, null)));
         return "event-viewer/projection-choices";
     }
-
-    record ProjectionChoice(String description, String urlPath) {}
 
     @GetMapping("/concerts")
     public String listConcerts(Model model) {
@@ -54,41 +54,38 @@ public class EventViewerController {
                                     @RequestParam(value = "selectedEvent", required = false, defaultValue = "-1") int selectedEvent,
                                     Model model) {
         model.addAttribute("concertId", concertIdString);
-        ConcertId concertId = new ConcertId(UUID.fromString(concertIdString));
-        List<ConcertEvent> allConcertEvents = concertStore.eventsForAggregate(concertId);
-        if (selectedEvent < 0 || selectedEvent > allConcertEvents.getLast().eventSequence()) {
-            selectedEvent = allConcertEvents.getLast().eventSequence();
+        UUID uuid = UUID.fromString(concertIdString);
+        List<? extends Event> allEvents = uuidToAllEventsForConcert.apply(uuid);
+        if (selectedEvent < 0 || selectedEvent > allEvents.getLast().eventSequence()) {
+            selectedEvent = allEvents.getLast().eventSequence();
         }
         model.addAttribute("selectedEvent", selectedEvent);
-        model.addAttribute("events", eventViewsOf(allConcertEvents));
+        model.addAttribute("events", eventViewsOf(allEvents));
 
-        Concert concert = reconstituteThroughSelectedEventSequence(selectedEvent, allConcertEvents);
-        model.addAttribute("projectedState",
-                           List.of(
-                                   "Artist: " + concert.artist(),
-                                   "Show Time: " + concert.showDateTime(),
-                                   "Doors Time: " + concert.doorsTime(),
-                                   "Tickets Remaining: " + concert.availableTicketCount()
-                           ));
+        List<String> aggregateProperties = projectionPropertiesFrom(selectedEvent, allEvents, eventsToStrings);
+        model.addAttribute("projectedState", aggregateProperties);
         return "event-viewer/concert-events";
     }
 
-    private static List<EventView> eventViewsOf(List<ConcertEvent> allConcertEvents) {
-        return allConcertEvents.reversed().stream()
-                               .map(EventView::of)
-                               .toList();
-    }
-
-    private static Concert reconstituteThroughSelectedEventSequence(int selectedEvent, List<ConcertEvent> allConcertEvents) {
-        int eventIndex = allConcertEvents.size() - 1;
-        for (int i = 0; i < allConcertEvents.size(); i++) {
-            if (allConcertEvents.get(i).eventSequence() == selectedEvent) {
+    private static List<String> projectionPropertiesFrom(int selectedEvent,
+                                                         List<? extends Event> allEvents,
+                                                         Function<List<? extends Event>, List<String>> fnEventsToStrings) {
+        int eventIndex = allEvents.size() - 1;
+        for (int i = 0; i < allEvents.size(); i++) {
+            if (allEvents.get(i).eventSequence() == selectedEvent) {
                 eventIndex = i;
                 break;
             }
         }
-        List<ConcertEvent> selectedConcertEvents = allConcertEvents.subList(0, eventIndex + 1);
-        return Concert.reconstitute(selectedConcertEvents);
+        List<? extends Event> selectedConcertEvents = allEvents.subList(0, eventIndex + 1);
+        return fnEventsToStrings.apply(selectedConcertEvents);
+    }
+
+    private static List<EventView> eventViewsOf(List<? extends Event> allEvents) {
+        return allEvents.reversed()
+                        .stream()
+                        .map(EventView::of)
+                        .toList();
     }
 
 }

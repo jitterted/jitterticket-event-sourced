@@ -1,5 +1,6 @@
 Wednesday, April 30, 2025
 =========================
+* Once again, found an incorrect URL during manual testing, which means I probably want to move the URL generation to the back-end to make it easier to test
 
 
 Tuesday, April 29, 2025
