@@ -14,7 +14,7 @@
     </thead>
     <tbody>
     <tr th:each="concert : ${concerts}">
-        <td><a th:href="@{/event-viewer/{concertId}(concertId=${concert.concertId})}" th:text="${concert.concertId}">af05fc05-2de1-46d8-9568-01381029feb7</a></td>
+        <td><a th:href="@{/event-viewer/concerts/{concertId}(concertId=${concert.concertId})}" th:text="${concert.concertId}">af05fc05-2de1-46d8-9568-01381029feb7</a></td>
         <td th:text="${concert.artist}">Jittery Pigs</td>
     </tr>
     </tbody>

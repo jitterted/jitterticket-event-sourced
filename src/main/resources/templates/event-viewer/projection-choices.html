@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Choose a Projection</title>
 </head>
 <body>
 <h1>Choose a Projection to Time Travel</h1>
-
+<ul>
+    <li th:each="projection: ${projections}">
+        <a href="#"
+           th:href="@{${projection.urlPath()}}"
+           th:text="${projection.description()}">Aggregates</a>
+    </li>
+</ul>
 </body>
 </html>

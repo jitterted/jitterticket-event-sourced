@@ -24,12 +24,29 @@ import static org.assertj.core.api.Assertions.*;
 class EventViewerControllerTest {
 
     @Test
+    void listProjectionChoicesShowsAvailableProjections() {
+        var concertStore = EventStore.forConcerts();
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
+        EventViewerController controller = new EventViewerController(concertSummaryProjector, concertStore);
+        ConcurrentModel model = new ConcurrentModel();
+
+        String viewName = controller.listProjectionChoices(model);
+
+        assertThat(viewName)
+                .isEqualTo("event-viewer/projection-choices");
+        assertThat(model)
+                .containsEntry("projections",
+                               List.of(new EventViewerController.ProjectionChoice("Concerts", "/event-viewer/concerts"),
+                                       new EventViewerController.ProjectionChoice("Concert Summaries", "/event-viewer/concert-summaries"),
+                                       new EventViewerController.ProjectionChoice("Customers", "/event-viewer/customers")));
+    }
+
+    @Test
     void listConcertsReturnsCorrectViewName() {
         var concertStore = EventStore.forConcerts();
         ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
-
         EventViewerController controller = new EventViewerController(concertSummaryProjector, concertStore);
-        Model model = new ConcurrentModel();
+        ConcurrentModel model = new ConcurrentModel();
 
         String viewName = controller.listConcerts(model);
 

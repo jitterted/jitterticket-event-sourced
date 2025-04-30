@@ -31,9 +31,13 @@ public class EventViewerController {
 
     @GetMapping
     public String listProjectionChoices(Model model) {
+        model.addAttribute("projections", List.of(new EventViewerController.ProjectionChoice("Concerts", "/event-viewer/concerts"),
+                                                  new EventViewerController.ProjectionChoice("Concert Summaries", "/event-viewer/concert-summaries"),
+                                                  new EventViewerController.ProjectionChoice("Customers", "/event-viewer/customers")));
         return "event-viewer/projection-choices";
     }
 
+    record ProjectionChoice(String description, String urlPath) {}
 
     @GetMapping("/concerts")
     public String listConcerts(Model model) {
