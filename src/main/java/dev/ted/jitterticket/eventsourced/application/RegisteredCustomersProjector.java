@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+import dev.ted.jitterticket.Gatherers;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
@@ -16,11 +17,11 @@ public class RegisteredCustomersProjector {
 
     public Stream<CustomerSummary> allCustomers() {
         return customerStore.allEvents()
-                            .filter(CustomerRegistered.class::isInstance)
-                            .map(CustomerRegistered.class::cast)
-                            .map(customerEvent -> new CustomerSummary(
-                                    customerEvent.customerId(),
-                                    customerEvent.customerName()
+                            .gather(Gatherers.filterAndCastTo(CustomerRegistered.class))
+                            .map(registered -> new CustomerSummary(
+                                    registered.customerId(),
+                                    registered.customerName()
                             ));
     }
+
 }
