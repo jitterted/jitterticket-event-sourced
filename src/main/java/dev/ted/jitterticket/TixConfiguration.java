@@ -10,6 +10,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import dev.ted.jitterticket.eventviewer.adapter.in.web.AggregateSummaryView;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoice;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Configuration
 public class TixConfiguration {
@@ -187,6 +189,11 @@ public class TixConfiguration {
     public ProjectionChoice createConcertProjectionChoice(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         return new ProjectionChoice("Concerts", "/event-viewer/concerts",
                                     functionForUuidToConcertEvents(concertStore),
-                                    functionForConcertEventsToStrings());
+                                    functionForConcertEventsToStrings(),
+                                    functionForConcertSummaryViews(concertStore));
+    }
+
+    public static Supplier<List<AggregateSummaryView>> functionForConcertSummaryViews(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return () -> new ConcertSummaryProjector(concertStore).allConcertSummaries().map(AggregateSummaryView::of).toList();
     }
 }

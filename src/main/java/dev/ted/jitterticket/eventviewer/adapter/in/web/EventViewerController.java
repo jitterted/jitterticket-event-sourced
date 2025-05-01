@@ -1,6 +1,5 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,25 +19,24 @@ import java.util.function.Supplier;
 public class EventViewerController {
 
     protected final Supplier<List<AggregateSummaryView>> aggregateSummarySupplier;
+    private final ProjectionChoice concertProjectionChoice;
     private final Function<List<? extends Event>, List<String>> eventsToStrings;
     private final Function<UUID, List<? extends Event>> uuidToAllEventsForConcert;
 
     @Autowired
-    public EventViewerController(ConcertSummaryProjector concertSummaryProjector,
-                                 ProjectionChoice concertProjectionChoice) {
+    public EventViewerController(ProjectionChoice concertProjectionChoice) {
+        this.concertProjectionChoice = concertProjectionChoice;
         this.uuidToAllEventsForConcert = concertProjectionChoice.uuidToAllEvents();
         this.eventsToStrings = concertProjectionChoice.eventsToStrings();
-        aggregateSummarySupplier = () -> concertSummaryProjector.allConcertSummaries()
-                                                                     .map(AggregateSummaryView::of)
-                                                                     .toList();
+        this.aggregateSummarySupplier = concertProjectionChoice.aggregateSummarySupplier();
     }
 
     @GetMapping
     public String listProjectionChoices(Model model) {
         model.addAttribute("projections",
-                           List.of(new ProjectionChoice("Concerts", "/event-viewer/concerts", uuidToAllEventsForConcert, eventsToStrings),
-                                   new ProjectionChoice("Concert Summaries", "/event-viewer/concert-summaries", null, null),
-                                   new ProjectionChoice("Customers", "/event-viewer/customers", null, null)));
+                           List.of(concertProjectionChoice,
+                                   new ProjectionChoice("Concert Summaries", "/event-viewer/concert-summaries", null, null, null),
+                                   new ProjectionChoice("Customers", "/event-viewer/customers", null, null, null)));
         return "event-viewer/projection-choices";
     }
 

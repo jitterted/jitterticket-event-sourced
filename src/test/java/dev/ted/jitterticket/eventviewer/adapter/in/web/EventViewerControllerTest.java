@@ -1,7 +1,6 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
 import dev.ted.jitterticket.TixConfiguration;
-import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -20,6 +19,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -30,11 +30,11 @@ class EventViewerControllerTest {
     void listProjectionChoicesShowsAvailableProjections() {
         var concertStore = EventStore.forConcerts();
         var customerStore = EventStore.forCustomers();
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
-        ProjectionChoice concertProjectionChoice = createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore), TixConfiguration.functionForConcertEventsToStrings());
-        EventViewerController controller =
-                new EventViewerController(concertSummaryProjector,
-                                          concertProjectionChoice);
+        ProjectionChoice concertProjectionChoice =
+                createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore),
+                                              TixConfiguration.functionForConcertEventsToStrings(),
+                                              TixConfiguration.functionForConcertSummaryViews(concertStore));
+        EventViewerController controller = new EventViewerController(concertProjectionChoice);
         ConcurrentModel model = new ConcurrentModel();
 
         String viewName = controller.listProjectionChoices(model);
@@ -44,24 +44,26 @@ class EventViewerControllerTest {
         assertThat(model)
                 .containsEntry("projections",
                                List.of(concertProjectionChoice,
-                                       new ProjectionChoice("Concert Summaries", "/event-viewer/concert-summaries", null, null),
-                                       new ProjectionChoice("Customers", "/event-viewer/customers", null, null)
+                                       new ProjectionChoice("Concert Summaries", "/event-viewer/concert-summaries", null, null, null),
+                                       new ProjectionChoice("Customers", "/event-viewer/customers", null, null, null)
                                )
                 );
     }
 
-    private static ProjectionChoice createConcertProjectionChoice(Function<UUID, List<? extends Event>> uuidToAllEventsForConcert, Function<List<? extends Event>, List<String>> eventsToStrings) {
-        return new ProjectionChoice("Concerts", "/event-viewer/concerts", uuidToAllEventsForConcert, eventsToStrings);
+    private static ProjectionChoice createConcertProjectionChoice(Function<UUID, List<? extends Event>> uuidToAllEventsForConcert,
+                                                                  Function<List<? extends Event>, List<String>> eventsToStrings,
+                                                                  Supplier<List<AggregateSummaryView>> aggregateSummarySupplier) {
+        return new ProjectionChoice("Concerts", "/event-viewer/concerts", uuidToAllEventsForConcert, eventsToStrings, aggregateSummarySupplier);
     }
 
     @Test
     void listAggregatesReturnsCorrectViewNameAndAggregateNameInModel() {
         var concertStore = EventStore.forConcerts();
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
         EventViewerController controller = new
-                EventViewerController(concertSummaryProjector,
-                                      createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore),
-                                                                    TixConfiguration.functionForConcertEventsToStrings()));
+                EventViewerController(
+                createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore),
+                                              TixConfiguration.functionForConcertEventsToStrings(),
+                                              TixConfiguration.functionForConcertSummaryViews(concertStore)));
 
         ConcurrentModel model = new ConcurrentModel();
 
@@ -76,8 +78,6 @@ class EventViewerControllerTest {
     @Test
     void listAggregatesAddsCorrectAttributesToModel() {
         var concertStore = EventStore.forConcerts();
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
-
         ConcertId concertId = ConcertId.createRandom();
         String artist = "Test Artist";
         LocalDateTime showDateTime = LocalDateTime.of(2025, 7, 26, 20, 0);
@@ -89,8 +89,10 @@ class EventViewerControllerTest {
                                                              showDateTime,
                                                              doorsTime));
 
-        EventViewerController controller = new EventViewerController(concertSummaryProjector,
-                                                                     createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore), TixConfiguration.functionForConcertEventsToStrings()));
+        EventViewerController controller = new EventViewerController(
+                createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore),
+                                              TixConfiguration.functionForConcertEventsToStrings(),
+                                              TixConfiguration.functionForConcertSummaryViews(concertStore)));
         ConcurrentModel model = new ConcurrentModel();
 
         controller.listAggregates(model);
@@ -174,7 +176,6 @@ class EventViewerControllerTest {
 
     private static Fixture createAndSaveConcertWithThreeEvents() {
         var concertStore = EventStore.forConcerts();
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
 
         ConcertId concertId = ConcertId.createRandom();
         Concert concert = ConcertFactory.scheduleConcertWith(
@@ -187,8 +188,10 @@ class EventViewerControllerTest {
         concert.sellTicketsTo(CustomerId.createRandom(), 4);
         concertStore.save(concert);
 
-        EventViewerController controller = new EventViewerController(concertSummaryProjector,
-                                                                     createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore), TixConfiguration.functionForConcertEventsToStrings()));
+        EventViewerController controller = new EventViewerController(
+                createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore),
+                                              TixConfiguration.functionForConcertEventsToStrings(),
+                                              TixConfiguration.functionForConcertSummaryViews(concertStore)));
         return new Fixture(concertId.id().toString(), concert, controller, concertStore.eventsForAggregate(concertId));
     }
 
