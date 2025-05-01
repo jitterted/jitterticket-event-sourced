@@ -40,7 +40,7 @@ public class EventViewerController {
     }
 
     @GetMapping("/concerts")
-    public String listConcerts(Model model) {
+    public String listAggregates(Model model) {
         List<ConcertListView> concertListViews =
                 concertSummaryProjector.allConcertSummaries()
                                        .map(ConcertListView::of)
@@ -50,6 +50,9 @@ public class EventViewerController {
     }
 
     @GetMapping("/concerts/{concertId}")
+    // @GetMapping("/{aggType}/{concertId}")
+    // get from the ProjectionChoiceMap(aggType) -> ProjectionChoice,
+    // where we can use its functions instead of using the fields passed in via the constructor
     public String showConcertEvents(@PathVariable("concertId") String concertIdString,
                                     @RequestParam(value = "selectedEvent", required = false, defaultValue = "-1") int selectedEvent,
                                     Model model) {
@@ -64,6 +67,7 @@ public class EventViewerController {
 
         List<String> aggregateProperties = projectionPropertiesFrom(selectedEvent, allEvents, eventsToStrings);
         model.addAttribute("projectedState", aggregateProperties);
+        // generalize the Thymeleaf template to work with any projection type
         return "event-viewer/concert-events";
     }
 

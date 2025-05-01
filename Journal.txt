@@ -1,3 +1,9 @@
+Thursday, May 1, 2025
+=====================
+[AI Assistant]
+[ ] When typing a prompt inline, (accidentally?) hitting the up/down arrow throws away what was typed, replacing it with the history!
+
+
 Wednesday, April 30, 2025
 =========================
 * Once again, found an incorrect URL during manual testing, which means I probably want to move the URL generation to the back-end to make it easier to test

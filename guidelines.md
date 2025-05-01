@@ -45,6 +45,21 @@ Tests in this project are categorized using JUnit 5 tags:
 - **Spring Tests**: Tests that require the Spring context (`@Tag("spring")`)
 - **MVC Tests**: Tests for web controllers (`@Tag("mvc")`)
 
+### Assertion Guidelines
+
+- **Always use AssertJ's assertThat**: JUnit tests should always use AssertJ's `assertThat` syntax for assertions
+- **Method chaining style**: Each method call in the chained methods should be on a new line for better readability
+  ```java
+  // Correct style
+  assertThat(results)
+      .isNotEmpty()
+      .hasSize(3)
+      .contains("expected value");
+      
+  // Avoid this style
+  assertThat(results).isNotEmpty().hasSize(3).contains("expected value");
+  ```
+
 ### Mocking Guidelines
 
 - **Avoid Mockito**: Do not use Mockito or other mocking frameworks unless explicitly asked to do so. Instead, use real implementations, in-memory repositories, or simple test doubles created manually.

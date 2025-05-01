@@ -66,7 +66,7 @@ class EventViewerControllerTest {
 
         ConcurrentModel model = new ConcurrentModel();
 
-        String viewName = controller.listConcerts(model);
+        String viewName = controller.listAggregates(model);
 
         assertThat(viewName)
                 .isEqualTo("event-viewer/concert-aggregates");
@@ -92,7 +92,7 @@ class EventViewerControllerTest {
                                                                      createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore), TixConfiguration.functionForConcertEventsToStrings()));
         Model model = new ConcurrentModel();
 
-        controller.listConcerts(model);
+        controller.listAggregates(model);
 
         List<ConcertListView> concertList = (List<ConcertListView>) model.getAttribute("concerts");
         assertThat(concertList)
