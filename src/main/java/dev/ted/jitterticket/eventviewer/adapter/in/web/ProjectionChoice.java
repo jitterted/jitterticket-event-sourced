@@ -1,51 +1,37 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
-import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
-import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
 import java.util.List;
 import java.util.UUID;
 
-public class ProjectionChoice {
+public abstract class ProjectionChoice {
 
-    private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
+    protected final String aggregateName;
+    protected final String urlPath;
+    protected final String description;
 
-    public ProjectionChoice(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        this.concertStore = concertStore;
+    public ProjectionChoice(String aggregateName, String urlPath, String description) {
+        this.aggregateName = aggregateName;
+        this.urlPath = urlPath;
+        this.description = description;
     }
 
-    public List<AggregateSummaryView> aggregateSummaryViews() {
-        return new ConcertSummaryProjector(concertStore).allConcertSummaries().map(AggregateSummaryView::of).toList();
-    }
+    public abstract List<AggregateSummaryView> aggregateSummaryViews();
 
-    public List<? extends Event> concertEventsFor(UUID uuid) {
-        return concertStore.eventsForAggregate(new ConcertId(uuid));
-    }
+    public abstract List<? extends Event> eventsFor(UUID uuid);
 
-    public List<String> propertiesOfAggregateFrom(List<? extends Event> events) {
-        @SuppressWarnings("unchecked")
-        Concert concert = Concert.reconstitute((List<ConcertEvent>) events);
-        return List.of(
-                "Artist: " + concert.artist(),
-                "Show Time: " + concert.showDateTime(),
-                "Doors Time: " + concert.doorsTime(),
-                "Tickets Remaining: " + concert.availableTicketCount()
-        );
-    }
+    public abstract List<String> propertiesOfAggregateFrom(List<? extends Event> events);
 
     public String aggregateName() {
-        return "Concert";
+        return aggregateName;
     }
 
     public String urlPath() {
-        return "/event-viewer/concerts";
+        return urlPath;
     }
 
     public String description() {
-        return "Concerts";
+        return description;
     }
 }

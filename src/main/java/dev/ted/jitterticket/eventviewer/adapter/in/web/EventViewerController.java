@@ -47,7 +47,7 @@ public class EventViewerController {
                                     Model model) {
         model.addAttribute("concertId", concertIdString);
         UUID uuid = UUID.fromString(concertIdString);
-        List<? extends Event> allEvents = projectionChoice.concertEventsFor(uuid);
+        List<? extends Event> allEvents = projectionChoice.eventsFor(uuid);
         if (selectedEvent < 0 || selectedEvent > allEvents.getLast().eventSequence()) {
             selectedEvent = allEvents.getLast().eventSequence();
         }

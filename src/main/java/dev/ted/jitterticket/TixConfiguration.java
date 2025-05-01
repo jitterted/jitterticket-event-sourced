@@ -9,6 +9,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import dev.ted.jitterticket.eventviewer.adapter.in.web.ConcertProjectionChoice;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoice;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -165,7 +166,7 @@ public class TixConfiguration {
 
     @Bean
     public ProjectionChoice createConcertProjectionChoice(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new ProjectionChoice(concertStore);
+        return new ConcertProjectionChoice(concertStore);
     }
 
 }

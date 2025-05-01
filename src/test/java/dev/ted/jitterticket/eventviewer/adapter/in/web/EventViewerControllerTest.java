@@ -25,7 +25,7 @@ class EventViewerControllerTest {
     void listProjectionChoicesShowsAvailableProjections() {
         var concertStore = EventStore.forConcerts();
         var customerStore = EventStore.forCustomers();
-        ProjectionChoice projectionChoice = new ProjectionChoice(concertStore);
+        ProjectionChoice projectionChoice = new ConcertProjectionChoice(concertStore);
         EventViewerController controller = new EventViewerController(projectionChoice);
         ConcurrentModel model = new ConcurrentModel();
 
@@ -47,7 +47,7 @@ class EventViewerControllerTest {
         var concertStore = EventStore.forConcerts();
         EventViewerController controller = new
                 EventViewerController(
-                new ProjectionChoice(concertStore));
+                new ConcertProjectionChoice(concertStore));
 
         ConcurrentModel model = new ConcurrentModel();
 
@@ -74,7 +74,7 @@ class EventViewerControllerTest {
                                                              doorsTime));
 
         EventViewerController controller = new EventViewerController(
-                new ProjectionChoice(concertStore));
+                new ConcertProjectionChoice(concertStore));
         ConcurrentModel model = new ConcurrentModel();
 
         controller.listAggregates(model);
@@ -170,7 +170,7 @@ class EventViewerControllerTest {
         concert.sellTicketsTo(CustomerId.createRandom(), 4);
         concertStore.save(concert);
 
-        EventViewerController controller = new EventViewerController(new ProjectionChoice(concertStore));
+        EventViewerController controller = new EventViewerController(new ConcertProjectionChoice(concertStore));
         return new Fixture(concertId.id().toString(), concert, controller, concertStore.eventsForAggregate(concertId));
     }
 
