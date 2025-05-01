@@ -19,6 +19,7 @@
     [ ] Generalize to events for any Aggregate type for a specific Agg ID
         [ ] Generalize show[Concert]Events to showEvents for any type
             [X] Use functions to transform an idString to a List<Event>
+            [X] Create summary projector for Customer aggregates
             [ ] Use the selected projection type for selecting the functions (see comments)
             [ ] Generalize the event viewer template
         [ ] Create a map of projection (aggregate) type to ProjectionChoice, and pass that into the controller

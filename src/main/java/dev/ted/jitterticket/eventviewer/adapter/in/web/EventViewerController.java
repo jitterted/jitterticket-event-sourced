@@ -41,12 +41,13 @@ public class EventViewerController {
 
     @GetMapping("/concerts")
     public String listAggregates(Model model) {
-        List<ConcertListView> concertListViews =
+        List<AggregateSummaryView> aggregateSummaryViews =
                 concertSummaryProjector.allConcertSummaries()
-                                       .map(ConcertListView::of)
+                                       .map(AggregateSummaryView::of)
                                        .toList();
-        model.addAttribute("concerts", concertListViews);
-        return "event-viewer/concert-aggregates";
+        model.addAttribute("aggregateName", "Concert");
+        model.addAttribute("aggregates", aggregateSummaryViews);
+        return "event-viewer/list-aggregates";
     }
 
     @GetMapping("/concerts/{concertId}")

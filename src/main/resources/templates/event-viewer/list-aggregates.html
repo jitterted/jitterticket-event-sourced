@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title><span th:text="${aggregateName}">Concert</span> List</title>
+</head>
+<body>
+<h1>Concert List</h1>
+<table>
+    <thead>
+    <tr>
+        <th><span th:text="${aggregateName}">Concert</span> ID</th>
+        <th>Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="aggregate : ${aggregates}">
+        <td><a th:href="@{/event-viewer/concerts/{concertId}(concertId=${aggregate.concertId})}" th:text="${aggregate.concertId}">af05fc05-2de1-46d8-9568-01381029feb7</a></td>
+        <td th:text="${aggregate.artist}">Jittery Pigs</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.ui.ConcurrentModel;
-import org.springframework.ui.Model;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -56,7 +55,7 @@ class EventViewerControllerTest {
     }
 
     @Test
-    void listConcertsReturnsCorrectViewName() {
+    void listAggregatesReturnsCorrectViewNameAndAggregateNameInModel() {
         var concertStore = EventStore.forConcerts();
         ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
         EventViewerController controller = new
@@ -69,11 +68,13 @@ class EventViewerControllerTest {
         String viewName = controller.listAggregates(model);
 
         assertThat(viewName)
-                .isEqualTo("event-viewer/concert-aggregates");
+                .isEqualTo("event-viewer/list-aggregates");
+        assertThat(model)
+                .containsEntry("aggregateName", "Concert");
     }
 
     @Test
-    void listConcertsAddsCorrectAttributesToModel() {
+    void listAggregatesAddsCorrectAttributesToModel() {
         var concertStore = EventStore.forConcerts();
         ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
 
@@ -90,15 +91,13 @@ class EventViewerControllerTest {
 
         EventViewerController controller = new EventViewerController(concertSummaryProjector,
                                                                      createConcertProjectionChoice(TixConfiguration.functionForUuidToConcertEvents(concertStore), TixConfiguration.functionForConcertEventsToStrings()));
-        Model model = new ConcurrentModel();
+        ConcurrentModel model = new ConcurrentModel();
 
         controller.listAggregates(model);
 
-        List<ConcertListView> concertList = (List<ConcertListView>) model.getAttribute("concerts");
-        assertThat(concertList)
-                .hasSize(1)
-                .extracting(ConcertListView::concertId, ConcertListView::artist)
-                .containsExactly(tuple(concertId.id().toString(), artist));
+        assertThat(model)
+                .extracting("aggregates", InstanceOfAssertFactories.list(AggregateSummaryView.class))
+                .containsExactly(new AggregateSummaryView(concertId.id().toString(), artist));
     }
 
     @Test
