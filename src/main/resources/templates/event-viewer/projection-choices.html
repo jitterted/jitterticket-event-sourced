@@ -8,8 +8,8 @@
 <ul>
     <li th:each="projection: ${projections}">
         <a href="#"
-           th:href="@{${projection.urlPath()}}"
-           th:text="${projection.description()}">Aggregates</a>
+           th:href="@{${projection.urlPath}}"
+           th:text="${projection.aggregateName}">Aggregate</a>
     </li>
 </ul>
 </body>

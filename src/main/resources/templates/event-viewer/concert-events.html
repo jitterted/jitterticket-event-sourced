@@ -179,8 +179,8 @@
 </head>
 <body>
 <header>
-    <h1>Concert Events</h1>
-    <h3>Concert ID: <span th:text="${concertId}">af05fc05-2de1-46d8-9568-01381029feb7</span></h3>
+    <h1><span th:text="${aggregateName}">Concert</span> Events</h1>
+    <h3>ID: <span th:text="${uuid}">af05fc05-2de1-46d8-9568-01381029feb7</span></h3>
 </header>
 
 <main>
@@ -191,7 +191,7 @@
                      th:classappend="${selectedEvent >= eventView.eventSequence} ? 'event-selected' : ''">
                     <a class="event-link"
                        href="#"
-                       th:href="@{/event-viewer/concerts/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
+                       th:href="@{/event-viewer/concerts/{uuid}(concertId=${uuid}, selectedEvent=${eventView.eventSequence})}"
                     >
                         <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
                         <div th:each="field : ${eventView.fields()}" class="event-field">
@@ -201,10 +201,7 @@
                     </a>
                 </div>
                 <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link"
-                       href="#"
-                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
-                    >
+                    <a class="event-link" href="#">
                         <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
                         <div th:each="field : ${eventView.fields()}" class="event-field">
                             <strong th:text="${field.name()}">Artist</strong>:
@@ -213,10 +210,7 @@
                     </a>
                 </div>
                 <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link"
-                       href="#"
-                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
-                    >
+                    <a class="event-link" href="#">
                         <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
                         <div th:each="field : ${eventView.fields()}" class="event-field">
                             <strong th:text="${field.name()}">eventSequence</strong>:
@@ -229,11 +223,8 @@
                     </a>
                 </div>
                 <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link"
-                       href="#"
-                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
-                    >
-                        <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
+                    <a class="event-link" href="#">
+                    <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
                         <div th:each="field : ${eventView.fields()}" class="event-field">
                             <div th:each="field : ${eventView.fields()}" class="event-field">
                                 <strong th:text="${field.name()}">eventSequence</strong>:
@@ -245,11 +236,8 @@
                     </a>
                 </div>
                 <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link"
-                       href="#"
-                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
-                    >
-                        <h3 th:text="${eventView.eventName()}">ConcertRescheduled</h3>
+                    <a class="event-link" href="#">
+                    <h3 th:text="${eventView.eventName()}">ConcertRescheduled</h3>
                         <div th:each="field : ${eventView.fields()}" class="event-field">
                             <strong th:text="${field.name()}">eventSequence</strong>:
                             <span th:text="${field.value()}">3</span>
@@ -265,11 +253,8 @@
                     </a>
                 </div>
                 <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link"
-                       href="#"
-                       th:href="@{/event-viewer/{concertId}(concertId=${concertId}, selectedEvent=${eventView.eventSequence})}"
-                    >
-                        <h3 th:text="${eventView.eventName()}">ConcertRescheduled</h3>
+                    <a class="event-link" href="#">
+                    <h3 th:text="${eventView.eventName()}">ConcertRescheduled</h3>
                         <div th:each="field : ${eventView.fields()}" class="event-field">
                             <strong th:text="${field.name()}">eventSequence</strong>:
                             <span th:text="${field.value()}">2</span>
@@ -307,7 +292,7 @@
 </main>
 
 <footer>
-    <a th:href="@{/event-viewer}" href="#" class="back-link">Back to Concert List</a>
+    <a th:href="@{/event-viewer}" href="#" class="back-link">Back to Projection List</a>
 </footer>
 </body>
 </html>

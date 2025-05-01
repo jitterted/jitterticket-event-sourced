@@ -34,12 +34,8 @@ class EventViewerControllerTest {
         assertThat(viewName)
                 .isEqualTo("event-viewer/projection-choices");
         assertThat(model)
-                .containsEntry("projections",
-                               List.of(projectionChoice,
-                                       projectionChoice,
-                                       projectionChoice
-                               )
-                );
+                .extracting("projections", InstanceOfAssertFactories.collection(ProjectionChoice.class))
+                .containsExactly(projectionChoice);
     }
 
     @Test
@@ -51,7 +47,7 @@ class EventViewerControllerTest {
 
         ConcurrentModel model = new ConcurrentModel();
 
-        String viewName = controller.listAggregates(model);
+        String viewName = controller.listAggregates("concerts", model);
 
         assertThat(viewName)
                 .isEqualTo("event-viewer/list-aggregates");
@@ -77,7 +73,7 @@ class EventViewerControllerTest {
                 new ConcertProjectionChoice(concertStore));
         ConcurrentModel model = new ConcurrentModel();
 
-        controller.listAggregates(model);
+        controller.listAggregates("concerts", model);
 
         assertThat(model)
                 .extracting("aggregates", InstanceOfAssertFactories.list(AggregateSummaryView.class))
@@ -91,13 +87,14 @@ class EventViewerControllerTest {
         ConcurrentModel model = new ConcurrentModel();
         int selectedEventSequence = fixture.concertEvents.getLast().eventSequence();
         String viewName = fixture.controller().showConcertEvents(
-                fixture.concertIdAsString, selectedEventSequence, model);
+                "concerts", fixture.concertIdAsString, selectedEventSequence, model);
 
         assertThat(viewName)
                 .isEqualTo("event-viewer/concert-events");
 
         assertThat(model)
-                .containsEntry("concertId", fixture.concertIdAsString);
+                .containsEntry("uuid", fixture.concertIdAsString)
+                .containsEntry("aggregateName", "Concert");
 
         List<EventView> events = (List<EventView>) model.getAttribute("events");
         assertThat(events)
@@ -119,7 +116,7 @@ class EventViewerControllerTest {
 
         ConcurrentModel model = new ConcurrentModel();
         int selectedEventAsDefault = -1;
-        fixture.controller().showConcertEvents(fixture.concertIdAsString, selectedEventAsDefault, model);
+        fixture.controller().showConcertEvents("concerts", fixture.concertIdAsString, selectedEventAsDefault, model);
 
         Integer defaultSelectedEvent = fixture.concertEvents.getLast().eventSequence();
         assertThat(model)
@@ -132,7 +129,7 @@ class EventViewerControllerTest {
         Fixture fixture = createAndSaveConcertWithThreeEvents();
 
         ConcurrentModel model = new ConcurrentModel();
-        fixture.controller().showConcertEvents(fixture.concertIdAsString,
+        fixture.controller().showConcertEvents("concerts", fixture.concertIdAsString,
                                                badSelectedEvent, model);
 
         Integer mostRecentEventSequence = fixture.concertEvents.getLast().eventSequence();
@@ -145,7 +142,7 @@ class EventViewerControllerTest {
         Fixture fixture = createAndSaveConcertWithThreeEvents();
 
         ConcurrentModel model = new ConcurrentModel();
-        fixture.controller().showConcertEvents(fixture.concertIdAsString,
+        fixture.controller().showConcertEvents("concerts", fixture.concertIdAsString,
                                                1,
                                                model);
 

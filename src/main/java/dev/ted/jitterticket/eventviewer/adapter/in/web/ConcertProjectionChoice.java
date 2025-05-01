@@ -15,13 +15,16 @@ public class ConcertProjectionChoice extends ProjectionChoice {
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
     public ConcertProjectionChoice(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        super("Concert", "/event-viewer/concerts", "Concerts");
+        super("Concert", "concerts");
         this.concertStore = concertStore;
     }
 
     @Override
     public List<AggregateSummaryView> aggregateSummaryViews() {
-        return new ConcertSummaryProjector(concertStore).allConcertSummaries().map(AggregateSummaryView::of).toList();
+        return new ConcertSummaryProjector(concertStore)
+                .allConcertSummaries()
+                .map(AggregateSummaryView::of)
+                .toList();
     }
 
     @Override
@@ -30,7 +33,7 @@ public class ConcertProjectionChoice extends ProjectionChoice {
     }
 
     @Override
-    public List<String> propertiesOfAggregateFrom(List<? extends Event> events) {
+    public List<String> propertiesOfProjectionFrom(List<? extends Event> events) {
         @SuppressWarnings("unchecked")
         Concert concert = Concert.reconstitute((List<ConcertEvent>) events);
         return List.of(

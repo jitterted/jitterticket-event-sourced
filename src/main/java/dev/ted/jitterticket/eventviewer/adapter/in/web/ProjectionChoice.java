@@ -8,30 +8,25 @@ import java.util.UUID;
 public abstract class ProjectionChoice {
 
     protected final String aggregateName;
-    protected final String urlPath;
-    protected final String description;
+    protected final String urlPathVariable;
 
-    public ProjectionChoice(String aggregateName, String urlPath, String description) {
+    public ProjectionChoice(String aggregateName, String urlPathVariable) {
         this.aggregateName = aggregateName;
-        this.urlPath = urlPath;
-        this.description = description;
+        this.urlPathVariable = urlPathVariable;
     }
 
     public abstract List<AggregateSummaryView> aggregateSummaryViews();
 
     public abstract List<? extends Event> eventsFor(UUID uuid);
 
-    public abstract List<String> propertiesOfAggregateFrom(List<? extends Event> events);
+    public abstract List<String> propertiesOfProjectionFrom(List<? extends Event> events);
 
     public String aggregateName() {
         return aggregateName;
     }
 
     public String urlPath() {
-        return urlPath;
+        return "/event-viewer/" + urlPathVariable;
     }
 
-    public String description() {
-        return description;
-    }
 }
