@@ -2,7 +2,7 @@ package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertSummary;
 
-public record AggregateSummaryView(String concertId, String artist) {
+public record AggregateSummaryView(String aggregateId, String description) {
     
     public static AggregateSummaryView of(ConcertSummary concertSummary) {
         return new AggregateSummaryView(
