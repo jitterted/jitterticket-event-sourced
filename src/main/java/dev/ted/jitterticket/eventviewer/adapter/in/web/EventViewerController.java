@@ -11,67 +11,56 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Controller
 @RequestMapping("/event-viewer")
 public class EventViewerController {
 
-    protected final Supplier<List<AggregateSummaryView>> aggregateSummarySupplier;
-    private final ProjectionChoice concertProjectionChoice;
-    private final Function<List<? extends Event>, List<String>> eventsToStrings;
-    private final Function<UUID, List<? extends Event>> uuidToAllEventsForConcert;
+    private final ProjectionChoice projectionChoice;
 
     @Autowired
-    public EventViewerController(ProjectionChoice concertProjectionChoice) {
-        this.concertProjectionChoice = concertProjectionChoice;
-        this.uuidToAllEventsForConcert = concertProjectionChoice.uuidToAllEvents();
-        this.eventsToStrings = concertProjectionChoice.eventsToStrings();
-        this.aggregateSummarySupplier = concertProjectionChoice.aggregateSummarySupplier();
+    public EventViewerController(ProjectionChoice projectionChoice) {
+        this.projectionChoice = projectionChoice;
     }
 
     @GetMapping
     public String listProjectionChoices(Model model) {
         model.addAttribute("projections",
-                           List.of(concertProjectionChoice,
-                                   new ProjectionChoice("Concert Summaries", "/event-viewer/concert-summaries", null, null, null),
-                                   new ProjectionChoice("Customers", "/event-viewer/customers", null, null, null)));
+                           List.of(projectionChoice, projectionChoice, projectionChoice));
         return "event-viewer/projection-choices";
     }
 
     @GetMapping("/concerts")
     public String listAggregates(Model model) {
-        model.addAttribute("aggregateName", "Concert");
-        model.addAttribute("aggregates", aggregateSummarySupplier.get());
+        //"Concerts", "/event-viewer/concerts",
+        model.addAttribute("aggregateName", projectionChoice.aggregateName());
+        model.addAttribute("aggregates", projectionChoice.aggregateSummaryViews());
         return "event-viewer/list-aggregates";
     }
 
     @GetMapping("/concerts/{concertId}")
     // @GetMapping("/{aggType}/{concertId}")
-    // get from the ProjectionChoiceMap(aggType) -> ProjectionChoice,
+    // get from the ProjectionChoiceMap(aggType) -> FunctionalProjectionChoice,
     // where we can use its functions instead of using the fields passed in via the constructor
     public String showConcertEvents(@PathVariable("concertId") String concertIdString,
                                     @RequestParam(value = "selectedEvent", required = false, defaultValue = "-1") int selectedEvent,
                                     Model model) {
         model.addAttribute("concertId", concertIdString);
         UUID uuid = UUID.fromString(concertIdString);
-        List<? extends Event> allEvents = uuidToAllEventsForConcert.apply(uuid);
+        List<? extends Event> allEvents = projectionChoice.concertEventsFor(uuid);
         if (selectedEvent < 0 || selectedEvent > allEvents.getLast().eventSequence()) {
             selectedEvent = allEvents.getLast().eventSequence();
         }
         model.addAttribute("selectedEvent", selectedEvent);
         model.addAttribute("events", eventViewsOf(allEvents));
 
-        List<String> aggregateProperties = projectionPropertiesFrom(selectedEvent, allEvents, eventsToStrings);
+        List<String> aggregateProperties = projectionPropertiesFrom(selectedEvent, allEvents);
         model.addAttribute("projectedState", aggregateProperties);
         // generalize the Thymeleaf template to work with any projection type
         return "event-viewer/concert-events";
     }
 
-    private static List<String> projectionPropertiesFrom(int selectedEvent,
-                                                         List<? extends Event> allEvents,
-                                                         Function<List<? extends Event>, List<String>> fnEventsToStrings) {
+    private List<String> projectionPropertiesFrom(int selectedEvent, List<? extends Event> allEvents) {
         int eventIndex = allEvents.size() - 1;
         for (int i = 0; i < allEvents.size(); i++) {
             if (allEvents.get(i).eventSequence() == selectedEvent) {
@@ -80,7 +69,7 @@ public class EventViewerController {
             }
         }
         List<? extends Event> selectedConcertEvents = allEvents.subList(0, eventIndex + 1);
-        return fnEventsToStrings.apply(selectedConcertEvents);
+        return projectionChoice.propertiesOfAggregateFrom(selectedConcertEvents);
     }
 
     private static List<EventView> eventViewsOf(List<? extends Event> allEvents) {

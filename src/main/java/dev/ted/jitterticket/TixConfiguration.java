@@ -3,44 +3,22 @@ package dev.ted.jitterticket;
 import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
-import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
-import dev.ted.jitterticket.eventviewer.adapter.in.web.AggregateSummaryView;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoice;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Configuration
 public class TixConfiguration {
-
-    public static Function<UUID, List<? extends Event>> functionForUuidToConcertEvents(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return uuid -> concertStore.eventsForAggregate(new ConcertId(uuid));
-    }
-
-    public static Function<List<? extends Event>, List<String>> functionForConcertEventsToStrings() {
-        return selectedEvents -> {
-            @SuppressWarnings("unchecked")
-            Concert concert = Concert.reconstitute((List<ConcertEvent>) selectedEvents);
-            return List.of(
-                    "Artist: " + concert.artist(),
-                    "Show Time: " + concert.showDateTime(),
-                    "Doors Time: " + concert.doorsTime(),
-                    "Tickets Remaining: " + concert.availableTicketCount()
-            );
-        };
-    }
 
     @Bean
     PurchaseTicketsUseCase purchaseTicketsUseCase(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
@@ -187,13 +165,7 @@ public class TixConfiguration {
 
     @Bean
     public ProjectionChoice createConcertProjectionChoice(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new ProjectionChoice("Concerts", "/event-viewer/concerts",
-                                    functionForUuidToConcertEvents(concertStore),
-                                    functionForConcertEventsToStrings(),
-                                    functionForConcertSummaryViews(concertStore));
+        return new ProjectionChoice(concertStore);
     }
 
-    public static Supplier<List<AggregateSummaryView>> functionForConcertSummaryViews(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return () -> new ConcertSummaryProjector(concertStore).allConcertSummaries().map(AggregateSummaryView::of).toList();
-    }
 }
