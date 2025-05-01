@@ -13,21 +13,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Controller
 @RequestMapping("/event-viewer")
 public class EventViewerController {
 
-    private final ConcertSummaryProjector concertSummaryProjector;
+    protected final Supplier<List<AggregateSummaryView>> aggregateSummarySupplier;
     private final Function<List<? extends Event>, List<String>> eventsToStrings;
     private final Function<UUID, List<? extends Event>> uuidToAllEventsForConcert;
 
     @Autowired
     public EventViewerController(ConcertSummaryProjector concertSummaryProjector,
                                  ProjectionChoice concertProjectionChoice) {
-        this.concertSummaryProjector = concertSummaryProjector;
         this.uuidToAllEventsForConcert = concertProjectionChoice.uuidToAllEvents();
         this.eventsToStrings = concertProjectionChoice.eventsToStrings();
+        aggregateSummarySupplier = () -> concertSummaryProjector.allConcertSummaries()
+                                                                     .map(AggregateSummaryView::of)
+                                                                     .toList();
     }
 
     @GetMapping
@@ -41,12 +44,8 @@ public class EventViewerController {
 
     @GetMapping("/concerts")
     public String listAggregates(Model model) {
-        List<AggregateSummaryView> aggregateSummaryViews =
-                concertSummaryProjector.allConcertSummaries()
-                                       .map(AggregateSummaryView::of)
-                                       .toList();
         model.addAttribute("aggregateName", "Concert");
-        model.addAttribute("aggregates", aggregateSummaryViews);
+        model.addAttribute("aggregates", aggregateSummarySupplier.get());
         return "event-viewer/list-aggregates";
     }
 
