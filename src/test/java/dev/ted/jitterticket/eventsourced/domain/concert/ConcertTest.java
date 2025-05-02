@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConcertTest {
 
@@ -30,9 +30,9 @@ public class ConcertTest {
             Stream<ConcertEvent> events = concert.uncommittedEvents();
 
             assertThat(events)
-                    .containsExactly(new ConcertScheduled[]{new ConcertScheduled(
+                    .containsExactly(new ConcertScheduled(
                             concertId, 0, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
-                    )});
+                    ));
         }
 
         @Test
@@ -47,11 +47,11 @@ public class ConcertTest {
             concert.rescheduleTo(newShowDateTime, newDoorsTime);
 
             assertThat(concert.uncommittedEvents())
-                    .containsExactly(
-                            new ConcertRescheduled[]{new ConcertRescheduled(concert.getId(),
-                                                                            1,
-                                                                            newShowDateTime,
-                                                                            newDoorsTime)});
+                    .containsExactly(new ConcertRescheduled(
+                            concert.getId(),
+                            1,
+                            newShowDateTime,
+                            newDoorsTime));
         }
 
         @Test
@@ -68,7 +68,7 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new TicketsSold[]{new TicketsSold(concertId, 1, quantity, -1)}
+                            new TicketsSold(concertId, 1, quantity, -1)
                     );
         }
 
@@ -124,7 +124,7 @@ public class ConcertTest {
             ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 0, newShowDateTime, newDoorsTime);
 
             List<ConcertEvent> concertEvents = List.of(concertScheduled,
-                                                       concertRescheduled);
+                    concertRescheduled);
 
             Concert concert = Concert.reconstitute(concertEvents);
 
@@ -147,7 +147,7 @@ public class ConcertTest {
                     concertScheduled.concertId(), 0, quantitySold, -1);
 
             Concert concert = Concert.reconstitute(List.of(concertScheduled,
-                                                           ticketsSold));
+                    ticketsSold));
 
             assertThat(concert.availableTicketCount())
                     .isEqualTo(100 - quantitySold);

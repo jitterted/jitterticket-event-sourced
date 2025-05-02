@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CustomerTest {
 
@@ -26,9 +26,11 @@ class CustomerTest {
 
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
-                            new CustomerRegistered[]{new CustomerRegistered(customerId,
-                                                                            0, "customer name",
-                                                                            "email@example.com")}
+                            new CustomerRegistered(
+                                    customerId,
+                                    0,
+                                    "customer name",
+                                    "email@example.com")
                     );
         }
 
@@ -44,11 +46,12 @@ class CustomerTest {
 
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
-                            new TicketsPurchased[]{new TicketsPurchased(customer.getId(),
-                                                                        1,
-                                                                        ticketOrderId,
-                                                                        concert.getId(),
-                                                                        quantity, paidAmount)}
+                            new TicketsPurchased(
+                                    customer.getId(),
+                                    1,
+                                    ticketOrderId,
+                                    concert.getId(),
+                                    quantity, paidAmount)
                     );
         }
 
@@ -86,7 +89,7 @@ class CustomerTest {
                     customerId, 0, ticketOrderId, concertId, quantity, amountPaid);
 
             Customer customer = Customer.reconstitute(List.of(customerRegistered,
-                                                              ticketsPurchased));
+                    ticketsPurchased));
 
             Customer.TicketOrder expectedTicketOrder = new Customer.TicketOrder(
                     ticketOrderId, concertId, quantity, amountPaid);
