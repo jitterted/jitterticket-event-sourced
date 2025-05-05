@@ -46,10 +46,10 @@ public class EventViewerController {
     }
 
     @GetMapping("/{aggregateName}/{uuidString}")
-    public String showConcertEvents(@PathVariable("aggregateName") String aggregateName,
-                                    @PathVariable("uuidString") String uuidString,
-                                    @RequestParam(value = "selectedEvent", required = false, defaultValue = "-1") int selectedEvent,
-                                    Model model) {
+    public String showEvents(@PathVariable("aggregateName") String aggregateName,
+                             @PathVariable("uuidString") String uuidString,
+                             @RequestParam(value = "selectedEvent", required = false, defaultValue = "-1") int selectedEvent,
+                             Model model) {
         model.addAttribute("uuid", uuidString);
         UUID uuid = UUID.fromString(uuidString);
         ProjectionChoice choice = projectionChoices.get(aggregateName);
@@ -61,8 +61,8 @@ public class EventViewerController {
         model.addAttribute("events", eventViewsOf(allEvents));
         model.addAttribute("aggregateName", choice.aggregateName());
 
-        List<? extends Event> selectedConcertEvents = selectEvents(selectedEvent, allEvents);
-        List<String> aggregateProperties = choice.propertiesOfProjectionFrom(selectedConcertEvents);
+        List<? extends Event> selectedEvents = selectEvents(selectedEvent, allEvents);
+        List<String> aggregateProperties = choice.propertiesOfProjectionFrom(selectedEvents);
         model.addAttribute("projectedState", aggregateProperties);
         // generalize the Thymeleaf template to work with any projection type
         return "event-viewer/concert-events";

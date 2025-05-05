@@ -24,6 +24,9 @@
             [ ] Generalize the event viewer template
         [X] Create a map of projection (aggregate) type to ProjectionChoice, and pass that into the controller
         [X] Need a function that provides a list of available projections (aggregates) to view, i.e., generalize the listConcerts() endpoint that uses concertSummaryProjector.allConcertSummaries()
+        [ ] Add concrete ProjectionChoice implementations for Customer aggregate and Concert Summary projection
+            [ ] Wrap the Map into ProjectionChoices class
+        [ ] Clean up "aggregate name" to be "projection name"
 
 [ ] Add a test for the events (concert-events.html) template so we can make sure we've got the necessary attributes in the model for Thymeleaf
 

@@ -86,7 +86,7 @@ class EventViewerControllerTest {
 
         ConcurrentModel model = new ConcurrentModel();
         int selectedEventSequence = fixture.concertEvents.getLast().eventSequence();
-        String viewName = fixture.controller().showConcertEvents(
+        String viewName = fixture.controller().showEvents(
                 "concerts", fixture.concertIdAsString, selectedEventSequence, model);
 
         assertThat(viewName)
@@ -116,7 +116,7 @@ class EventViewerControllerTest {
 
         ConcurrentModel model = new ConcurrentModel();
         int selectedEventAsDefault = -1;
-        fixture.controller().showConcertEvents("concerts", fixture.concertIdAsString, selectedEventAsDefault, model);
+        fixture.controller().showEvents("concerts", fixture.concertIdAsString, selectedEventAsDefault, model);
 
         Integer defaultSelectedEvent = fixture.concertEvents.getLast().eventSequence();
         assertThat(model)
@@ -129,8 +129,8 @@ class EventViewerControllerTest {
         Fixture fixture = createAndSaveConcertWithThreeEvents();
 
         ConcurrentModel model = new ConcurrentModel();
-        fixture.controller().showConcertEvents("concerts", fixture.concertIdAsString,
-                                               badSelectedEvent, model);
+        fixture.controller().showEvents("concerts", fixture.concertIdAsString,
+                                        badSelectedEvent, model);
 
         Integer mostRecentEventSequence = fixture.concertEvents.getLast().eventSequence();
         assertThat(model)
@@ -142,9 +142,9 @@ class EventViewerControllerTest {
         Fixture fixture = createAndSaveConcertWithThreeEvents();
 
         ConcurrentModel model = new ConcurrentModel();
-        fixture.controller().showConcertEvents("concerts", fixture.concertIdAsString,
-                                               1,
-                                               model);
+        fixture.controller().showEvents("concerts", fixture.concertIdAsString,
+                                        1,
+                                        model);
 
         assertThat(model)
                 .containsEntry("selectedEvent", 1)
