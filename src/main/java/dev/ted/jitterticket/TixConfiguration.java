@@ -10,6 +10,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ConcertProjectionChoice;
+import dev.ted.jitterticket.eventviewer.adapter.in.web.CustomerProjectionChoice;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoices;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +35,11 @@ public class TixConfiguration {
         var customerStore = EventStore.forCustomers();
         customerStore.save(Customer.register(
                 new CustomerId(UUID.fromString("68f5b2c2-d70d-4992-ad78-c94809ae9a6a")),
-                "Sample Customer", "sample@example.com"));
+                "First Customer", "first@example.com"));
+        customerStore.save(Customer.register(
+                new CustomerId(UUID.fromString("123e4567-e89b-42d3-a456-556642440000")),
+                "Another Customer", "another@example.com"
+        ));
         return customerStore;
     }
 
@@ -166,8 +171,14 @@ public class TixConfiguration {
     }
 
     @Bean
-    public ProjectionChoices projectionChoices(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new ProjectionChoices(Map.of("concerts", new ConcertProjectionChoice(concertStore)));
+    public ProjectionChoices projectionChoices(
+            EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+            EventStore<CustomerId, CustomerEvent, Customer> customerStore
+            ) {
+        return new ProjectionChoices(Map.of(
+                "concerts", new ConcertProjectionChoice(concertStore),
+                "customers", new CustomerProjectionChoice(customerStore)
+        ));
     }
 
 }

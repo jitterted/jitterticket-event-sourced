@@ -10,11 +10,11 @@ public class ProjectionChoices {
         this.projectionChoices = projectionChoices;
     }
 
-    Collection<ProjectionChoice> choices() {
+    public Collection<ProjectionChoice> choices() {
         return projectionChoices.values();
     }
 
-    ProjectionChoice choiceFor(String aggregateName) {
+    public ProjectionChoice choiceFor(String aggregateName) {
         return projectionChoices.get(aggregateName);
     }
 }

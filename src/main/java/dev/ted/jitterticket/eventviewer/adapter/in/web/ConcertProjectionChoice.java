@@ -13,17 +13,22 @@ import java.util.UUID;
 public class ConcertProjectionChoice extends ProjectionChoice {
 
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
+    protected ConcertSummaryProjector concertSummaryProjector;
 
     public ConcertProjectionChoice(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         super("Concert", "concerts");
         this.concertStore = concertStore;
+        this.concertSummaryProjector = new ConcertSummaryProjector(concertStore);
     }
 
     @Override
     public List<AggregateSummaryView> aggregateSummaryViews() {
-        return new ConcertSummaryProjector(concertStore)
+        return concertSummaryProjector
                 .allConcertSummaries()
-                .map(AggregateSummaryView::of)
+                .map(concertSummary -> new AggregateSummaryView(
+                        concertSummary.concertId().id().toString(),
+                        concertSummary.artist()
+                ))
                 .toList();
     }
 
