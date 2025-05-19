@@ -10,12 +10,13 @@ import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ConcertProjectionChoice;
-import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoice;
+import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoices;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Configuration
@@ -165,8 +166,8 @@ public class TixConfiguration {
     }
 
     @Bean
-    public ProjectionChoice createConcertProjectionChoice(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new ConcertProjectionChoice(concertStore);
+    public ProjectionChoices projectionChoices(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new ProjectionChoices(Map.of("concerts", new ConcertProjectionChoice(concertStore)));
     }
 
 }

@@ -15,6 +15,7 @@ import org.springframework.ui.ConcurrentModel;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -26,7 +27,8 @@ class EventViewerControllerTest {
         var concertStore = EventStore.forConcerts();
         var customerStore = EventStore.forCustomers();
         ProjectionChoice projectionChoice = new ConcertProjectionChoice(concertStore);
-        EventViewerController controller = new EventViewerController(projectionChoice);
+        EventViewerController controller = new EventViewerController(
+                new ProjectionChoices(Map.of("concerts", projectionChoice)));
         ConcurrentModel model = new ConcurrentModel();
 
         String viewName = controller.listProjectionChoices(model);
@@ -41,9 +43,7 @@ class EventViewerControllerTest {
     @Test
     void listAggregatesReturnsCorrectViewNameAndAggregateNameInModel() {
         var concertStore = EventStore.forConcerts();
-        EventViewerController controller = new
-                EventViewerController(
-                new ConcertProjectionChoice(concertStore));
+        EventViewerController controller = createEventViewerController(concertStore);
 
         ConcurrentModel model = new ConcurrentModel();
 
@@ -53,6 +53,13 @@ class EventViewerControllerTest {
                 .isEqualTo("event-viewer/list-aggregates");
         assertThat(model)
                 .containsEntry("aggregateName", "Concert");
+    }
+
+    private static EventViewerController createEventViewerController(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        EventViewerController controller = new EventViewerController(
+                new ProjectionChoices(Map.of(
+                        "concerts", new ConcertProjectionChoice(concertStore))));
+        return controller;
     }
 
     @Test
@@ -69,8 +76,7 @@ class EventViewerControllerTest {
                                                              showDateTime,
                                                              doorsTime));
 
-        EventViewerController controller = new EventViewerController(
-                new ConcertProjectionChoice(concertStore));
+        EventViewerController controller = createEventViewerController(concertStore);
         ConcurrentModel model = new ConcurrentModel();
 
         controller.listAggregates("concerts", model);
@@ -90,7 +96,7 @@ class EventViewerControllerTest {
                 "concerts", fixture.concertIdAsString, selectedEventSequence, model);
 
         assertThat(viewName)
-                .isEqualTo("event-viewer/concert-events");
+                .isEqualTo("event-viewer/view-events");
 
         assertThat(model)
                 .containsEntry("uuid", fixture.concertIdAsString)
@@ -167,7 +173,7 @@ class EventViewerControllerTest {
         concert.sellTicketsTo(CustomerId.createRandom(), 4);
         concertStore.save(concert);
 
-        EventViewerController controller = new EventViewerController(new ConcertProjectionChoice(concertStore));
+        EventViewerController controller = createEventViewerController(concertStore);
         return new Fixture(concertId.id().toString(), concert, controller, concertStore.eventsForAggregate(concertId));
     }
 

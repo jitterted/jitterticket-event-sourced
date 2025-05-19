@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -22,24 +21,23 @@ import java.util.UUID;
  */
 public class EventViewerController {
 
-    protected final Map<String, ProjectionChoice> projectionChoices;
+    protected final ProjectionChoices projectionChoices;
 
     @Autowired
-    public EventViewerController(ProjectionChoice projectionChoice) {
-        this.projectionChoices = Map.of("concerts", projectionChoice);
+    public EventViewerController(ProjectionChoices projectionChoices) {
+        this.projectionChoices = projectionChoices;
     }
 
     @GetMapping
     public String listProjectionChoices(Model model) {
-        model.addAttribute("projections",
-                           projectionChoices.values());
+        model.addAttribute("projections", projectionChoices.choices());
         return "event-viewer/projection-choices";
     }
 
     @GetMapping("/{aggregateName}")
     public String listAggregates(@PathVariable("aggregateName") String aggregateName,
                                  Model model) {
-        ProjectionChoice choice = projectionChoices.get(aggregateName);
+        ProjectionChoice choice = projectionChoices.choiceFor(aggregateName);
         model.addAttribute("aggregateName", choice.aggregateName());
         model.addAttribute("aggregates", choice.aggregateSummaryViews());
         return "event-viewer/list-aggregates";
@@ -52,7 +50,7 @@ public class EventViewerController {
                              Model model) {
         model.addAttribute("uuid", uuidString);
         UUID uuid = UUID.fromString(uuidString);
-        ProjectionChoice choice = projectionChoices.get(aggregateName);
+        ProjectionChoice choice = projectionChoices.choiceFor(aggregateName);
         List<? extends Event> allEvents = choice.eventsFor(uuid);
         if (selectedEvent < 0 || selectedEvent > allEvents.getLast().eventSequence()) {
             selectedEvent = allEvents.getLast().eventSequence();
