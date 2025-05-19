@@ -3,12 +3,14 @@ package dev.ted.jitterticket;
 import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.EventStore;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ConcertProjectionChoice;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.CustomerProjectionChoice;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoices;
@@ -19,9 +21,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Configuration
 public class TixConfiguration {
+
+    private static final ConcertId SONIC_WAVES_CONCERT_ID = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440001"));
 
     @Bean
     PurchaseTicketsUseCase purchaseTicketsUseCase(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
@@ -33,13 +38,16 @@ public class TixConfiguration {
     @Bean
     public EventStore<CustomerId, CustomerEvent, Customer> customerStore() {
         var customerStore = EventStore.forCustomers();
+        CustomerId firstCustomerId = new CustomerId(UUID.fromString("68f5b2c2-d70d-4992-ad78-c94809ae9a6a"));
         customerStore.save(Customer.register(
-                new CustomerId(UUID.fromString("68f5b2c2-d70d-4992-ad78-c94809ae9a6a")),
+                firstCustomerId,
                 "First Customer", "first@example.com"));
         customerStore.save(Customer.register(
                 new CustomerId(UUID.fromString("123e4567-e89b-42d3-a456-556642440000")),
                 "Another Customer", "another@example.com"
         ));
+        customerStore.save(firstCustomerId,
+                           Stream.of(new TicketsPurchased(firstCustomerId, 1, TicketOrderId.createRandom(), SONIC_WAVES_CONCERT_ID, 3, 150)));
         return customerStore;
     }
 
@@ -140,10 +148,8 @@ public class TixConfiguration {
     }
 
     private static void addSonicWavesConcertTo(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        ConcertId sonicWavesConcertId = ConcertId.createRandom();
-
         Concert sonicWavesConcert = Concert.schedule(
-                sonicWavesConcertId,
+                SONIC_WAVES_CONCERT_ID,
                 "The Sonic Waves",
                 45,
                 LocalDateTime.of(2025, 7, 26, 20, 0),
