@@ -28,8 +28,6 @@
             [X] Wrap the Map into ProjectionChoices class
         [ ] Clean up "aggregate name" to be "projection name"
 
-[ ] Add a test for the events (concert-events.html) template so we can make sure we've got the necessary attributes in the model for Thymeleaf
-
 [ ] Convert Events from Record to Class
 
 [ ] Persistence! File and then database
