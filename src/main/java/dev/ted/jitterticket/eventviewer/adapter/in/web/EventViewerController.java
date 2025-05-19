@@ -60,6 +60,7 @@ public class EventViewerController {
         model.addAttribute("selectedEvent", selectedEvent);
         model.addAttribute("events", eventViewsOf(allEvents));
         model.addAttribute("aggregateName", choice.aggregateName());
+        model.addAttribute("urlPath", choice.urlPath());
 
         List<? extends Event> selectedEvents = selectEvents(selectedEvent, allEvents);
         List<String> aggregateProperties = choice.propertiesOfProjectionFrom(selectedEvents);

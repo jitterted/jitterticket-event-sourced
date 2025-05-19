@@ -191,7 +191,7 @@
                      th:classappend="${selectedEvent >= eventView.eventSequence} ? 'event-selected' : ''">
                     <a class="event-link"
                        href="#"
-                       th:href="@{/event-viewer/concerts/{uuid}(uuid=${uuid}, selectedEvent=${eventView.eventSequence})}"
+                       th:href="@{{urlPath}/{uuid}(urlPath=${urlPath}, uuid=${uuid}, selectedEvent=${eventView.eventSequence})}"
                     >
                         <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
                         <div th:each="field : ${eventView.fields()}" class="event-field">
