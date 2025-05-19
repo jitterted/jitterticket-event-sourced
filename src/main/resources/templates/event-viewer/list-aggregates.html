@@ -14,8 +14,8 @@
     </thead>
     <tbody>
     <tr th:each="aggregate : ${aggregates}">
-        <td><a th:href="@{/event-viewer/concerts/{aggregateId}(aggregateId=${aggregate.aggregateId})}" th:text="${aggregate.aggregateId}">af05fc05-2de1-46d8-9568-01381029feb7</a></td>
-        <td th:text="${aggregate.description}">Jittery Pigs</td>
+        <td><a th:href="@{{urlPath}/{aggregateId}(urlPath=${urlPath}, aggregateId=${aggregate.aggregateId})}" th:text="${aggregate.aggregateId}">af05fc05-2de1-46d8-9568-01381029feb7</a></td>
+        <td th:text="${aggregate.description}">Aggregate/Projection Description</td>
     </tr>
     </tbody>
 </table>

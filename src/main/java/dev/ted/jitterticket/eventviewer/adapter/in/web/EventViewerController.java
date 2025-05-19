@@ -39,6 +39,7 @@ public class EventViewerController {
                                  Model model) {
         ProjectionChoice choice = projectionChoices.choiceFor(aggregateName);
         model.addAttribute("aggregateName", choice.aggregateName());
+        model.addAttribute("urlPath", choice.urlPath());
         model.addAttribute("aggregates", choice.aggregateSummaryViews());
         return "event-viewer/list-aggregates";
     }
