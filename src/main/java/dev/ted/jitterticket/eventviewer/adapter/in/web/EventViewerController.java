@@ -66,7 +66,7 @@ public class EventViewerController {
         List<String> aggregateProperties = choice.propertiesOfProjectionFrom(selectedEvents);
         model.addAttribute("projectedState", aggregateProperties);
         // generalize the Thymeleaf template to work with any projection type
-        return "event-viewer/concert-events";
+        return "event-viewer/view-events";
     }
 
     private static List<? extends Event> selectEvents(int selectedEvent, List<? extends Event> allEvents) {
