@@ -40,14 +40,6 @@ public class EventStore<
         return new EventStore<>(Customer::reconstitute);
     }
 
-    @Deprecated // use findById() instead
-    public Stream<AGGREGATE> findAll() {
-        return idToEventDtoMap
-                .keySet()
-                .stream()
-                .map(id -> aggregateFromEvents(idToEventDtoMap.get(id)));
-    }
-
     public void save(AGGREGATE aggregate) {
         ID aggregateId = aggregate.getId();
         if (aggregateId == null) {

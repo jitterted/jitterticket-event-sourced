@@ -15,8 +15,8 @@
         [X] Clicking on an event moves the "current" pointer to that event
         [X] Create a sublist of the events up to (and including) the selected event, then reconstitute the aggregate from the sublist
     [X] Improve layout of events in the event list
-===>> CURRENT TASK:
-    [ ] Generalize to events for any Aggregate type for a specific Agg ID
+
+    [X] Generalize to events for any Aggregate type for a specific Agg ID
         [X] Generalize show[Concert]Events to showEvents for any type
             [X] Use functions to transform an idString to a List<Event>
             [X] Create summary projector for Customer aggregates
@@ -26,9 +26,11 @@
         [X] Need a function that provides a list of available projections (aggregates) to view, i.e., generalize the listConcerts() endpoint that uses concertSummaryProjector.allConcertSummaries()
         [X] Add concrete ProjectionChoice implementations for Customer aggregate and Concert Summary projection
             [X] Wrap the Map into ProjectionChoices class
-        [ ] Clean up "aggregate name" to be "projection name"
+        [-] Clean up "aggregate name" to be "projection name"
 
 [X] Convert Events from Record to Class
+
+===>> CURRENT TASK:
 
 [ ] Persistence! File and then database
 
