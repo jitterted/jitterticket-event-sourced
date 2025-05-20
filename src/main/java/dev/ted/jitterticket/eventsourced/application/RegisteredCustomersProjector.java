@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.Gatherers;
+import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;

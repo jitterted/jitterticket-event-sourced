@@ -15,7 +15,7 @@ class ConcertSummaryProjectorTest {
 
     @Test
     void noConcertsCreatedProjectorReturnsNoConcerts() {
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(EventStore.forConcerts());
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(InMemoryEventStore.forConcerts());
 
         Stream<ConcertSummary> concertTicketViews = concertSummaryProjector.allConcertSummaries();
 
@@ -25,7 +25,7 @@ class ConcertSummaryProjectorTest {
 
     @Test
     void projectorReturnsConcertsSavedInConcertStore() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         ConcertId firstConcertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.scheduleConcertWith(firstConcertId,
                                                              "First Concert",
@@ -59,7 +59,7 @@ class ConcertSummaryProjectorTest {
 
     @Test
     void projectorReturnsSingleConcertForSavedAndRescheduledConcerts() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.scheduleConcertWith(concertId,

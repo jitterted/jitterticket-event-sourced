@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
+import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
@@ -24,8 +25,8 @@ class EventViewerControllerTest {
 
     @Test
     void listProjectionChoicesShowsAvailableProjections() {
-        var concertStore = EventStore.forConcerts();
-        var customerStore = EventStore.forCustomers();
+        var concertStore = InMemoryEventStore.forConcerts();
+        var customerStore = InMemoryEventStore.forCustomers();
         ProjectionChoice projectionChoice = new ConcertProjectionChoice(concertStore);
         EventViewerController controller = new EventViewerController(
                 new ProjectionChoices(Map.of("concerts", projectionChoice)));
@@ -42,7 +43,7 @@ class EventViewerControllerTest {
 
     @Test
     void listAggregatesReturnsCorrectViewNameAndAggregateNameInModel() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         EventViewerController controller = createEventViewerController(concertStore);
 
         ConcurrentModel model = new ConcurrentModel();
@@ -64,7 +65,7 @@ class EventViewerControllerTest {
 
     @Test
     void listAggregatesAddsCorrectAttributesToModel() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         ConcertId concertId = ConcertId.createRandom();
         String artist = "Test Artist";
         LocalDateTime showDateTime = LocalDateTime.of(2025, 7, 26, 20, 0);
@@ -160,7 +161,7 @@ class EventViewerControllerTest {
     }
 
     private static Fixture createAndSaveConcertWithThreeEvents() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
 
         ConcertId concertId = ConcertId.createRandom();
         Concert concert = ConcertFactory.scheduleConcertWith(

@@ -10,7 +10,7 @@ class RegisteredCustomersProjectorTest {
 
     @Test
     void allCustomersReturnsEmptyStreamWhenNoCustomersAreRegistered() {
-        var customerStore = EventStore.forCustomers();
+        var customerStore = InMemoryEventStore.forCustomers();
         RegisteredCustomersProjector registeredCustomersProjector =
                 new RegisteredCustomersProjector(customerStore);
 
@@ -20,7 +20,7 @@ class RegisteredCustomersProjectorTest {
 
     @Test
     void allCustomersReturnsCustomerSummariesForRegisteredCustomers() {
-        var customerStore = EventStore.forCustomers();
+        var customerStore = InMemoryEventStore.forCustomers();
         RegisteredCustomersProjector registeredCustomersProjector =
                 new RegisteredCustomersProjector(customerStore);
 

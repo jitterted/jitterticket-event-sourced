@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.EventDto;
+import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
@@ -20,26 +21,28 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class EventStore<
+public class InMemoryEventStore<
         ID extends Id,
         EVENT extends Event,
-        AGGREGATE extends EventSourcedAggregate<EVENT, ID>> {
+        AGGREGATE extends EventSourcedAggregate<EVENT, ID>> implements
+        EventStore<ID, EVENT, AGGREGATE> {
 
     private final Map<ID, List<EventDto<EVENT>>> idToEventDtoMap = new HashMap<>();
     private final Function<List<EVENT>, AGGREGATE> eventsToAggregate;
 
-    private EventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
+    private InMemoryEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         this.eventsToAggregate = eventsToAggregate;
     }
 
     public static EventStore<ConcertId, ConcertEvent, Concert> forConcerts() {
-        return new EventStore<>(Concert::reconstitute);
+        return new InMemoryEventStore<>(Concert::reconstitute);
     }
 
     public static EventStore<CustomerId, CustomerEvent, Customer> forCustomers() {
-        return new EventStore<>(Customer::reconstitute);
+        return new InMemoryEventStore<>(Customer::reconstitute);
     }
 
+    @Override
     public void save(AGGREGATE aggregate) {
         ID aggregateId = aggregate.getId();
         if (aggregateId == null) {
@@ -50,6 +53,7 @@ public class EventStore<
         save(aggregateId, uncommittedEvents);
     }
 
+    @Override
     public void save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
         List<EventDto<EVENT>> existingEventDtos = idToEventDtoMap
                 .computeIfAbsent(aggregateId, _ -> new ArrayList<>());
@@ -72,11 +76,13 @@ public class EventStore<
         return eventsToAggregate.apply(events);
     }
 
+    @Override
     public Optional<AGGREGATE> findById(ID id) {
         return Optional.ofNullable(idToEventDtoMap.get(id))
                        .map(this::aggregateFromEvents);
     }
 
+    @Override
     public Stream<EVENT> allEvents() {
         return idToEventDtoMap.values()
                               .stream()
@@ -84,6 +90,7 @@ public class EventStore<
                               .map(EventDto::toDomain);
     }
 
+    @Override
     public List<EVENT> eventsForAggregate(ID id) {
         return idToEventDtoMap.get(id)
                               .stream()

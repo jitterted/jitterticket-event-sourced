@@ -1,7 +1,9 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
@@ -17,8 +19,8 @@ class PurchaseTicketsUseCaseTest {
 
     @Test
     void failureOfPurchaseTicketsReturnsEmptyOptional() {
-        var concertStore = EventStore.forConcerts();
-        var customerStore = EventStore.forCustomers();
+        var concertStore = InMemoryEventStore.forConcerts();
+        var customerStore = InMemoryEventStore.forCustomers();
         Customer customer = CustomerFactory.newlyRegistered();
         customerStore.save(customer);
         PurchaseTicketsUseCase purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore, customerStore);
@@ -84,15 +86,15 @@ class PurchaseTicketsUseCaseTest {
     private static Fixture createForPurchaseTicketsWithCapacityOf(int originalConcertAvailableTicketCount) {
         Customer customer = CustomerFactory.newlyRegistered();
         Concert concertBefore = ConcertFactory.createWithCapacity(originalConcertAvailableTicketCount);
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         concertStore.save(concertBefore);
         ConcertId concertId = concertBefore.getId();
-        var customerStore = EventStore.forCustomers();
+        var customerStore = InMemoryEventStore.forCustomers();
         customerStore.save(customer);
         return new Fixture(customer, concertStore, concertId, customerStore);
     }
 
-    private record Fixture(Customer customer, EventStore<ConcertId,dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent, Concert> concertStore, ConcertId concertId, EventStore<dev.ted.jitterticket.eventsourced.domain.customer.CustomerId,dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent, Customer> customerStore) {}
+    private record Fixture(Customer customer, EventStore<ConcertId, ConcertEvent, Concert> concertStore, ConcertId concertId, EventStore<dev.ted.jitterticket.eventsourced.domain.customer.CustomerId,dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent, Customer> customerStore) {}
 
     private static Fixture createForPurchaseTickets() {
         return createForPurchaseTicketsWithCapacityOf(42);

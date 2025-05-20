@@ -1,6 +1,6 @@
 package dev.ted.jitterticket.eventsourced.domain.concert;
 
-import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;

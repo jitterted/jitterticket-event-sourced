@@ -1,6 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
@@ -19,7 +19,7 @@ class CustomersControllerTest {
 
     @Test
     void viewIncludesPurchaseConfirmationDetails() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         String artist = "Character Set";
         LocalDateTime showDateTime = LocalDateTime.now();
         Concert concert = ConcertFactory.scheduleConcertWith(ConcertId.createRandom(),
@@ -28,7 +28,7 @@ class CustomersControllerTest {
                                                              showDateTime,
                                                              showDateTime.minusHours(1).toLocalTime());
         concertStore.save(concert);
-        var customerStore = EventStore.forCustomers();
+        var customerStore = InMemoryEventStore.forCustomers();
         Customer customer = CustomerFactory.newlyRegistered();
         customerStore.save(customer);
         int ticketQuantity = 3;

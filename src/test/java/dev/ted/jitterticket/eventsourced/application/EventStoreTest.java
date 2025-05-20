@@ -26,7 +26,7 @@ class EventStoreTest {
 
     @Test
     void findByIdForNonExistingConcertReturnsEmptyOptional() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
 
         ConcertId concertId = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440000"));
         assertThat(concertStore.findById(concertId))
@@ -36,7 +36,7 @@ class EventStoreTest {
 
     @Test
     void findByIdReturnsSavedConcert() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         ConcertId concertId = ConcertId.createRandom();
         Concert concert = Concert.schedule(concertId,
                                            "Headliner",
@@ -59,7 +59,7 @@ class EventStoreTest {
 
     @Test
     void findByIdReturnsDifferentInstanceOfConcert() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         Concert savedConcert = ConcertFactory.createConcert();
         concertStore.save(savedConcert);
 
@@ -72,7 +72,7 @@ class EventStoreTest {
 
     @Test
     void eventStoreCanStoreCustomers() {
-        var customerStore = EventStore.forCustomers();
+        var customerStore = InMemoryEventStore.forCustomers();
         Customer savedCustomer = Customer.register(CustomerId.createRandom(), "name", "email@example.com");
         customerStore.save(savedCustomer);
 
@@ -86,7 +86,7 @@ class EventStoreTest {
 
     @Test
     void eventStoreReturnsAllEventsAcrossAllSavedAggregatesInOrder() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         Concert originalConcert = ConcertFactory.createConcert();
         concertStore.save(originalConcert);
         Concert rescheduledConcert = concertStore.findById(originalConcert.getId()).orElseThrow();
@@ -102,7 +102,7 @@ class EventStoreTest {
 
     @Test
     void exactlyAllEventsForSpecifiedConcertAggregateAreReturned() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         ConcertId concertId = ConcertId.createRandom();
         Concert concert = Concert.schedule(concertId, "artist", 30, LocalDateTime.now(), LocalTime.now().minusHours(1), 100, 8);
         concert.rescheduleTo(LocalDateTime.now(), LocalTime.now().minusHours(1));
@@ -123,7 +123,7 @@ class EventStoreTest {
 
     @Test
     void exactlyAllEventsForSpecifiedCustomerAggregateAreReturned() {
-        var customerStore = EventStore.forCustomers();
+        var customerStore = InMemoryEventStore.forCustomers();
         CustomerId customerId = CustomerId.createRandom();
         Customer customer = Customer.register(customerId, "customer name", "customer@example.com");
         Concert concert = ConcertFactory.createConcert();
@@ -140,7 +140,7 @@ class EventStoreTest {
 
     @Test
     void savingEventsDirectlyStoresThemCorrectly() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         ConcertId concertId = ConcertId.createRandom();
         LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
         LocalTime originalDoorsTime = LocalTime.of(18, 0);

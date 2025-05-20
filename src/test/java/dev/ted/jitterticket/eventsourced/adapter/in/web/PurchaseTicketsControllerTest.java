@@ -1,6 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.EventStore;
+import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -20,7 +20,7 @@ class PurchaseTicketsControllerTest {
 
     @Test
     void purchaseTicketsViewPutsConcertAndTicketOrderIntoModel() {
-        var concertStore = EventStore.forConcerts();
+        var concertStore = InMemoryEventStore.forConcerts();
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(Concert.schedule(
                 concertId,
@@ -30,7 +30,7 @@ class PurchaseTicketsControllerTest {
                 LocalTime.of(20, 0),
                 150,
                 4));
-        var customerStore = EventStore.forCustomers();
+        var customerStore = InMemoryEventStore.forCustomers();
         PurchaseTicketsController purchaseTicketsController =
                 new PurchaseTicketsController(concertStore, new PurchaseTicketsUseCase(concertStore, customerStore));
         String concertIdString = concertId.id().toString();
@@ -57,8 +57,8 @@ class PurchaseTicketsControllerTest {
 
     @Test
     void placeTicketOrderRedirectsToOrderConfirmationPage() {
-        var concertStore = EventStore.forConcerts();
-        var customerStore = EventStore.forCustomers();
+        var concertStore = InMemoryEventStore.forConcerts();
+        var customerStore = InMemoryEventStore.forCustomers();
         TicketOrderId ticketOrderId = TicketOrderId.createRandom();
         PurchaseTicketsUseCase purchaseTicketsUseCase =
                 PurchaseTicketsUseCase.createForTest(concertStore,
