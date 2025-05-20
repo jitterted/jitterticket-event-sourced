@@ -24,26 +24,19 @@ public class ConcertSummaryProjector {
         Map<ConcertId, ConcertSummary> views = new HashMap<>();
         concertStore.allEvents()
                     .forEach(concertEvent -> {
-                                 switch (concertEvent) {
-                                     case ConcertScheduled(
-                                             ConcertId concertId, _,
-                                             String artist,
-                                             int ticketPrice,
-                                             LocalDateTime showDateTime,
-                                             LocalTime doorsTime,
-                                             _, _) ->
-                                             views.put(concertId,
-                                                    new ConcertSummary(concertId, artist, ticketPrice, showDateTime, doorsTime));
-
-                                     case ConcertRescheduled(ConcertId concertId, _,
-                                                             LocalDateTime newShowDateTime, LocalTime newDoorsTime) -> {
-                                         ConcertSummary oldView = views.get(concertId);
-                                         ConcertSummary rescheduledView = rescheduleTo(newShowDateTime, newDoorsTime, oldView);
-                                         views.put(concertId, rescheduledView);
-                                     }
-
-                                     default -> {
-                                     }
+                                 if (concertEvent instanceof ConcertScheduled scheduled) {
+                                     views.put(scheduled.concertId(),
+                                             new ConcertSummary(scheduled.concertId(), 
+                                                               scheduled.artist(), 
+                                                               scheduled.ticketPrice(), 
+                                                               scheduled.showDateTime(), 
+                                                               scheduled.doorsTime()));
+                                 } else if (concertEvent instanceof ConcertRescheduled rescheduled) {
+                                     ConcertSummary oldView = views.get(rescheduled.concertId());
+                                     ConcertSummary rescheduledView = rescheduleTo(rescheduled.newShowDateTime(), 
+                                                                                  rescheduled.newDoorsTime(), 
+                                                                                  oldView);
+                                     views.put(rescheduled.concertId(), rescheduledView);
                                  }
                              }
                     );

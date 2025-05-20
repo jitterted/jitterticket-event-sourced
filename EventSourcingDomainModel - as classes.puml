@@ -1,0 +1,56 @@
+@startuml Event Implementation Hierarchy (with Classes)
+
+abstract class Event {
+  +Integer eventSequence()
+}
+
+abstract class CustomerEvent {
+  +CustomerId customerId()
+}
+
+abstract class ConcertEvent {
+  +ConcertId concertId()
+}
+
+class CustomerRegistered {
+  -String customerName
+  -String email
+}
+
+class TicketsPurchased {
+  -TicketOrderId ticketOrderId
+  -ConcertId concertId
+  -int quantity
+  -int paidAmount
+}
+
+class ConcertScheduled {
+  -String artist
+  -int ticketPrice
+  -LocalDateTime showDateTime
+  -LocalTime doorsTime
+  -int capacity
+  -int maxTicketsPerPurchase
+}
+
+class ConcertRescheduled {
+  -LocalDateTime newShowDateTime
+  -LocalTime newDoorsTime
+}
+
+class TicketsSold {
+  -int quantity
+  -int paidAmount
+}
+
+Event <|-- CustomerEvent
+Event <|-- ConcertEvent
+
+CustomerEvent <|-- CustomerRegistered
+CustomerEvent <|-- TicketsPurchased
+
+ConcertEvent <|-- ConcertScheduled
+ConcertEvent <|-- ConcertRescheduled
+ConcertEvent <|-- TicketsSold
+
+@enduml

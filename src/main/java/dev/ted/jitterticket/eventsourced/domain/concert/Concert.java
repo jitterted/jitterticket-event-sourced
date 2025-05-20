@@ -45,35 +45,20 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
 
     @Override
     protected void apply(ConcertEvent concertEvent) {
-        switch (concertEvent) {
-            case ConcertScheduled(
-                    ConcertId concertId, _,
-                    String artist,
-                    int ticketPrice,
-                    LocalDateTime showDateTime,
-                    LocalTime doorsTime,
-                    int capacity,
-                    int maxTicketsPerPurchase
-            ) -> {
-                this.setId(concertId);
-                this.artist = artist;
-                this.ticketPrice = ticketPrice;
-                this.showDateTime = showDateTime;
-                this.doorsTime = doorsTime;
-                this.capacity = capacity;
-                this.availableTicketCount = capacity;
-                this.maxTicketsPerPurchase = maxTicketsPerPurchase;
-            }
-
-            case ConcertRescheduled(_, _, LocalDateTime newShowDateTime,
-                                    LocalTime newDoorsTime
-            ) -> {
-                this.showDateTime = newShowDateTime;
-                this.doorsTime = newDoorsTime;
-            }
-
-            case TicketsSold(_, _, int quantity, _) ->
-                    this.availableTicketCount -= quantity;
+        if (concertEvent instanceof ConcertScheduled scheduled) {
+            this.setId(scheduled.concertId());
+            this.artist = scheduled.artist();
+            this.ticketPrice = scheduled.ticketPrice();
+            this.showDateTime = scheduled.showDateTime();
+            this.doorsTime = scheduled.doorsTime();
+            this.capacity = scheduled.capacity();
+            this.availableTicketCount = scheduled.capacity();
+            this.maxTicketsPerPurchase = scheduled.maxTicketsPerPurchase();
+        } else if (concertEvent instanceof ConcertRescheduled rescheduled) {
+            this.showDateTime = rescheduled.newShowDateTime();
+            this.doorsTime = rescheduled.newDoorsTime();
+        } else if (concertEvent instanceof TicketsSold sold) {
+            this.availableTicketCount -= sold.quantity();
         }
     }
 

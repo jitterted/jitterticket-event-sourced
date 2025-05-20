@@ -37,7 +37,6 @@ class EventViewTest {
 
         assertThat(eventView.fields())
                 .containsExactlyInAnyOrder(
-                        new EventView.FieldView("eventSequence", "5"),
                         new EventView.FieldView("newShowDateTime", newShowDateTime.toString()),
                         new EventView.FieldView("newDoorsTime", newDoorsTime.toString())
                 );

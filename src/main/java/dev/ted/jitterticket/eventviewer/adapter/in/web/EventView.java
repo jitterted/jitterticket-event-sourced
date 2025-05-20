@@ -3,7 +3,7 @@ package dev.ted.jitterticket.eventviewer.adapter.in.web;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.RecordComponent;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,15 +30,21 @@ public class EventView {
     }
 
     private static List<FieldView> mapFields(Event event) {
-        return Arrays.stream(event.getClass().getRecordComponents())
-                     .skip(1) // skip the first component as it will always be the primary key/aggregate ID
-                     .map(rc -> new FieldView(rc.getName(), extractFieldValue(event, rc)))
+        // this includes methods defined in all super classes, including Object
+        // because we're not calling getDECLAREDmethods
+        List<String> superClassMethods = Arrays.stream(event.getClass().getSuperclass().getMethods())
+                                               .map(Method::getName)
+                                               .toList();
+        return Arrays.stream(event.getClass().getMethods())
+                     .filter(method -> !method.isSynthetic())
+                     .filter(method -> !superClassMethods.contains(method.getName()))
+                     .map(method -> new FieldView(method.getName(), extractFieldValue(event, method)))
                      .toList();
     }
 
-    private static String extractFieldValue(Event event, RecordComponent e) {
+    private static String extractFieldValue(Event event, Method method) {
         try {
-            return e.getAccessor().invoke(event).toString();
+            return method.invoke(event).toString();
         } catch (IllegalAccessException | InvocationTargetException ex) {
             return ex.toString();
         }

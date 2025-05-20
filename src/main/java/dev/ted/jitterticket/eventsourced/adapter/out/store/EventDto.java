@@ -1,10 +1,25 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.ted.jitterticket.eventsourced.domain.Event;
+import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
+import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public class EventDto<EVENT extends Event> {
@@ -45,9 +60,27 @@ public class EventDto<EVENT extends Event> {
         this.json = json;
     }
 
-    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggRootId, Integer eventSequence, EVENT event) {
+    private static ObjectMapper createObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
+
+        objectMapper.enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION.mappedFeature());
+
         objectMapper.registerModule(new JavaTimeModule());
+
+        objectMapper.addMixIn(Event.class, EventMixin.class);
+        objectMapper.addMixIn(CustomerEvent.class, CustomerEventMixin.class);
+        objectMapper.addMixIn(ConcertEvent.class, ConcertEventMixin.class);
+        objectMapper.addMixIn(CustomerRegistered.class, CustomerRegisteredMixin.class);
+        objectMapper.addMixIn(ConcertScheduled.class, ConcertScheduledMixin.class);
+        objectMapper.addMixIn(ConcertRescheduled.class, ConcertRescheduledMixin.class);
+        objectMapper.addMixIn(TicketsSold.class, TicketsSoldMixin.class);
+        objectMapper.addMixIn(TicketsPurchased.class, TicketsPurchasedMixin.class);
+
+        return objectMapper;
+    }
+
+    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggRootId, Integer eventSequence, EVENT event) {
+        ObjectMapper objectMapper = createObjectMapper();
 
         try {
             String json = objectMapper.writeValueAsString(event);
@@ -60,8 +93,7 @@ public class EventDto<EVENT extends Event> {
 
     @SuppressWarnings("unchecked")
     public EVENT toDomain() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        ObjectMapper objectMapper = createObjectMapper();
 
         try {
             Class<EVENT> valueType = (Class<EVENT>) Class.forName(eventType);
@@ -72,4 +104,136 @@ public class EventDto<EVENT extends Event> {
             throw new RuntimeException(e);
         }
     }
+}
+
+abstract class EventMixin {
+    @JsonProperty("eventSequence")
+    public abstract Integer eventSequence();
+}
+
+abstract class CustomerEventMixin {
+    @JsonProperty("customerId")
+    public abstract CustomerId customerId();
+}
+
+abstract class ConcertEventMixin {
+    @JsonProperty("concertId")
+    public abstract ConcertId concertId();
+}
+
+abstract class CustomerRegisteredMixin {
+    @JsonCreator
+    public CustomerRegisteredMixin(
+            @JsonProperty("customerId") CustomerId customerId,
+            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("customerName") String customerName,
+            @JsonProperty("email") String email) {
+    }
+
+    @JsonProperty("customerName")
+    public abstract String customerName();
+
+    @JsonProperty("email")
+    public abstract String email();
+}
+
+abstract class ConcertRescheduledMixin {
+    @JsonCreator
+    public ConcertRescheduledMixin(
+            @JsonProperty("concertId") ConcertId concertId,
+            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("newShowDateTime") LocalDateTime newShowDateTime,
+            @JsonProperty("newDoorsTime") LocalTime newDoorsTime
+    ) {
+    }
+
+    @JsonProperty("concertId")
+    public abstract ConcertId concertId();
+
+    @JsonProperty("newShowDateTime")
+    public abstract LocalDateTime newShowDateTime();
+
+    @JsonProperty("newDoorsTime")
+    public abstract LocalTime newDoorsTime();
+}
+
+abstract class TicketsSoldMixin {
+    @JsonCreator
+    public TicketsSoldMixin(
+            @JsonProperty("concertId") ConcertId concertId,
+            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("quantity") int quantity,
+            @JsonProperty("totalPaid") int totalPaid
+    ) {
+    }
+
+    @JsonProperty("concertId")
+    public abstract ConcertId concertId();
+
+    @JsonProperty("quantity")
+    public abstract int quantity();
+
+    @JsonProperty("totalPaid")
+    public abstract int totalPaid();
+}
+
+abstract class TicketsPurchasedMixin {
+    @JsonCreator
+    public TicketsPurchasedMixin(
+            @JsonProperty("customerId") CustomerId customerId,
+            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("ticketOrderId") TicketOrderId ticketOrderId,
+            @JsonProperty("concertId") ConcertId concertId,
+            @JsonProperty("quantity") int quantity,
+            @JsonProperty("paidAmount") int paidAmount
+    ) {
+    }
+
+    @JsonProperty("ticketOrderId")
+    public abstract TicketOrderId ticketOrderId();
+
+    @JsonProperty("concertId")
+    public abstract ConcertId concertId();
+
+    @JsonProperty("quantity")
+    public abstract int quantity();
+
+    @JsonProperty("paidAmount")
+    public abstract int paidAmount();
+}
+
+abstract class ConcertScheduledMixin {
+    @JsonCreator
+    public ConcertScheduledMixin(
+            @JsonProperty("concertId") ConcertId concertId,
+            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("artist") String artist,
+            @JsonProperty("ticketPrice") int ticketPrice,
+            @JsonProperty("showDateTime") java.time.LocalDateTime showDateTime,
+            @JsonProperty("doorsTime") java.time.LocalTime doorsTime,
+            @JsonProperty("capacity") int capacity,
+            @JsonProperty("maxTicketsPerPurchase") int maxTicketsPerPurchase
+    ) {
+    }
+
+    @JsonProperty("concertId")
+    public abstract ConcertId concertId();
+
+    @JsonProperty("artist")
+    public abstract String artist();
+
+    @JsonProperty("ticketPrice")
+    public abstract int ticketPrice();
+
+    @JsonProperty("showDateTime")
+    public abstract java.time.LocalDateTime showDateTime();
+
+    @JsonProperty("doorsTime")
+    public abstract java.time.LocalTime doorsTime();
+
+    @JsonProperty("capacity")
+    public abstract int capacity();
+
+    @JsonProperty("maxTicketsPerPurchase")
+    public abstract int maxTicketsPerPurchase();
 }

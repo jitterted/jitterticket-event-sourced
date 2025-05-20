@@ -40,27 +40,14 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
     @Override
     protected void apply(CustomerEvent customerEvent) {
-        switch (customerEvent) {
-            case CustomerRegistered(
-                    CustomerId customerId, _,
-                    String customerName,
-                    String email
-            ) -> {
-                setId(customerId);
-                this.name = customerName;
-                this.email = email;
-            }
-
-            case TicketsPurchased(_, _,
-                    TicketOrderId ticketOrderId,
-                    ConcertId concertId,
-                    int quantity,
-                    int paidAmount
-            ) -> {
-                TicketOrder ticketOrder = new TicketOrder(
-                        ticketOrderId, concertId, quantity, paidAmount);
-                ticketOrdersByTicketOrderId.put(ticketOrderId, ticketOrder);
-            }
+        if (customerEvent instanceof CustomerRegistered registered) {
+            setId(registered.customerId());
+            this.name = registered.customerName();
+            this.email = registered.email();
+        } else if (customerEvent instanceof TicketsPurchased purchased) {
+            TicketOrder ticketOrder = new TicketOrder(
+                    purchased.ticketOrderId(), purchased.concertId(), purchased.quantity(), purchased.paidAmount());
+            ticketOrdersByTicketOrderId.put(purchased.ticketOrderId(), ticketOrder);
         }
     }
 

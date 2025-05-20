@@ -28,7 +28,7 @@
             [X] Wrap the Map into ProjectionChoices class
         [ ] Clean up "aggregate name" to be "projection name"
 
-[ ] Convert Events from Record to Class
+[X] Convert Events from Record to Class
 
 [ ] Persistence! File and then database
 
