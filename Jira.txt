@@ -33,6 +33,13 @@
 ===>> CURRENT TASK:
 
 [ ] Persistence! File and then database
+    [ ] Reorganize code
+        [ ] move core of findById() up to Base class, relying on the eventsForAggregate method instead of directly pulling events from the map
+        [ ] generalize and push up eventsForAggregate
+    [ ] Add in file I/O for CSV event store
+
+
+[ ] Fix up the if+instanceof to switch
 
 [X] Clean up ConcertSummaryProjector (remove concertWithEventsThrough()).
 

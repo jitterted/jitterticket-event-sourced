@@ -23,7 +23,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public class EventDto<EVENT extends Event> {
-    private final UUID aggRootId; // ID for the Aggregate Root
+    private final UUID aggregateRootId; // ID for the Aggregate Root
     private final Integer eventSequence;
     private final String eventType;
     private final String json; // blob of data - schemaless
@@ -31,7 +31,7 @@ public class EventDto<EVENT extends Event> {
     /*
         Table schema:
 
-        PK   AggRootId
+        PK   AggregateRootId
              EventSequence (monotonically increasing per AggRootId)
              Sequence?? (this might be a globally ordered sequence from the DB?)
              Version (for versioning the schema)
@@ -50,11 +50,11 @@ public class EventDto<EVENT extends Event> {
     //    so that when adding (and especially renaming) classes, the mapping works
 //    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public EventDto(UUID aggRootId, Integer eventSequence, String eventClassName, String json) {
+    public EventDto(UUID aggregateRootId, Integer eventSequence, String eventClassName, String json) {
         if (eventClassName == null) {
             throw new IllegalArgumentException("Event class name cannot be null, JSON is: " + json);
         }
-        this.aggRootId = aggRootId;
+        this.aggregateRootId = aggregateRootId;
         this.eventSequence = eventSequence;
         this.eventType = eventClassName;
         this.json = json;
@@ -79,13 +79,13 @@ public class EventDto<EVENT extends Event> {
         return objectMapper;
     }
 
-    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggRootId, Integer eventSequence, EVENT event) {
+    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggregateRootId, Integer eventSequence, EVENT event) {
         ObjectMapper objectMapper = createObjectMapper();
 
         try {
             String json = objectMapper.writeValueAsString(event);
             String fullyQualifiedClassName = event.getClass().getName();
-            return new EventDto<>(aggRootId, eventSequence, fullyQualifiedClassName, json);
+            return new EventDto<>(aggregateRootId, eventSequence, fullyQualifiedClassName, json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -103,6 +103,51 @@ public class EventDto<EVENT extends Event> {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public UUID getAggregateRootId() {
+        return aggregateRootId;
+    }
+
+    public Integer getEventSequence() {
+        return eventSequence;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public String getJson() {
+        return json;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        EventDto<?> eventDto = (EventDto<?>) o;
+        return aggregateRootId.equals(eventDto.aggregateRootId) && eventSequence.equals(eventDto.eventSequence) && eventType.equals(eventDto.eventType) && json.equals(eventDto.json);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = aggregateRootId.hashCode();
+        result = 31 * result + eventSequence.hashCode();
+        result = 31 * result + eventType.hashCode();
+        result = 31 * result + json.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "EventDto {" +
+                "aggregateRootId=" + aggregateRootId +
+                ", eventSequence=" + eventSequence +
+                ", eventType='" + eventType + '\'' +
+                ", json='" + json + '\'' +
+                '}';
     }
 }
 

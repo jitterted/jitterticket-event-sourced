@@ -10,10 +10,18 @@ public class ConcertFactory {
         ConcertId concertId = ConcertId.createRandom();
         return createConcertWithId(concertId);
     }
+    
+    public static Concert createConcertWithArtist(String artist) {
+        return createConcertWithIdAndArtist(ConcertId.createRandom(), artist);
+    }
 
     public static Concert createConcertWithId(ConcertId concertId) {
+        return createConcertWithIdAndArtist(concertId, "Headliner");
+    }
+
+    private static Concert createConcertWithIdAndArtist(ConcertId concertId, String artist) {
         return Concert.schedule(concertId,
-                                "Headliner",
+                                artist,
                                 99,
                                 LocalDateTime.now(),
                                 LocalTime.now().minusHours(1),

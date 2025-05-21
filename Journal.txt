@@ -1,3 +1,12 @@
+Wednesday, May 21, 2025
+=======================
+
+[JUnit Feedback]
+[ ] Is there a way to use @ParameterizedClass such that it supplies a new instance of the argument(s) for each individual test method? So instead of writing the same @ParameterizedTest+@MethodSource for each test method, I can specify it once for the whole class? (See EventStoreTest for an example.)
+
+
+
+
 Thursday, May 1, 2025
 =====================
 [AI Assistant]
