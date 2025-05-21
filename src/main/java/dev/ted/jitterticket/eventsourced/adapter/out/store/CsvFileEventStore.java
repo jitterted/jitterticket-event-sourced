@@ -17,12 +17,10 @@ import java.util.stream.Stream;
 
 public class CsvFileEventStore<ID extends Id, EVENT extends Event, AGGREGATE extends EventSourcedAggregate<EVENT, ID>> extends BaseEventStore<ID, EVENT, AGGREGATE> {
 
-    private final Class<EVENT> eventClass;
     public List<String> csvLines = new ArrayList<>();
 
     private CsvFileEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate, Class<EVENT> eventClass) {
         super(eventsToAggregate);
-        this.eventClass = eventClass;
     }
 
     public static EventStore<ConcertId, ConcertEvent, Concert> forConcerts() {
