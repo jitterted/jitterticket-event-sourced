@@ -82,6 +82,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.lazyparams</groupId>
+			<artifactId>lazyparams</artifactId>
+			<version>1.0.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>test</scope>
