@@ -16,9 +16,8 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedClass;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.lazyparams.LazyParams;
+import org.lazyparams.showcase.TestInstance_Lifecycle_PER_METHOD_REPETITION;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -32,6 +31,11 @@ import static org.assertj.core.api.Assertions.*;
 class EventStoreTest {
 
     enum EventStoreType { InMemory, CSV_File;
+
+        static EventStoreType pick() {
+            return LazyParams.pickValue(
+                    type -> "Using " + type + " Storage", values());
+        }
 
         EventStore<CustomerId, CustomerEvent, Customer> forCustomers() {
             switch (this) {
@@ -51,10 +55,9 @@ class EventStoreTest {
     @Nested
     class ConcertEventStoreTest {
 
-        @ParameterizedTest(name = "Using {0} Storage")
-        @EnumSource
-        void findByIdForNonExistingConcertReturnsEmptyOptional(EventStoreType storageType) {
-            var concertStore = storageType.forConcerts();
+        @Test
+        void findByIdForNonExistingConcertReturnsEmptyOptional() {
+            var concertStore = EventStoreType.pick().forConcerts();
             Concert existingConcert = ConcertFactory.createConcertWithArtist("Existing Concert");
             concertStore.save(existingConcert);
             ConcertId nonExistentConcertId = ConcertId.createRandom();
@@ -63,10 +66,9 @@ class EventStoreTest {
                     .isEmpty();
         }
 
-        @ParameterizedTest(name = "Using {0} Storage")
-        @EnumSource
-        void findByIdReturnsSavedConcert(EventStoreType storageType) {
-            var concertStore = storageType.forConcerts();
+        @Test
+        void findByIdReturnsSavedConcert() {
+            var concertStore = EventStoreType.pick().forConcerts();
             ConcertId concertId = ConcertId.createRandom();
             Concert concert = Concert.schedule(concertId,
                                                "Headliner",
@@ -87,10 +89,9 @@ class EventStoreTest {
                     .isEqualTo("Headliner");
         }
 
-        @ParameterizedTest(name = "Using {0} Storage")
-        @EnumSource
-        void findByIdReturnsDifferentInstanceOfConcert(EventStoreType storageType) {
-            var concertStore = storageType.forConcerts();
+        @Test
+        void findByIdReturnsDifferentInstanceOfConcert() {
+            var concertStore = EventStoreType.pick().forConcerts();
             Concert savedConcert = ConcertFactory.createConcert();
             concertStore.save(savedConcert);
 
@@ -101,10 +102,9 @@ class EventStoreTest {
                     .isNotSameAs(savedConcert);
         }
 
-        @ParameterizedTest(name = "Using {0} Storage")
-        @EnumSource
-        void eventStoreReturnsAllEventsAcrossAllSavedAggregates(EventStoreType storageType) {
-            var concertStore = storageType.forConcerts();
+        @Test
+        void eventStoreReturnsAllEventsAcrossAllSavedAggregates() {
+            var concertStore = EventStoreType.pick().forConcerts();
             Concert firstConcert = ConcertFactory.createConcertWithArtist("First Concert");
             List<ConcertEvent> expectedEvents = new ArrayList<>(firstConcert.uncommittedEvents().toList());
             concertStore.save(firstConcert);
@@ -122,10 +122,9 @@ class EventStoreTest {
                     .containsExactlyInAnyOrderElementsOf(expectedEvents);
         }
 
-        @ParameterizedTest(name = "Using {0} Storage")
-        @EnumSource
-        void emptyListReturnedForUnknownAggregateId(EventStoreType storageType) {
-            var concertStore = storageType.forConcerts();
+        @Test
+        void emptyListReturnedForUnknownAggregateId() {
+            var concertStore = EventStoreType.pick().forConcerts();
             Concert existingConcert = ConcertFactory.createConcertWithArtist("Existing Concert");
             concertStore.save(existingConcert);
             ConcertId unknownConcertId = ConcertId.createRandom();
@@ -135,10 +134,9 @@ class EventStoreTest {
                     .isEmpty();
         }
 
-        @ParameterizedTest(name = "Using {0} Storage")
-        @EnumSource
-        void exactlyAllEventsForSpecifiedConcertAggregateAreReturned(EventStoreType storageType) {
-            var concertStore = storageType.forConcerts();
+        @Test
+        void exactlyAllEventsForSpecifiedConcertAggregateAreReturned() {
+            var concertStore = EventStoreType.pick().forConcerts();
             ConcertId concertId = ConcertId.createRandom();
             Concert concert = Concert.schedule(concertId, "artist", 30, LocalDateTime.now(), LocalTime.now().minusHours(1), 100, 8);
             concert.rescheduleTo(LocalDateTime.now(), LocalTime.now().minusHours(1));
@@ -157,10 +155,9 @@ class EventStoreTest {
                     .containsExactlyElementsOf(allEventsForConcert.toList());
         }
 
-        @ParameterizedTest(name = "Using {0} Storage")
-        @EnumSource
-        void savingEventsDirectlyStoresThemCorrectly(EventStoreType storageType) {
-            var concertStore = storageType.forConcerts();
+        @Test
+        void savingEventsDirectlyStoresThemCorrectly() {
+            var concertStore = EventStoreType.pick().forConcerts();
             ConcertId concertId = ConcertId.createRandom();
             LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
             LocalTime originalDoorsTime = LocalTime.of(18, 0);
@@ -180,16 +177,16 @@ class EventStoreTest {
         }
     }
 
-    @ParameterizedClass
-    @EnumSource(names = {"InMemory"})
+    @TestInstance_Lifecycle_PER_METHOD_REPETITION
     @Nested
     class CustomerEventStoreTest {
 
-        CustomerEventStoreTest(EventStoreType storageType) {
-            customerStore = storageType.forCustomers();
-        }
-
-        EventStore<CustomerId, CustomerEvent, Customer> customerStore;
+        EventStore<CustomerId, CustomerEvent, Customer> customerStore = LazyParams
+                .<EventStoreType>pickValue(
+                        type -> "Using " + type + " Storage",
+//                        EventStoreType.CSV_File,
+                        EventStoreType.InMemory)
+                .forCustomers();
 
         @Test
         void eventStoreCanStoreCustomers() {
