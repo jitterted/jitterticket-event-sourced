@@ -1,6 +1,8 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvFileEventStore;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.ArrayListStringsReaderAppender;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvReaderAppender;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvStringsEventStore;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -15,12 +17,16 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -34,12 +40,17 @@ class EventStoreTest {
 
     @Nested
     class ConcertEventStoreTest {
+        @TempDir
+        static Path tempDir;
 
-        static Stream<Arguments> concertEventStoreSupplier() {
+        static Stream<Arguments> concertEventStoreSupplier() throws IOException {
+            Path tempFile = Files.createTempFile(tempDir, "test", ".csv");
             return Stream.of(
                     Arguments.of("In-Memory", InMemoryEventStore.forConcerts())
                     ,
-                    Arguments.of("CSV File", CsvFileEventStore.forConcerts())
+                    Arguments.of("CSV ArrayList", CsvStringsEventStore.forConcerts(new ArrayListStringsReaderAppender()))
+                    ,
+                    Arguments.of("CSV File", CsvStringsEventStore.forConcerts(new CsvReaderAppender(tempFile)))
             );
         }
 
@@ -169,9 +180,16 @@ class EventStoreTest {
     @MethodSource("customerEventStoreSupplier")
     @Nested
     class CustomerEventStoreTest {
+        @TempDir
+        static Path tempDir;
 
-        static Stream<EventStore<CustomerId, CustomerEvent, Customer>> customerEventStoreSupplier() {
-            return Stream.of(InMemoryEventStore.forCustomers());
+        static Stream<EventStore<CustomerId, CustomerEvent, Customer>> customerEventStoreSupplier() throws IOException {
+            Path tempFile = Files.createTempFile(tempDir, "test", ".csv");
+
+            return Stream.of(InMemoryEventStore.forCustomers(),
+                             CsvStringsEventStore.forCustomers(new ArrayListStringsReaderAppender()),
+                             CsvStringsEventStore.forCustomers(new CsvReaderAppender(tempFile))
+            );
         }
 
         @Parameter

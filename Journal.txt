@@ -1,10 +1,20 @@
+Tuesday, May 27, 2025
+=====================
+[Design Decision]
+* Storing events for all aggregates in a single CSV file means that when reading them inside an event-specific store, we need to filter out those events that don't match the Store's event type (e.g., CustomerEvent).
+  Solutions:
+  1. Each store gets its own file (e.g., "customer-events.csv" and "concert-events.csv")
+  2. Add a column in the CSV to indicate the event type (e.g., "ConcertEvent"), and then match that to the store's `eventClass` field (already defined)
+
 Wednesday, May 21, 2025
 =======================
 
 [JUnit Feedback]
 [ ] Is there a way to use @ParameterizedClass such that it supplies a new instance of the argument(s) for each individual test method? So instead of writing the same @ParameterizedTest+@MethodSource for each test method, I can specify it once for the whole class? (See EventStoreTest for an example.)
 
-
+[IntelliJ IDEA Feedback]
+[ ] (1:10pm) When extracting delegate, it leaves behind methods that are no longer used.
+    See CsvFileEventStore when delegating the csvLines to a new class.
 
 
 Thursday, May 1, 2025

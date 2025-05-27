@@ -33,10 +33,14 @@
 ===>> CURRENT TASK:
 
 [ ] Persistence! File and then database
-    [ ] Reorganize code
-        [ ] move core of findById() up to Base class, relying on the eventsForAggregate method instead of directly pulling events from the map
-        [ ] generalize and push up eventsForAggregate
+    [X] Reorganize code
+        [X] move core of findById() up to Base class, relying on the eventsForAggregate method instead of directly pulling events from the map
+        [X] generalize and push up eventsForAggregate
     [ ] Add in file I/O for CSV event store
+        [X] Create interface for reading/appending
+        [X] Create file-based implementation: translate IOException to RuntimeException
+            [X] Expanded CsvEventStore tests to test across ArrayList and File reader/appender implementations
+        [ ] Plug in file-based implementation into the CsvFileEventStore
 
 
 [ ] Fix up the if+instanceof to switch

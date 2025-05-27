@@ -1,6 +1,5 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.TixConfiguration;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -10,18 +9,13 @@ import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
-@Tag("mvc")
-@Tag("spring")
 @WebMvcTest(PurchaseTicketsController.class)
-@Import(TixConfiguration.class)
-class PurchaseTicketsControllerMvcTest {
+class PurchaseTicketsControllerMvcTest extends BaseMvcTest {
 
     @Autowired
     MockMvcTester mvc;

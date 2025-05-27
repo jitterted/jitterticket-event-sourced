@@ -3,9 +3,14 @@ package dev.ted.jitterticket.eventsourced;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoices;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -13,6 +18,14 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest
 @Tag("spring")
 class JitterTicketEventSourcedApplicationTests {
+
+	@TempDir
+	static Path tempDir;
+
+	@DynamicPropertySource
+	static void properties(DynamicPropertyRegistry registry) {
+		registry.add("events.directory", () -> tempDir.toString());
+	}
 
 	@Autowired
 	ProjectionChoices projectionChoices;
