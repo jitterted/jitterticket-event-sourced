@@ -53,6 +53,9 @@ Tuesday, May 27, 2025
     ```
     but the last case is not needed. (This might be hard!)
 
+[Design Decision]
+* When storing events in a relational database, there doesn't seem to be any benefit to trying to store all aggregates in a single table? Storing aggregate events in their own table seems more straightforward, and (eventually) would be more performant.
+  So, will have separate tables for each aggregate type (and therefore EventStore)
 
 Wednesday, May 21, 2025
 =======================
