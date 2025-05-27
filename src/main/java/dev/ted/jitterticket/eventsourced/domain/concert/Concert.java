@@ -45,20 +45,22 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
 
     @Override
     protected void apply(ConcertEvent concertEvent) {
-        if (concertEvent instanceof ConcertScheduled scheduled) {
-            this.setId(scheduled.concertId());
-            this.artist = scheduled.artist();
-            this.ticketPrice = scheduled.ticketPrice();
-            this.showDateTime = scheduled.showDateTime();
-            this.doorsTime = scheduled.doorsTime();
-            this.capacity = scheduled.capacity();
-            this.availableTicketCount = scheduled.capacity();
-            this.maxTicketsPerPurchase = scheduled.maxTicketsPerPurchase();
-        } else if (concertEvent instanceof ConcertRescheduled rescheduled) {
-            this.showDateTime = rescheduled.newShowDateTime();
-            this.doorsTime = rescheduled.newDoorsTime();
-        } else if (concertEvent instanceof TicketsSold sold) {
-            this.availableTicketCount -= sold.quantity();
+        switch (concertEvent) {
+            case ConcertScheduled scheduled -> {
+                this.setId(scheduled.concertId());
+                this.artist = scheduled.artist();
+                this.ticketPrice = scheduled.ticketPrice();
+                this.showDateTime = scheduled.showDateTime();
+                this.doorsTime = scheduled.doorsTime();
+                this.capacity = scheduled.capacity();
+                this.availableTicketCount = scheduled.capacity();
+                this.maxTicketsPerPurchase = scheduled.maxTicketsPerPurchase();
+            }
+            case ConcertRescheduled rescheduled -> {
+                this.showDateTime = rescheduled.newShowDateTime();
+                this.doorsTime = rescheduled.newDoorsTime();
+            }
+            case TicketsSold sold -> this.availableTicketCount -= sold.quantity();
         }
     }
 

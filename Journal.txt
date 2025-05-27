@@ -18,6 +18,41 @@ Tuesday, May 27, 2025
             }
     ```
 
+[IntelliJ IDEA Feature Request]
+[ ] When converting from an "if..else with instanceof" to a switch, it puts in the `null,default` case even if it's not necessary (due to sealed base class).
+    Example:
+    ```
+    protected void apply(CustomerEvent customerEvent) {
+        if (customerEvent instanceof CustomerRegistered registered) {
+            setId(registered.customerId());
+            this.name = registered.customerName();
+            this.email = registered.email();
+        } else if (customerEvent instanceof TicketsPurchased purchased) {
+            TicketOrder ticketOrder = new TicketOrder(
+                    purchased.ticketOrderId(), purchased.concertId(), purchased.quantity(), purchased.paidAmount());
+            ticketOrdersByTicketOrderId.put(purchased.ticketOrderId(), ticketOrder);
+        }
+    }
+    ```
+    becomes:
+    ```
+    switch (customerEvent) {
+        case CustomerRegistered registered -> {
+            setId(registered.customerId());
+            this.name = registered.customerName();
+            this.email = registered.email();
+        }
+        case TicketsPurchased purchased -> {
+            TicketOrder ticketOrder = new TicketOrder(
+                    purchased.ticketOrderId(), purchased.concertId(), purchased.quantity(), purchased.paidAmount());
+            ticketOrdersByTicketOrderId.put(purchased.ticketOrderId(), ticketOrder);
+        }
+        case null, default -> {
+        }
+    }
+    ```
+    but the last case is not needed. (This might be hard!)
+
 
 Wednesday, May 21, 2025
 =======================

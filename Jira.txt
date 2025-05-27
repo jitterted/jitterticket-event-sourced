@@ -32,17 +32,19 @@
 
 ===>> CURRENT TASK:
 
-[ ] Persistence! File and then database
+[X] File Persistence!
     [X] Reorganize code
         [X] move core of findById() up to Base class, relying on the eventsForAggregate method instead of directly pulling events from the map
         [X] generalize and push up eventsForAggregate
-    [ ] Add in file I/O for CSV event store
+    [X] Add in file I/O for CSV event store
         [X] Create interface for reading/appending
         [X] Create file-based implementation: translate IOException to RuntimeException
             [X] Expanded CsvEventStore tests to test across ArrayList and File reader/appender implementations
         [X] Plug in file-based implementation into the CsvFileEventStore
 
 [ ] Fix up the if+instanceof to switch
+
+[ ] Database Persistence!
 
 [X] Clean up ConcertSummaryProjector (remove concertWithEventsThrough()).
 

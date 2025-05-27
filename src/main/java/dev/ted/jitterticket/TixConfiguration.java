@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -47,11 +46,10 @@ public class TixConfiguration {
     public EventStore<CustomerId, CustomerEvent, Customer> customerStore(@Value("${events.directory}") String eventsDirectory) throws IOException {
 //        var customerStore = InMemoryEventStore.forCustomers();
         String eventsFilePath = eventsDirectory + File.separator + "customer-events.csv";
-        Path customerEventsPath = Path.of(eventsFilePath);
         var customerStore = CsvStringsEventStore.forCustomers(
-                new CsvReaderAppender(customerEventsPath));
-        // don't add sample data if the file already exists
-        if (Files.exists(customerEventsPath)) {
+                new CsvReaderAppender(Path.of(eventsFilePath)));
+        // don't add sample data if the store already has data
+        if (!customerStore.allEvents().toList().isEmpty()) {
             return customerStore;
         }
 
@@ -75,11 +73,10 @@ public class TixConfiguration {
         }
 //        var concertStore = InMemoryEventStore.forConcerts();
         String eventsFilePath = eventsDirectory + File.separator + "concert-events.csv";
-        Path concertEventsPath = Path.of(eventsFilePath);
         var concertStore = CsvStringsEventStore.forConcerts(
-                new CsvReaderAppender(concertEventsPath));
+                new CsvReaderAppender(Path.of(eventsFilePath)));
         // don't add sample data if the file already exists
-        if (Files.exists(concertEventsPath)) {
+        if (!concertStore.allEvents().toList().isEmpty()) {
             return concertStore;
         }
 
