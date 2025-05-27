@@ -5,6 +5,19 @@ Tuesday, May 27, 2025
   Solutions:
   1. Each store gets its own file (e.g., "customer-events.csv" and "concert-events.csv")
   2. Add a column in the CSV to indicate the event type (e.g., "ConcertEvent"), and then match that to the store's `eventClass` field (already defined)
+  Decision: #1, as it required fewer changes and less data in the file
+
+[IntelliJ IDEA Bug]
+[ ] When it suggests an introduce variable refactoring, the keyboard focus isn't on the dropdown (for "Replace ...")
+    Example code:
+    ```
+            var concertStore = CsvStringsEventStore.forConcerts(
+                    new CsvReaderAppender(Path.of(eventsFilePath)));
+            if (Files.exists(Path.of(eventsFilePath))) {
+                return concertStore;
+            }
+    ```
+
 
 Wednesday, May 21, 2025
 =======================

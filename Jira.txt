@@ -40,8 +40,7 @@
         [X] Create interface for reading/appending
         [X] Create file-based implementation: translate IOException to RuntimeException
             [X] Expanded CsvEventStore tests to test across ArrayList and File reader/appender implementations
-        [ ] Plug in file-based implementation into the CsvFileEventStore
-
+        [X] Plug in file-based implementation into the CsvFileEventStore
 
 [ ] Fix up the if+instanceof to switch
 

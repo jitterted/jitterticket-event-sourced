@@ -8,3 +8,4 @@ target/
 *.iws
 *.iml
 *.ipr
+events/
