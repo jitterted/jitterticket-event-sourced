@@ -31,7 +31,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         save(aggregateId, uncommittedEvents);
     }
 
-    public abstract void save(ID aggregateId, Stream<EVENT> uncommittedEvents);
+    protected abstract List<EventDto<EVENT>> eventDtosFor(ID id);
 
     @Override
     public List<EVENT> eventsForAggregate(ID id) {
@@ -49,6 +49,4 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
                 ? Optional.empty()
                 : Optional.of(eventsToAggregate.apply(events));
     }
-
-    protected abstract List<EventDto<EVENT>> eventDtosFor(ID id);
 }

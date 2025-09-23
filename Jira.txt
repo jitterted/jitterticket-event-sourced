@@ -46,7 +46,15 @@
 
 [ ] Database Persistence using 1 Table per Aggregate
     [ ] SQL to create the table(s)
-    [ ]
+    [ ] Docker compose config to start up local postgres container
+    [ ] Testcontainer setup for postgres
+    [ ] Create DatabaseEventStore implementation using BaseEventStore
+        [ ] Create static methods: forConcerts, forCustomers
+        [ ] Implement allEvents()
+        [ ] Implement eventDtosFor(ID)
+        [ ] Implement save(ID, Stream<EVENT>)
+
+[ ] Variant: implement delegation (composition) oriented version of EventStore instead of subclassing?
 
 [X] Clean up ConcertSummaryProjector (remove concertWithEventsThrough()).
 
