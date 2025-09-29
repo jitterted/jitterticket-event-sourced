@@ -30,7 +30,6 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
     private final StringsReaderAppender stringsReaderAppender;
 
     private CsvStringsEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate,
-                                 Class<EVENT> eventClass,
                                  StringsReaderAppender stringsReaderAppender) {
         super(eventsToAggregate);
         this.stringsReaderAppender = stringsReaderAppender;
@@ -38,14 +37,12 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
 
     public static EventStore<ConcertId, ConcertEvent, Concert> forConcerts(StringsReaderAppender stringsReaderAppender) {
         return new CsvStringsEventStore<>(Concert::reconstitute,
-                                          ConcertEvent.class,
-                                          stringsReaderAppender);
+                stringsReaderAppender);
     }
 
     public static EventStore<CustomerId, CustomerEvent, Customer> forCustomers(StringsReaderAppender stringsReaderAppender) {
         return new CsvStringsEventStore<>(Customer::reconstitute,
-                                          CustomerEvent.class,
-                                          stringsReaderAppender);
+                stringsReaderAppender);
     }
 
     static String toCsv(EventDto<? extends Event> originalEventDto) {
