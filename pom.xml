@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.0</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.5.6</version>
+		<relativePath/>
 	</parent>
 	<groupId>dev.ted.jitterticket</groupId>
 	<artifactId>event-sourced</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>JitterTicket Event-sourced Concert Ticketing</name>
 	<description>Minimal (as possible) example of an event-sourced concert event ticketing application.</description>
 	<url/>
@@ -28,7 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>24</java.version>
-		<junit-jupiter.version>5.13.0-RC1</junit-jupiter.version>
+		<junit-jupiter.version>5.13.4</junit-jupiter.version>
 	</properties>
 	<dependencies>
 		<dependency>

@@ -93,6 +93,23 @@
             margin-bottom: 1rem;
         }
 
+        details > summary {
+            list-style: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        details > summary::before {
+            content: '▶';
+            display: inline-block;
+            margin-right: 0.5rem;
+            transition: transform 0.2s;
+        }
+
+        details[open] > summary::before {
+            transform: rotate(90deg);
+        }
+
         .event-details {
             padding: 16px;
             margin-bottom: 12px;
@@ -176,6 +193,19 @@
             padding: 1rem 0;
         }
     </style>
+    <script>
+        function expandAll() {
+            document.querySelectorAll('details').forEach(detail => {
+                detail.open = true;
+            });
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('details').forEach(detail => {
+                detail.open = false;
+            });
+        }
+    </script>
 </head>
 <body>
 <header>
@@ -189,85 +219,97 @@
             <div class="event-row" th:each="eventView : ${events}">
                 <div class="event-details"
                      th:classappend="${selectedEvent >= eventView.eventSequence} ? 'event-selected' : ''">
-                    <a class="event-link"
-                       href="#"
-                       th:href="@{{urlPath}/{uuid}(urlPath=${urlPath}, uuid=${uuid}, selectedEvent=${eventView.eventSequence})}"
-                    >
-                        <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">
-                            <strong th:text="${field.name()}">Artist</strong>:
-                            <span th:text="${field.value()}">Sonic Waves</span>
-                        </div>
-                    </a>
+                    <details>
+                        <summary th:text="${eventView.eventName()}">ConcertScheduled</summary>
+                        <a class="event-link"
+                           href="#"
+                           th:href="@{{urlPath}/{uuid}(urlPath=${urlPath}, uuid=${uuid}, selectedEvent=${eventView.eventSequence})}"
+                        >
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">Artist</strong>:
+                                <span th:text="${field.value()}">Sonic Waves</span>
+                            </div>
+                        </a>
+                    </details>
                 </div>
                 <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link" href="#">
-                        <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">
-                            <strong th:text="${field.name()}">Artist</strong>:
-                            <span th:text="${field.value()}">Sonic Waves</span>
-                        </div>
-                    </a>
+                    <details>
+                        <summary th:text="${eventView.eventName()}">ConcertScheduled</summary>
+                        <a class="event-link" href="#">
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">Artist</strong>:
+                                <span th:text="${field.value()}">Sonic Waves</span>
+                            </div>
+                        </a>
+                    </details>
                 </div>
                 <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link" href="#">
-                        <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">
-                            <strong th:text="${field.name()}">eventSequence</strong>:
-                            <span th:text="${field.value()}">5</span>
-                        </div>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">
-                            <strong th:text="${field.name()}">Artist</strong>:
-                            <span th:text="${field.value()}">Sonic Waves</span>
-                        </div>
-                    </a>
-                </div>
-                <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link" href="#">
-                    <h3 th:text="${eventView.eventName()}">ConcertScheduled</h3>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">
+                    <details>
+                        <summary th:text="${eventView.eventName()}">ConcertScheduled</summary>
+                        <a class="event-link" href="#">
                             <div th:each="field : ${eventView.fields()}" class="event-field">
                                 <strong th:text="${field.name()}">eventSequence</strong>:
-                                <span th:text="${field.value()}">4</span>
+                                <span th:text="${field.value()}">5</span>
                             </div>
-                            <strong th:text="${field.name()}">Artist</strong>:
-                            <span th:text="${field.value()}">Sonic Waves</span>
-                        </div>
-                    </a>
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">Artist</strong>:
+                                <span th:text="${field.value()}">Sonic Waves</span>
+                            </div>
+                        </a>
+                    </details>
                 </div>
                 <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link" href="#">
-                    <h3 th:text="${eventView.eventName()}">ConcertRescheduled</h3>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">
-                            <strong th:text="${field.name()}">eventSequence</strong>:
-                            <span th:text="${field.value()}">3</span>
-                        </div>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">
-                            <strong th:text="${field.name()}">newShowDateTime</strong>:
-                            <span th:text="${field.value()}">2025-09-20T21:00</span>
-                        </div>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">                            <strong th:text="${field.name()}">newShowDateTime</strong>:
-                            <strong th:text="${field.name()}">newDoorsTime</strong>:
-                            <span th:text="${field.value()}">20:00</span>
-                        </div>
-                    </a>
+                    <details>
+                        <summary th:text="${eventView.eventName()}">ConcertScheduled</summary>
+                        <a class="event-link" href="#">
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <div th:each="field : ${eventView.fields()}" class="event-field">
+                                    <strong th:text="${field.name()}">eventSequence</strong>:
+                                    <span th:text="${field.value()}">4</span>
+                                </div>
+                                <strong th:text="${field.name()}">Artist</strong>:
+                                <span th:text="${field.value()}">Sonic Waves</span>
+                            </div>
+                        </a>
+                    </details>
                 </div>
                 <div class="event-details event-selected" th:remove="all">
-                    <a class="event-link" href="#">
-                    <h3 th:text="${eventView.eventName()}">ConcertRescheduled</h3>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">
-                            <strong th:text="${field.name()}">eventSequence</strong>:
-                            <span th:text="${field.value()}">2</span>
-                        </div>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">
-                            <strong th:text="${field.name()}">newShowDateTime</strong>:
-                            <span th:text="${field.value()}">2025-09-20T21:00</span>
-                        </div>
-                        <div th:each="field : ${eventView.fields()}" class="event-field">                            <strong th:text="${field.name()}">newShowDateTime</strong>:
-                            <strong th:text="${field.name()}">newDoorsTime</strong>:
-                            <span th:text="${field.value()}">20:00</span>
-                        </div>
-                    </a>
+                    <details>
+                        <summary th:text="${eventView.eventName()}">ConcertRescheduled</summary>
+                        <a class="event-link" href="#">
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">eventSequence</strong>:
+                                <span th:text="${field.value()}">3</span>
+                            </div>
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">newShowDateTime</strong>:
+                                <span th:text="${field.value()}">2025-09-20T21:00</span>
+                            </div>
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">newDoorsTime</strong>:
+                                <span th:text="${field.value()}">20:00</span>
+                            </div>
+                        </a>
+                    </details>
+                </div>
+                <div class="event-details event-selected" th:remove="all">
+                    <details>
+                        <summary th:text="${eventView.eventName()}">ConcertRescheduled</summary>
+                        <a class="event-link" href="#">
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">eventSequence</strong>:
+                                <span th:text="${field.value()}">2</span>
+                            </div>
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">newShowDateTime</strong>:
+                                <span th:text="${field.value()}">2025-09-20T21:00</span>
+                            </div>
+                            <div th:each="field : ${eventView.fields()}" class="event-field">
+                                <strong th:text="${field.name()}">newDoorsTime</strong>:
+                                <span th:text="${field.value()}">20:00</span>
+                            </div>
+                        </a>
+                    </details>
                 </div>
             </div>
         </div>
@@ -293,6 +335,8 @@
 
 <footer>
     <a th:href="@{/event-viewer}" href="#" class="back-link">Back to Projection List</a>
+    <button onclick="expandAll()">Expand All</button>
+    <button onclick="collapseAll()">Collapse All</button>
 </footer>
 </body>
 </html>

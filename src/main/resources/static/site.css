@@ -1,0 +1,28 @@
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+thead th {
+    font-size: 1.5rem;
+}
+
+tbody td {
+    font-size: 1.25rem;
+    padding: 0.6rem 0.75rem;
+}
+
+tbody td:first-child {
+    font-size: 0.75rem;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #f7f7f7;
+}
+
+
+/* Projection choices styled list */
+.choice-list { list-style: none; padding: 0; margin: 0; }
+.choice-list li { margin: 0 0 0.75rem 0; }
+.choice-list li:last-child { margin-bottom: 0; }
+.choice-list a { display: block; width: 25%; padding: 1rem 1.25rem; font-size: 1.25rem; text-decoration: underline; color: #0645ad; border: 1px solid #ddd; border-radius: 8px; background-color: #fafafa; }
+.choice-list a:hover, .choice-list a:focus { background-color: #f0f7ff; border-color: #c6defa; outline: none; color: #0b63d1; }

@@ -2,10 +2,11 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Choose a Projection</title>
+    <link rel="stylesheet" th:href="@{/site.css}">
 </head>
 <body>
 <h1>Choose a Projection to Time Travel</h1>
-<ul>
+<ul class="choice-list">
     <li th:each="projection: ${projections}">
         <a href="#"
            th:href="@{${projection.urlPath}}"
