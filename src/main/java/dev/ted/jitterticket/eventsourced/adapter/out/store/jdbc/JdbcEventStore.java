@@ -1,7 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.EventDto;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.StringsReaderAppender;
 import dev.ted.jitterticket.eventsourced.application.BaseEventStore;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
@@ -30,14 +29,12 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
 
 
-    public static EventStore<ConcertId, ConcertEvent, Concert> forConcerts(StringsReaderAppender stringsReaderAppender, EventDboRepository eventDboRepository) {
-        return new JdbcEventStore<>(Concert::reconstitute,
-                eventDboRepository);
+    public static EventStore<ConcertId, ConcertEvent, Concert> forConcerts(EventDboRepository eventDboRepository) {
+        return new JdbcEventStore<>(Concert::reconstitute, eventDboRepository);
     }
 
-    public static EventStore<CustomerId, CustomerEvent, Customer> forCustomers(StringsReaderAppender stringsReaderAppender, EventDboRepository eventDboRepository) {
-        return new JdbcEventStore<>(Customer::reconstitute,
-                eventDboRepository);
+    public static EventStore<CustomerId, CustomerEvent, Customer> forCustomers(EventDboRepository eventDboRepository) {
+        return new JdbcEventStore<>(Customer::reconstitute, eventDboRepository);
     }
 
 
@@ -57,7 +54,11 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     public void save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
         List<EventDbo> dbos = uncommittedEvents
                 .map(event -> EventDto.from(aggregateId.id(), event.eventSequence(), event))
-                .map(dto -> new EventDbo(dto.getAggregateRootId(), dto.getEventSequence(), dto.getEventType(), dto.getJson()))
+                .map(dto -> new EventDbo(
+                        dto.getAggregateRootId(),
+                        dto.getEventSequence(),
+                        dto.getEventType(),
+                        dto.getJson()))
                 .toList();
         eventDboRepository.saveAll(dbos);
     }
