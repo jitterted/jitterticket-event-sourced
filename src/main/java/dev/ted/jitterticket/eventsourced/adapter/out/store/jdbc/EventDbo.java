@@ -10,7 +10,6 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Table("events")
-
 public class EventDbo implements Persistable<UUID> {
 
     // Composite primary key fields: prior to Spring Data JDBC 4.0, can't easily use a composite ID for @Id, but we have to mark one of these as the primary key
@@ -33,11 +32,13 @@ public class EventDbo implements Persistable<UUID> {
     @Transient
     private boolean isNew;
 
-    // Constructors
     public EventDbo() {
     }
 
-    public EventDbo(UUID aggregateRootId, Integer eventSequence, String eventType, String json) {
+    public EventDbo(UUID aggregateRootId,
+                    Integer eventSequence,
+                    String eventType,
+                    String json) {
         this.aggregateRootId = aggregateRootId;
         this.eventSequence = eventSequence;
         this.eventType = eventType;
@@ -46,7 +47,7 @@ public class EventDbo implements Persistable<UUID> {
         this.isNew = true;
     }
 
-    //region Persistable interface methods
+    //region Persistable interface implementation
     @Override
     public UUID getId() {
         return aggregateRootId;
@@ -55,10 +56,6 @@ public class EventDbo implements Persistable<UUID> {
     @Override
     public boolean isNew() {
         return isNew || globalSequence == null;
-    }
-
-    public void markNotNew() {
-        this.isNew = false;
     }
     //endregion Persistable
 
@@ -119,7 +116,6 @@ public class EventDbo implements Persistable<UUID> {
         this.version = version;
     }
     //endregion getter-setters
-
 
     @Override
     public String toString() {
