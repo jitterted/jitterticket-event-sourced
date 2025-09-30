@@ -5,16 +5,11 @@ import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvReaderAppender;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvStringsEventStore;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
-import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
+import dev.ted.jitterticket.eventsourced.domain.concert.*;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -34,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class EventStoreTest {
 
@@ -46,17 +41,17 @@ class EventStoreTest {
         static Stream<Arguments> concertEventStoreSupplier() throws IOException {
             Path tempFile = Files.createTempFile(tempDir, "test", ".csv");
             return Stream.of(
-                    Arguments.of("In-Memory", InMemoryEventStore.forConcerts())
+                    Arguments.of(Named.of("In-Memory", InMemoryEventStore.forConcerts()))
                     ,
-                    Arguments.of("CSV ArrayList", CsvStringsEventStore.forConcerts(new ArrayListStringsReaderAppender()))
+                    Arguments.of(Named.of("CSV ArrayList", CsvStringsEventStore.forConcerts(new ArrayListStringsReaderAppender())))
                     ,
-                    Arguments.of("CSV File", CsvStringsEventStore.forConcerts(new CsvReaderAppender(tempFile)))
+                    Arguments.of(Named.of("CSV File", CsvStringsEventStore.forConcerts(new CsvReaderAppender(tempFile))))
             );
         }
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("concertEventStoreSupplier")
-        void findByIdForNonExistingConcertReturnsEmptyOptional(String storageType, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        void findByIdForNonExistingConcertReturnsEmptyOptional(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             Concert existingConcert = ConcertFactory.createConcertWithArtist("Existing Concert");
             concertStore.save(existingConcert);
             ConcertId nonExistentConcertId = ConcertId.createRandom();
@@ -67,7 +62,7 @@ class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("concertEventStoreSupplier")
-        void findByIdReturnsSavedConcert(String storageType, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        void findByIdReturnsSavedConcert(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId = ConcertId.createRandom();
             Concert concert = Concert.schedule(concertId,
                                                "Headliner",
@@ -90,7 +85,7 @@ class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("concertEventStoreSupplier")
-        void findByIdReturnsDifferentInstanceOfConcert(String storageType, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        void findByIdReturnsDifferentInstanceOfConcert(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             Concert savedConcert = ConcertFactory.createConcert();
             concertStore.save(savedConcert);
 
@@ -103,7 +98,7 @@ class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("concertEventStoreSupplier")
-        void eventStoreReturnsAllEventsAcrossAllSavedAggregates(String storageType, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        void eventStoreReturnsAllEventsAcrossAllSavedAggregates(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             Concert firstConcert = ConcertFactory.createConcertWithArtist("First Concert");
             List<ConcertEvent> expectedEvents = new ArrayList<>(firstConcert.uncommittedEvents().toList());
             concertStore.save(firstConcert);
@@ -123,7 +118,7 @@ class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("concertEventStoreSupplier")
-        void emptyListReturnedForUnknownAggregateId(String storageType, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        void emptyListReturnedForUnknownAggregateId(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             Concert existingConcert = ConcertFactory.createConcertWithArtist("Existing Concert");
             concertStore.save(existingConcert);
             ConcertId unknownConcertId = ConcertId.createRandom();
@@ -135,7 +130,7 @@ class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("concertEventStoreSupplier")
-        void exactlyAllEventsForSpecifiedConcertAggregateAreReturned(String storageType, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        void exactlyAllEventsForSpecifiedConcertAggregateAreReturned(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId = ConcertId.createRandom();
             Concert concert = Concert.schedule(concertId, "artist", 30, LocalDateTime.now(), LocalTime.now().minusHours(1), 100, 8);
             concert.rescheduleTo(LocalDateTime.now(), LocalTime.now().minusHours(1));
@@ -156,7 +151,7 @@ class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("concertEventStoreSupplier")
-        void savingEventsDirectlyStoresThemCorrectly(String storageType, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        void savingEventsDirectlyStoresThemCorrectly(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId = ConcertId.createRandom();
             LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
             LocalTime originalDoorsTime = LocalTime.of(18, 0);
@@ -176,19 +171,20 @@ class EventStoreTest {
         }
     }
 
-    @ParameterizedClass
+    @ParameterizedClass(name = "Using {0} Storage")
     @MethodSource("customerEventStoreSupplier")
     @Nested
     class CustomerEventStoreTest {
         @TempDir
         static Path tempDir;
 
-        static Stream<EventStore<CustomerId, CustomerEvent, Customer>> customerEventStoreSupplier() throws IOException {
+        static Stream<Arguments> customerEventStoreSupplier() throws IOException {
             Path tempFile = Files.createTempFile(tempDir, "test", ".csv");
 
-            return Stream.of(InMemoryEventStore.forCustomers(),
-                             CsvStringsEventStore.forCustomers(new ArrayListStringsReaderAppender()),
-                             CsvStringsEventStore.forCustomers(new CsvReaderAppender(tempFile))
+            return Stream.of(
+                    Arguments.of(Named.of("In-Memory", InMemoryEventStore.forCustomers())),
+                    Arguments.of(Named.of("CSV ArrayList", CsvStringsEventStore.forCustomers(new ArrayListStringsReaderAppender()))),
+                    Arguments.of(Named.of("CSV File", CsvStringsEventStore.forCustomers(new CsvReaderAppender(tempFile))))
             );
         }
 
