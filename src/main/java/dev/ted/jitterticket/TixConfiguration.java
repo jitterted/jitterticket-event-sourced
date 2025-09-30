@@ -26,12 +26,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 @Configuration
 public class TixConfiguration {
+
+    private static LocalDateTime daysFromNowAt(long days, int hour, int minute) {
+        return LocalDateTime.now()
+                .truncatedTo(ChronoUnit.DAYS)
+                .plusDays(days)
+                .withHour(hour)
+                .withMinute(minute);
+    }
 
     private static final ConcertId SONIC_WAVES_CONCERT_ID = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440001"));
 
@@ -87,7 +96,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Midnight Rebels",
                 55,
-                LocalDateTime.of(2025, 10, 15, 21, 0),
+                daysFromNowAt(15, 21, 0),
                 LocalTime.of(20, 0),
                 150,
                 4));
@@ -97,7 +106,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Blue Note Quartet",
                 35,
-                LocalDateTime.of(2025, 12, 22, 19, 30),
+                daysFromNowAt(83, 19, 30),
                 LocalTime.of(18, 30),
                 75,
                 2));
@@ -107,7 +116,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Stella Nova",
                 65,
-                LocalDateTime.of(2025, 10, 5, 20, 0),
+                daysFromNowAt(5, 20, 0),
                 LocalTime.of(18, 30),
                 250,
                 6));
@@ -117,7 +126,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Woodland Echoes",
                 30,
-                LocalDateTime.of(2025, 12, 12, 16, 0),
+                daysFromNowAt(73, 16, 0),
                 LocalTime.of(15, 0),
                 120,
                 4));
@@ -127,7 +136,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Pulse Wave",
                 40,
-                LocalDateTime.of(2025, 11, 8, 22, 30),
+                daysFromNowAt(39, 22, 30),
                 LocalTime.of(21, 0),
                 180,
                 5));
@@ -137,7 +146,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Metropolitan Symphony",
                 70,
-                LocalDateTime.of(2025, 12, 20, 19, 0),
+                daysFromNowAt(81, 19, 0),
                 LocalTime.of(18, 0),
                 200,
                 3));
@@ -147,7 +156,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Cosmic Drift",
                 45,
-                LocalDateTime.of(2026, 1, 17, 20, 0),
+                daysFromNowAt(109, 20, 0),
                 LocalTime.of(19, 0),
                 130,
                 4));
@@ -157,7 +166,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Lyrical Storm",
                 50,
-                LocalDateTime.of(2025, 10, 31, 21, 0),
+                daysFromNowAt(31, 21, 0),
                 LocalTime.of(19, 30),
                 175,
                 4));
@@ -167,7 +176,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Jagged Arrays",
                 50,
-                LocalDateTime.of(2025, 11, 3, 20, 0),
+                daysFromNowAt(34, 20, 0),
                 LocalTime.of(19, 0),
                 150,
                 6));
@@ -179,13 +188,13 @@ public class TixConfiguration {
                 SONIC_WAVES_CONCERT_ID,
                 "The Sonic Waves",
                 45,
-                LocalDateTime.of(2025, 10, 26, 20, 0),
+                daysFromNowAt(26, 20, 0),
                 LocalTime.of(19, 0),
                 100,
                 8);
 
         sonicWavesConcert.rescheduleTo(
-                LocalDateTime.of(2025, 11, 2, 21, 0),
+                daysFromNowAt(33, 21, 0),
                 LocalTime.of(20, 0));
 
         sonicWavesConcert.sellTicketsTo(CustomerId.createRandom(), 8);
