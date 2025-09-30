@@ -157,7 +157,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Lyrical Storm",
                 50,
-                LocalDateTime.of(2025, 9, 30, 21, 0),
+                LocalDateTime.of(2025, 10, 31, 21, 0),
                 LocalTime.of(19, 30),
                 175,
                 4));
@@ -167,7 +167,7 @@ public class TixConfiguration {
                 ConcertId.createRandom(),
                 "Jagged Arrays",
                 50,
-                LocalDateTime.of(2025, 10, 3, 20, 0),
+                LocalDateTime.of(2025, 11, 3, 20, 0),
                 LocalTime.of(19, 0),
                 150,
                 6));
