@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JitterTix Concert Event Ticketing</title>
+  <link rel="stylesheet" href="/site.css">
+  <style>
+    :root {
+      --bg-dark: #0b0c10;
+      --accent: #7dd3fc; /* light sky */
+      --accent-2: #a78bfa; /* violet */
+      --text: #e6f4ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(180deg, #0b0c10 0%, #111827 100%);
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .brand {
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      gap: .5rem;
+      align-items: center;
+    }
+    .brand .dot {
+      width: .7rem; height: .7rem; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2));
+      box-shadow: 0 0 16px rgba(125, 211, 252, .65);
+    }
+    .brand span {
+      font-size: 1.1rem;
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      min-height: 74vh;
+      overflow: clip;
+    }
+    .hero img.bg {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(.15) saturate(1.1);
+      transform: scale(1.02);
+    }
+    .hero .overlay {
+      position: absolute; inset: 0;
+      background: radial-gradient(1200px 600px at 50% 60%, rgba(124,58,237,.35), transparent 60%),
+                  radial-gradient(900px 450px at 30% 20%, rgba(14,165,233,.25), transparent 50%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+    .hero .content {
+      position: relative; z-index: 1;
+      padding: 3rem 1rem;
+      max-width: 900px;
+    }
+    h1.title {
+      margin: 0 0 1rem 0;
+      font-size: 5rem;
+      line-height: 1.05;
+      letter-spacing: .5px;
+      text-shadow: 0 4px 24px rgba(0,0,0,.6);
+    }
+    p.tagline {
+      margin: 0 0 2rem 0;
+      font-size: 1.5rem;
+        font-weight: bold;
+      color: #dbeafe;
+      opacity: .95;
+    }
+    .cta {
+      display: inline-flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      cursor: pointer;
+      padding: .9rem 1.25rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      color: #0b1220;
+      background: linear-gradient(180deg, #7dd3fc, #38bdf8);
+      font-size: 1.75rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
+      box-shadow: 0 10px 25px rgba(56, 189, 248, .25);
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .btn.secondary {
+      background: transparent;
+      color: #e2e8f0;
+      border-color: rgba(255,255,255,.28);
+    }
+
+    /* Footer */
+    footer {
+      color: #9fb3c8;
+      font-size: .9rem;
+      padding: 1.25rem;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.2);
+    }
+    a { color: #7dd3fc; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="dot" aria-hidden="true"></span>
+      <span>JitterTix</span>
+    </div>
+  </header>
+
+  <main class="hero">
+    <img class="bg" src="/concert-with-lights.jpeg" alt="Concert crowd with lights">
+    <div class="overlay" aria-hidden="true"></div>
+    <div class="content">
+      <h1 class="title">JitterTix<br/>Concert Event Ticketing</h1>
+      <p class="tagline">The Event-Sourced Ticketing System.</p>
+      <div class="cta">
+        <a class="btn" href="/concerts">Explore Concert Tickets</a>
+        <a class="btn secondary" href="/event-viewer">Event Viewer</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Copyright © 2025 JitterTed Productions. All rights reserved.
+  </footer>
+
+</body>
+</html>
