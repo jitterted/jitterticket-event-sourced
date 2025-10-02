@@ -13,7 +13,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 class PurchaseTicketsUseCaseTest {
 
@@ -23,7 +24,8 @@ class PurchaseTicketsUseCaseTest {
         var customerStore = InMemoryEventStore.forCustomers();
         Customer customer = CustomerFactory.newlyRegistered();
         customerStore.save(customer);
-        PurchaseTicketsUseCase purchaseTicketsUseCase = new PurchaseTicketsUseCase(concertStore, customerStore);
+        PurchaseTicketsUseCase purchaseTicketsUseCase =
+                new PurchaseTicketsUseCase(concertStore, customerStore);
         ConcertId invalidConcertId = ConcertId.createRandom();
 
         Optional<TicketOrderId> ticketOrderIdOptional =
@@ -47,7 +49,8 @@ class PurchaseTicketsUseCaseTest {
                                                      expectedTicketOrderId);
 
         Optional<TicketOrderId> actualTicketOrderId =
-                purchaseTicketsUseCase.purchaseTickets(fixture.concertId(), fixture.customer().getId(), ticketPurchaseQuantity);
+                purchaseTicketsUseCase.purchaseTickets(fixture.concertId(),
+                        fixture.customer().getId(), ticketPurchaseQuantity);
 
         assertThat(actualTicketOrderId)
                 .as("TicketOrderId should have been returned for a successful ticket purchase")
@@ -83,6 +86,8 @@ class PurchaseTicketsUseCaseTest {
                 .isNotEqualTo(secondTicketOrderId);
     }
 
+    //region Test Fixture
+
     private static Fixture createForPurchaseTicketsWithCapacityOf(int originalConcertAvailableTicketCount) {
         Customer customer = CustomerFactory.newlyRegistered();
         Concert concertBefore = ConcertFactory.createWithCapacity(originalConcertAvailableTicketCount);
@@ -99,5 +104,7 @@ class PurchaseTicketsUseCaseTest {
     private static Fixture createForPurchaseTickets() {
         return createForPurchaseTicketsWithCapacityOf(42);
     }
+
+    //endregion Test Fixture
 
 }

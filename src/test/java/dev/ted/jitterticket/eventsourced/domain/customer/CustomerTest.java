@@ -88,8 +88,8 @@ class CustomerTest {
             TicketsPurchased ticketsPurchased = new TicketsPurchased(
                     customerId, 0, ticketOrderId, concertId, quantity, amountPaid);
 
-            Customer customer = Customer.reconstitute(List.of(customerRegistered,
-                    ticketsPurchased));
+            Customer customer = Customer.reconstitute(List.of(
+                    customerRegistered, ticketsPurchased));
 
             Customer.TicketOrder expectedTicketOrder = new Customer.TicketOrder(
                     ticketOrderId, concertId, quantity, amountPaid);

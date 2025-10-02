@@ -39,7 +39,8 @@ public class ConcertTest {
         void rescheduleConcertGeneratesConcertRescheduled() {
             LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
             LocalTime originalDoorsTime = LocalTime.of(19, 0);
-            ConcertScheduled concertScheduled = ConcertFactory.Events.scheduledConcert(originalShowDateTime, originalDoorsTime);
+            ConcertScheduled concertScheduled = ConcertFactory.Events.
+                                                        scheduledConcert(originalShowDateTime, originalDoorsTime);
             Concert concert = Concert.reconstitute(List.of(concertScheduled));
 
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
@@ -86,7 +87,8 @@ public class ConcertTest {
             int maxTicketsPerPurchase = 4;
             String artist = "Headliner";
             ConcertId concertId = ConcertId.createRandom();
-            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0, artist,
+                    ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
             List<ConcertEvent> concertEvents = List.of(concertScheduled);
 
             Concert concert = Concert.reconstitute(concertEvents);
@@ -118,10 +120,12 @@ public class ConcertTest {
             int maxTicketsPerPurchase = 4;
             String artist = "Rescheduler Artist Name";
             ConcertId concertId = ConcertId.createRandom();
-            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0, artist, ticketPrice, originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
+            ConcertScheduled concertScheduled = new ConcertScheduled(concertId, 0, artist, ticketPrice,
+                    originalShowDateTime, originalDoorsTime, capacity, maxTicketsPerPurchase);
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
             LocalTime newDoorsTime = originalDoorsTime.minusHours(1);
-            ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 0, newShowDateTime, newDoorsTime);
+            ConcertRescheduled concertRescheduled = new ConcertRescheduled(concertId, 0,
+                    newShowDateTime, newDoorsTime);
 
             List<ConcertEvent> concertEvents = List.of(concertScheduled,
                     concertRescheduled);
@@ -141,7 +145,8 @@ public class ConcertTest {
 
         @Test
         void ticketsSoldUpdatesAvailableTicketCount() {
-            ConcertScheduled concertScheduled = ConcertFactory.Events.scheduledConcertWithCapacityOf(100);
+            ConcertScheduled concertScheduled =
+                    ConcertFactory.Events.scheduledConcertWithCapacityOf(100);
             int quantitySold = 6;
             TicketsSold ticketsSold = new TicketsSold(
                     concertScheduled.concertId(), 0, quantitySold, -1);

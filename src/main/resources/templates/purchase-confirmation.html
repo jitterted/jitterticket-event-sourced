@@ -4,11 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ticket Purchase Confirmation</title>
+    <link rel="stylesheet" th:href="@{/site.css}">
+    <style>
+        body.confirmation-page {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+        body.confirmation-page h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5em;
+        }
+    </style>
 </head>
-<body>
+<body class="confirmation-page">
     <div>
         <div>
-            <h1>Congrats!</h1>
+            <h1>Enjoy the Show!</h1>
             <p>You've bought <span th:text="${numberOfTickets}">2</span> tickets for the
                <span th:text="${artist}">Crimson Waves</span> show on
                <span th:text="${#temporals.format(showDateTime, 'MMMM d, yyyy h:mm a')}">December 15, 2025 8:00 PM</span>.

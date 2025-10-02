@@ -5,11 +5,7 @@ import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 
 public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
@@ -17,10 +13,13 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     private String email;
     private final Map<TicketOrderId, TicketOrder> ticketOrdersByTicketOrderId = new HashMap<>();
 
+    //region Creation Command
     public static Customer register(CustomerId customerId, String name, String email) {
         return new Customer(customerId, name, email);
     }
+    //endregion
 
+    //region Event Application
     public static Customer reconstitute(List<CustomerEvent> customerEvents) {
         return new Customer(customerEvents);
     }
@@ -29,13 +28,8 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
         applyAll(customerEvents);
     }
 
-
     private Customer(CustomerId customerId, String name, String email) {
         enqueue(new CustomerRegistered(customerId, nextEventSequenceNumber(), name, email));
-    }
-
-    public Optional<TicketOrder> ticketOrderFor(TicketOrderId ticketOrderId) {
-        return Optional.ofNullable(ticketOrdersByTicketOrderId.get(ticketOrderId));
     }
 
     @Override
@@ -53,7 +47,9 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
             }
         }
     }
+    //endregion
 
+    //region Queries
     public void purchaseTickets(Concert concert, TicketOrderId ticketOrderId, int quantity) {
         int paidAmount = quantity * concert.ticketPrice();
         TicketsPurchased ticketsPurchased =
@@ -65,6 +61,10 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
         return ticketOrdersByTicketOrderId.values().stream().toList();
     }
 
+    public Optional<TicketOrder> ticketOrderFor(TicketOrderId ticketOrderId) {
+        return Optional.ofNullable(ticketOrdersByTicketOrderId.get(ticketOrderId));
+    }
+
     public String name() {
         return name;
     }
@@ -72,6 +72,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     public String email() {
         return email;
     }
+    //endregion Queries
 
     @Override
     public String toString() {

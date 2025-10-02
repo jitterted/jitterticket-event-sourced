@@ -18,6 +18,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     private int maxTicketsPerPurchase;
     private int availableTicketCount;
 
+    //region Creation Command
     public static Concert schedule(ConcertId concertId,
                                    String artist,
                                    int ticketPrice,
@@ -27,18 +28,30 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                                    int maxTicketsPerPurchase) {
         return new Concert(concertId, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
     }
+    //endregion Creation Command
 
-    private Concert(ConcertId concertId, String artist, int ticketPrice, LocalDateTime showDateTime, LocalTime doorsTime, int capacity, int maxTicketsPerPurchase) {
+    private Concert(ConcertId concertId,
+                    String artist,
+                    int ticketPrice,
+                    LocalDateTime showDateTime,
+                    LocalTime doorsTime,
+                    int capacity,
+                    int maxTicketsPerPurchase) {
         ConcertScheduled concertScheduled = new ConcertScheduled(
-                concertId, nextEventSequenceNumber(), artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
+                concertId, nextEventSequenceNumber(), artist, ticketPrice,
+                showDateTime, doorsTime, capacity, maxTicketsPerPurchase
         );
         enqueue(concertScheduled);
     }
 
+    // only invoked by EventStore (and tests)
     public static Concert reconstitute(List<ConcertEvent> concertEvents) {
         return new Concert(concertEvents);
     }
 
+    //region Event Application
+
+    // this is a Projection!
     private Concert(List<ConcertEvent> concertEvents) {
         applyAll(concertEvents);
     }
@@ -64,6 +77,10 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
         }
     }
 
+    //endregion Event Application
+
+    //region Queries
+
     public int ticketPrice() {
         return ticketPrice;
     }
@@ -88,6 +105,14 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
         return artist;
     }
 
+    public int availableTicketCount() {
+        return availableTicketCount;
+    }
+
+    //endregion Queries
+
+    //region Commands
+
     public void rescheduleTo(LocalDateTime newShowDateTime,
                              LocalTime newDoorsTime) {
         // validation: new times must be X amount of time in the future
@@ -96,14 +121,12 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
         enqueue(concertRescheduled);
     }
 
-    public int availableTicketCount() {
-        return availableTicketCount;
-    }
-
     public void sellTicketsTo(CustomerId customerId, int quantity) {
         TicketsSold ticketsSold = new TicketsSold(getId(), nextEventSequenceNumber(), quantity, -1);
         enqueue(ticketsSold);
     }
+
+    //endregion Commands
 
     @Override
     public String toString() {

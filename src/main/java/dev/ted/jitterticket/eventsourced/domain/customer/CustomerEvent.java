@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.domain.Event;
 
 public abstract sealed class CustomerEvent extends Event
         permits CustomerRegistered, TicketsPurchased {
+
     private final CustomerId customerId;
 
     protected CustomerEvent(CustomerId customerId, Integer eventSequence) {
