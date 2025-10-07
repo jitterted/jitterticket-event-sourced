@@ -27,8 +27,8 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>24</java.version>
-		<junit-jupiter.version>5.13.4</junit-jupiter.version>
+		<java.version>25</java.version>
+		<junit-jupiter.version>5.14.0</junit-jupiter.version>
 	</properties>
 	<dependencies>
 		<dependency>
