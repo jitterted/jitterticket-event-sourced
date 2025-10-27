@@ -3,7 +3,7 @@ services:
     image: 'postgres:17.6'
     environment:
       - 'POSTGRES_DB=jitterticket'
-      - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=secret'
     ports:
       - '5432:5432'
