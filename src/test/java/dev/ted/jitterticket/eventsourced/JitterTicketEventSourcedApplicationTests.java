@@ -35,12 +35,12 @@ class JitterTicketEventSourcedApplicationTests {
 		assertThat(projectionChoices.choices())
 				.as("Should be two choices of projections: Concerts and Customers")
 				.hasSize(2);
-		assertThat(projectionChoices.choiceFor("customers").aggregateSummaryViews())
-				.as("Should be two sample customers from the TixConfiguration")
-				.hasSize(2);
 		assertThat(projectionChoices.choiceFor("concerts").aggregateSummaryViews())
-				.as("Should be 10 sample concerts from the TixConfiguration")
+				.as("Should be 10 sample concerts from the EventStoreConfiguration")
 				.hasSize(10);
+		assertThat(projectionChoices.choiceFor("customers").aggregateSummaryViews())
+				.as("Should be two sample customers from the EventStoreConfiguration")
+				.hasSize(2);
 	}
 
 }

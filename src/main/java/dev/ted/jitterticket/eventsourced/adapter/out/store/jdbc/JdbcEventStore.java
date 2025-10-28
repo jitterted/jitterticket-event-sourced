@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
+import dev.ted.jitterticket.Gatherers;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.EventDto;
 import dev.ted.jitterticket.eventsourced.application.BaseEventStore;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
@@ -20,21 +21,23 @@ import java.util.stream.Stream;
 public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extends EventSourcedAggregate<EVENT, ID>> extends BaseEventStore<ID, EVENT, AGGREGATE> {
 
     private final EventDboRepository eventDboRepository;
+    private final Class<EVENT> concreteEventClass;
 
-    public JdbcEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate,
-                          EventDboRepository eventDboRepository) {
+    private JdbcEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate,
+                           EventDboRepository eventDboRepository,
+                           Class<EVENT> concreteEventClass) {
         super(eventsToAggregate);
         this.eventDboRepository = eventDboRepository;
+        this.concreteEventClass = concreteEventClass;
     }
-
 
 
     public static EventStore<ConcertId, ConcertEvent, Concert> forConcerts(EventDboRepository eventDboRepository) {
-        return new JdbcEventStore<>(Concert::reconstitute, eventDboRepository);
+        return new JdbcEventStore<>(Concert::reconstitute, eventDboRepository, ConcertEvent.class);
     }
 
     public static EventStore<CustomerId, CustomerEvent, Customer> forCustomers(EventDboRepository eventDboRepository) {
-        return new JdbcEventStore<>(Customer::reconstitute, eventDboRepository);
+        return new JdbcEventStore<>(Customer::reconstitute, eventDboRepository, CustomerEvent.class);
     }
 
 
@@ -72,6 +75,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                                          dbo.getEventSequence(),
                                          dbo.getEventType(),
                                          dbo.getJson()))
-                                 .map(EventDto::toDomain);
+                                 .map(EventDto::toDomain)
+                                 .gather(Gatherers.filterAndCastTo(concreteEventClass));
     }
 }

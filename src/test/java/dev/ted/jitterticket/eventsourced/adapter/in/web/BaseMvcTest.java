@@ -1,6 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.TixConfiguration;
+import dev.ted.jitterticket.eventsourced.adapter.TixTestConfiguration;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.context.annotation.Import;
@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 @Tag("mvc")
 @Tag("spring")
-@Import(TixConfiguration.class)
+@Import(TixTestConfiguration.class)
 public class BaseMvcTest {
     @TempDir
     static Path tempDir;

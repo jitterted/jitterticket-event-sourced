@@ -2,7 +2,13 @@ package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
-import dev.ted.jitterticket.eventsourced.domain.concert.*;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
@@ -22,9 +28,10 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @Tag("spring")
 @DataJdbcTest
@@ -45,6 +52,23 @@ class JdbcEventStoreTest {
 
     private EventStore<CustomerId, CustomerEvent, Customer> customerStore() {
         return JdbcEventStore.forCustomers(eventDboRepository);
+    }
+
+    @Nested
+    class EventStoreTests {
+        @Test
+        void onlyReturnEventsMatchingTypeOfEventStore() {
+            var customerStore = customerStore();
+            CustomerId onlyCustomerId = new CustomerId(UUID.fromString("68f5b2c2-d70d-4992-ad78-c94809ae9a6a"));
+            customerStore.save(Customer.register(onlyCustomerId, "First Customer", "first@example.com"));
+            var concertStore = concertStore();
+            concertStore.save(ConcertFactory.createConcertWithArtist("Concert"));
+
+            assertThat(customerStore.allEvents())
+                    .as("Only one Customer event should be in the store")
+                    .map(CustomerEvent::customerId)
+                    .containsExactly(onlyCustomerId);
+        }
     }
 
     @Nested
