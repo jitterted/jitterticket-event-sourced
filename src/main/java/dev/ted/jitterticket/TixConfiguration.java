@@ -2,6 +2,7 @@ package dev.ted.jitterticket;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
+import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -27,12 +28,17 @@ class TixConfiguration {
     }
 
     @Bean
-    public ConcertSummaryProjector concertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    ConcertSummaryProjector concertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         return new ConcertSummaryProjector(concertStore);
     }
 
     @Bean
-    public ProjectionChoices projectionChoices(
+    RegisteredCustomersProjector RegisteredCustomersProjector(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
+        return new RegisteredCustomersProjector(customerStore);
+    }
+
+    @Bean
+    ProjectionChoices projectionChoices(
             EventStore<ConcertId, ConcertEvent, Concert> concertStore,
             EventStore<CustomerId, CustomerEvent, Customer> customerStore
     ) {

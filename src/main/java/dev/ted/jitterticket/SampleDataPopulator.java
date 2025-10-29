@@ -1,11 +1,11 @@
 package dev.ted.jitterticket;
 
+import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
-import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -20,15 +20,17 @@ import static dev.ted.jitterticket.EventStoreConfiguration.SONIC_WAVES_CONCERT_I
 public class SampleDataPopulator implements ApplicationRunner {
 
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
+    private final RegisteredCustomersProjector registeredCustomersProjector;
 
-    public SampleDataPopulator(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
+    public SampleDataPopulator(EventStore<CustomerId, CustomerEvent, Customer> customerStore, RegisteredCustomersProjector registeredCustomersProjector) {
         this.customerStore = customerStore;
+        this.registeredCustomersProjector = registeredCustomersProjector;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // don't add sample data if the store already has CUSTOMER data
-        if (customerStore.allEvents().anyMatch(e -> e instanceof CustomerRegistered)) {
+        if (registeredCustomersProjector.allCustomers().findAny().isPresent()) {
             return;
         }
 
