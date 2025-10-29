@@ -23,7 +23,6 @@ import java.nio.file.Path;
 @Configuration
 public class EventStoreConfiguration {
 
-
     @Bean
     public EventStore<CustomerId, CustomerEvent, Customer> customerStore(@Value("${events.directory}") String eventsDirectory, EventDboRepository eventDboRepository) throws IOException {
 //        var customerStore = InMemoryEventStore.forCustomers();

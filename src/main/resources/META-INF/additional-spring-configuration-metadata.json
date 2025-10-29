@@ -1,0 +1,28 @@
+{
+  "properties": [
+    {
+      "name": "event.store.type",
+      "type": "java.lang.String",
+      "description": "Which type of store to use for event sourcing."
+    }
+  ],
+  "hints": [
+    {
+      "name": "event.store.type",
+      "values": [
+        {
+          "value": "jdbc",
+          "description": "Use Spring Data JDBC-based event store implementation."
+        },
+        {
+          "value": "in-memory",
+          "description": "Use an In Memory event store implementation."
+        },
+        {
+          "value": "CSV",
+          "description": "Use Comma-Separated Values file for the event store implementation."
+        }
+      ]
+    }
+  ]
+}
