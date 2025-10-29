@@ -6,7 +6,13 @@
 
 # To Do
 
-[ ] Time-travel event viewer
+===>> CURRENT TASK:
+
+[ ] Store projections as tables in the database
+    [ ] Incremental updates to projections as events are emitted/persisted
+        [ ] Figure out listener/subscription for when events are persisted
+
+[X] Time-travel event viewer
     [X] Show all Concerts, select a specific one to see its event stream history
         [X] In reverse chronological (event) order
     [X] Show state of the Aggregate
@@ -30,8 +36,6 @@
 
 [X] Convert Events from Record to Class
 
-===>> CURRENT TASK:
-
 [X] File Persistence!
     [X] Reorganize code
         [X] move core of findById() up to Base class, relying on the eventsForAggregate method instead of directly pulling events from the map
@@ -44,15 +48,15 @@
 
 [X] Fix up the if+instanceof to switch
 
-[ ] Database Persistence using 1 Table per Aggregate
-    [ ] SQL to create the table(s)
-    [ ] Docker compose config to start up local postgres container
-    [ ] Testcontainer setup for postgres
-    [ ] Create DatabaseEventStore implementation using BaseEventStore
-        [ ] Create static methods: forConcerts, forCustomers
-        [ ] Implement allEvents()
-        [ ] Implement eventDtosFor(ID)
-        [ ] Implement save(ID, Stream<EVENT>)
+[X] Database Persistence using 1 Table for all Aggregate types (vs. 1 table for each aggregate type)
+    [X] SQL to create the table(s)
+    [X] Docker compose config to start up local postgres container
+    [X] Testcontainer setup for postgres
+    [X] Create DatabaseEventStore implementation using BaseEventStore
+        [X] Create static methods: forConcerts, forCustomers
+        [X] Implement allEvents()
+        [X] Implement eventDtosFor(ID)
+        [X] Implement save(ID, Stream<EVENT>)
 
 [ ] Variant: implement delegation (composition) oriented version of EventStore instead of subclassing?
 
