@@ -8,9 +8,16 @@
 
 ===>> CURRENT TASK:
 
-[ ] Store projections as tables in the database
+[ ] Store projections as tables in the database via incremental (per-event) updates
     [ ] Incremental updates to projections as events are emitted/persisted
-        [ ] Figure out listener/subscription for when events are persisted
+        [ ] Create new projector that updates only via events directly received, e.g., projector.update(uncommittedEvents):
+                ConcertSales=
+                ConcertId, Artist, Date, Tickets Sold, Total Sales
+            [ ] Store updated information in-memory
+                [ ] Load the information into memory upon first request
+            [ ] Store updated information in the projector's own database table
+    [ ] Make more general way of registering projectors
+    [later with modulith] Figure out listener/subscription for when events are persisted
 
 [X] Time-travel event viewer
     [X] Show all Concerts, select a specific one to see its event stream history

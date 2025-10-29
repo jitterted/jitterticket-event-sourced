@@ -29,6 +29,8 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         Stream<EVENT> uncommittedEvents = aggregate.uncommittedEvents();
 
         save(aggregateId, uncommittedEvents);
+        // notify projectors to update their state, e.g.:
+        // projector.update(uncommittedEvents)
     }
 
     protected abstract List<EventDto<EVENT>> eventDtosFor(ID id);
