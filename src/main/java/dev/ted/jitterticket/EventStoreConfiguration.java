@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvReaderAppender;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvStringsEventStore;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.EventDboRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.JdbcEventStore;
+import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -23,12 +24,20 @@ import java.nio.file.Path;
 @Configuration
 public class EventStoreConfiguration {
 
-    @Bean
-    public EventStore<CustomerId, CustomerEvent, Customer> customerStore(@Value("${events.directory}") String eventsDirectory, EventDboRepository eventDboRepository) throws IOException {
-//        var customerStore = InMemoryEventStore.forCustomers();
-//        var customerStore = csvCustomerEventStoreIn(eventsDirectory);
+    public enum StoreType {
+        IN_MEMORY, CSV, JDBC
+    }
 
-        return JdbcEventStore.forCustomers(eventDboRepository);
+    @Bean
+    public EventStore<CustomerId, CustomerEvent, Customer> customerStore(
+            @Value("${event.store.csv.directory}") String eventsDirectory,
+            @Value("${event.store.type}") StoreType storeType,
+            EventDboRepository eventDboRepository) throws IOException {
+        return switch (storeType) {
+            case IN_MEMORY -> InMemoryEventStore.forCustomers();
+            case CSV -> csvCustomerEventStoreIn(eventsDirectory);
+            case JDBC -> JdbcEventStore.forCustomers(eventDboRepository);
+        };
     }
 
     private EventStore<CustomerId, CustomerEvent, Customer> csvCustomerEventStoreIn(String eventsDirectory) throws IOException {
@@ -37,14 +46,18 @@ public class EventStoreConfiguration {
     }
 
     @Bean
-    public EventStore<ConcertId, ConcertEvent, Concert> concertStore(@Value("${events.directory}") String eventsDirectory, EventDboRepository eventDboRepository) throws IOException {
+    public EventStore<ConcertId, ConcertEvent, Concert> concertStore(
+            @Value("${event.store.csv.directory}") String eventsDirectory,
+            @Value("${event.store.type}") StoreType storeType,
+            EventDboRepository eventDboRepository) throws IOException {
         if (Strings.isBlank(eventsDirectory)) {
             throw new IllegalArgumentException("eventsDirectory (from events.directory) is empty");
         }
-//        var concertStore = InMemoryEventStore.forConcerts();
-//        var concertStore = csvConcertStoreIn(eventsDirectory);
-
-        return JdbcEventStore.forConcerts(eventDboRepository);
+        return switch (storeType) {
+            case IN_MEMORY -> InMemoryEventStore.forConcerts();
+            case CSV -> csvConcertStoreIn(eventsDirectory);
+            case JDBC -> JdbcEventStore.forConcerts(eventDboRepository);
+        };
     }
 
     private static EventStore<ConcertId, ConcertEvent, Concert> csvConcertStoreIn(String eventsDirectory) throws IOException {
