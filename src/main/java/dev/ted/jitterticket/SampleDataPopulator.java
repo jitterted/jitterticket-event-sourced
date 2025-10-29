@@ -1,5 +1,6 @@
 package dev.ted.jitterticket;
 
+import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
@@ -27,13 +28,15 @@ public class SampleDataPopulator implements ApplicationRunner {
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
     private final RegisteredCustomersProjector registeredCustomersProjector;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
+    private final ConcertSummaryProjector concertSummaryProjector;
 
     public SampleDataPopulator(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
                                EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-                               RegisteredCustomersProjector registeredCustomersProjector) {
+                               RegisteredCustomersProjector registeredCustomersProjector, ConcertSummaryProjector concertSummaryProjector) {
         this.customerStore = customerStore;
         this.concertStore = concertStore;
         this.registeredCustomersProjector = registeredCustomersProjector;
+        this.concertSummaryProjector = concertSummaryProjector;
     }
 
     @Override
@@ -52,7 +55,7 @@ public class SampleDataPopulator implements ApplicationRunner {
 
     void populateConcertSampleData() {
         // don't add sample data if sample concerts were already added
-        if (!concertStore.allEvents().toList().isEmpty()) {
+        if (concertSummaryProjector.allConcertSummaries().findAny().isPresent()) {
             return;
         }
 
