@@ -64,7 +64,7 @@ public class ConcertFactory {
     }
 
     public static class Store {
-        public static ConcertId createSavedConcertIn(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public static ConcertId saveScheduledConcertIn(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId = ConcertId.createRandom();
             concertStore.save(Concert.schedule(
                     concertId,

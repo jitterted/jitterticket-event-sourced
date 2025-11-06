@@ -38,7 +38,7 @@ class EventViewerControllerMvcTest extends BaseMvcTest {
 
     @Test
     void getConcertEventsEndpointReturns200Ok() {
-        ConcertId concertId = ConcertFactory.Store.createSavedConcertIn(concertStore);
+        ConcertId concertId = ConcertFactory.Store.saveScheduledConcertIn(concertStore);
         mvc.get()
            .uri("/event-viewer/concerts/" + concertId.id())
            .assertThat()

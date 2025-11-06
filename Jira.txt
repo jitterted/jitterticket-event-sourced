@@ -13,6 +13,9 @@
         [ ] Create new projector that updates only via events directly received, e.g., projector.update(uncommittedEvents):
                 ConcertSales=
                 ConcertId, Artist, Date, Tickets Sold, Total Sales
+                [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
+                [ ] Rescheduled -> UPDATE data for ConcertId
+                [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
             [ ] Store updated information in-memory
                 [ ] Load the information into memory upon first request
             [ ] Store updated information in the projector's own database table

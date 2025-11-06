@@ -28,7 +28,7 @@ class PurchaseTicketsControllerMvcTest extends BaseMvcTest {
 
     @Test
     void getToPurchaseTicketViewEndpointReturns200Ok() {
-        ConcertId concertId = ConcertFactory.Store.createSavedConcertIn(concertStore);
+        ConcertId concertId = ConcertFactory.Store.saveScheduledConcertIn(concertStore);
 
         mvc.get()
            .uri("/concerts/" + concertId.id().toString())
@@ -40,7 +40,7 @@ class PurchaseTicketsControllerMvcTest extends BaseMvcTest {
     void postToPurchaseTicketEndpointRedirects() {
         Customer customer = CustomerFactory.newlyRegistered();
         customerStore.save(customer);
-        ConcertId concertId = ConcertFactory.Store.createSavedConcertIn(concertStore);
+        ConcertId concertId = ConcertFactory.Store.saveScheduledConcertIn(concertStore);
         mvc.post()
            .formField("customerId", customer.getId().id().toString())
            .formField("quantity", "2")
