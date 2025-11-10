@@ -27,7 +27,7 @@ class ConcertSalesProjectorTest {
 
         @Test
         void onlyScheduledConcertAndNoTicketSalesReturnsSalesSummaryWithZeroes() {
-            Fixture fixture = scheduleAndSaveConcert();
+            Fixture fixture = scheduleAndSaveConcert(42);
 
             ConcertSalesProjector.ConcertSalesSummary expectedSummary =
                     new ConcertSalesProjector
@@ -40,8 +40,9 @@ class ConcertSalesProjectorTest {
         }
 
         @Test
-        void singleConcertScheduleOneTicketSoldReturnsCorrectSummary() {
-            Fixture fixture = scheduleAndSaveConcert();
+        void singleConcertScheduledOneTicketTransactionReturnsCorrectSummaryOfSoldAndSales() {
+            int ticketPrice = 75;
+            Fixture fixture = scheduleAndSaveConcert(ticketPrice);
             Customer customer = CustomerFactory.reconstituteWithRegisteredEvent();
             int quantityPurchased = 4;
             fixture.concert.sellTicketsTo(customer.getId(), quantityPurchased);
@@ -72,15 +73,18 @@ class ConcertSalesProjectorTest {
                             .ConcertSalesSummary(fixture.concertId,
                                                  fixture.concert.artist(),
                                                  fixture.concert.showDateTime(),
-                                                 quantityPurchased,
-                                                 0);
+                                                 4,
+                                                 75 * 4);
             assertThat(fixture.concertSalesProjector.allSalesSummaries())
-                    .containsExactly(expectedSummary);
+                    .singleElement().isEqualTo(expectedSummary);
         }
 
-        private static Fixture scheduleAndSaveConcert() {
+        // TODO: test for multiple concerts with multiple tickets sold (purchased)
+
+        private static Fixture scheduleAndSaveConcert(int ticketPrice) {
             var concertEventStore = InMemoryEventStore.forConcerts();
-            ConcertId concertId = ConcertFactory.Store.saveScheduledConcertIn(concertEventStore);
+            ConcertId concertId = ConcertFactory.Store.saveScheduledConcert(
+                    concertEventStore, ticketPrice);
             Concert concert = concertEventStore.findById(concertId).orElseThrow();
             ConcertSalesProjector concertSalesProjector =
                     ConcertSalesProjector.createForTest(concertEventStore);

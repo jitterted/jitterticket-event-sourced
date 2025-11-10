@@ -30,6 +30,10 @@ public class ConcertSalesProjector {
         return new ConcertSalesProjector(InMemoryEventStore.forConcerts());
     }
 
+
+    // ? replace with something like:
+    // new SalesSummarizer().apply(events) -> Stream<ConcertSalesSummary>
+    // ?
     public Stream<ConcertSalesSummary> allSalesSummaries() {
         Map<ConcertId, ConcertSalesSummary> summaries = new HashMap<>();
         concertEventStore
@@ -40,7 +44,7 @@ public class ConcertSalesProjector {
                                 summaries.put(concertScheduled.concertId(), createSummaryFrom(concertScheduled));
                         case TicketsSold ticketsSold -> summaries.computeIfPresent(
                                 ticketsSold.concertId(),
-                                (_, summary) -> summary.plusQuantitySold(ticketsSold.quantity()));
+                                (_, summary) -> summary.plusTicketsSold(ticketsSold));
                         case ConcertRescheduled concertRescheduled -> {
                         }
                     }
@@ -61,10 +65,10 @@ public class ConcertSalesProjector {
 
     public record ConcertSalesSummary(ConcertId concertId, String artist,
                                       LocalDateTime showDateTime, int ticketsSold, int totalSales) {
-        public ConcertSalesSummary plusQuantitySold(int quantity) {
+        public ConcertSalesSummary plusTicketsSold(TicketsSold ticketsSold) {
             return new ConcertSalesSummary(concertId, artist, showDateTime,
-                                           ticketsSold + quantity,
-                                           totalSales);
+                                           ticketsSold.quantity(),
+                                           ticketsSold.totalPaid());
         }
     }
 }
