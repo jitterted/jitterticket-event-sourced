@@ -5,10 +5,19 @@ import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -16,6 +25,9 @@ class ConcertSalesProjectorTest {
 
     @Nested
     class NewProjector {
+
+        private static final int MAX_CAPACITY = 100;
+        private static final int MAX_TICKETS_PER_PURCHASE = 8;
 
         @Test
         void noScheduledConcertsReturnsNoSalesSummaries() {
@@ -53,7 +65,7 @@ class ConcertSalesProjectorTest {
             //      create stores
             //      create+save concert
             //      create+save customer
-            //      sellTicketsTo: concert + customer
+            //      concert.sellTicketsTo: customer, qty
             //      save concert
             // (2) Setup using PurchaseTicketsUseCase
             //      create stores
@@ -64,9 +76,9 @@ class ConcertSalesProjectorTest {
             // (3) Use manually created events
             //      create stores
             //      store ConcertScheduled event
-            //      store CustomerRegistered event
+            //      store CustomerRegistered event (optional)
             //      store TicketsSold event (*required*)
-            //      store TicketsPurchased event
+            //      store TicketsPurchased event (optional)
 
             ConcertSalesProjector.ConcertSalesSummary expectedSummary =
                     new ConcertSalesProjector
@@ -80,6 +92,82 @@ class ConcertSalesProjectorTest {
         }
 
         // TODO: test for multiple concerts with multiple tickets sold (purchased)
+
+
+        @Test
+        void multipleConcertsWithTicketsSoldReturnsCorrectSummaryOfSales() {
+            var concertEventStore = InMemoryEventStore.forConcerts();
+            ConcertId concertId1 = ConcertId.createRandom();
+            int ticketPrice1 = 35;
+            LocalDateTime showDateTime1 = LocalDateTime.now();
+            String artist1 = "First Concert";
+            ConcertScheduled concertScheduled1 = new ConcertScheduled(concertId1, 0,
+                                                                      artist1,
+                                                                      ticketPrice1,
+                                                                      showDateTime1,
+                                                                      LocalTime.now(),
+                                                                      MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
+            int quantity1 = 2;
+            TicketsSold ticketsSoldForConcert1 = new TicketsSold(concertId1, 1, quantity1, quantity1 * ticketPrice1);
+            concertEventStore.save(concertId1, Stream.of(concertScheduled1, ticketsSoldForConcert1));
+            ConcertId concertId2 = ConcertId.createRandom();
+            int ticketPrice2 = 125;
+            LocalDateTime showDateTime2 = LocalDateTime.now();
+            String artist2 = "Second Concert";
+            ConcertScheduled concertScheduled2 = new ConcertScheduled(
+                    concertId2, 0,
+                    artist2,
+                    ticketPrice2,
+                    showDateTime2,
+                    LocalTime.now(),
+                    MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
+            int quantity2 = 8;
+            TicketsSold ticketsSoldForConcert2 = new TicketsSold(concertId2, 1, quantity2, quantity2 * ticketPrice2);
+            concertEventStore.save(concertId2, Stream.of(concertScheduled2, ticketsSoldForConcert2));
+            ConcertSalesProjector concertSalesProjector =
+                    ConcertSalesProjector.createForTest(concertEventStore);
+
+            var expectedSummary1 = new ConcertSalesProjector.ConcertSalesSummary(
+                    concertId1,
+                    artist1,
+                    showDateTime1,
+                    quantity1,
+                    ticketPrice1 * quantity1);
+            var expectedSummary2 = new ConcertSalesProjector.ConcertSalesSummary(
+                    concertId2,
+                    artist2,
+                    showDateTime2,
+                    quantity2,
+                    ticketPrice2 * quantity2);
+
+            var actualMap = concertSalesProjector
+                    .allSalesSummaries()
+                     .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::artist, Function.identity()));
+            var expectedMap = Map.of(expectedSummary1.artist(), expectedSummary1,
+                                     expectedSummary2.artist(), expectedSummary2);
+            assertThat(actualMap)
+                    .usingRecursiveComparison()
+                    .isEqualTo(expectedMap);
+
+// List comparison highlights mismatched fields, but uses [0] and [1] to reference elements, which is potentially unhelpful with longer lists
+//            List<ConcertSalesProjector.ConcertSalesSummary> actualList =
+//                    concertSalesProjector.allSalesSummaries()
+//                                         .sorted(Comparator.comparing(summary -> summary.concertId().id()))
+//                                         .toList();
+//            List<ConcertSalesProjector.ConcertSalesSummary> expectedList =
+//                    Stream.of(expectedSummary2, expectedSummary1)
+//                          .sorted(Comparator.comparing(summary -> summary.concertId().id()))
+//                          .toList();
+//
+//            assertThat(actualList)
+//                    .usingRecursiveComparison()
+//                    .isEqualTo(expectedList);
+
+// unhelpful assertion failure output
+//            assertThat(concertSalesProjector.allSalesSummaries())
+//                    .usingRecursiveFieldByFieldElementComparator()
+//                    .containsExactly(expectedSummary1, expectedSummary2);
+        }
 
         private static Fixture scheduleAndSaveConcert(int ticketPrice) {
             var concertEventStore = InMemoryEventStore.forConcerts();
