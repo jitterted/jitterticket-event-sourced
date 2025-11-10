@@ -5,7 +5,11 @@ import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
 
@@ -49,14 +53,16 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     }
     //endregion
 
-    //region Queries
+    //region Commands
     public void purchaseTickets(Concert concert, TicketOrderId ticketOrderId, int quantity) {
         int paidAmount = quantity * concert.ticketPrice();
         TicketsPurchased ticketsPurchased =
                 new TicketsPurchased(getId(), nextEventSequenceNumber(), ticketOrderId, concert.getId(), quantity, paidAmount);
         enqueue(ticketsPurchased);
     }
+    //endregion
 
+    //region Queries
     public List<TicketOrder> ticketOrders() {
         return ticketOrdersByTicketOrderId.values().stream().toList();
     }

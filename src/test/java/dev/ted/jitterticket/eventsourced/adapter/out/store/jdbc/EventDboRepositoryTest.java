@@ -14,7 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @SuppressWarnings("AssertThatIsZeroOne")
 @Tag("spring")
@@ -165,7 +165,8 @@ class EventDboRepositoryTest {
         Integer maxSequence = eventDboRepository.getMaxEventSequence(UUID.randomUUID());
 
         // Then
-        assertThat(maxSequence).isEqualTo(0);
+        assertThat(maxSequence)
+                .isEqualTo(0);
     }
 
     @Test
