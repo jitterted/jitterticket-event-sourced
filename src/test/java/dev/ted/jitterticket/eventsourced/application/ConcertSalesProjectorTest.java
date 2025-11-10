@@ -122,8 +122,10 @@ class ConcertSalesProjectorTest {
                     LocalTime.now(),
                     MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             int quantity2 = 8;
-            TicketsSold ticketsSoldForConcert2 = new TicketsSold(concertId2, 1, quantity2, quantity2 * ticketPrice2);
-            concertEventStore.save(concertId2, Stream.of(concertScheduled2, ticketsSoldForConcert2));
+            TicketsSold ticketsSold1ForConcert2 = new TicketsSold(concertId2, 1, quantity2, quantity2 * ticketPrice2);
+            int quantity3 = 6;
+            TicketsSold ticketsSold2ForConcert2 = new TicketsSold(concertId2, 2, quantity3, quantity3 * ticketPrice2);
+            concertEventStore.save(concertId2, Stream.of(concertScheduled2, ticketsSold1ForConcert2, ticketsSold2ForConcert2));
             ConcertSalesProjector concertSalesProjector =
                     ConcertSalesProjector.createForTest(concertEventStore);
 
@@ -137,8 +139,9 @@ class ConcertSalesProjectorTest {
                     concertId2,
                     artist2,
                     showDateTime2,
-                    quantity2,
-                    ticketPrice2 * quantity2);
+                    quantity2 + quantity3,
+                    ticketsSold1ForConcert2.totalPaid()
+                    + ticketsSold2ForConcert2.totalPaid());
 
             var actualMap = concertSalesProjector
                     .allSalesSummaries()

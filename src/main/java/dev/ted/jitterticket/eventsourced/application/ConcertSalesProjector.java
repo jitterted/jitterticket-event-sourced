@@ -64,11 +64,13 @@ public class ConcertSalesProjector {
 
 
     public record ConcertSalesSummary(ConcertId concertId, String artist,
-                                      LocalDateTime showDateTime, int ticketsSold, int totalSales) {
+                                      LocalDateTime showDateTime,
+                                      int totalQuantity, int totalSales) {
         public ConcertSalesSummary plusTicketsSold(TicketsSold ticketsSold) {
-            return new ConcertSalesSummary(concertId, artist, showDateTime,
-                                           ticketsSold.quantity(),
-                                           ticketsSold.totalPaid());
+            return new ConcertSalesSummary(concertId, artist,
+                                           showDateTime,
+                                           totalQuantity + ticketsSold.quantity(),
+                                           totalSales + ticketsSold.totalPaid());
         }
     }
 }
