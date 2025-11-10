@@ -65,11 +65,17 @@ public class ConcertFactory {
 
     public static class Store {
         public static ConcertId saveScheduledConcertIn(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+            int ticketPrice = 35;
+            return saveScheduledConcert(concertStore, ticketPrice);
+        }
+
+        public static ConcertId saveScheduledConcert(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+                                                     int ticketPrice) {
             ConcertId concertId = ConcertId.createRandom();
             concertStore.save(Concert.schedule(
                     concertId,
                     "Blue Note Quartet",
-                    35,
+                    ticketPrice,
                     LocalDateTime.of(2025, 8, 22, 19, 30),
                     LocalTime.of(18, 30),
                     75,

@@ -122,7 +122,10 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     }
 
     public void sellTicketsTo(CustomerId customerId, int quantity) {
-        TicketsSold ticketsSold = new TicketsSold(getId(), nextEventSequenceNumber(), quantity, -1);
+        TicketsSold ticketsSold = new TicketsSold(getId(),
+                                                  nextEventSequenceNumber(),
+                                                  quantity,
+                                                  quantity * ticketPrice);
         enqueue(ticketsSold);
     }
 

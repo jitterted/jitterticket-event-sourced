@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 public class ConcertTest {
 
@@ -69,7 +69,9 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new TicketsSold(concertId, 1, quantity, -1)
+                            new TicketsSold(concertId, 1,
+                                            2,
+                                            35 * 2)
                     );
         }
 
