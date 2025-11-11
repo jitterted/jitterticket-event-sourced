@@ -5,6 +5,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
@@ -91,9 +92,6 @@ class ConcertSalesProjectorTest {
                     .singleElement().isEqualTo(expectedSummary);
         }
 
-        // TODO: test for multiple concerts with multiple tickets sold (purchased)
-
-
         @Test
         void multipleConcertsWithTicketsSoldReturnsCorrectSummaryOfSales() {
             var concertEventStore = InMemoryEventStore.forConcerts();
@@ -145,7 +143,7 @@ class ConcertSalesProjectorTest {
 
             var actualMap = concertSalesProjector
                     .allSalesSummaries()
-                     .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::artist, Function.identity()));
+                    .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::artist, Function.identity()));
             var expectedMap = Map.of(expectedSummary1.artist(), expectedSummary1,
                                      expectedSummary2.artist(), expectedSummary2);
             assertThat(actualMap)
@@ -171,6 +169,43 @@ class ConcertSalesProjectorTest {
 //                    .usingRecursiveFieldByFieldElementComparator()
 //                    .containsExactly(expectedSummary1, expectedSummary2);
         }
+
+        @Test
+        void summaryIsUpToDateAfterRescheduledConcert() {
+            var concertEventStore = InMemoryEventStore.forConcerts();
+            ConcertId concertId = ConcertId.createRandom();
+            LocalDateTime originalShowDateTime = LocalDateTime.now();
+            LocalTime originalDoorsTime = LocalTime.now();
+            ConcertScheduled concertScheduled =
+                    new ConcertScheduled(concertId, 0, "Artist",
+                                         35,
+                                         originalShowDateTime,
+                                         originalDoorsTime,
+                                         MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
+            LocalDateTime newShowDateTime = originalShowDateTime.plusMonths(1);
+            ConcertRescheduled concertRescheduled =
+                    new ConcertRescheduled(concertId, 1,
+                                           newShowDateTime,
+                                           originalDoorsTime.minusHours(1));
+            concertEventStore.save(concertId, Stream.of(concertScheduled, concertRescheduled));
+            ConcertSalesProjector concertSalesProjector =
+                    ConcertSalesProjector.createForTest(concertEventStore);
+
+            ConcertSalesProjector.ConcertSalesSummary expectedSummary =
+                    new ConcertSalesProjector
+                            .ConcertSalesSummary(concertId,
+                                                 "Artist",
+                                                 newShowDateTime,
+                                                 0, 0);
+            assertThat(concertSalesProjector.allSalesSummaries())
+                    .as("Sales Summaries should have 1 summary, but did not.")
+                    .singleElement()
+                    .usingRecursiveComparison()
+                    .isEqualTo(expectedSummary);
+        }
+
+        // TODO: test against the ConcertSalesSummary record "withers" directly,
+        //       i.e., the plusTicketsSold and the reschedule
 
         private static Fixture scheduleAndSaveConcert(int ticketPrice) {
             var concertEventStore = InMemoryEventStore.forConcerts();

@@ -10,15 +10,20 @@
 
 [ ] Store projections as tables in the database via incremental (per-event) updates
     [ ] Incremental updates to projections as events are emitted/persisted
-        [ ] Create new projector that updates only via events directly received, e.g., projector.update(uncommittedEvents):
+        [ ] Create new projector that updates only via events directly received, e.g., projector.apply(uncommittedEvents):
                 ConcertSales=
                 ConcertId, Artist, Date, Tickets Sold, Total Sales
-                [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
-                [ ] Rescheduled -> UPDATE data for ConcertId
-                [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
             [ ] Store updated information in-memory
-                [ ] Load the information into memory upon first request
+                [X] Scheduled -> put new value for key in map
+                [X] TicketsSold -> update value with new SOLD (+= qty) and new SALES (+= paidAmount) for key in map
+                [X] Rescheduled -> update value with new show date+time in map
+                [ ] Load the information into memory upon creation (constructor)
+                    [ ] implement .apply(), which applies and updates in-memory map
             [ ] Store updated information in the projector's own database table
+                [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
+                [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
+                [ ] Rescheduled -> UPDATE data for ConcertId
+    [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion
     [ ] Make more general way of registering projectors
     [later with modulith] Figure out listener/subscription for when events are persisted
 

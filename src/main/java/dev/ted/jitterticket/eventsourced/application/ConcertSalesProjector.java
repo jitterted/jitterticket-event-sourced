@@ -40,13 +40,15 @@ public class ConcertSalesProjector {
                 .allEvents()
                 .forEach(concertEvent -> {
                     switch (concertEvent) {
-                        case ConcertScheduled concertScheduled ->
-                                summaries.put(concertScheduled.concertId(), createSummaryFrom(concertScheduled));
+                        case ConcertScheduled concertScheduled -> summaries.put(
+                                concertScheduled.concertId(),
+                                createSummaryFrom(concertScheduled));
                         case TicketsSold ticketsSold -> summaries.computeIfPresent(
                                 ticketsSold.concertId(),
                                 (_, summary) -> summary.plusTicketsSold(ticketsSold));
-                        case ConcertRescheduled concertRescheduled -> {
-                        }
+                        case ConcertRescheduled concertRescheduled -> summaries.computeIfPresent(
+                                concertRescheduled.concertId(),
+                                (_, summary) -> summary.withNewShowDateTime(concertRescheduled.newShowDateTime()));
                     }
                 });
         return summaries.values().stream();
@@ -67,10 +69,18 @@ public class ConcertSalesProjector {
                                       LocalDateTime showDateTime,
                                       int totalQuantity, int totalSales) {
         public ConcertSalesSummary plusTicketsSold(TicketsSold ticketsSold) {
-            return new ConcertSalesSummary(concertId, artist,
-                                           showDateTime,
-                                           totalQuantity + ticketsSold.quantity(),
-                                           totalSales + ticketsSold.totalPaid());
+            return new ConcertSalesSummary(
+                    concertId, artist,
+                    showDateTime,
+                    totalQuantity + ticketsSold.quantity(),
+                    totalSales + ticketsSold.totalPaid());
+        }
+
+        public ConcertSalesSummary withNewShowDateTime(LocalDateTime newShowDateTime) {
+            return new ConcertSalesSummary(
+                    concertId, artist,
+                    newShowDateTime,
+                    totalQuantity, totalSales);
         }
     }
 }
