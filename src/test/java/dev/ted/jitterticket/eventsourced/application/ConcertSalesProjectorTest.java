@@ -82,12 +82,12 @@ class ConcertSalesProjectorTest {
             //      store TicketsPurchased event (optional)
 
             ConcertSalesProjector.ConcertSalesSummary expectedSummary =
-                    new ConcertSalesProjector
-                            .ConcertSalesSummary(fixture.concertId,
-                                                 fixture.concert.artist(),
-                                                 fixture.concert.showDateTime(),
-                                                 4,
-                                                 75 * 4);
+                    new ConcertSalesProjector.ConcertSalesSummary(
+                            fixture.concertId,
+                            fixture.concert.artist(),
+                            fixture.concert.showDateTime(),
+                            4,
+                            75 * 4);
             assertThat(fixture.concertSalesProjector.allSalesSummaries())
                     .singleElement().isEqualTo(expectedSummary);
         }
