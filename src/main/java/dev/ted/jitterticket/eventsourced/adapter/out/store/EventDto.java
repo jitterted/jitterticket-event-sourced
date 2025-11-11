@@ -23,6 +23,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public class EventDto<EVENT extends Event> {
+    private static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
     private final UUID aggregateRootId; // ID for the Aggregate Root
     private final Integer eventSequence;
     private final String eventType;
@@ -80,10 +81,9 @@ public class EventDto<EVENT extends Event> {
     }
 
     public static <EVENT extends Event> EventDto<EVENT> from(UUID aggregateRootId, Integer eventSequence, EVENT event) {
-        ObjectMapper objectMapper = createObjectMapper();
 
         try {
-            String json = objectMapper.writeValueAsString(event);
+            String json = OBJECT_MAPPER.writeValueAsString(event);
             String fullyQualifiedClassName = event.getClass().getName();
             return new EventDto<>(aggregateRootId, eventSequence, fullyQualifiedClassName, json);
         } catch (JsonProcessingException e) {
@@ -93,11 +93,10 @@ public class EventDto<EVENT extends Event> {
 
     @SuppressWarnings("unchecked")
     public EVENT toDomain() {
-        ObjectMapper objectMapper = createObjectMapper();
 
         try {
             Class<EVENT> valueType = (Class<EVENT>) Class.forName(eventType);
-            return objectMapper.readValue(json, valueType);
+            return OBJECT_MAPPER.readValue(json, valueType);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Problem converting JSON: " + json + " to " + eventType, e);
         } catch (ClassNotFoundException e) {

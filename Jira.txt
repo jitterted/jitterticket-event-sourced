@@ -19,6 +19,7 @@
                 [X] Rescheduled -> update value with new show date+time in map
                 [ ] Load the information into memory upon creation (constructor)
                     [ ] implement .apply(), which applies and updates in-memory map
+                    [ ] in constructor, call apply() with allEvents() from the event store
             [ ] Store updated information in the projector's own database table
                 [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
