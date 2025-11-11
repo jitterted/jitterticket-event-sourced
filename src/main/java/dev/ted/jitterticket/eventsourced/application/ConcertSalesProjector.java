@@ -20,6 +20,7 @@ public class ConcertSalesProjector {
 
     private ConcertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
         this.concertEventStore = concertEventStore;
+        apply(concertEventStore.allEvents());
     }
 
     public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
@@ -30,13 +31,12 @@ public class ConcertSalesProjector {
         return new ConcertSalesProjector(InMemoryEventStore.forConcerts());
     }
 
-
-    // ? replace with something like:
-    // new SalesSummarizer().apply(events) -> Stream<ConcertSalesSummary>
-    // ?
     public Stream<ConcertSalesSummary> allSalesSummaries() {
-        concertEventStore
-                .allEvents()
+        return salesSummaryMap.values().stream();
+    }
+
+    public void apply(Stream<ConcertEvent> concertEvents) {
+        concertEvents
                 .forEach(concertEvent -> {
                     switch (concertEvent) {
                         case ConcertScheduled concertScheduled -> salesSummaryMap.put(
@@ -50,7 +50,6 @@ public class ConcertSalesProjector {
                                 (_, summary) -> summary.withNewShowDateTime(concertRescheduled.newShowDateTime()));
                     }
                 });
-        return salesSummaryMap.values().stream();
     }
 
     private static ConcertSalesSummary createSummaryFrom(ConcertScheduled concertScheduled) {
