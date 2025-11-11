@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application.port;
 
+import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
@@ -18,4 +19,8 @@ public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     Stream<EVENT> allEvents();
 
     List<EVENT> eventsForAggregate(ID id);
+
+    default void register(ConcertSalesProjector concertSalesProjector) {
+
+    }
 }

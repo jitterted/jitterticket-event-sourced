@@ -5,6 +5,7 @@ import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +43,11 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
                        .flatMap(Collection::stream)
                        .map(EventDto::toDomain)
                        .toList();
+    }
+
+    @Override
+    public void register(ConcertSalesProjector concertSalesProjector) {
+        concertSalesProjector.apply((Stream<ConcertEvent>) allEvents());
     }
 
     @Override

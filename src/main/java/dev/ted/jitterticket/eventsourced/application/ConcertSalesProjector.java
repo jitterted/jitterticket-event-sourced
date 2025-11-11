@@ -15,20 +15,16 @@ import java.util.stream.Stream;
 
 public class ConcertSalesProjector {
 
-    private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
     private final Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
 
-    private ConcertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        this.concertEventStore = concertEventStore;
-        apply(concertEventStore.allEvents());
-    }
-
     public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        return new ConcertSalesProjector(concertEventStore);
+        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
+        concertEventStore.register(concertSalesProjector);
+        return concertSalesProjector;
     }
 
     public static ConcertSalesProjector createForTest() {
-        return new ConcertSalesProjector(InMemoryEventStore.forConcerts());
+        return createForTest(InMemoryEventStore.forConcerts());
     }
 
     public Stream<ConcertSalesSummary> allSalesSummaries() {

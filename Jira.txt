@@ -17,9 +17,15 @@
                 [X] Scheduled -> put new value for key in map
                 [X] TicketsSold -> update value with new SOLD (+= qty) and new SALES (+= paidAmount) for key in map
                 [X] Rescheduled -> update value with new show date+time in map
-                [ ] Load the information into memory upon creation (constructor)
-                    [ ] implement .apply(), which applies and updates in-memory map
-                    [ ] in constructor, call apply() with allEvents() from the event store
+                [X] Load the information into memory upon creation (constructor)
+                    [X] implement .apply(), which applies and updates in-memory map
+                    [X] in constructor, call apply() with allEvents() from the event store
+                [ ] Invert relationship between projector and eventStore:
+                    [ ] Projector registers with EventStore, which (only for in-memory projectors) immediately calls back to apply all events in the store
+                [ ] In the Projector, ensure idempotency by storing the last event sequence when applying the event
+                    [ ] Skip past "seen" events
+                    [ ] Warn/error if we see a gap in the event sequence during apply: that means we missed something
+                        [ ] Could just ask the event store for all events since the last one we saw + the ones that came in via apply(uncommittedEvents)
             [ ] Store updated information in the projector's own database table
                 [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
