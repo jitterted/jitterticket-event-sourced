@@ -13,10 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class ConcertSalesProjector {
 
     private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
+    private final Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
 
     private ConcertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
         this.concertEventStore = concertEventStore;
@@ -35,23 +35,22 @@ public class ConcertSalesProjector {
     // new SalesSummarizer().apply(events) -> Stream<ConcertSalesSummary>
     // ?
     public Stream<ConcertSalesSummary> allSalesSummaries() {
-        Map<ConcertId, ConcertSalesSummary> summaries = new HashMap<>();
         concertEventStore
                 .allEvents()
                 .forEach(concertEvent -> {
                     switch (concertEvent) {
-                        case ConcertScheduled concertScheduled -> summaries.put(
+                        case ConcertScheduled concertScheduled -> salesSummaryMap.put(
                                 concertScheduled.concertId(),
                                 createSummaryFrom(concertScheduled));
-                        case TicketsSold ticketsSold -> summaries.computeIfPresent(
+                        case TicketsSold ticketsSold -> salesSummaryMap.computeIfPresent(
                                 ticketsSold.concertId(),
                                 (_, summary) -> summary.plusTicketsSold(ticketsSold));
-                        case ConcertRescheduled concertRescheduled -> summaries.computeIfPresent(
+                        case ConcertRescheduled concertRescheduled -> salesSummaryMap.computeIfPresent(
                                 concertRescheduled.concertId(),
                                 (_, summary) -> summary.withNewShowDateTime(concertRescheduled.newShowDateTime()));
                     }
                 });
-        return summaries.values().stream();
+        return salesSummaryMap.values().stream();
     }
 
     private static ConcertSalesSummary createSummaryFrom(ConcertScheduled concertScheduled) {
