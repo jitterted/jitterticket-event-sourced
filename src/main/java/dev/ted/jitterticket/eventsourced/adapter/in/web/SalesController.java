@@ -5,8 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.List;
 
 @Controller
@@ -22,18 +20,10 @@ class SalesController {
     public String viewConcertSalesSummary(Model model) {
         List<ConcertSalesSummaryView> salesSummaryViews = concertSummaryProjector
                 .allSalesSummaries()
-                .map(concertSalesSummary ->
-                             new ConcertSalesSummaryView(
-                                     concertSalesSummary.concertId().id().toString(),
-                                     concertSalesSummary.artist(),
-                                     concertSalesSummary.showDateTime()
-                                                        .toLocalDate()
-                                                        .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)),
-                                     String.valueOf(concertSalesSummary.totalQuantity()),
-                                     "$" + concertSalesSummary.totalSales()
-                             ))
+                .map(ConcertSalesSummaryView::from)
                 .toList();
         model.addAttribute("salesSummary", salesSummaryViews);
         return "concert-sales-view";
     }
+
 }

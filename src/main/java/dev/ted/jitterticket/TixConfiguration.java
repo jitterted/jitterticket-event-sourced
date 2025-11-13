@@ -1,5 +1,6 @@
 package dev.ted.jitterticket;
 
+import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
@@ -19,13 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Map;
 
 @Configuration
-class TixConfiguration {
-
-    @Bean
-    PurchaseTicketsUseCase purchaseTicketsUseCase(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
-                                                  EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new PurchaseTicketsUseCase(concertStore, customerStore);
-    }
+public class TixConfiguration {
 
     @Bean
     ConcertSummaryProjector concertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
@@ -38,6 +33,11 @@ class TixConfiguration {
     }
 
     @Bean
+    ConcertSalesProjector concertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new ConcertSalesProjector();
+    }
+
+    @Bean
     ProjectionChoices projectionChoices(
             EventStore<ConcertId, ConcertEvent, Concert> concertStore,
             EventStore<CustomerId, CustomerEvent, Customer> customerStore
@@ -46,6 +46,12 @@ class TixConfiguration {
                 "concerts", new ConcertProjectionChoice(concertStore),
                 "customers", new CustomerProjectionChoice(customerStore)
         ));
+    }
+
+    @Bean
+    PurchaseTicketsUseCase purchaseTicketsUseCase(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
+                                                  EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new PurchaseTicketsUseCase(concertStore, customerStore);
     }
 
 }
