@@ -59,9 +59,13 @@ public class ConcertSalesProjector {
     }
 
 
-    public record ConcertSalesSummary(ConcertId concertId, String artist,
-                                      LocalDateTime showDateTime,
-                                      int totalQuantity, int totalSales) {
+    public record ConcertSalesSummary(
+            ConcertId concertId,
+            String artist,
+            LocalDateTime showDateTime,
+            int totalQuantity,
+            int totalSales
+    ) {
         public ConcertSalesSummary plusTicketsSold(TicketsSold ticketsSold) {
             return new ConcertSalesSummary(
                     concertId, artist,
