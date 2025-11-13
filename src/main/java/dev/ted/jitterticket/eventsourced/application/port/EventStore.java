@@ -20,7 +20,5 @@ public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     List<EVENT> eventsForAggregate(ID id);
 
-    default void register(ConcertSalesProjector concertSalesProjector) {
-
-    }
+    void register(ConcertSalesProjector concertSalesProjector);
 }

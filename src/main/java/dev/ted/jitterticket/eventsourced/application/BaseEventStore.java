@@ -17,6 +17,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         implements EventStore<ID, EVENT, AGGREGATE> {
 
     protected final Function<List<EVENT>, AGGREGATE> eventsToAggregate;
+    private ConcertSalesProjector concertSalesProjector;
 
     public BaseEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         this.eventsToAggregate = eventsToAggregate;
@@ -31,7 +32,9 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
 
         save(aggregateId, uncommittedEvents);
         // notify projectors to update their state, e.g.:
-        // projector.update(uncommittedEvents)
+        if (concertSalesProjector != null) {
+            concertSalesProjector.apply((Stream<ConcertEvent>) aggregate.uncommittedEvents());
+        }
     }
 
     protected abstract List<EventDto<EVENT>> eventDtosFor(ID id);
@@ -47,6 +50,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
 
     @Override
     public void register(ConcertSalesProjector concertSalesProjector) {
+        this.concertSalesProjector = concertSalesProjector;
         concertSalesProjector.apply((Stream<ConcertEvent>) allEvents());
     }
 

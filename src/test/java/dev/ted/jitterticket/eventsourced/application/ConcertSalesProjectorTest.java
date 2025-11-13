@@ -59,7 +59,6 @@ class ConcertSalesProjectorTest {
             Customer customer = CustomerFactory.reconstituteWithRegisteredEvent();
             int quantityPurchased = 4;
             fixture.concert.sellTicketsTo(customer.getId(), quantityPurchased);
-            fixture.concertSalesProjector.apply(fixture.concert.uncommittedEvents());
             fixture.eventStore.save(fixture.concert);
 
             // TODO: compare:

@@ -20,8 +20,8 @@
                 [X] Load the information into memory upon creation (constructor)
                     [X] implement .apply(), which applies and updates in-memory map
                     [X] in constructor, call apply() with allEvents() from the event store
-                [ ] Invert relationship between projector and eventStore:
-                    [ ] Projector registers with EventStore, which (only for in-memory projectors) immediately calls back to apply all events in the store
+                [X] Invert relationship between projector and eventStore:
+                    [X] Projector registers with EventStore, which (only for in-memory projectors) immediately calls back to apply all events in the store
                 [ ] In the Projector, ensure idempotency by storing the last event sequence when applying the event
                     [ ] Skip past "seen" events
                     [ ] Warn/error if we see a gap in the event sequence during apply: that means we missed something
@@ -32,6 +32,8 @@
                 [ ] Rescheduled -> UPDATE data for ConcertId
     [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion
     [ ] Make more general way of registering projectors
+        [ ] Generalize projectors to extract an interface
+
     [later with modulith] Figure out listener/subscription for when events are persisted
 
 [X] Time-travel event viewer
