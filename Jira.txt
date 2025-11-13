@@ -26,7 +26,10 @@
                     [ ] Skip past "seen" events
                     [ ] Warn/error if we see a gap in the event sequence during apply: that means we missed something
                         [ ] Could just ask the event store for all events since the last one we saw + the ones that came in via apply(uncommittedEvents)
-            [ ] Wire up projector so we can see it in the UI
+            [X] Wire up projector so we can see it in the UI
+
+==> NEXT TIME ==>
+
             [ ] Store updated information in the projector's own database table
                 [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
@@ -35,6 +38,7 @@
     [ ] Make more general way of registering projectors
         [ ] Generalize projectors to extract an interface
 
+    [ ] ArchUnit rule to ensure that only test code calls `createForTest...` methods
     [later with modulith] Figure out listener/subscription for when events are persisted
 
 [X] Time-travel event viewer

@@ -22,7 +22,7 @@ class SalesController {
                 .allSalesSummaries()
                 .map(ConcertSalesSummaryView::from)
                 .toList();
-        model.addAttribute("salesSummary", salesSummaryViews);
+        model.addAttribute("salesSummaryViews", salesSummaryViews);
         return "concert-sales-view";
     }
 

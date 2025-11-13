@@ -34,7 +34,9 @@ public class TixConfiguration {
 
     @Bean
     ConcertSalesProjector concertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new ConcertSalesProjector();
+        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
+        concertStore.register(concertSalesProjector);
+        return concertSalesProjector;
     }
 
     @Bean

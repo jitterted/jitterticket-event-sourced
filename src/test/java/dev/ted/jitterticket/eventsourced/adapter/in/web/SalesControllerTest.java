@@ -36,7 +36,7 @@ class SalesControllerTest {
 
         assertThat(viewName)
                 .isEqualTo("concert-sales-view");
-        assertThat((List<ConcertSalesSummaryView>) model.getAttribute("salesSummary"))
+        assertThat((List<ConcertSalesSummaryView>) model.getAttribute("salesSummaryViews"))
                 .containsExactly(new ConcertSalesSummaryView(
                         concertId.id().toString(),
                         "White Label Community",

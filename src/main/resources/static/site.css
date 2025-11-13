@@ -26,3 +26,8 @@ tbody tr:nth-child(odd) {
 .choice-list li:last-child { margin-bottom: 0; }
 .choice-list a { display: block; width: 25%; padding: 1rem 1.25rem; font-size: 1.25rem; text-decoration: underline; color: #0645ad; border: 1px solid #ddd; border-radius: 8px; background-color: #fafafa; }
 .choice-list a:hover, .choice-list a:focus { background-color: #f0f7ff; border-color: #c6defa; outline: none; color: #0b63d1; }
+
+.numeric-column {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
