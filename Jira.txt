@@ -25,12 +25,12 @@
                 [ ] In the Projector, ensure idempotency by storing the last event sequence when applying the event
                     [ ] Skip past "seen" events
                     [ ] Warn/error if we see a gap in the event sequence during apply: that means we missed something
-                        [ ] Could just ask the event store for all events since the last one we saw + the ones that came in via apply(uncommittedEvents)
             [X] Wire up projector so we can see it in the UI
 
 ==> NEXT TIME ==>
 
             [ ] Store updated information in the projector's own database table
+                [ ] As part of subscribe (aka register), ask the event store for all events since the last one we saw
                 [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
                 [ ] Rescheduled -> UPDATE data for ConcertId

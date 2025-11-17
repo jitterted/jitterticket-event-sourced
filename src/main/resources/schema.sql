@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS events (
     -- Primary key is composite of aggregate_root_id and event_sequence
     PRIMARY KEY (aggregate_root_id, event_sequence)
     
-    -- Optional: Add a global sequence for ordering all events across aggregates
+    -- Add a global sequence for ordering all events across aggregates
+    -- as per docs, this starts at 1
     , global_sequence BIGSERIAL
     
     -- Optional: Add a version field for schema versioning
