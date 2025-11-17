@@ -14,6 +14,25 @@ public final class CustomerRegistered extends CustomerEvent {
         return new CustomerRegistered(customerId, eventSequence, customerName, email);
     }
 
+//    @ReconstituteOnly // do not call unless from EventStore or a test
+    public static CustomerRegistered reconstitute(CustomerId customerId,
+                                                  Integer eventSequence,
+                                                  Long globalEventSequence,
+                                                  String customerName,
+                                                  String email) {
+        return new CustomerRegistered(customerId, eventSequence, globalEventSequence, customerName, email);
+    }
+
+    public CustomerRegistered(CustomerId customerId,
+                              Integer eventSequence,
+                              Long globalEventSequence,
+                              String customerName,
+                              String email) {
+        super(customerId, eventSequence, globalEventSequence);
+        this.customerName = customerName;
+        this.email = email;
+    }
+
     private CustomerRegistered(CustomerId customerId,
                                Integer eventSequence,
                                String customerName,

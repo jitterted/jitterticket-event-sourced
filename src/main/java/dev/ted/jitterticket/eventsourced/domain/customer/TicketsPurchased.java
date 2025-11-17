@@ -18,7 +18,28 @@ public final class TicketsPurchased extends CustomerEvent {
                                              ConcertId concertId,
                                              int quantity,
                                              int paidAmount) {
-        return new TicketsPurchased(customerId, eventSequence, ticketOrderId, concertId, quantity, paidAmount);
+        return new TicketsPurchased(customerId, eventSequence,
+                                    ticketOrderId, concertId, quantity, paidAmount);
+    }
+
+    public static TicketsPurchased reconstitute(CustomerId customerId,
+                                               Integer eventSequence,
+                                               Long globalEventSequence,
+                                               TicketOrderId ticketOrderId,
+                                               ConcertId concertId,
+                                               int quantity,
+                                               int paidAmount) {
+        return new TicketsPurchased(customerId, eventSequence,
+                                    globalEventSequence,
+                                    ticketOrderId, concertId, quantity, paidAmount);
+    }
+
+    public TicketsPurchased(CustomerId customerId, Integer eventSequence, Long globalEventSequence, TicketOrderId ticketOrderId, ConcertId concertId, int quantity, int paidAmount) {
+        super(customerId, eventSequence, globalEventSequence);
+        this.ticketOrderId = ticketOrderId;
+        this.concertId = concertId;
+        this.quantity = quantity;
+        this.paidAmount = paidAmount;
     }
 
     private TicketsPurchased(CustomerId customerId,

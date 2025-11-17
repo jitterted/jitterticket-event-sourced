@@ -15,6 +15,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -224,6 +225,25 @@ class EventStoreTest {
 
             assertThat(eventsForAggregate)
                     .containsExactlyElementsOf(allEventsForCustomer.toList());
+        }
+
+        @Test
+        void reconstitutedEventHasGlobalEventSequenceNumber() {
+            CustomerId customerId = CustomerId.createRandom();
+            CustomerEvent customerEvent = CustomerRegistered.createNew(
+                    customerId,
+                    1,
+                    "Customer Name",
+                    "customer@example.com"
+            );
+            customerStore.save(customerId, Stream.of(customerEvent));
+
+            List<CustomerEvent> customerEvents = customerStore.eventsForAggregate(customerId);
+
+            assertThat(customerEvents)
+                    .singleElement()
+                    .extracting(CustomerEvent::globalEventSequence)
+                    .isNotNull();
         }
     }
 }
