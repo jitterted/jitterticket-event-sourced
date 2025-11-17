@@ -24,6 +24,7 @@ import java.util.UUID;
 
 public class EventDto<EVENT extends Event> {
     private static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
+
     private final UUID aggregateRootId; // ID for the Aggregate Root
     private final Integer eventSequence;
     private final String eventType;
@@ -34,22 +35,21 @@ public class EventDto<EVENT extends Event> {
 
         PK   AggregateRootId
              EventSequence (monotonically increasing per AggRootId)
-             Sequence?? (this might be a globally ordered sequence from the DB?)
-             Version (for versioning the schema)
+             GlobalEventSequence (a globally ordered sequence from the DB, starts at 1 for PostgreSQL)
+             Version (optional: for versioning the schema)
         JSON String eventContent
 
-        AggRootId | EventSequence | Sequence?? | Version | Timestamp | EventType          |  JSON Content
+        AggRootId | EventSequence | GlobalEventSequence | Version | Timestamp | EventType          |  JSON Content
         ----------------------------------------------------------------------------------------------------------------
-        0         | 0             |            |         |           | ConcertScheduled   | {id: 0, eventSequence: 0, artist: "Judy", ... }
-        1         | 0             |            |         |           | ConcertScheduled   | {id: 1, eventSequence: 0, artist: "Betty", ... }
-        0         | 1             |            |         |           | TicketsSold        | {id: 0, eventSequence: 1, quantity: 4, totalPaid: 120 }
-        0         | 2             |            |         |           | ConcertRescheduled | {id: 0, eventSequence: 2, newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
+        0         | 0             | 1                   |         |           | ConcertScheduled   | {id: 0, eventSequence: 0, artist: "Judy", ... }
+        1         | 0             | 2                   |         |           | ConcertScheduled   | {id: 1, eventSequence: 0, artist: "Betty", ... }
+        0         | 1             | 3                   |         |           | TicketsSold        | {id: 0, eventSequence: 1, quantity: 4, totalPaid: 120 }
+        0         | 2             | 4                   |         |           | ConcertRescheduled | {id: 0, eventSequence: 2, newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
     */
 
 
     // -- the following mapper and maps should be externalized to some configuration
     //    so that when adding (and especially renaming) classes, the mapping works
-//    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public EventDto(UUID aggregateRootId, Integer eventSequence, String eventClassName, String json) {
         if (eventClassName == null) {

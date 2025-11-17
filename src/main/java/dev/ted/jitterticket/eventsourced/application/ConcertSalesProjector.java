@@ -47,6 +47,7 @@ public class ConcertSalesProjector {
                                 (_, summary) -> summary.withNewShowDateTime(concertRescheduled.newShowDateTime()));
                     }
                 });
+        // update internal last seen global event sequence
     }
 
     private static ConcertSalesSummary createSummaryFrom(ConcertScheduled concertScheduled) {
