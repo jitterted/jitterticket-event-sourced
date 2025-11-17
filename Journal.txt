@@ -1,3 +1,11 @@
+Monday, November 17, 2025
+=========================
+
+[JUnit]
+* Would like to use ParameterizedClass for the nested test classes in EventStoreTest, but because the parameters are stored in fields, the same values are (re)used by all test methods, which doesn't work when I want new ("clean") in-memory event stores for each test *method*.
+
+
+
 Tuesday, May 27, 2025
 =====================
 [Design Decision]
