@@ -107,25 +107,37 @@ class EventDtoTest {
 
     public static Stream<Arguments> events() {
         return Stream.of(
-                Arguments.of(new ConcertScheduled(ConcertId.createRandom(),
-                                                  0, "artist",
-                                                  99,
-                                                  LocalDateTime.now(),
-                                                  LocalTime.now().minusHours(1),
-                                                  100,
-                                                  4))
-                , Arguments.of(new ConcertRescheduled(ConcertId.createRandom(),
-                                                      0, LocalDateTime.now(),
-                                                      LocalTime.now().minusHours(1)))
-                , Arguments.of(new CustomerRegistered(CustomerId.createRandom(),
-                                                      0, "customer name",
-                                                      "email@example.com"))
-                , Arguments.of(new TicketsSold(ConcertId.createRandom(),
-                                               0, 6, -1))
-                , Arguments.of(new TicketsPurchased(
+                Arguments.of(ConcertScheduled.createNew(
+                        ConcertId.createRandom(),
+                        0,
+                        "artist",
+                        99,
+                        LocalDateTime.now(),
+                        LocalTime.now().minusHours(1),
+                        100,
+                        4))
+                , Arguments.of(ConcertRescheduled.createNew(
+                        ConcertId.createRandom(),
+                        0,
+                        LocalDateTime.now(),
+                        LocalTime.now().minusHours(1)))
+                , Arguments.of(CustomerRegistered.createNew(
                         CustomerId.createRandom(),
-                        0, TicketOrderId.createRandom(),
-                        ConcertId.createRandom(), 4, 100))
+                        0,
+                        "customer name",
+                        "email@example.com"))
+                , Arguments.of(TicketsSold.createNew(
+                        ConcertId.createRandom(),
+                        0,
+                        6,
+                        42))
+                , Arguments.of(TicketsPurchased.createNew(
+                        CustomerId.createRandom(),
+                        0,
+                        TicketOrderId.createRandom(),
+                        ConcertId.createRandom(),
+                        4,
+                        100))
         );
     }
 

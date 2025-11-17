@@ -13,14 +13,25 @@ public final class ConcertScheduled extends ConcertEvent {
     private final int capacity;
     private final int maxTicketsPerPurchase;
 
-    public ConcertScheduled(ConcertId concertId,
-                            Integer eventSequence,
-                            String artist,
-                            int ticketPrice,
-                            LocalDateTime showDateTime,
-                            LocalTime doorsTime,
-                            int capacity,
-                            int maxTicketsPerPurchase) {
+    public static ConcertScheduled createNew(ConcertId concertId,
+                                             Integer eventSequence,
+                                             String artist,
+                                             int ticketPrice,
+                                             LocalDateTime showDateTime,
+                                             LocalTime doorsTime,
+                                             int capacity,
+                                             int maxTicketsPerPurchase) {
+        return new ConcertScheduled(concertId, eventSequence, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase);
+    }
+
+    private ConcertScheduled(ConcertId concertId,
+                             Integer eventSequence,
+                             String artist,
+                             int ticketPrice,
+                             LocalDateTime showDateTime,
+                             LocalTime doorsTime,
+                             int capacity,
+                             int maxTicketsPerPurchase) {
         super(concertId, eventSequence);
         this.artist = artist;
         this.ticketPrice = ticketPrice;

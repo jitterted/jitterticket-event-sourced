@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class CustomerTest {
 
@@ -26,7 +26,7 @@ class CustomerTest {
 
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
-                            new CustomerRegistered(
+                            CustomerRegistered.createNew(
                                     customerId,
                                     0,
                                     "customer name",
@@ -46,7 +46,7 @@ class CustomerTest {
 
             assertThat(customer.uncommittedEvents())
                     .containsExactly(
-                            new TicketsPurchased(
+                            TicketsPurchased.createNew(
                                     customer.getId(),
                                     1,
                                     ticketOrderId,
@@ -63,7 +63,7 @@ class CustomerTest {
         @Test
         void customerRegisteredUpdatesNameAndEmail() {
             CustomerId customerId = CustomerId.createRandom();
-            CustomerRegistered customerRegistered = new CustomerRegistered(
+            CustomerRegistered customerRegistered = CustomerRegistered.createNew(
                     customerId, 0, "customer name", "email@example.com");
 
             Customer customer = Customer.reconstitute(List.of(customerRegistered));
@@ -79,13 +79,13 @@ class CustomerTest {
         @Test
         void ticketsPurchasedAddsTicketOrder() {
             CustomerId customerId = CustomerId.createRandom();
-            CustomerRegistered customerRegistered = new CustomerRegistered(
+            CustomerRegistered customerRegistered = CustomerRegistered.createNew(
                     customerId, 0, "customer name", "email@example.com");
             ConcertId concertId = ConcertId.createRandom();
             int quantity = 8;
             int amountPaid = quantity * 45;
             TicketOrderId ticketOrderId = TicketOrderId.createRandom();
-            TicketsPurchased ticketsPurchased = new TicketsPurchased(
+            TicketsPurchased ticketsPurchased = TicketsPurchased.createNew(
                     customerId, 0, ticketOrderId, concertId, quantity, amountPaid);
 
             Customer customer = Customer.reconstitute(List.of(
@@ -105,7 +105,7 @@ class CustomerTest {
         @Test
         void ticketOrderForUnknownTicketIdIsEmptyOptional() {
             CustomerId customerId = CustomerId.createRandom();
-            CustomerRegistered customerRegistered = new CustomerRegistered(
+            CustomerRegistered customerRegistered = CustomerRegistered.createNew(
                     customerId, 0, "customer name", "email@example.com");
             Customer customer = Customer.reconstitute(List.of(customerRegistered));
 

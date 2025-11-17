@@ -5,7 +5,7 @@ import java.util.List;
 public class CustomerFactory {
 
     public static Customer reconstituteWithRegisteredEvent() {
-        CustomerRegistered customerRegistered = new CustomerRegistered(
+        CustomerRegistered customerRegistered = CustomerRegistered.createNew(
                 CustomerId.createRandom(), 0, "customer name", "email@example.com");
         return Customer.reconstitute(List.of(customerRegistered));
     }

@@ -9,10 +9,17 @@ public final class ConcertRescheduled extends ConcertEvent {
     private final LocalDateTime newShowDateTime;
     private final LocalTime newDoorsTime;
 
-    public ConcertRescheduled(ConcertId concertId,
-                              Integer eventSequence,
-                              LocalDateTime newShowDateTime,
-                              LocalTime newDoorsTime) {
+    public static ConcertRescheduled createNew(ConcertId concertId,
+                                               Integer eventSequence,
+                                               LocalDateTime newShowDateTime,
+                                               LocalTime newDoorsTime) {
+        return new ConcertRescheduled(concertId, eventSequence, newShowDateTime, newDoorsTime);
+    }
+
+    private ConcertRescheduled(ConcertId concertId,
+                               Integer eventSequence,
+                               LocalDateTime newShowDateTime,
+                               LocalTime newDoorsTime) {
         super(concertId, eventSequence);
         this.newShowDateTime = newShowDateTime;
         this.newDoorsTime = newDoorsTime;

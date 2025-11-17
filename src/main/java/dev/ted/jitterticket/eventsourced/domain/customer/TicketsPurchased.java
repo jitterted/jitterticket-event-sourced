@@ -12,12 +12,21 @@ public final class TicketsPurchased extends CustomerEvent {
     private final int quantity;
     private final int paidAmount;
 
-    public TicketsPurchased(CustomerId customerId,
-                            Integer eventSequence,
-                            TicketOrderId ticketOrderId,
-                            ConcertId concertId,
-                            int quantity,
-                            int paidAmount) {
+    public static TicketsPurchased createNew(CustomerId customerId,
+                                             Integer eventSequence,
+                                             TicketOrderId ticketOrderId,
+                                             ConcertId concertId,
+                                             int quantity,
+                                             int paidAmount) {
+        return new TicketsPurchased(customerId, eventSequence, ticketOrderId, concertId, quantity, paidAmount);
+    }
+
+    private TicketsPurchased(CustomerId customerId,
+                             Integer eventSequence,
+                             TicketOrderId ticketOrderId,
+                             ConcertId concertId,
+                             int quantity,
+                             int paidAmount) {
         super(customerId, eventSequence);
         this.ticketOrderId = ticketOrderId;
         this.concertId = concertId;

@@ -180,12 +180,12 @@ class JdbcEventStoreTest {
             ConcertId concertId = ConcertId.createRandom();
             LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
             LocalTime originalDoorsTime = LocalTime.of(18, 0);
-            ConcertScheduled concertScheduled = new ConcertScheduled(
+            ConcertScheduled concertScheduled = ConcertScheduled.createNew(
                     concertId, 1, "Headliner", 45,
                     originalShowDateTime, originalDoorsTime,
                     150, 8);
-            TicketsSold ticketsSold = new TicketsSold(concertId, 2, 4, 4 * 45);
-            ConcertRescheduled concertRescheduled = new ConcertRescheduled(
+            TicketsSold ticketsSold = TicketsSold.createNew(concertId, 2, 4, 4 * 45);
+            ConcertRescheduled concertRescheduled = ConcertRescheduled.createNew(
                     concertId, 3, originalShowDateTime.plusMonths(2).plusHours(1),
                     originalDoorsTime.plusHours(1));
 

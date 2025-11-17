@@ -25,7 +25,7 @@ class EventSourcedAggregateTest {
             }
         };
 
-        CustomerRegistered event = new CustomerRegistered(CustomerId.createRandom(), 0, "name", "email");
+        CustomerRegistered event = CustomerRegistered.createNew(CustomerId.createRandom(), 0, "name", "email");
         eventSourcedAggregate.enqueue(event);
 
         assertThat(eventSourcedAggregate.appliedEvent)
@@ -46,9 +46,9 @@ class EventSourcedAggregateTest {
     @Test
     void eventSequenceAssignmentTakesIntoAccountEventsLoadedDuringReconstitution() {
         CustomerId customerId = CustomerId.createRandom();
-        CustomerRegistered customerRegistered = new CustomerRegistered(
+        CustomerRegistered customerRegistered = CustomerRegistered.createNew(
                 customerId, 0, "name", "email@example.com");
-        TicketsPurchased ticketsPurchased = new TicketsPurchased(
+        TicketsPurchased ticketsPurchased = TicketsPurchased.createNew(
                 customerId, 1, TicketOrderId.createRandom(), ConcertId.createRandom(), 3, 150);
         Customer reconstitutedCustomer = Customer.reconstitute(List.of(customerRegistered,
                                                                        ticketsPurchased));

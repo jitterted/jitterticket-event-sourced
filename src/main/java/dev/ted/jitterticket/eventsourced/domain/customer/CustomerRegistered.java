@@ -7,10 +7,17 @@ public final class CustomerRegistered extends CustomerEvent {
     private final String customerName;
     private final String email;
 
-    public CustomerRegistered(CustomerId customerId,
-                              Integer eventSequence,
-                              String customerName,
-                              String email) {
+    public static CustomerRegistered createNew(CustomerId customerId,
+                                               Integer eventSequence,
+                                               String customerName,
+                                               String email) {
+        return new CustomerRegistered(customerId, eventSequence, customerName, email);
+    }
+
+    private CustomerRegistered(CustomerId customerId,
+                               Integer eventSequence,
+                               String customerName,
+                               String email) {
         super(customerId, eventSequence);
         this.customerName = customerName;
         this.email = email;

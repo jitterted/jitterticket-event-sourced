@@ -99,20 +99,20 @@ class ConcertSalesProjectorTest {
             int ticketPrice1 = 35;
             LocalDateTime showDateTime1 = LocalDateTime.now();
             String artist1 = "First Concert";
-            ConcertScheduled concertScheduled1 = new ConcertScheduled(concertId1, 0,
-                                                                      artist1,
-                                                                      ticketPrice1,
-                                                                      showDateTime1,
-                                                                      LocalTime.now(),
-                                                                      MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
+            ConcertScheduled concertScheduled1 = ConcertScheduled.createNew(concertId1, 0,
+                                                                            artist1,
+                                                                            ticketPrice1,
+                                                                            showDateTime1,
+                                                                            LocalTime.now(),
+                                                                            MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             int quantity1 = 2;
-            TicketsSold ticketsSoldForConcert1 = new TicketsSold(concertId1, 1, quantity1, quantity1 * ticketPrice1);
+            TicketsSold ticketsSoldForConcert1 = TicketsSold.createNew(concertId1, 1, quantity1, quantity1 * ticketPrice1);
             concertEventStore.save(concertId1, Stream.of(concertScheduled1, ticketsSoldForConcert1));
             ConcertId concertId2 = ConcertId.createRandom();
             int ticketPrice2 = 125;
             LocalDateTime showDateTime2 = LocalDateTime.now();
             String artist2 = "Second Concert";
-            ConcertScheduled concertScheduled2 = new ConcertScheduled(
+            ConcertScheduled concertScheduled2 = ConcertScheduled.createNew(
                     concertId2, 0,
                     artist2,
                     ticketPrice2,
@@ -120,9 +120,9 @@ class ConcertSalesProjectorTest {
                     LocalTime.now(),
                     MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             int quantity2 = 8;
-            TicketsSold ticketsSold1ForConcert2 = new TicketsSold(concertId2, 1, quantity2, quantity2 * ticketPrice2);
+            TicketsSold ticketsSold1ForConcert2 = TicketsSold.createNew(concertId2, 1, quantity2, quantity2 * ticketPrice2);
             int quantity3 = 6;
-            TicketsSold ticketsSold2ForConcert2 = new TicketsSold(concertId2, 2, quantity3, quantity3 * ticketPrice2);
+            TicketsSold ticketsSold2ForConcert2 = TicketsSold.createNew(concertId2, 2, quantity3, quantity3 * ticketPrice2);
             concertEventStore.save(concertId2, Stream.of(concertScheduled2, ticketsSold1ForConcert2, ticketsSold2ForConcert2));
             ConcertSalesProjector concertSalesProjector =
                     ConcertSalesProjector.createForTest(concertEventStore);
@@ -177,16 +177,16 @@ class ConcertSalesProjectorTest {
             LocalDateTime originalShowDateTime = LocalDateTime.now();
             LocalTime originalDoorsTime = LocalTime.now();
             ConcertScheduled concertScheduled =
-                    new ConcertScheduled(concertId, 0, "Artist",
-                                         35,
-                                         originalShowDateTime,
-                                         originalDoorsTime,
-                                         MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
+                    ConcertScheduled.createNew(concertId, 0, "Artist",
+                                               35,
+                                               originalShowDateTime,
+                                               originalDoorsTime,
+                                               MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             LocalDateTime newShowDateTime = originalShowDateTime.plusMonths(1);
             ConcertRescheduled concertRescheduled =
-                    new ConcertRescheduled(concertId, 1,
-                                           newShowDateTime,
-                                           originalDoorsTime.minusHours(1));
+                    ConcertRescheduled.createNew(concertId, 1,
+                                                 newShowDateTime,
+                                                 originalDoorsTime.minusHours(1));
             concertEventStore.save(concertId, Stream.of(concertScheduled, concertRescheduled));
             ConcertSalesProjector concertSalesProjector =
                     ConcertSalesProjector.createForTest(concertEventStore);

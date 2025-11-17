@@ -7,10 +7,17 @@ public final class TicketsSold extends ConcertEvent {
     private final int quantity;
     private final int totalPaid;
 
-    public TicketsSold(ConcertId concertId,
-                       Integer eventSequence,
-                       int quantity,
-                       int totalPaid) {
+    public static TicketsSold createNew(ConcertId concertId,
+                                        Integer eventSequence,
+                                        int quantity,
+                                        int totalPaid) {
+        return new TicketsSold(concertId, eventSequence, quantity, totalPaid);
+    }
+
+    private TicketsSold(ConcertId concertId,
+                        Integer eventSequence,
+                        int quantity,
+                        int totalPaid) {
         super(concertId, eventSequence);
         this.quantity = quantity;
         this.totalPaid = totalPaid;

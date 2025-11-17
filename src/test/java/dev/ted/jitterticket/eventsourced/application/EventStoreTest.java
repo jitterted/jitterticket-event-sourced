@@ -5,7 +5,13 @@ import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvReaderAppender;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvStringsEventStore;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
-import dev.ted.jitterticket.eventsourced.domain.concert.*;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
@@ -29,7 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class EventStoreTest {
 
@@ -155,12 +161,12 @@ class EventStoreTest {
             ConcertId concertId = ConcertId.createRandom();
             LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
             LocalTime originalDoorsTime = LocalTime.of(18, 0);
-            ConcertScheduled concertScheduled = new ConcertScheduled(
+            ConcertScheduled concertScheduled = ConcertScheduled.createNew(
                     concertId, 0, "Headliner", 45,
                     originalShowDateTime, originalDoorsTime,
                     150, 8);
-            TicketsSold ticketsSold = new TicketsSold(concertId, 0, 4, 4 * 45);
-            ConcertRescheduled concertRescheduled = new ConcertRescheduled(
+            TicketsSold ticketsSold = TicketsSold.createNew(concertId, 0, 4, 4 * 45);
+            ConcertRescheduled concertRescheduled = ConcertRescheduled.createNew(
                     concertId, 0, originalShowDateTime.plusMonths(2).plusHours(1),
                     originalDoorsTime.plusHours(1));
 

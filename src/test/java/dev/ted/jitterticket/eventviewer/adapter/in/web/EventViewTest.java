@@ -13,10 +13,10 @@ class EventViewTest {
 
     @Test
     void typeNameContainsClassSimpleName() {
-        ConcertRescheduled event = new ConcertRescheduled(ConcertId.createRandom(),
-                                                          7,
-                                                          LocalDateTime.now(),
-                                                          LocalTime.now());
+        ConcertRescheduled event = ConcertRescheduled.createNew(
+                ConcertId.createRandom(), 7,
+                LocalDateTime.now(),
+                LocalTime.now());
 
         EventView eventView = EventView.of(event);
 
@@ -29,9 +29,10 @@ class EventViewTest {
         ConcertId concertId = ConcertId.createRandom();
         LocalTime newDoorsTime = LocalTime.now();
         LocalDateTime newShowDateTime = LocalDateTime.now();
-        ConcertRescheduled event = new ConcertRescheduled(concertId, 5,
-                                                          newShowDateTime,
-                                                          newDoorsTime);
+        ConcertRescheduled event = ConcertRescheduled.createNew(
+                concertId, 5,
+                newShowDateTime,
+                newDoorsTime);
 
         EventView eventView = EventView.of(event);
 

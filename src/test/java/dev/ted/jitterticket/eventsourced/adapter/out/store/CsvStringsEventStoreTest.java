@@ -90,18 +90,18 @@ class CsvStringsEventStoreTest {
         ConcertId concertId = ConcertId.createRandom();
         LocalDateTime newShowDateTime = LocalDateTime.now().plusMonths(1);
         List<ConcertEvent> concertEvents = List.of(
-                new ConcertScheduled(concertId,
-                                     0,
-                                     "Name of Artist",
-                                     99,
-                                     LocalDateTime.now(),
-                                     LocalTime.now().minusHours(1),
-                                     100,
-                                     4)
-                , new ConcertRescheduled(concertId,
-                                         1,
-                                         newShowDateTime,
-                                         newShowDateTime.toLocalTime().minusHours(1))
+                ConcertScheduled.createNew(concertId,
+                                           0,
+                                           "Name of Artist",
+                                           99,
+                                           LocalDateTime.now(),
+                                           LocalTime.now().minusHours(1),
+                                           100,
+                                           4)
+                , ConcertRescheduled.createNew(concertId,
+                                               1,
+                                               newShowDateTime,
+                                               newShowDateTime.toLocalTime().minusHours(1))
         );
 
         List<EventDto<ConcertEvent>> eventDtoList = concertEvents.stream()
@@ -140,10 +140,10 @@ class CsvStringsEventStoreTest {
     @Test
     void eventDtoConvertedToAndFromCsvCorrectly() {
         String customerUuid = "3ed83b5e-9564-42a5-8329-3cc5d5e14840";
-        CustomerRegistered event = new CustomerRegistered(new CustomerId(UUID.fromString(customerUuid)),
-                                                          0,
-                                                          "Customer Name",
-                                                          "customer@example.com");
+        CustomerRegistered event = CustomerRegistered.createNew(new CustomerId(UUID.fromString(customerUuid)),
+                                                                0,
+                                                                "Customer Name",
+                                                                "customer@example.com");
         EventDto<CustomerRegistered> originalEventDto =
                 EventDto.from(event.customerId().id(),
                               event.eventSequence(),
