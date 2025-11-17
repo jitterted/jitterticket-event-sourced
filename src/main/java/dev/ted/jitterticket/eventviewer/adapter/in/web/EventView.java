@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.domain.Event;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,7 +26,8 @@ public class EventView {
     public static EventView of(Event event) {
         return new EventView(
                 event.getClass().getSimpleName(),
-                event.eventSequence(), mapFields(event)
+                event.eventSequence(),
+                mapFields(event)
         );
     }
 
@@ -38,6 +40,7 @@ public class EventView {
         return Arrays.stream(event.getClass().getMethods())
                      .filter(method -> !method.isSynthetic())
                      .filter(method -> !superClassMethods.contains(method.getName()))
+                     .filter(method -> !Modifier.isStatic(method.getModifiers()))
                      .map(method -> new FieldView(method.getName(), extractFieldValue(event, method)))
                      .toList();
     }
