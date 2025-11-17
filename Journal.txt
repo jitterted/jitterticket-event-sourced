@@ -4,6 +4,11 @@ Monday, November 17, 2025
 [JUnit]
 * Would like to use ParameterizedClass for the nested test classes in EventStoreTest, but because the parameters are stored in fields, the same values are (re)used by all test methods, which doesn't work when I want new ("clean") in-memory event stores for each test *method*.
 
+[Adding Global Event Sequence]
+* Event objects need two creation methods:
+    1. Creating a new event that will be stored (created by the Aggregate)
+    2. Reconstituting the event from persistence (created by the EventStore)
+  Otherwise when events are newly created, we have to remember to pass in "null" for the global sequence, which is mistake-prone and unnecessary
 
 
 Tuesday, May 27, 2025
