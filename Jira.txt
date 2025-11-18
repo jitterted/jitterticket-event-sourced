@@ -33,7 +33,8 @@
                 [ ] As part of subscribe (aka register), ask the event store for all events since the last one we saw (uses Global Event Sequence)
                     [X] Add table for projection+last GES
                     [X] Add table for sales projection
-                    [ ] JDBC repository for concert_sales_projection
+                    [X] JDBC repository for concert_sales_projection
+                    [X] JDBC repository for projections
                     [ ] EventStore#save() returns last/highest/max global event sequence number as a result of the save
                     [ ] Projector.apply(events, lastGlobalEventSequence)
                     [ ] EventStore#subscribe(projector, lastGES)
