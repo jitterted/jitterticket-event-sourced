@@ -30,7 +30,10 @@
 ==> NEXT TIME ==>
 
             [ ] Store updated information in the projector's own database table
-                [ ] As part of subscribe (aka register), ask the event store for all events since the last one we saw
+                [ ] As part of subscribe (aka register), ask the event store for all events since the last one we saw (uses Global Event Sequence)
+                    [ ] EventStore#save() returns last/highest/max global event sequence number as a result of the save
+                    [ ] Projector.apply(events, lastGlobalEventSequence)
+                    [ ] EventStore#subscribe(projector, lastGES)
                 [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
                 [ ] Rescheduled -> UPDATE data for ConcertId

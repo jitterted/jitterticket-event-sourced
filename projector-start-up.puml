@@ -1,0 +1,31 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+control SpringAppConfig
+boundary MvcController
+
+== Initialization ==
+
+SpringAppConfig -> Projector: new Projector()
+activate Projector
+Projector -> ProjectionRepository: findLastGlobalEventSequenceFor(projectionId)
+ProjectionRepository --> Projector: lastGlobalEventSequence (if it's not there, insert row with 0)
+Projector -> EventStore: subscribe(projector, lastGlobalEventSequence)
+
+== Viewing the Projection ==
+
+MvcController -> Projector: allProjectedSummaries()
+Projector -> ProjectionRepository: load Projection
+ProjectionRepository --> Projector: Projection\n(with lastGlobalEventSequence)
+Projector -> EventStore: allEventsAfter(globalEventSequence)
+alt if new events were loaded from event store
+    EventStore --> Projector: Stream<Event>
+    Projector -> Projector: apply(Stream<Event>)
+    Projector -> ProjectionRepository: save Projection\n(only if there were new events)
+end
+
+Projector --> MvcController: List<ProjectedSummaries>
+
+@enduml
