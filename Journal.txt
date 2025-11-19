@@ -1,3 +1,9 @@
+Wednesday, November 19, 2025
+============================
+[IntelliJ IDEA]
+[ ] When extracting a base (super) class, would be nice to "drag" the class's annotations along with it
+
+
 Monday, November 17, 2025
 =========================
 

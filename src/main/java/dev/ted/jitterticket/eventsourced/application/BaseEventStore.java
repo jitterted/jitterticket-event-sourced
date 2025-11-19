@@ -30,10 +30,13 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         }
         Stream<EVENT> uncommittedEvents = aggregate.uncommittedEvents();
 
-        save(aggregateId, uncommittedEvents);
-        // notify projectors to update their state, e.g.:
+        save(aggregateId, uncommittedEvents); // get the highest global sequence number post-save
+        // load the last global event sequence that was created
         if (concertSalesProjector != null) {
-            concertSalesProjector.apply((Stream<ConcertEvent>) aggregate.uncommittedEvents());
+            concertSalesProjector.apply(
+                    (Stream<ConcertEvent>) aggregate.uncommittedEvents()
+                    // , lastGlobalEventSequence
+            );
         }
     }
 

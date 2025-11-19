@@ -19,8 +19,7 @@ public class ConcertSalesProjector {
 
     public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        concertEventStore.subscribe(concertSalesProjector /*, global sequence I last saw */);
-        // subscribe(projector) <- with the 2nd parameter implies all events (i.e., as if we passed in 0)
+        concertEventStore.subscribe(concertSalesProjector /*, global sequence I last saw, which might be 0 if we're a new projection */);
         return concertSalesProjector;
     }
 
