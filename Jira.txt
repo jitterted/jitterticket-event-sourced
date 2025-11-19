@@ -41,6 +41,12 @@
                 [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
                 [ ] Rescheduled -> UPDATE data for ConcertId
+
+            [ ] Convert ConcertSummaryProjector to be similar to ConcertSalesProjector
+                [ ] Extract IProjector (haha) interface
+                    [ ] Create base class??
+                [ ] Redesign Projector startup to move retrieval of last-seen global event sequence and subscribing to the event store to Spring configuration (e.g., TixConfiguration) so that it fetches the info and subscribes the projector to the event store(s)
+
     [ ] Configure TestContainer tests to reuse the same container to speed up tests
     [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion
     [ ] Make more general way of registering projectors

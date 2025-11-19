@@ -27,12 +27,10 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
 
     @Test
     void newSalesProjectorSubscribesWithLastGlobalEventSequenceOfZero() {
-        // Spy for the EventStore with an override for the subscribe method:
-        // - we want to verify that the lastGlobalEventSequence passed into the subscribe is 0
         EventStoreSpy eventStoreSpy = new EventStoreSpy();
 
         ConcertSalesProjector concertSalesProjector =
-                ConcertSalesProjector.createForTest(eventStoreSpy);
+                ConcertSalesProjector.createForTest(eventStoreSpy, projectionMetadataRepository);
 
         eventStoreSpy
                 .assertSubscribeCalledWithLastGlobalSequenceOf(0);

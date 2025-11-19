@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadata;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -20,17 +21,26 @@ public class ConcertSalesProjector {
 
     private final Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
 
-    private ConcertSalesProjector() {
+    private final ProjectionMetadataRepository projectionMetadataRepository;
+    private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
+
+    private ConcertSalesProjector(ProjectionMetadataRepository projectionMetadataRepository, EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
+        this.projectionMetadataRepository = projectionMetadataRepository;
+        this.concertEventStore = concertEventStore;
+        ProjectionMetadata projectionMetadata =
+                projectionMetadataRepository.findById(PROJECTION_NAME)
+                                            .orElse(new ProjectionMetadata(PROJECTION_NAME, 0L));
+        concertEventStore.subscribe(this, projectionMetadata.getLastGlobalEventSequenceSeen());
     }
 
-    public static ConcertSalesProjector createNew() {
-        return new ConcertSalesProjector();
+    public static ConcertSalesProjector createNew(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
+        return new ConcertSalesProjector(null, concertEventStore);
     }
 
+    @Deprecated // require the ProjectionMetadataRepository or create an in-memory version
     public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        /*, global sequence I last saw, which might be 0 if we're a new projection */
-        concertEventStore.subscribe(concertSalesProjector, 0);
+        ConcertSalesProjector concertSalesProjector =
+                new ConcertSalesProjector(null, concertEventStore);
         return concertSalesProjector;
     }
 
@@ -40,8 +50,8 @@ public class ConcertSalesProjector {
 
     public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
                                                       ProjectionMetadataRepository projectionMetadataRepository) {
-        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        concertEventStore.subscribe(concertSalesProjector, 0);
+        ConcertSalesProjector concertSalesProjector =
+                new ConcertSalesProjector(projectionMetadataRepository, concertEventStore);
         return concertSalesProjector;
     }
 
