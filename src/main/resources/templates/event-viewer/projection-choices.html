@@ -8,10 +8,10 @@
 <header><a href="/">Back Home</a></header>
 <h1>Choose a Projection to Time Travel</h1>
 <ul class="choice-list">
-    <li th:each="projection: ${projections}">
+    <li th:each="projectionMetadata: ${projections}">
         <a href="#"
-           th:href="@{${projection.urlPath}}"
-           th:text="${projection.aggregateName}">Aggregate</a>
+           th:href="@{${projectionMetadata.urlPath}}"
+           th:text="${projectionMetadata.aggregateName}">Aggregate</a>
     </li>
 </ul>
 </body>

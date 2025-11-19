@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -15,16 +16,33 @@ import java.util.stream.Stream;
 
 public class ConcertSalesProjector {
 
+    static final String PROJECTION_NAME = "concert_sales_projector";
+
     private final Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
+
+    private ConcertSalesProjector() {
+    }
+
+    public static ConcertSalesProjector createNew() {
+        return new ConcertSalesProjector();
+    }
 
     public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        concertEventStore.subscribe(concertSalesProjector /*, global sequence I last saw, which might be 0 if we're a new projection */);
+        /*, global sequence I last saw, which might be 0 if we're a new projection */
+        concertEventStore.subscribe(concertSalesProjector, 0);
         return concertSalesProjector;
     }
 
     public static ConcertSalesProjector createForTest() {
         return createForTest(InMemoryEventStore.forConcerts());
+    }
+
+    public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
+                                                      ProjectionMetadataRepository projectionMetadataRepository) {
+        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
+        concertEventStore.subscribe(concertSalesProjector, 0);
+        return concertSalesProjector;
     }
 
     public Stream<ConcertSalesSummary> allSalesSummaries() {

@@ -28,15 +28,14 @@ CREATE INDEX IF NOT EXISTS idx_events_created_at ON events (created_at);
 
 -- == PROJECTIONS == --
 
--- Table for storing just the last global event sequence that a Projection has seen/processed
-CREATE TABLE IF NOT EXISTS projections (
+-- Table for storing just the last global event sequence that a ProjectionMetadata has seen/processed
+CREATE TABLE IF NOT EXISTS projection_metadata (
     projection_name TEXT NOT NULL PRIMARY KEY,
-    version INTEGER DEFAULT 1,
     last_global_event_sequence_seen BIGINT DEFAULT 0
 );
 
 
--- Table for storing the concert sales summary projection
+-- Table for storing the concert sales summary projectionMetadata
 CREATE TABLE IF NOT EXISTS concert_sales_projection (
     concert_id   UUID PRIMARY KEY,
     artist_name  TEXT    NOT NULL,

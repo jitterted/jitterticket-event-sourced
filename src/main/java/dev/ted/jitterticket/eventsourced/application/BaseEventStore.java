@@ -52,7 +52,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
     }
 
     @Override
-    public void subscribe(ConcertSalesProjector concertSalesProjector) {
+    public void subscribe(ConcertSalesProjector concertSalesProjector, long lastGlobalEventSequence) {
         this.concertSalesProjector = concertSalesProjector;
         concertSalesProjector.apply((Stream<ConcertEvent>) allEvents());
     }

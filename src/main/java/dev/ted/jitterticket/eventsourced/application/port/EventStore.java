@@ -20,5 +20,5 @@ public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     List<EVENT> eventsForAggregate(ID id);
 
-    void subscribe(ConcertSalesProjector concertSalesProjector);
+    void subscribe(ConcertSalesProjector concertSalesProjector, long lastGlobalEventSequence);
 }
