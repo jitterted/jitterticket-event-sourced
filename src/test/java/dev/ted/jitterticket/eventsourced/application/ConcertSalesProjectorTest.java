@@ -32,7 +32,7 @@ class ConcertSalesProjectorTest {
 
         @Test
         void noScheduledConcertsReturnsNoSalesSummaries() {
-            ConcertSalesProjector concertSalesProjector = ConcertSalesProjector.createForTest();
+            ConcertSalesProjector concertSalesProjector = ConcertSalesProjector.createForTest(InMemoryEventStore.forConcerts());
 
             assertThat(concertSalesProjector.allSalesSummaries())
                     .isEmpty();

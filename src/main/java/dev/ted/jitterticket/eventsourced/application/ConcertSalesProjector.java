@@ -1,5 +1,7 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjection;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadata;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
@@ -22,10 +24,14 @@ public class ConcertSalesProjector {
     private final Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
 
     private final ProjectionMetadataRepository projectionMetadataRepository;
+    private final ConcertSalesProjectionRepository concertSalesProjectionRepository;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
 
-    private ConcertSalesProjector(ProjectionMetadataRepository projectionMetadataRepository, EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
+    private ConcertSalesProjector(ProjectionMetadataRepository projectionMetadataRepository,
+                                  ConcertSalesProjectionRepository concertSalesProjectionRepository,
+                                  EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
         this.projectionMetadataRepository = projectionMetadataRepository;
+        this.concertSalesProjectionRepository = concertSalesProjectionRepository;
         this.concertEventStore = concertEventStore;
         ProjectionMetadata projectionMetadata =
                 projectionMetadataRepository.findById(PROJECTION_NAME)
@@ -34,29 +40,39 @@ public class ConcertSalesProjector {
     }
 
     public static ConcertSalesProjector createNew(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        return new ConcertSalesProjector(null, concertEventStore);
+        return new ConcertSalesProjector(null, null, concertEventStore);
     }
 
+    //region Creation Methods for Testing
     @Deprecated // require the ProjectionMetadataRepository or create an in-memory version
     public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
         ConcertSalesProjector concertSalesProjector =
-                new ConcertSalesProjector(null, concertEventStore);
+                new ConcertSalesProjector(null, null, concertEventStore);
         return concertSalesProjector;
-    }
-
-    public static ConcertSalesProjector createForTest() {
-        return createForTest(InMemoryEventStore.forConcerts());
     }
 
     public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
+                                                      ConcertSalesProjectionRepository concertSalesProjectionRepository,
                                                       ProjectionMetadataRepository projectionMetadataRepository) {
         ConcertSalesProjector concertSalesProjector =
-                new ConcertSalesProjector(projectionMetadataRepository, concertEventStore);
+                new ConcertSalesProjector(projectionMetadataRepository, concertSalesProjectionRepository, concertEventStore);
         return concertSalesProjector;
     }
 
+    public static ConcertSalesProjector createForTest(ProjectionMetadataRepository projectionMetadataRepository, ConcertSalesProjectionRepository concertSalesProjectionRepository) {
+        return new ConcertSalesProjector(
+                projectionMetadataRepository,
+                concertSalesProjectionRepository,
+                InMemoryEventStore.forConcerts()
+        );
+    }
+    //endregion
+
     public Stream<ConcertSalesSummary> allSalesSummaries() {
-        return salesSummaryMap.values().stream();
+        return concertSalesProjectionRepository
+                .findAll()
+                .stream()
+                .map(ConcertSalesProjection::toSummary);
     }
 
     public void apply(Stream<ConcertEvent> concertEvents) {

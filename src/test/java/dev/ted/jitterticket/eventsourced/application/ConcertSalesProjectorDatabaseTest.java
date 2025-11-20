@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjection;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.DataJdbcContainerTest;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadata;
@@ -7,9 +8,13 @@ import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetada
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -30,7 +35,9 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
         EventStoreSpy eventStoreSpy = new EventStoreSpy();
 
         ConcertSalesProjector concertSalesProjector =
-                ConcertSalesProjector.createForTest(eventStoreSpy, projectionMetadataRepository);
+                ConcertSalesProjector.createForTest(eventStoreSpy,
+                                                    concertSalesProjectionRepository,
+                                                    projectionMetadataRepository);
 
         eventStoreSpy
                 .assertSubscribeCalledWithLastGlobalSequenceOf(0);
@@ -45,10 +52,49 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
         projectionMetadataRepository.save(projectionMetadata);
         ConcertSalesProjector concertSalesProjector =
                 ConcertSalesProjector.createForTest(eventStoreSpy,
+                                                    concertSalesProjectionRepository,
                                                     projectionMetadataRepository);
 
         eventStoreSpy
                 .assertSubscribeCalledWithLastGlobalSequenceOf(9L);
+    }
+
+    @Nested
+    class AllProjectedSummaries {
+
+        @Test
+        void loadsProjectionOfSingleConcertScheduledEventFromRepository() {
+            ConcertId concertId = ConcertId.createRandom();
+            String artist = "Artist";
+            LocalDateTime showDateTime = LocalDate.now().atStartOfDay();
+            concertSalesProjectionRepository.save(
+                    new ConcertSalesProjection(
+                            concertId.id(), artist,
+                            showDateTime.toLocalDate(),
+                            0, 0)
+            );
+            ProjectionMetadata projectionMetadata =
+                    new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
+                                           1L);
+            projectionMetadataRepository.save(projectionMetadata);
+            ConcertSalesProjector concertSalesProjector =
+                    ConcertSalesProjector.createForTest(
+                            projectionMetadataRepository,
+                            concertSalesProjectionRepository
+                            );
+
+            Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
+                    concertSalesProjector.allSalesSummaries();
+
+            assertThat(allSalesSummaries)
+                    .containsExactly(
+                            new ConcertSalesProjector.ConcertSalesSummary(
+                                    concertId, artist,
+                                    showDateTime,
+                                    0, 0
+                            )
+                    );
+        }
     }
 
     // == TEST DOUBLES ==

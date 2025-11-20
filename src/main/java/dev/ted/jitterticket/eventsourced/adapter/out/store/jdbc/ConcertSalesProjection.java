@@ -1,13 +1,18 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
+import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceCreator;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Table("concert_sales_projection")
-public class ConcertSalesProjection {
+public class ConcertSalesProjection implements Persistable<UUID> {
 
     @Id
     private UUID concertId;
@@ -16,6 +21,10 @@ public class ConcertSalesProjection {
     private int ticketsSold;
     private int totalSales;
 
+    @Transient
+    private boolean isNew;
+
+    @PersistenceCreator
     public ConcertSalesProjection() {
     }
 
@@ -29,7 +38,30 @@ public class ConcertSalesProjection {
         this.concertDate = concertDate;
         this.ticketsSold = ticketsSold;
         this.totalSales = totalSales;
+        this.isNew = true;
     }
+
+    public ConcertSalesProjector.ConcertSalesSummary toSummary() {
+        return new ConcertSalesProjector.ConcertSalesSummary(
+                new ConcertId(getConcertId()),
+                getArtistName(),
+                getConcertDate().atStartOfDay(),
+                getTicketsSold(),
+                getTotalSales()
+        );
+    }
+
+    //region Persistable Implementation
+    @Override
+    public UUID getId() {
+        return concertId;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+    //endregion
 
     public UUID getConcertId() {
         return concertId;
@@ -70,4 +102,5 @@ public class ConcertSalesProjection {
     public void setTotalSales(int totalSales) {
         this.totalSales = totalSales;
     }
+
 }

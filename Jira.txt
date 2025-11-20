@@ -35,7 +35,8 @@
                     [X] Add table for sales projection
                     [X] JDBC repository for concert_sales_projection
                     [X] JDBC repository for projections
-                    [ ] Load existing projection from database
+                    [X] Load existing projection from database
+                        [ ] Add a specific query to get the GES directly as a Long instead of returning the db entity
                     [ ] Detour: refactor projector into DB infra + domain projection (the apply())
                     [ ] EventStore#save() returns last/highest/max global event sequence number as a result of the save
                     [ ] Projector.apply(events, lastGlobalEventSequence)
