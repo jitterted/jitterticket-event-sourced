@@ -2,7 +2,6 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjection;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadata;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -33,10 +32,10 @@ public class ConcertSalesProjector {
         this.projectionMetadataRepository = projectionMetadataRepository;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
         this.concertEventStore = concertEventStore;
-        ProjectionMetadata projectionMetadata =
-                projectionMetadataRepository.findById(PROJECTION_NAME)
-                                            .orElse(new ProjectionMetadata(PROJECTION_NAME, 0L));
-        concertEventStore.subscribe(this, projectionMetadata.getLastGlobalEventSequenceSeen());
+        long lastGlobalEventSequenceSeen = projectionMetadataRepository
+                .lastGlobalSequenceSeenByProjectionName(PROJECTION_NAME)
+                .orElse(0L);
+        concertEventStore.subscribe(this, lastGlobalEventSequenceSeen);
     }
 
     public static ConcertSalesProjector createNew(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
