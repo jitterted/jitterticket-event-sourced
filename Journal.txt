@@ -1,9 +1,14 @@
 Wednesday, November 19, 2025
 ============================
 [IntelliJ IDEA]
-[ ] When extracting a base (super) class, would be nice to "drag" the class's annotations along with it
+    [ ] When extracting a base (super) class, would be nice to "drag" the class's annotations along with it
 
-[ ] When expanding selection, it should be aware of region/endregion sections
+    [ ] When expanding selection, it should be aware of region/endregion sections
+
+[Spring Data]
+    * When IDs are supplied by the client, need to add Persistable implementation (with @Transient isNew and @PersistenceCreator) so that Spring Data knows when to do an INSERT vs. an UPDATE
+       * If the IDs are generated in the database, this isn't needed, as Spring Data knows any object without an ID is always new
+
 
 Monday, November 17, 2025
 =========================
