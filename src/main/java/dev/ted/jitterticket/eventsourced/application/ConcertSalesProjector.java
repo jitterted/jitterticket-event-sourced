@@ -13,6 +13,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -22,9 +23,12 @@ public class ConcertSalesProjector {
 
     private final Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
 
-    private final ProjectionMetadataRepository projectionMetadataRepository;
-    private final ConcertSalesProjectionRepository concertSalesProjectionRepository;
-    private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
+    private ProjectionMetadataRepository projectionMetadataRepository;
+    private ConcertSalesProjectionRepository concertSalesProjectionRepository;
+    private EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
+
+    public ConcertSalesProjector() {
+    }
 
     private ConcertSalesProjector(ProjectionMetadataRepository projectionMetadataRepository,
                                   ConcertSalesProjectionRepository concertSalesProjectionRepository,
@@ -33,7 +37,7 @@ public class ConcertSalesProjector {
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
         this.concertEventStore = concertEventStore;
         long lastGlobalEventSequenceSeen = projectionMetadataRepository
-                .lastGlobalSequenceSeenByProjectionName(PROJECTION_NAME)
+                .lastGlobalEventSequenceSeenByProjectionName(PROJECTION_NAME)
                 .orElse(0L);
         concertEventStore.subscribe(this, lastGlobalEventSequenceSeen);
     }
@@ -72,6 +76,35 @@ public class ConcertSalesProjector {
                 .findAll()
                 .stream()
                 .map(ConcertSalesProjection::toSummary);
+    }
+
+    // class ProjectionEventHandler
+    //   #register(Projector, ProjectionRepository, "projection_name", ConcertSalesProjection.class)
+    //   void eventHandler(Stream<ConcertEvent> concertEvents, lastGlobalEventSequence)
+    //     loadedProjectionRows = load ConcertSalesProjection from DB (or create the Projection in memory within a test)
+    //              ProjectionRepository.findAll() -> List<Object> (raw list)
+    //       projector.load(loadedProjectionRows) // transforms ConcertSalesProjection -> internal Map
+    //       // applies events and transforms internal Map, returning the updated ConcertSalesProjection
+    //       List<Object> updatedProjectionRows = projector.project(concertEvents) // "domain" aggregation/summarization logic
+    //                                      Optimization: only return CHANGED "rows"
+    //
+    //       List<Object> updatedProjectionRows = projector.project(loadedProjectionRows, concertEvents)
+    //     projectionRepository.saveAll(updatedProjectionRows)
+    //     metadataRepository.save(projectionName, lastGlobalEventSequence)
+
+    public List<ConcertSalesProjection> project(List<ConcertSalesProjection> loadedProjectionRows, Stream<ConcertEvent> concertEvents) {
+        apply(concertEvents);
+        return salesSummaryMap
+                .values()
+                .stream()
+                .map(css -> new ConcertSalesProjection(
+                        css.concertId().id(),
+                        css.artist(),
+                        css.showDateTime().toLocalDate(),
+                        css.totalQuantity(),
+                        css.totalSales()
+                ))
+                .toList();
     }
 
     public void apply(Stream<ConcertEvent> concertEvents) {

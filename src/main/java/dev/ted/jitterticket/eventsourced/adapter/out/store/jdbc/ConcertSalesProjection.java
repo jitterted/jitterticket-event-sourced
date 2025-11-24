@@ -9,6 +9,7 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDate;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Table("concert_sales_projection")
@@ -103,4 +104,16 @@ public class ConcertSalesProjection implements Persistable<UUID> {
         this.totalSales = totalSales;
     }
 
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ConcertSalesProjection.class.getSimpleName() + "[", "]")
+                .add("concertId=" + concertId)
+                .add("artistName='" + artistName + "'")
+                .add("concertDate=" + concertDate)
+                .add("ticketsSold=" + ticketsSold)
+                .add("totalSales=" + totalSales)
+                .add("isNew=" + isNew)
+                .toString();
+    }
 }
