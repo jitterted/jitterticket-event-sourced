@@ -113,19 +113,19 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
         }
     }
 
-    private ProjectionUpdater createProjectionUpdater() {
-        return new ProjectionUpdater(new ConcertSalesProjector(),
-                             concertEventStore,
-                             projectionMetadataRepository,
-                             concertSalesProjectionRepository);
-    }
-
     @Nested
     class ProjectionUpToDate {
 
-    }
 
+    }
+    private ProjectionUpdater createProjectionUpdater() {
+        return new ProjectionUpdater(new ConcertSalesProjector(),
+                                     concertEventStore,
+                                     projectionMetadataRepository,
+                                     concertSalesProjectionRepository);
+    }
     class Old {
+
 
         @Test
         void singleConcertScheduledSingleTicketPurchaseReturnsCorrectSummaryOfSoldAndSales() {
