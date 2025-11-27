@@ -51,13 +51,10 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
 
     @Test
     void noConcertsScheduledReturnsEmptyProjection() {
-        ProjectionUpdater projectionUpdater =
-                new ProjectionUpdater(new ConcertSalesProjector(),
-                                      concertEventStore,
-                                      projectionMetadataRepository,
-                                      concertSalesProjectionRepository);
+        ProjectionUpdater projectionUpdater = createProjectionUpdater();
 
-        Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries = projectionUpdater.allSalesSummaries();
+        Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
+                projectionUpdater.allSalesSummaries();
 
         assertThat(allSalesSummaries)
                 .isEmpty();
@@ -68,11 +65,7 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
 
         @Test
         void oneConcertScheduledAndNoTicketsPurchasedReturnsOneSalesSummaryWithZeroSales() {
-            ProjectionUpdater projectionUpdater =
-                    new ProjectionUpdater(new ConcertSalesProjector(),
-                                          concertEventStore,
-                                          projectionMetadataRepository,
-                                          concertSalesProjectionRepository);
+            ProjectionUpdater projectionUpdater = createProjectionUpdater();
             ConcertId concertId = ConcertId.createRandom();
             LocalDateTime showDateTime = LocalDateTime.of(2027, 2, 1, 20, 0);
             String artist = "First Concert";
@@ -96,6 +89,35 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
                     );
         }
 
+        @Test
+        void oneConcertScheduledOneTicketPurchasedReturnsOneSalesSummaryWithTicketSales() {
+            ProjectionUpdater projectionUpdater = createProjectionUpdater();
+            ConcertId concertId = ConcertId.createRandom();
+            Stream<ConcertEvent> concertEventStream =
+                    MakeEvents.with()
+                              .concertScheduled(concertId, (concert) -> concert
+                                      .ticketPrice(35)
+                                      .ticketsSold(6))
+                              .stream();
+            concertEventStore.save(concertId, concertEventStream);
+
+            Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
+                    projectionUpdater.allSalesSummaries();
+
+            assertThat(allSalesSummaries)
+                    .extracting(ConcertSalesProjector.ConcertSalesSummary::totalQuantity,
+                                ConcertSalesProjector.ConcertSalesSummary::totalSales)
+                    .containsExactly(
+                            tuple(6, 6 * 35)
+                    );
+        }
+    }
+
+    private ProjectionUpdater createProjectionUpdater() {
+        return new ProjectionUpdater(new ConcertSalesProjector(),
+                             concertEventStore,
+                             projectionMetadataRepository,
+                             concertSalesProjectionRepository);
     }
 
     @Nested
