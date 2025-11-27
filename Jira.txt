@@ -38,6 +38,7 @@
                     [X] Load existing projection from database
                         [X] Add a specific query to get the GES directly as a Long instead of returning the db entity
                     [ ] Detour: refactor projector into DB infra + domain projection (the apply())
+                        [ ] ConcertSalesProjector must be I/O-free as it is living in the Domain (or at least should be!), which means the project() method should accept and return ConcertSalesSummary object and not DB-specific ConcertSalesProjection objects
                     [ ] EventStore#save() returns last/highest/max global event sequence number as a result of the save
                     [ ] Projector.apply(events, lastGlobalEventSequence)
                     [ ] EventStore#subscribe(projector, lastGES)

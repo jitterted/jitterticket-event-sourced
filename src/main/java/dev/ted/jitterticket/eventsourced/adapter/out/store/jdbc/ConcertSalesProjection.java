@@ -42,6 +42,16 @@ public class ConcertSalesProjection implements Persistable<UUID> {
         this.isNew = true;
     }
 
+    public static ConcertSalesProjection createFromSummary(ConcertSalesProjector.ConcertSalesSummary css) {
+        return new ConcertSalesProjection(
+                css.concertId().id(),
+                css.artist(),
+                css.showDateTime().toLocalDate(),
+                css.totalQuantity(),
+                css.totalSales()
+        );
+    }
+
     public ConcertSalesProjector.ConcertSalesSummary toSummary() {
         return new ConcertSalesProjector.ConcertSalesSummary(
                 new ConcertId(getConcertId()),

@@ -30,9 +30,9 @@ public class ConcertSalesProjector {
     public ConcertSalesProjector() {
     }
 
-    private ConcertSalesProjector(ProjectionMetadataRepository projectionMetadataRepository,
-                                  ConcertSalesProjectionRepository concertSalesProjectionRepository,
-                                  EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
+    ConcertSalesProjector(ProjectionMetadataRepository projectionMetadataRepository,
+                          ConcertSalesProjectionRepository concertSalesProjectionRepository,
+                          EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
         this.projectionMetadataRepository = projectionMetadataRepository;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
         this.concertEventStore = concertEventStore;
@@ -42,41 +42,27 @@ public class ConcertSalesProjector {
         concertEventStore.subscribe(this, lastGlobalEventSequenceSeen);
     }
 
+    @Deprecated
     public static ConcertSalesProjector createNew(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
         return new ConcertSalesProjector(null, null, concertEventStore);
     }
 
-    //region Creation Methods for Testing
-    @Deprecated // require the ProjectionMetadataRepository or create an in-memory version
-    public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        ConcertSalesProjector concertSalesProjector =
-                new ConcertSalesProjector(null, null, concertEventStore);
-        return concertSalesProjector;
-    }
-
-    public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
-                                                      ConcertSalesProjectionRepository concertSalesProjectionRepository,
-                                                      ProjectionMetadataRepository projectionMetadataRepository) {
-        ConcertSalesProjector concertSalesProjector =
-                new ConcertSalesProjector(projectionMetadataRepository, concertSalesProjectionRepository, concertEventStore);
-        return concertSalesProjector;
-    }
-
-    public static ConcertSalesProjector createForTest(ProjectionMetadataRepository projectionMetadataRepository, ConcertSalesProjectionRepository concertSalesProjectionRepository) {
-        return new ConcertSalesProjector(
-                projectionMetadataRepository,
-                concertSalesProjectionRepository,
-                InMemoryEventStore.forConcerts()
-        );
-    }
-    //endregion
-
+    @Deprecated // moves to ProjectionUpdater
     public Stream<ConcertSalesSummary> allSalesSummaries() {
         return concertSalesProjectionRepository
                 .findAll()
                 .stream()
                 .map(ConcertSalesProjection::toSummary);
     }
+
+    // class ProjectorDispatcher (depends on EventStore)
+    //     sends events (uncommitted ones that were just persisted) to...
+    //     class ProjectionUpdater (depends on Projection & Metadata Repositories)
+    //         load last global event sequence (from metadata repo)
+    //         load projection rows from database (from projection repo)
+    //              ==> call (dispatch to) Projector.project(rows, events)
+    //         save updated projection rows (to projection repo)
+    //         save last global event sequence (to metadata repo)
 
     // class ProjectionEventHandler
     //   #register(Projector, ProjectionRepository, "projection_name", ConcertSalesProjection.class)
@@ -93,27 +79,23 @@ public class ConcertSalesProjector {
     //     metadataRepository.save(projectionName, lastGlobalEventSequence)
 
     public List<ConcertSalesProjection> project(List<ConcertSalesProjection> loadedProjectionRows, Stream<ConcertEvent> concertEvents) {
+        salesSummaryMap.clear(); // TODO: convert/store the incoming loaded projection
         apply(concertEvents);
         return salesSummaryMap
                 .values()
                 .stream()
-                .map(css -> new ConcertSalesProjection(
-                        css.concertId().id(),
-                        css.artist(),
-                        css.showDateTime().toLocalDate(),
-                        css.totalQuantity(),
-                        css.totalSales()
-                ))
+                .map(ConcertSalesProjection::createFromSummary)
                 .toList();
     }
 
+    @Deprecated // should be for internal use only
     public void apply(Stream<ConcertEvent> concertEvents) {
         concertEvents
                 .forEach(concertEvent -> {
                     switch (concertEvent) {
                         case ConcertScheduled concertScheduled -> salesSummaryMap.put(
                                 concertScheduled.concertId(),
-                                createSummaryFrom(concertScheduled));
+                                ConcertSalesSummary.createSummaryFrom(concertScheduled));
                         case TicketsSold ticketsSold -> salesSummaryMap.computeIfPresent(
                                 ticketsSold.concertId(),
                                 (_, summary) -> summary.plusTicketsSold(ticketsSold));
@@ -124,16 +106,6 @@ public class ConcertSalesProjector {
                 });
     }
 
-    private static ConcertSalesSummary createSummaryFrom(ConcertScheduled concertScheduled) {
-        return new ConcertSalesSummary(
-                concertScheduled.concertId(),
-                concertScheduled.artist(),
-                concertScheduled.showDateTime(),
-                0, // tickets sold
-                0  // ticket $$ sales
-        );
-    }
-
 
     public record ConcertSalesSummary(
             ConcertId concertId,
@@ -142,6 +114,16 @@ public class ConcertSalesProjector {
             int totalQuantity,
             int totalSales
     ) {
+        private static ConcertSalesSummary createSummaryFrom(ConcertScheduled concertScheduled) {
+            return new ConcertSalesSummary(
+                    concertScheduled.concertId(),
+                    concertScheduled.artist(),
+                    concertScheduled.showDateTime(),
+                    0, // tickets sold
+                    0  // ticket $$ sales
+            );
+        }
+
         public ConcertSalesSummary plusTicketsSold(TicketsSold ticketsSold) {
             return new ConcertSalesSummary(
                     concertId, artist,

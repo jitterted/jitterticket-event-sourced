@@ -1,0 +1,55 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+control SpringAppConfig
+boundary MvcController
+database ConcertEventStore
+participant ProjectionUpdater as "Projection Updater\n<<txn script>>"
+participant ConcertSalesProjector as "Concert Sales Projector\n<<domain>>"
+database ProjectionMetadataRepository
+database ConcertSalesProjectionRepository
+
+== Initialization ==
+
+activate ProjectionMetadataRepository
+activate ConcertSalesProjectionRepository
+SpringAppConfig -> ConcertEventStore: create new
+activate ConcertEventStore
+ConcertEventStore --> SpringAppConfig: eventStore
+SpringAppConfig -> ConcertSalesProjector: create new
+activate ConcertSalesProjector
+ConcertSalesProjector --> SpringAppConfig: concertSalesProjector
+SpringAppConfig -> ProjectionUpdater: create(concertSalesProjector,\n    eventStore,\n    metadataRepository,\n    concertSalesProjectionRepository)
+activate ProjectionUpdater
+ProjectionUpdater -> ProjectionMetadataRepository: findLastGlobalEventSequenceFor\n(projectionId)
+ProjectionMetadataRepository --> ProjectionUpdater: lastGlobalEventSequence\n(if it's not there, treat as 0)
+ProjectionUpdater -> ConcertEventStore: allEventsAfter\n(lastGlobalEventSequence)
+ConcertEventStore --> ProjectionUpdater: Stream<event>\n(might be empty)
+note over ProjectionUpdater: this is the "catch up" process
+alt if Stream<event> is NOT empty
+    ProjectionUpdater -> ConcertSalesProjectionRepository: loadAllRows()
+    ConcertSalesProjectionRepository --> ProjectionUpdater: projectionRows
+    ProjectionUpdater -> ConcertSalesProjector: project(projectionRows, Stream<event>)
+    ConcertSalesProjector --> ProjectionUpdater: Stream<projectionRows> updatedRows
+    ProjectionUpdater -> ConcertSalesProjectionRepository: save(updatedRows)
+end
+ProjectionUpdater -> ConcertEventStore: subscribe\n(projectionUpdater)
+ConcertEventStore --> ProjectionUpdater
+ProjectionUpdater --> SpringAppConfig: projectionUpdater
+
+== Viewing the Projection ==
+
+MvcController -> ProjectionUpdater: allProjectedSummaries()
+ProjectionUpdater -> ProjectionMetadataRepository: findLastGlobalEventSequenceFor(projectionId)
+ProjectionMetadataRepository --> ProjectionUpdater: lastGlobalEventSequence
+ProjectionUpdater -> ConcertSalesProjectionRepository: load Projection
+ConcertSalesProjectionRepository --> ProjectionUpdater: projectionRows
+alt if new events were loaded from event store
+    ProjectionUpdater -> ProjectionUpdater: catch up (see above)
+end
+
+ConcertSalesProjector --> MvcController: List<ProjectedSummaries>
+
+@enduml
