@@ -26,6 +26,17 @@ public class ProjectionUpdater {
         this.concertEventStore = concertEventStore;
         this.projectionMetadataRepository = projectionMetadataRepository;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
+
+        ensureMetadataExistsIn(projectionMetadataRepository);
+
+    }
+
+    private static void ensureMetadataExistsIn(ProjectionMetadataRepository projectionMetadataRepository) {
+        if (!projectionMetadataRepository
+                .existsByProjectionName(ConcertSalesProjector.PROJECTION_NAME)) {
+            projectionMetadataRepository.saveIfNotExist(
+                    ConcertSalesProjector.PROJECTION_NAME, 0L);
+        }
     }
 
     //region Creation Methods for Testing

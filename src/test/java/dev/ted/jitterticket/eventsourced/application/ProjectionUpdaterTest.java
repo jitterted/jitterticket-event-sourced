@@ -10,7 +10,6 @@ import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
@@ -24,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,6 +58,15 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
 
         assertThat(allSalesSummaries)
                 .isEmpty();
+
+        Optional<Long> lastGlobalEventSequenceSeenByProjectionName =
+                projectionMetadataRepository.lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME);
+        assertThat(lastGlobalEventSequenceSeenByProjectionName)
+                .as("Expected the Metadata Repository to have an entry for the projection named: `%s`", ConcertSalesProjector.PROJECTION_NAME)
+                .isPresent()
+                .get()
+                .as("No events were processed by the projector, so its last seen global event sequence should be 0")
+                .isEqualTo(0L);
     }
 
     @Nested
@@ -118,14 +127,16 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
 
 
     }
+
     private ProjectionUpdater createProjectionUpdater() {
         return new ProjectionUpdater(new ConcertSalesProjector(),
                                      concertEventStore,
                                      projectionMetadataRepository,
                                      concertSalesProjectionRepository);
     }
-    class Old {
 
+    @Deprecated // need to pull out any remaining useful notes
+    class OldStuff {
 
         @Test
         void singleConcertScheduledSingleTicketPurchaseReturnsCorrectSummaryOfSoldAndSales() {
@@ -245,39 +256,6 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
 //                    .containsExactly(expectedSummary1, expectedSummary2);
         }
 
-        @Test
-        void summaryIsUpToDateAfterRescheduledConcert() {
-            var concertEventStore = InMemoryEventStore.forConcerts();
-            ConcertId concertId = ConcertId.createRandom();
-            LocalDateTime originalShowDateTime = LocalDateTime.now();
-            LocalTime originalDoorsTime = LocalTime.now();
-            ConcertScheduled concertScheduled =
-                    new ConcertScheduled(concertId, 0, "Artist",
-                                         35,
-                                         originalShowDateTime,
-                                         originalDoorsTime,
-                                         MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
-            LocalDateTime newShowDateTime = originalShowDateTime.plusMonths(1);
-            ConcertRescheduled concertRescheduled =
-                    new ConcertRescheduled(concertId, 1,
-                                           newShowDateTime,
-                                           originalDoorsTime.minusHours(1));
-            concertEventStore.save(concertId, Stream.of(concertScheduled, concertRescheduled));
-            ConcertSalesProjector concertSalesProjector =
-                    ProjectionUpdater.createForTest(concertEventStore);
-
-            ConcertSalesProjector.ConcertSalesSummary expectedSummary =
-                    new ConcertSalesProjector
-                            .ConcertSalesSummary(concertId,
-                                                 "Artist",
-                                                 newShowDateTime,
-                                                 0, 0);
-            assertThat(concertSalesProjector.allSalesSummaries())
-                    .as("Sales Summaries should have 1 summary, but did not.")
-                    .singleElement()
-                    .usingRecursiveComparison()
-                    .isEqualTo(expectedSummary);
-        }
 
         private static Fixture scheduleAndSaveConcert(int ticketPrice) {
             var concertEventStore = InMemoryEventStore.forConcerts();

@@ -14,4 +14,8 @@ public interface ProjectionMetadataRepository extends ListCrudRepository<Project
     // does not actually return a Long, tries to return a ProjectionMetadata entity
     // Optional<Long> findLastGlobalEventSequenceSeenByProjectionName(String projectionName);
 
+    @Query("INSERT INTO projection_metadata (projection_name, last_global_event_sequence_seen) VALUES (:projectionName, :lastGlobalEventSequenceSeen) ON CONFLICT (projection_name) DO NOTHING RETURNING last_global_event_sequence_seen")
+    Optional<Long> saveIfNotExist(@Param("projectionName") String projectionName, @Param("lastGlobalEventSequenceSeen") Long lastGlobalEventSequenceSeen);
+
+    boolean existsByProjectionName(String projectionName);
 }

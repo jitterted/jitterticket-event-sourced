@@ -8,8 +8,8 @@ boundary MvcController
 database ConcertEventStore
 participant ProjectionUpdater as "Projection Updater\n<<txn script>>"
 participant ConcertSalesProjector as "Concert Sales Projector\n<<domain>>"
-database ProjectionMetadataRepository
 database ConcertSalesProjectionRepository
+database ProjectionMetadataRepository
 
 == Initialization ==
 
@@ -34,6 +34,7 @@ alt if Stream<event> is NOT empty
     ProjectionUpdater -> ConcertSalesProjector: project(projectionRows, Stream<event>)
     ConcertSalesProjector --> ProjectionUpdater: Stream<projectionRows> updatedRows
     ProjectionUpdater -> ConcertSalesProjectionRepository: save(updatedRows)
+    ProjectionUpdater -> ProjectionMetadataRepository: save(lastGlobalEventSequence)
 end
 ProjectionUpdater -> ConcertEventStore: subscribe\n(projectionUpdater)
 ConcertEventStore --> ProjectionUpdater
