@@ -49,7 +49,6 @@ class CsvStringsEventStoreTest {
 
     @Test
     void saveThatAppendsToExistingCsvGeneratesCorrectGlobalEventSequence() {
-        // TODO: convert setup to use MakeEvents instead of creating aggregates
         ArrayListStringsReaderAppender stringsReaderAppender =
                 new ArrayListStringsReaderAppender();
         ConcertId concertId = new ConcertId(UUID.fromString("a087bb99-b920-41d9-a25b-d96ac779be0b"));
