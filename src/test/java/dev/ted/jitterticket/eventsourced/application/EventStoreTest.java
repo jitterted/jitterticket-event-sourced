@@ -54,7 +54,7 @@ public class EventStoreTest {
     }
 
     @Nested
-    public class ConcertEventStore {
+    public class ConcertEventStoreFindById {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
@@ -96,12 +96,17 @@ public class EventStoreTest {
             Concert savedConcert = ConcertFactory.createConcert();
             concertStore.save(savedConcert);
 
-            Optional<Concert> foundConcert = concertStore.findById(savedConcert.getId());
+            Optional<Concert> foundConcert = concertStore
+                    .findById(savedConcert.getId());
 
             assertThat(foundConcert)
                     .get()
                     .isNotSameAs(savedConcert);
         }
+    }
+
+    @Nested
+    public class ConcertEventStoreAllEvents {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
@@ -183,6 +188,11 @@ public class EventStoreTest {
                     .as("Max GES is 2, so asking for events AFTER 2 should not return any")
                     .isEmpty();
         }
+
+    }
+
+    @Nested
+    public class ConcertEventStoreEventsForAggregate {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")

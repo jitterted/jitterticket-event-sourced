@@ -55,55 +55,61 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
     @Nested
     class ConcertEventStoreTests {
 
-        protected EventStoreTest.ConcertEventStore delegatedConcertEventStoreTest;
         protected EventStore<ConcertId, ConcertEvent, Concert> concertStore;
+        private EventStoreTest.ConcertEventStoreFindById delegatedConcertEventStoreFindById;
+        private EventStoreTest.ConcertEventStoreAllEvents delegatedConcertEventStoreAllEvents;
+        private EventStoreTest.ConcertEventStoreEventsForAggregate delegatedConcertEventStoreEventsForAggregate;
 
         @BeforeEach
         void beforeEach() {
-            // yes, the ().new is valid Java syntax for instantiating a non-static inner class
-            delegatedConcertEventStoreTest = new EventStoreTest().new ConcertEventStore();
+            @SuppressWarnings("InstantiationOfUtilityClass")
+            EventStoreTest eventStoreTest = new EventStoreTest();
+            // yes, the .new is valid Java syntax for instantiating a non-static inner class
+            delegatedConcertEventStoreFindById = eventStoreTest.new ConcertEventStoreFindById();
+            delegatedConcertEventStoreAllEvents = eventStoreTest.new ConcertEventStoreAllEvents();
+            delegatedConcertEventStoreEventsForAggregate = eventStoreTest.new ConcertEventStoreEventsForAggregate();
             concertStore = concertStore();
         }
 
         @Test
         void findByIdForNonExistingConcertReturnsEmptyOptional() {
-            delegatedConcertEventStoreTest
+            delegatedConcertEventStoreFindById
                     .findByIdForNonExistingConcertReturnsEmptyOptional(concertStore);
         }
 
         @Test
         void findByIdReturnsSavedConcert() {
-            delegatedConcertEventStoreTest
+            delegatedConcertEventStoreFindById
                     .findByIdReturnsSavedConcert(concertStore);
         }
 
         @Test
         void findByIdReturnsDifferentInstanceOfConcert() {
-            delegatedConcertEventStoreTest
+            delegatedConcertEventStoreFindById
                     .findByIdReturnsDifferentInstanceOfConcert(concertStore);
         }
 
         @Test
         void allEventsReturnsAllEventsForAllSavedAggregates() {
-            delegatedConcertEventStoreTest
+            delegatedConcertEventStoreAllEvents
                     .allEventsReturnsAllEventsForAllSavedAggregatesInGlobalSequenceOrder(concertStore);
         }
 
         @Test
         void emptyListReturnedForUnknownAggregateId() {
-           delegatedConcertEventStoreTest
+            delegatedConcertEventStoreEventsForAggregate
                    .emptyListReturnedForUnknownAggregateId(concertStore);
         }
 
         @Test
         void exactlyAllEventsForSpecifiedConcertAggregateAreReturned() {
-            delegatedConcertEventStoreTest
+            delegatedConcertEventStoreEventsForAggregate
                     .exactlyAllEventsForSpecifiedConcertAggregateAreReturned(concertStore);
         }
 
         @Test
-        void savingEventsDirectlyStoresThemCorrectly() {
-            delegatedConcertEventStoreTest
+        void savingEventsDirectlyInAnyOrderAreReturnedInOrderOfEventSequence() {
+            delegatedConcertEventStoreEventsForAggregate
                     .savingEventsDirectlyInAnyOrderAreReturnedInOrderOfEventSequence(concertStore);
         }
     }
