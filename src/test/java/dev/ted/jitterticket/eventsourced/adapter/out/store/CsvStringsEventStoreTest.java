@@ -16,6 +16,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -53,23 +54,25 @@ class CsvStringsEventStoreTest {
                 new ArrayListStringsReaderAppender();
         ConcertId concertId = new ConcertId(UUID.fromString("a087bb99-b920-41d9-a25b-d96ac779be0b"));
         LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 10, 10, 20, 0);
-        Concert concert = Concert.schedule(concertId,
-                                           "Name of Artist",
-                                           99,
-                                           originalShowDateTime,
-                                           originalShowDateTime.toLocalTime().minusHours(1),
-                                           100,
-                                           4);
+        ConcertScheduled concertScheduled = new ConcertScheduled(concertId,
+                                                                 0,
+                                                                 "Name of Artist",
+                                                                 99,
+                                                                 originalShowDateTime,
+                                                                 originalShowDateTime.toLocalTime().minusHours(1),
+                                                                 100,
+                                                                 4);
+        // save in new event store instance
         CsvStringsEventStore.forConcerts(stringsReaderAppender)
-                            .save(concert);
-        concert = CsvStringsEventStore.forConcerts(stringsReaderAppender)
-                                      .findById(concertId).orElseThrow();
+                            .save(concertId, Stream.of(concertScheduled));
 
         LocalDateTime newShowDateTime = originalShowDateTime.plusMonths(1);
-        concert.rescheduleTo(newShowDateTime, newShowDateTime.toLocalTime().minusHours(1));
+        ConcertRescheduled concertRescheduled = new ConcertRescheduled(
+                concertId, 1, newShowDateTime, newShowDateTime.toLocalTime().minusHours(1));
 
+        // save new event in a new event store instance
         CsvStringsEventStore.forConcerts(stringsReaderAppender)
-                            .save(concert);
+                            .save(concertId, Stream.of(concertRescheduled));
 
         assertThat(stringsReaderAppender.readAllLines())
                 .hasSize(2)
@@ -81,7 +84,7 @@ class CsvStringsEventStoreTest {
     @Test
     void eventsForAggregateReturnsCorrectEventInstances() {
         ArrayListStringsReaderAppender stringsReaderAppender = new ArrayListStringsReaderAppender();
-        CsvStringsEventStore<ConcertId, ConcertEvent, Concert> concertEventStore = (CsvStringsEventStore<ConcertId, ConcertEvent, Concert>) CsvStringsEventStore.forConcerts(stringsReaderAppender);
+        var concertEventStore = (CsvStringsEventStore<ConcertId, ConcertEvent, Concert>) CsvStringsEventStore.forConcerts(stringsReaderAppender);
         String concertUuidString = "a087bb99-b920-41d9-a25b-d96ac779be0b";
 
         stringsReaderAppender.appendLines(
