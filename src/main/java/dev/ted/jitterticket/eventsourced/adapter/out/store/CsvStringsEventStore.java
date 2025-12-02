@@ -11,6 +11,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import jakarta.annotation.Nonnull;
 
 import java.util.Comparator;
 import java.util.List;
@@ -94,7 +95,7 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
     }
 
     @Override
-    protected List<EventDto<EVENT>> eventDtosFor(ID id) {
+    protected @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id) {
         return allEventDtos()
                 .filter(dto -> dto.getAggregateRootId().equals(id.id()))
                 .sorted(Comparator.comparingInt(EventDto::getEventSequence))

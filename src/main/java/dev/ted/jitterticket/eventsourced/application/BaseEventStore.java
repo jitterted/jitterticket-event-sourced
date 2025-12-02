@@ -6,6 +6,7 @@ import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import jakarta.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +40,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         }
     }
 
-    protected abstract List<EventDto<EVENT>> eventDtosFor(ID id);
+    protected abstract @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id);
 
     @Override
     public List<EVENT> eventsForAggregate(ID id) {

@@ -13,6 +13,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import jakarta.annotation.Nonnull;
 
 import java.util.List;
 import java.util.function.Function;
@@ -44,7 +45,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
 
     @Override
-    protected List<EventDto<EVENT>> eventDtosFor(ID id) {
+    protected @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id) {
         return eventDboRepository.findByAggregateRootId(id.id())
                                  .stream()
                                  .map(dbo -> new EventDto<EVENT>(
