@@ -7,7 +7,6 @@ import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -44,9 +43,8 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
 
     @Override
     public List<EVENT> eventsForAggregate(ID id) {
-        return Optional.ofNullable(eventDtosFor(id))
+        return eventDtosFor(id)
                        .stream()
-                       .flatMap(Collection::stream)
                        .map(EventDto::toDomain)
                        .toList();
     }

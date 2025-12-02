@@ -11,6 +11,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,8 +60,11 @@ public class InMemoryEventStore<
     }
 
     @Override
-    protected List<EventDto<EVENT>> eventDtosFor(ID id) {
-        return idToEventDtoMap.get(id);
+    protected @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id) {
+        return idToEventDtoMap.getOrDefault(id, List.of())
+                .stream()
+                .sorted(Comparator.comparingInt(EventDto::getEventSequence))
+                .toList();
     }
 
     @Override

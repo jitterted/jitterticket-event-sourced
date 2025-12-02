@@ -12,6 +12,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
@@ -94,8 +95,10 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
 
     @Override
     protected List<EventDto<EVENT>> eventDtosFor(ID id) {
-        return allEventDtos().filter(dto -> dto.getAggregateRootId().equals(id.id()))
-                             .toList();
+        return allEventDtos()
+                .filter(dto -> dto.getAggregateRootId().equals(id.id()))
+                .sorted(Comparator.comparingInt(EventDto::getEventSequence))
+                .toList();
     }
 
     @Override
