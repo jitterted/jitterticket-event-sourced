@@ -68,20 +68,22 @@ public class InMemoryEventStore<
     }
 
     @Override
+    public Stream<EVENT> allEvents() {
+        return allEventsSortedByGlobalEventSequence()
+                .map(EventDto::toDomain);
+    }
+
+    @Override
     public Stream<EVENT> allEventsAfter(long globalEventSequence) {
-        return idToEventDtoMap.values()
-                              .stream()
-                              .flatMap(Collection::stream)
-                              .sorted(Comparator.comparingLong(EventDto::getGlobalEventSequence))
+        return allEventsSortedByGlobalEventSequence()
                               .dropWhile(eventDto -> eventDto.getGlobalEventSequence() <= globalEventSequence)
                               .map(EventDto::toDomain);
     }
 
-    @Override
-    public Stream<EVENT> allEvents() {
+    private Stream<EventDto<EVENT>> allEventsSortedByGlobalEventSequence() {
         return idToEventDtoMap.values()
                               .stream()
                               .flatMap(Collection::stream)
-                              .map(EventDto::toDomain);
+                              .sorted(Comparator.comparingLong(EventDto::getGlobalEventSequence));
     }
 }

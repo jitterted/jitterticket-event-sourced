@@ -32,6 +32,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     }
 
 
+    //region Creation Methods for Specific Aggregate Types
     public static EventStore<ConcertId, ConcertEvent, Concert> forConcerts(EventDboRepository eventDboRepository) {
         return new JdbcEventStore<>(Concert::reconstitute, eventDboRepository, ConcertEvent.class);
     }
@@ -39,6 +40,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     public static EventStore<CustomerId, CustomerEvent, Customer> forCustomers(EventDboRepository eventDboRepository) {
         return new JdbcEventStore<>(Customer::reconstitute, eventDboRepository, CustomerEvent.class);
     }
+    //endregion
 
 
     @Override
@@ -48,7 +50,8 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                                  .map(dbo -> new EventDto<EVENT>(
                                          dbo.getAggregateRootId(),
                                          dbo.getEventSequence(),
-                                         null, dbo.getEventType(),
+                                         null,
+                                         dbo.getEventType(),
                                          dbo.getJson()))
                                  .toList();
     }
@@ -79,7 +82,8 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                                  .map(dbo -> new EventDto<EVENT>(
                                          dbo.getAggregateRootId(),
                                          dbo.getEventSequence(),
-                                         null, dbo.getEventType(),
+                                         null,
+                                         dbo.getEventType(),
                                          dbo.getJson()))
                                  .map(EventDto::toDomain)
                                  .gather(Gatherers.filterAndCastTo(concreteEventClass));

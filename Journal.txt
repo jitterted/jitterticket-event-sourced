@@ -1,3 +1,9 @@
+Tuesday, December 2, 2025
+=========================
+[IntelliJ IDEA]
+    [ ] Moving of the JUnit MethodSource from inside the same nested class to the outer class does not rename the method name inside the MethodSource annotation
+    [ ] Inspection for the situation after manually moving the method source supplier outside the nested class should suggest making it fully qualified, e.g. "concertEventStoreSupplier" -> "dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier"
+
 Wednesday, November 19, 2025
 ============================
 [IntelliJ IDEA]

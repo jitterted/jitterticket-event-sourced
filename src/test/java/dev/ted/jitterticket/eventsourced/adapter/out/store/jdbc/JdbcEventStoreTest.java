@@ -55,13 +55,13 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
     @Nested
     class ConcertEventStoreTests {
 
-        protected EventStoreTest.ConcertEventStoreTest delegatedConcertEventStoreTest;
+        protected EventStoreTest.ConcertEventStore delegatedConcertEventStoreTest;
         protected EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
         @BeforeEach
         void beforeEach() {
             // yes, the ().new is valid Java syntax for instantiating a non-static inner class
-            delegatedConcertEventStoreTest = new EventStoreTest().new ConcertEventStoreTest();
+            delegatedConcertEventStoreTest = new EventStoreTest().new ConcertEventStore();
             concertStore = concertStore();
         }
 
