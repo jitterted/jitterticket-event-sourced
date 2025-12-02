@@ -106,7 +106,7 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
         }
 
         @Test
-        void eventStoreReturnsAllEventsAcrossAllSavedAggregates() {
+        void allEventsReturnsAllEventsForAllSavedAggregates() {
             EventStore<ConcertId, ConcertEvent, Concert> store = concertStore();
             Concert firstConcert = ConcertFactory.createConcertWithArtist("First Concert");
             List<ConcertEvent> expectedEvents = new ArrayList<>(firstConcert.uncommittedEvents().toList());

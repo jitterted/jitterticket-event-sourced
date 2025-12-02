@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-class MakeEvents {
+public class MakeEvents {
     private int eventSequence = 0;
     private final List<ConcertEvent> events = new ArrayList<>();
 
