@@ -48,7 +48,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                                  .map(dbo -> new EventDto<EVENT>(
                                          dbo.getAggregateRootId(),
                                          dbo.getEventSequence(),
-                                         dbo.getEventType(),
+                                         null, dbo.getEventType(),
                                          dbo.getJson()))
                                  .toList();
     }
@@ -57,7 +57,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     public void save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
         // assumes there's at least one uncommittedEvent in the incoming stream!
         List<EventDbo> dbos = uncommittedEvents
-                .map(event -> EventDto.from(aggregateId.id(), event.eventSequence(), event))
+                .map(event -> EventDto.from(aggregateId.id(), event.eventSequence(), null, event))
                 .map(dto -> new EventDbo(
                         dto.getAggregateRootId(),
                         dto.getEventSequence(),
@@ -79,9 +79,14 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                                  .map(dbo -> new EventDto<EVENT>(
                                          dbo.getAggregateRootId(),
                                          dbo.getEventSequence(),
-                                         dbo.getEventType(),
+                                         null, dbo.getEventType(),
                                          dbo.getJson()))
                                  .map(EventDto::toDomain)
                                  .gather(Gatherers.filterAndCastTo(concreteEventClass));
+    }
+
+    @Override
+    public Stream<EVENT> allEventsAfter(long globalEventSequence) {
+        return Stream.empty();
     }
 }

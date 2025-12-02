@@ -22,11 +22,15 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
+/**
+ *  Represents an Event as JSON with some metadata for converting back to concrete Event object
+ */
 public class EventDto<EVENT extends Event> {
     private static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
 
     private final UUID aggregateRootId; // ID for the Aggregate Root
     private final Integer eventSequence;
+    private final Long globalEventSequence;
     private final String eventType;
     private final String json; // blob of data - schemaless
 
@@ -51,7 +55,12 @@ public class EventDto<EVENT extends Event> {
     // -- the following mapper and maps should be externalized to some configuration
     //    so that when adding (and especially renaming) classes, the mapping works
 
-    public EventDto(UUID aggregateRootId, Integer eventSequence, String eventClassName, String json) {
+    public EventDto(UUID aggregateRootId,
+                    Integer eventSequence,
+                    Long globalEventSequence,
+                    String eventClassName,
+                    String json) {
+        this.globalEventSequence = globalEventSequence;
         if (eventClassName == null) {
             throw new IllegalArgumentException("Event class name cannot be null, JSON is: " + json);
         }
@@ -80,12 +89,18 @@ public class EventDto<EVENT extends Event> {
         return objectMapper;
     }
 
-    public static <EVENT extends Event> EventDto<EVENT> from(UUID aggregateRootId, Integer eventSequence, EVENT event) {
-
+    public static <EVENT extends Event> EventDto<EVENT> from(
+            UUID aggregateRootId,
+            Integer eventSequence,
+            Long globalEventSequence, EVENT event) {
         try {
             String json = OBJECT_MAPPER.writeValueAsString(event);
             String fullyQualifiedClassName = event.getClass().getName();
-            return new EventDto<>(aggregateRootId, eventSequence, fullyQualifiedClassName, json);
+            return new EventDto<>(aggregateRootId,
+                                  eventSequence,
+                                  globalEventSequence,
+                                  fullyQualifiedClassName,
+                                  json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -110,6 +125,10 @@ public class EventDto<EVENT extends Event> {
 
     public Integer getEventSequence() {
         return eventSequence;
+    }
+
+    public Long getGlobalEventSequence() {
+        return globalEventSequence;
     }
 
     public String getEventType() {

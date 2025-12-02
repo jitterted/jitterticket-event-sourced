@@ -49,28 +49,28 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
     @Autowired
     EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
 
-    @Test
-    void noConcertsScheduledReturnsEmptyProjection() {
-        ProjectionUpdater projectionUpdater = createProjectionUpdater();
-
-        Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
-                projectionUpdater.allSalesSummaries();
-
-        assertThat(allSalesSummaries)
-                .isEmpty();
-
-        Optional<Long> lastGlobalEventSequenceSeenByProjectionName =
-                projectionMetadataRepository.lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME);
-        assertThat(lastGlobalEventSequenceSeenByProjectionName)
-                .as("Expected the Metadata Repository to have an entry for the projection named: `%s`", ConcertSalesProjector.PROJECTION_NAME)
-                .isPresent()
-                .get()
-                .as("No events were processed by the projector, so its last seen global event sequence should be 0")
-                .isEqualTo(0L);
-    }
-
     @Nested
     class ProjectionNewlyCreated {
+
+        @Test
+        void noEventsExistReturnsEmptyProjectionWithNewlyCreatedMetadata() {
+            ProjectionUpdater projectionUpdater = createProjectionUpdater();
+
+            Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
+                    projectionUpdater.allSalesSummaries();
+
+            assertThat(allSalesSummaries)
+                    .isEmpty();
+
+            Optional<Long> lastGlobalEventSequenceSeenByProjectionName =
+                    projectionMetadataRepository.lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME);
+            assertThat(lastGlobalEventSequenceSeenByProjectionName)
+                    .as("Expected the Metadata Repository to have an entry for the projection named: `%s`", ConcertSalesProjector.PROJECTION_NAME)
+                    .isPresent()
+                    .get()
+                    .as("No events were processed by the projector, so its last seen global event sequence should be 0")
+                    .isEqualTo(0L);
+        }
 
         @Test
         void oneConcertScheduledAndNoTicketsPurchasedReturnsOneSalesSummaryWithZeroSales() {

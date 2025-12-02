@@ -141,6 +141,11 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
             assertThat(subscribedLastGlobalEventSequence)
                     .isEqualTo(expectedLastGlobalSequence);
         }
+
+        @Override
+        public Stream allEventsAfter(long globalEventSequence) {
+            throw new UnsupportedOperationException();
+        }
     }
 
 }

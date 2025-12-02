@@ -26,16 +26,16 @@ class MakeEvents {
         return events.stream();
     }
 
+    public MakeEvents concertScheduled(ConcertId concertId) {
+        ConcertScheduled concertScheduled =
+                createConcertScheduled(concertId, 42);
+        events.add(concertScheduled);
+        return this;
+    }
+
     public MakeEvents concertScheduled(ConcertId concertId, Function<ConcertCustomizer, ConcertCustomizer> concertCustomizer) {
         ConcertCustomizer customizer = concertCustomizer.apply(new ConcertCustomizer());
-        ConcertScheduled concertScheduled = new ConcertScheduled(concertId,
-                                                                 eventSequence++,
-                                                                 "Don't Care Artist Name",
-                                                                 customizer.ticketPrice,
-                                                                 LocalDateTime.now(),
-                                                                 LocalTime.now(),
-                                                                 100,
-                                                                 8);
+        ConcertScheduled concertScheduled = createConcertScheduled(concertId, customizer.ticketPrice);
         events.add(concertScheduled);
         customizer.ticketsSoldQuantity
                 .stream()
@@ -46,6 +46,17 @@ class MakeEvents {
                         qty * customizer.ticketPrice))
                 .forEach(events::add);
         return this;
+    }
+
+    private ConcertScheduled createConcertScheduled(ConcertId concertId, int ticketPrice) {
+        return new ConcertScheduled(concertId,
+                                    eventSequence++,
+                                    "Don't Care Artist Name",
+                                    ticketPrice,
+                                    LocalDateTime.now(),
+                                    LocalTime.now(),
+                                    100,
+                                    8);
     }
 
     public MakeEvents reschedule(ConcertId concertId, LocalDateTime newShowDateTime, LocalTime newDoorsTime) {

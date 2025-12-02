@@ -14,6 +14,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class InMemoryEventStore<
         EventStore<ID, EVENT, AGGREGATE> {
 
     private final Map<ID, List<EventDto<EVENT>>> idToEventDtoMap = new HashMap<>();
+    private long globalEventSequence = 1L; // emulate what the database does: starting at 1
 
     private InMemoryEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         super(eventsToAggregate);
@@ -47,7 +49,8 @@ public class InMemoryEventStore<
         List<EventDto<EVENT>> freshEventDtos =
                 uncommittedEvents.map(event -> EventDto.from(
                                          aggregateId.id(),
-                                         event.eventSequence(), // max(sequence) from existing events)
+                                         event.eventSequence(),
+                                         globalEventSequence++,
                                          event))
                                  .toList();
         existingEventDtos.addAll(freshEventDtos);
@@ -58,6 +61,16 @@ public class InMemoryEventStore<
     @Override
     protected List<EventDto<EVENT>> eventDtosFor(ID id) {
         return idToEventDtoMap.get(id);
+    }
+
+    @Override
+    public Stream<EVENT> allEventsAfter(long globalEventSequence) {
+        return idToEventDtoMap.values()
+                              .stream()
+                              .flatMap(Collection::stream)
+                              .sorted(Comparator.comparingLong(EventDto::getGlobalEventSequence))
+                              .dropWhile(eventDto -> eventDto.getGlobalEventSequence() <= globalEventSequence)
+                              .map(EventDto::toDomain);
     }
 
     @Override

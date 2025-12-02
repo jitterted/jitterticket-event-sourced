@@ -14,6 +14,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -37,37 +38,46 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
 
     public static EventStore<ConcertId, ConcertEvent, Concert> forConcerts(StringsReaderAppender stringsReaderAppender) {
         return new CsvStringsEventStore<>(Concert::reconstitute,
-                stringsReaderAppender);
+                                          stringsReaderAppender);
     }
 
     public static EventStore<CustomerId, CustomerEvent, Customer> forCustomers(StringsReaderAppender stringsReaderAppender) {
         return new CsvStringsEventStore<>(Customer::reconstitute,
-                stringsReaderAppender);
+                                          stringsReaderAppender);
     }
 
     static String toCsv(EventDto<? extends Event> originalEventDto) {
         return originalEventDto.getAggregateRootId() + ","
                + originalEventDto.getEventSequence() + ","
+               + originalEventDto.getGlobalEventSequence() + ","
                + originalEventDto.getEventType() + ","
                + originalEventDto.getJson();
     }
 
     EventDto<EVENT> csvToEventDto(String csv) {
-        String[] splitCsv = csv.split(",", 4);
+        String[] splitCsv = csv.split(",", 5);
         UUID aggregateRootId = UUID.fromString(splitCsv[0]);
         int eventSequence = Integer.parseInt(splitCsv[1]);
-        String eventType = splitCsv[2];
-        String json = splitCsv[3];
+        long globalEventSequence = Long.parseLong(splitCsv[2]);
+        String eventType = splitCsv[3];
+        String json = splitCsv[4];
 
-        return new EventDto<>(aggregateRootId, eventSequence, eventType, json);
+        return new EventDto<>(aggregateRootId,
+                              eventSequence,
+                              globalEventSequence,
+                              eventType,
+                              json);
     }
 
     @Override
     public void save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
+        AtomicLong globalEventSequence = new AtomicLong(
+                stringsReaderAppender.readAllLines().count() + 1);
         List<EventDto<EVENT>> uncommittedEventDtos =
                 uncommittedEvents.map(event -> EventDto.from(
                                          aggregateId.id(),
-                                         event.eventSequence(), // max(sequence) from existing events)
+                                         event.eventSequence(),
+                                         globalEventSequence.getAndIncrement(),
                                          event))
                                  .toList();
         List<String> newCsvLines = uncommittedEventDtos
@@ -88,6 +98,21 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
                              .toList();
     }
 
+    @Override
+    public Stream<EVENT> allEventsAfter(long globalEventSequence) {
+        return allEventDtos()
+                .dropWhile(eventDto -> eventDto.getGlobalEventSequence() <= globalEventSequence)
+                .map(EventDto::toDomain);
+
+    }
+
+    /**
+     * Reads all the lines from the CSV
+     * <p>
+     * by definition, these will be in the correct global order
+     * because we are always appending to the "file"
+     *
+     */
     private Stream<EventDto<EVENT>> allEventDtos() {
         return stringsReaderAppender.readAllLines()
                                     .map(this::csvToEventDto);

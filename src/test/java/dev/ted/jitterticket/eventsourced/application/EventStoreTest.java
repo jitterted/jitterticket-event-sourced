@@ -5,7 +5,13 @@ import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvReaderAppender;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.CsvStringsEventStore;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
-import dev.ted.jitterticket.eventsourced.domain.concert.*;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
@@ -29,7 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class EventStoreTest {
 
@@ -114,6 +120,66 @@ class EventStoreTest {
 
             assertThat(concertEventStream)
                     .containsExactlyInAnyOrderElementsOf(expectedEvents);
+        }
+
+        @ParameterizedTest(name = "Using {0} Storage")
+        @MethodSource("concertEventStoreSupplier")
+        void noEventsReturnedForAllEventsAfterWhenEventStoreIsEmpty(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(0L);
+
+            assertThat(newEvents)
+                    .as("Event Store is empty, so should not return any events")
+                    .isEmpty();
+        }
+
+        @ParameterizedTest(name = "Using {0} Storage")
+        @MethodSource("concertEventStoreSupplier")
+        void oneEventReturnForOneEventInStoreAskingForEventsAfterZero(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+            ConcertId concertId = ConcertId.createRandom();
+            concertStore.save(concertId,
+                              MakeEvents.with()
+                                        .concertScheduled(concertId)
+                                        .stream());
+
+            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(0L);
+
+            assertThat(newEvents)
+                    .as("Event Store has 1 ConcertScheduled event, so should return that event")
+                    .extracting(ConcertEvent::concertId)
+                    .containsExactly(concertId);
+        }
+
+
+        @ParameterizedTest(name = "Using {0} Storage")
+        @MethodSource("concertEventStoreSupplier")
+        void oneOfTwoEventsReturnedFromStoreAskingForEventsAfterOne(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+            ConcertId concertId1 = ConcertId.createRandom();
+            ConcertId concertId2 = ConcertId.createRandom();
+            concertStore.save(concertId1,
+                              MakeEvents.with()
+                                        .concertScheduled(concertId1)
+                                        .stream());
+            concertStore.save(concertId2,
+                              MakeEvents.with()
+                                        .concertScheduled(concertId2)
+                                        .stream());
+
+            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(1L);
+
+            assertThat(newEvents)
+                    .as("Event Store has 2 ConcertScheduled events, but should only return the second event")
+                    .extracting(ConcertEvent::concertId)
+                    .containsExactly(concertId2);
+        }
+
+        @ParameterizedTest(name = "Using {0} Storage")
+        @MethodSource("concertEventStoreSupplier")
+        void noEventsReturnedForAllEventsAfterTheMaxGlobalEventSequence(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(2L);
+
+            assertThat(newEvents)
+                    .as("Max GES is 2, so asking for events AFTER 2 should not return any")
+                    .isEmpty();
         }
 
         @ParameterizedTest(name = "Using {0} Storage")

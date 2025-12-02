@@ -97,7 +97,7 @@ class EventDtoTest {
     void eventRoundTripConversion(Event sourceEvent) {
         EventDto<Event> eventDto = EventDto.from(UUID.randomUUID(),
                                                  14,
-                                                 sourceEvent);
+                                                 null, sourceEvent);
 
         Event actual = eventDto.toDomain();
 

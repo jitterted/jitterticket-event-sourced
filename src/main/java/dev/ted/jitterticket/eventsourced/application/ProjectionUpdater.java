@@ -67,6 +67,10 @@ public class ProjectionUpdater {
     //endregion
 
     public Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries() {
+        return catchUpForAllEventsInEventStore();
+    }
+
+    private Stream<ConcertSalesProjector.ConcertSalesSummary> catchUpForAllEventsInEventStore() {
         Stream<ConcertEvent> concertEventStream = concertEventStore.allEvents();
         return concertSalesProjector.project(Collections.emptyList(),
                                              concertEventStream
