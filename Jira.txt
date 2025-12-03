@@ -39,10 +39,10 @@
                         [ ] ConcertSalesProjector must be I/O-free as it is living in the Domain (or at least should be!), which means the project() method should accept and return ConcertSalesSummary object and not DB-specific ConcertSalesProjection objects
 
 ==> CURRENT TASK ==>
-                        [ ] EventStore needs allEventsAfter(globalEventSequence)
+                        [X] EventStore needs allEventsAfter(globalEventSequence)
                             [X] Memory
                             [X] CSV
-                            [ ] JDBC
+                            [X] JDBC
                         [ ] Catch up for new Projector in ProjectionUpdater's constructor
                         [ ] ? Convert test delegation in the JdbcEventStoreTest to abstract base class?
                     [ ] EventStore#save() returns last/highest/max global event sequence number as a result of the save

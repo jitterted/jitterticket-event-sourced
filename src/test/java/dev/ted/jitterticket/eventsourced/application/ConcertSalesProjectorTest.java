@@ -149,6 +149,20 @@ class ConcertSalesProjectorTest {
                 );
     }
 
+    @Test
+    void ticketsSoldWhenConcertScheduledEventNotSeenIsIgnoredThenProjectionIsEmpty() {
+        ConcertId concertId = ConcertId.createRandom();
+        TicketsSold ticketsSold = new TicketsSold(concertId, 1, 3, 75);
+
+        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
+        List<ConcertSalesProjection> concertSalesProjections =
+                concertSalesProjector.project(List.of(),
+                                              Stream.of(ticketsSold));
+
+        assertThat(concertSalesProjections)
+                .isEmpty();
+    }
+
 
     // TODO: test against the ConcertSalesSummary record "withers" directly,
     //       i.e., the plusTicketsSold and the reschedule

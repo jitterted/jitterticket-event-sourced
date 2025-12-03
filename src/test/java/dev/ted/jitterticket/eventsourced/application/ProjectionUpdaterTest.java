@@ -1,9 +1,11 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.EventStoreConfiguration;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjection;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.DataJdbcContainerTest;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.EventDboRepository;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadata;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -74,7 +76,6 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
 
         @Test
         void oneConcertScheduledAndNoTicketsPurchasedReturnsOneSalesSummaryWithZeroSales() {
-            ProjectionUpdater projectionUpdater = createProjectionUpdater();
             ConcertId concertId = ConcertId.createRandom();
             LocalDateTime showDateTime = LocalDateTime.of(2027, 2, 1, 20, 0);
             String artist = "First Concert";
@@ -86,8 +87,9 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
                                                                      LocalTime.now(),
                                                                      MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             concertEventStore.save(concertId, Stream.of(concertScheduled));
+            ProjectionUpdater projectionUpdater = createProjectionUpdater();
 
-            Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries = projectionUpdater.allSalesSummaries();
+            var allSalesSummaries = projectionUpdater.allSalesSummaries();
             assertThat(allSalesSummaries)
                     .containsExactly(
                             new ConcertSalesProjector.ConcertSalesSummary(
@@ -96,11 +98,16 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
                                     0, 0
                             )
                     );
+            assertThat(concertSalesProjectionRepository.count())
+                    .isEqualTo(1);
+            assertThat(projectionMetadataRepository.lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME))
+                    .isPresent()
+                    .get()
+                    .isEqualTo(1L);
         }
 
         @Test
         void oneConcertScheduledOneTicketPurchasedReturnsOneSalesSummaryWithTicketSales() {
-            ProjectionUpdater projectionUpdater = createProjectionUpdater();
             ConcertId concertId = ConcertId.createRandom();
             Stream<ConcertEvent> concertEventStream =
                     MakeEvents.with()
@@ -109,6 +116,7 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
                                       .ticketsSold(6))
                               .stream();
             concertEventStore.save(concertId, concertEventStream);
+            ProjectionUpdater projectionUpdater = createProjectionUpdater();
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
                     projectionUpdater.allSalesSummaries();
@@ -123,9 +131,62 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
     }
 
     @Nested
-    class ProjectionUpToDate {
+    class ProjectionDataPersisted {
 
+        @Test
+        void noNewEventsReturnsPersistedProjection() {
+            ConcertSalesProjection concertSalesProjection = new ConcertSalesProjection(
+                    ConcertId.createRandom().id(),
+                    "Artist Name", LocalDate.now(), 0, 0);
+            concertSalesProjectionRepository.save(concertSalesProjection);
+            projectionMetadataRepository.save(
+                    new ProjectionMetadata(
+                            ConcertSalesProjector.PROJECTION_NAME, 1));
 
+            ProjectionUpdater projectionUpdater =
+                    new ProjectionUpdater(new ConcertSalesProjector(),
+                                          InMemoryEventStore.forConcerts(),
+                                          projectionMetadataRepository,
+                                          concertSalesProjectionRepository);
+            var persistedSummaries = projectionUpdater.allSalesSummaries();
+
+            assertThat(persistedSummaries)
+                    .containsExactly(concertSalesProjection.toSummary());
+        }
+
+        @Test
+        void projectionUsesPreviouslyPersistedDataWhenUpdated() {
+            // event store's max GES = 2
+            // metadata: last GES = 1, 1 row in projection table
+            // => should catch up 1 missing events after GES=1
+            ConcertId concertId = ConcertId.createRandom();
+            ConcertSalesProjection concertSalesProjection = new ConcertSalesProjection(
+                    concertId.id(), "Artist Name", LocalDate.now(), 0, 0);
+            concertSalesProjectionRepository.save(concertSalesProjection);
+            projectionMetadataRepository.save(
+                    new ProjectionMetadata(
+                            ConcertSalesProjector.PROJECTION_NAME, 1));
+            var concertEventStore = InMemoryEventStore.forConcerts();
+            Stream<ConcertEvent> concertEventStream =
+                    MakeEvents.with()
+                              .concertScheduled(concertId, (concert) -> concert
+                                      .ticketPrice(35)
+                                      .ticketsSold(6))
+                              .stream();
+            concertEventStore.save(concertId, concertEventStream);
+            ProjectionUpdater projectionUpdater =
+                    new ProjectionUpdater(new ConcertSalesProjector(),
+                                          concertEventStore,
+                                          projectionMetadataRepository,
+                                          concertSalesProjectionRepository);
+
+            var summaries = projectionUpdater.allSalesSummaries();
+
+            assertThat(summaries)
+                    .hasSize(1)
+                    .extracting(ConcertSalesProjector.ConcertSalesSummary::totalQuantity)
+                    .containsExactly(6);
+        }
     }
 
     private ProjectionUpdater createProjectionUpdater() {

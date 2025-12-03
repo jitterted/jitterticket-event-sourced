@@ -1,3 +1,9 @@
+Wednesday, December 3, 2025
+===========================
+[Design Decision]
+* We do the "catch up" of the projection when it's instantiated (instead of lazily when `allSalesSummaries()` is invoked) so that the projected data is immediately available in the database, in case we want to use that as an integration point.
+
+
 Tuesday, December 2, 2025
 =========================
 [IntelliJ IDEA]

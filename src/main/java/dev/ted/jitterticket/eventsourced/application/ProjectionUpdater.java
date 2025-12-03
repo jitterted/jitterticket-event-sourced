@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjection;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadata;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -9,6 +10,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class ProjectionUpdater {
@@ -27,11 +29,25 @@ public class ProjectionUpdater {
         this.projectionMetadataRepository = projectionMetadataRepository;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
 
-        ensureMetadataExistsIn(projectionMetadataRepository);
+        this.ensureMetadataExistsIn(projectionMetadataRepository);
+
+        List<ConcertSalesProjector.ConcertSalesSummary> concertSalesSummaries
+                = this.catchUpForAllEventsInEventStore().toList();
+        concertSalesSummaries.forEach(css -> {
+            concertSalesProjectionRepository.deleteById(css.concertId().id());
+            concertSalesProjectionRepository.save(
+                    ConcertSalesProjection.createFromSummary(css));
+        });
+        if (!concertSalesSummaries.isEmpty()) {
+            ProjectionMetadata projectionMetadata = new ProjectionMetadata();
+            projectionMetadata.setProjectionName(ConcertSalesProjector.PROJECTION_NAME);
+            projectionMetadata.setLastGlobalEventSequenceSeen(1L);
+            projectionMetadataRepository.save(projectionMetadata);
+        }
 
     }
 
-    private static void ensureMetadataExistsIn(ProjectionMetadataRepository projectionMetadataRepository) {
+    private void ensureMetadataExistsIn(ProjectionMetadataRepository projectionMetadataRepository) {
         if (!projectionMetadataRepository
                 .existsByProjectionName(ConcertSalesProjector.PROJECTION_NAME)) {
             projectionMetadataRepository.saveIfNotExist(
@@ -63,16 +79,23 @@ public class ProjectionUpdater {
                                          InMemoryEventStore.forConcerts()
         );
     }
-
     //endregion
 
     public Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries() {
-        return catchUpForAllEventsInEventStore();
+        return concertSalesProjectionRepository
+                .findAll()
+                .stream()
+                .map(ConcertSalesProjection::toSummary);
     }
 
     private Stream<ConcertSalesProjector.ConcertSalesSummary> catchUpForAllEventsInEventStore() {
-        Stream<ConcertEvent> concertEventStream = concertEventStore.allEvents();
-        return concertSalesProjector.project(Collections.emptyList(),
+        long lastGlobalEventSequenceSeen = projectionMetadataRepository
+                .lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME)
+                .orElse(0L);
+        Stream<ConcertEvent> concertEventStream =
+                concertEventStore.allEventsAfter(lastGlobalEventSequenceSeen);
+        List<ConcertSalesProjection> loadedProjectionRows = Collections.emptyList();
+        return concertSalesProjector.project(loadedProjectionRows,
                                              concertEventStream
                                     )
                                     .stream()
