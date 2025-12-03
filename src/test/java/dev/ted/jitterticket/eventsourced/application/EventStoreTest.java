@@ -110,7 +110,7 @@ public class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        public void allEventsReturnsAllEventsForAllSavedAggregatesInGlobalSequenceOrder(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public void allEventsReturnsAllEventsForAllSavedAggregatesInGlobalEventSequenceOrder(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             Concert firstConcert = ConcertFactory.createConcertWithArtist("First Concert");
             List<ConcertEvent> expectedEvents = new ArrayList<>(firstConcert.uncommittedEvents().toList());
             concertStore.save(firstConcert);
@@ -131,7 +131,7 @@ public class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        void noEventsReturnedForAllEventsAfterWhenEventStoreIsEmpty(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public void noEventsReturnedForAllEventsAfterWhenEventStoreIsEmpty(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(0L);
 
             assertThat(newEvents)
@@ -141,7 +141,7 @@ public class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        void oneEventReturnForOneEventInStoreAskingForEventsAfterZero(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public void oneEventReturnForOneEventInStoreAskingForEventsAfterZero(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId = ConcertId.createRandom();
             concertStore.save(concertId,
                               MakeEvents.with()
@@ -159,7 +159,7 @@ public class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        void oneOfTwoEventsReturnedFromStoreAskingForEventsAfterOne(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public void oneOfTwoEventsReturnedFromStoreAskingForEventsAfterOne(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId1 = ConcertId.createRandom();
             ConcertId concertId2 = ConcertId.createRandom();
             concertStore.save(concertId1,
@@ -171,6 +171,8 @@ public class EventStoreTest {
                                         .concertScheduled(concertId2)
                                         .stream());
 
+            // need the last GES from the save to pass into the method below instead of 1L
+
             Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(1L);
 
             assertThat(newEvents)
@@ -181,7 +183,7 @@ public class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        void noEventsReturnedForAllEventsAfterTheMaxGlobalEventSequence(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public void noEventsReturnedForAllEventsAfterTheMaxGlobalEventSequence(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(2L);
 
             assertThat(newEvents)

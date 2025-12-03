@@ -51,7 +51,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                                  .map(dbo -> new EventDto<EVENT>(
                                          dbo.getAggregateRootId(),
                                          dbo.getEventSequence(),
-                                         null,
+                                         null, // TODO ensure this null goes away
                                          dbo.getEventType(),
                                          dbo.getJson()))
                                  .toList();
@@ -78,20 +78,27 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     @Override
     public Stream<EVENT> allEvents() {
-        return eventDboRepository.findAllByGlobalSequence()
-                                 .stream()
-                                 .map(dbo -> new EventDto<EVENT>(
-                                         dbo.getAggregateRootId(),
-                                         dbo.getEventSequence(),
-                                         null,
-                                         dbo.getEventType(),
-                                         dbo.getJson()))
-                                 .map(EventDto::toDomain)
-                                 .gather(Gatherers.filterAndCastTo(concreteEventClass));
+        return mapToDomainEvents(eventDboRepository
+                                         .findAllByGlobalSequence());
     }
 
     @Override
     public Stream<EVENT> allEventsAfter(long globalEventSequence) {
-        return Stream.empty();
+        return mapToDomainEvents(eventDboRepository
+                                         .findEventsAfter(globalEventSequence));
+
+    }
+
+    private Stream<EVENT> mapToDomainEvents(List<EventDbo> allByGlobalSequence) {
+        return allByGlobalSequence
+                .stream()
+                .map(dbo -> new EventDto<EVENT>(
+                        dbo.getAggregateRootId(),
+                        dbo.getEventSequence(),
+                        null, // TODO ensure this null goes away
+                        dbo.getEventType(),
+                        dbo.getJson()))
+                .map(EventDto::toDomain)
+                .gather(Gatherers.filterAndCastTo(concreteEventClass));
     }
 }

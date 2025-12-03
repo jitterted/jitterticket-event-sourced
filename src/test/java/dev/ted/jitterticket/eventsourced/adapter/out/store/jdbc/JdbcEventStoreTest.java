@@ -90,10 +90,34 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
         }
 
         @Test
-        void allEventsReturnsAllEventsForAllSavedAggregates() {
+        void allEventsReturnsAllEventsForAllSavedAggregatesInGlobalEventSequenceOrder() {
             delegatedConcertEventStoreAllEvents
-                    .allEventsReturnsAllEventsForAllSavedAggregatesInGlobalSequenceOrder(concertStore);
+                    .allEventsReturnsAllEventsForAllSavedAggregatesInGlobalEventSequenceOrder(concertStore);
         }
+
+        @Test
+        void noEventsReturnedForAllEventsAfterWhenEventStoreIsEmpty() {
+            delegatedConcertEventStoreAllEvents
+                    .noEventsReturnedForAllEventsAfterWhenEventStoreIsEmpty(concertStore);
+        }
+
+        @Test
+        void oneEventReturnForOneEventInStoreAskingForEventsAfterZero() {
+            delegatedConcertEventStoreAllEvents
+                    .oneEventReturnForOneEventInStoreAskingForEventsAfterZero(concertStore);
+        }
+
+        @Test
+        void oneOfTwoEventsReturnedFromStoreAskingForEventsAfterOne() {
+            delegatedConcertEventStoreAllEvents
+                    .oneOfTwoEventsReturnedFromStoreAskingForEventsAfterOne(concertStore);
+        }
+
+//        @Test
+//        void noEventsReturnedForAllEventsAfterTheMaxGlobalEventSequence() {
+//            delegatedConcertEventStoreAllEvents
+//                    .noEventsReturnedForAllEventsAfterTheMaxGlobalEventSequence(concertStore);
+//        }
 
         @Test
         void emptyListReturnedForUnknownAggregateId() {

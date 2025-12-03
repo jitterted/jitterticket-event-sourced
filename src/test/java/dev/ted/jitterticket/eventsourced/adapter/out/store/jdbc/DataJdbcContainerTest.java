@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
@@ -16,6 +17,9 @@ public abstract class DataJdbcContainerTest {
 
     @ServiceConnection
     static PostgreSQLContainer<?> postgres;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     static {
         postgres = new PostgreSQLContainer<>("postgres:17.6")
@@ -33,6 +37,21 @@ public abstract class DataJdbcContainerTest {
                 FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
                     EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE';
                 END LOOP;
+            END $$;
+        """);
+    }
+
+    @BeforeEach
+    public void restartSequence() {
+        jdbcTemplate.execute("""
+            DO $$
+            DECLARE
+                seq_name text;
+            BEGIN
+                SELECT pg_get_serial_sequence('events', 'global_sequence') INTO seq_name;
+                IF seq_name IS NOT NULL THEN
+                    EXECUTE 'ALTER SEQUENCE ' || seq_name || ' RESTART WITH 1';
+                END IF;
             END $$;
         """);
     }
