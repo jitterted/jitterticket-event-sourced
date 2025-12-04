@@ -1,3 +1,9 @@
+Thursday, December 4, 2025
+==========================
+[IntelliJ IDEA]
+    [ ] Presentation Assistant doesn't display the shortcut for dialogs until after the dialog goes away, e.g., Ctrl+Shift+V
+
+
 Wednesday, December 3, 2025
 ===========================
 [Design Decision]

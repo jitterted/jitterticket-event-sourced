@@ -15,13 +15,16 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ConcertSalesProjector {
 
     static final String PROJECTION_NAME = "concert_sales_projector";
 
-    private final Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
+    @Deprecated // should be a local variable
+    private Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
 
     private ProjectionMetadataRepository projectionMetadataRepository;
     private ConcertSalesProjectionRepository concertSalesProjectionRepository;
@@ -78,14 +81,23 @@ public class ConcertSalesProjector {
     //     projectionRepository.saveAll(updatedProjectionRows)
     //     metadataRepository.save(projectionName, lastGlobalEventSequence)
 
-    public List<ConcertSalesProjection> project(List<ConcertSalesProjection> loadedProjectionRows, Stream<ConcertEvent> concertEvents) {
-        salesSummaryMap.clear(); // TODO: convert/store the incoming loaded projection
+    public List<ConcertSalesProjection> project(List<ConcertSalesProjection> loadedProjectionRows,
+                                                Stream<ConcertEvent> concertEvents) {
+        loadPreviousProjection(loadedProjectionRows);
         apply(concertEvents);
         return salesSummaryMap
                 .values()
                 .stream()
                 .map(ConcertSalesProjection::createFromSummary)
                 .toList();
+    }
+
+    private void loadPreviousProjection(List<ConcertSalesProjection> loadedProjectionRows) {
+        salesSummaryMap = loadedProjectionRows
+                .stream()
+                .map(ConcertSalesProjection::toSummary)
+                .collect(Collectors.toMap(ConcertSalesSummary::concertId,
+                                          Function.identity()));
     }
 
     @Deprecated // should be for internal use only

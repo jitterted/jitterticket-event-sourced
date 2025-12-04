@@ -28,14 +28,17 @@ public class MakeEvents {
 
     public MakeEvents concertScheduled(ConcertId concertId) {
         ConcertScheduled concertScheduled =
-                createConcertScheduled(concertId, 42);
+                createConcertScheduled(concertId, 42, "Don't Care Artist Name");
         events.add(concertScheduled);
         return this;
     }
 
     public MakeEvents concertScheduled(ConcertId concertId, Function<ConcertCustomizer, ConcertCustomizer> concertCustomizer) {
         ConcertCustomizer customizer = concertCustomizer.apply(new ConcertCustomizer());
-        ConcertScheduled concertScheduled = createConcertScheduled(concertId, customizer.ticketPrice);
+        ConcertScheduled concertScheduled =
+                createConcertScheduled(concertId,
+                                       customizer.ticketPrice,
+                                       customizer.artistName);
         events.add(concertScheduled);
         customizer.ticketsSoldQuantity
                 .stream()
@@ -48,10 +51,10 @@ public class MakeEvents {
         return this;
     }
 
-    private ConcertScheduled createConcertScheduled(ConcertId concertId, int ticketPrice) {
+    private ConcertScheduled createConcertScheduled(ConcertId concertId, int ticketPrice, String artistName) {
         return new ConcertScheduled(concertId,
                                     eventSequence++,
-                                    "Don't Care Artist Name",
+                                    artistName,
                                     ticketPrice,
                                     LocalDateTime.now(),
                                     LocalTime.now(),
@@ -68,10 +71,15 @@ public class MakeEvents {
         return this;
     }
 
+    public List<ConcertEvent> list() {
+        return List.copyOf(events);
+    }
+
     public static class ConcertCustomizer {
 
-        private int ticketPrice;
+        private int ticketPrice = 42; // default
         private final List<Integer> ticketsSoldQuantity = new ArrayList<>();
+        private String artistName = "Don't Care Artist Name"; // default
 
         public ConcertCustomizer ticketPrice(int ticketPrice) {
             this.ticketPrice = ticketPrice;
@@ -80,6 +88,11 @@ public class MakeEvents {
 
         public ConcertCustomizer ticketsSold(int quantity) {
             ticketsSoldQuantity.add(quantity);
+            return this;
+        }
+
+        public ConcertCustomizer artistNamed(String artistName) {
+            this.artistName = artistName;
             return this;
         }
     }

@@ -150,6 +150,40 @@ class ConcertSalesProjectorTest {
     }
 
     @Test
+    void updatesPreviouslyComputedProjectionWithNewEvents() {
+        ConcertId concertId = ConcertId.createRandom();
+        List<ConcertEvent> concertEvents =
+                MakeEvents.with()
+                          .concertScheduled(concertId, (concert) -> concert
+                                  .artistNamed("Artist Name")
+                                  .ticketPrice(35)
+                                  .ticketsSold(6))
+                          .list();
+        assertThat(concertEvents).hasSize(2);
+        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
+        ConcertSalesProjection expectedProjection =
+                concertSalesProjector.project(
+                                             Collections.emptyList(),
+                                             concertEvents.stream())
+                                     .getFirst();
+
+        List<ConcertSalesProjection> initialProjection =
+                concertSalesProjector.project(
+                                             Collections.emptyList(),
+                                             Stream.of(concertEvents.getFirst())
+                                     );
+
+        ConcertSalesProjection finalProjection =
+                concertSalesProjector.project(initialProjection,
+                                              Stream.of(concertEvents.getLast())
+                ).getFirst();
+
+        assertThat(finalProjection)
+                .usingRecursiveComparison()
+                .isEqualTo(expectedProjection);
+    }
+
+    @Test
     void ticketsSoldWhenConcertScheduledEventNotSeenIsIgnoredThenProjectionIsEmpty() {
         ConcertId concertId = ConcertId.createRandom();
         TicketsSold ticketsSold = new TicketsSold(concertId, 1, 3, 75);
