@@ -43,7 +43,7 @@
                             [X] Memory
                             [X] CSV
                             [X] JDBC
-                        [ ] Catch up for new Projector in ProjectionUpdater's constructor
+                        [X] Catch up for new Projector in ProjectionUpdater's constructor
                         [ ] ? Convert test delegation in the JdbcEventStoreTest to abstract base class?
                     [ ] EventStore#save() returns last/highest/max global event sequence number as a result of the save
                     [ ] Projector.apply(events, lastGlobalEventSequence)

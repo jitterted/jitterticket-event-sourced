@@ -3,6 +3,21 @@ Thursday, December 4, 2025
 [IntelliJ IDEA]
     [ ] Presentation Assistant doesn't display the shortcut for dialogs until after the dialog goes away, e.g., Ctrl+Shift+V
 
+[Design Decision]
+  For persisting the projections' state...
+     Current candidate design target:
+       * generic persistence, just stores/loads some convenient serialized format
+       * pluggable persisters, e.g., custom schema in DB or JSON or YAML (not!) or S3 blob
+      List<ConcertSalesSummary> summaries = Projections.load("concert sales", ConcertSalesSummary.class)
+
+     Other ideas:
+         * Or, one custom projection handler per projector:
+              ConcertSalesSummaryProjection.allSummaries()
+                -> new ConcertSalesSummaryProjection(concertSalesSummaryProjector)
+
+         * This won't work because the Projector has no state (it's a function)
+             ConcertSalesProjector projector = Pants.projectorFor("concert sales")
+             List<ConcertSalesSummary> summaries = projector.allSummaries()
 
 Wednesday, December 3, 2025
 ===========================

@@ -12,17 +12,17 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ProjectionUpdater {
+public class Projections {
 
     private final ConcertSalesProjector concertSalesProjector;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
     private final ProjectionMetadataRepository projectionMetadataRepository;
     private final ConcertSalesProjectionRepository concertSalesProjectionRepository;
 
-    public ProjectionUpdater(ConcertSalesProjector concertSalesProjector,
-                             EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
-                             ProjectionMetadataRepository projectionMetadataRepository,
-                             ConcertSalesProjectionRepository concertSalesProjectionRepository) {
+    public Projections(ConcertSalesProjector concertSalesProjector,
+                       EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
+                       ProjectionMetadataRepository projectionMetadataRepository,
+                       ConcertSalesProjectionRepository concertSalesProjectionRepository) {
         this.concertSalesProjector = concertSalesProjector;
         this.concertEventStore = concertEventStore;
         this.projectionMetadataRepository = projectionMetadataRepository;
@@ -93,7 +93,8 @@ public class ProjectionUpdater {
                 .orElse(0L);
         Stream<ConcertEvent> concertEventStream =
                 concertEventStore.allEventsAfter(lastGlobalEventSequenceSeen);
-        List<ConcertSalesProjection> loadedProjectionRows = null;
+        List<ConcertSalesProjection> loadedProjectionRows =
+                concertSalesProjectionRepository.findAll();
         return concertSalesProjector.project(loadedProjectionRows,
                                              concertEventStream
                                     )

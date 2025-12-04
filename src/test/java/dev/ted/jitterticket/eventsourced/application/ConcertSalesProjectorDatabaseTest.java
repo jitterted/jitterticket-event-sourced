@@ -35,9 +35,9 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
         EventStoreSpy eventStoreSpy = new EventStoreSpy();
 
         ConcertSalesProjector concertSalesProjector =
-                ProjectionUpdater.createForTest(eventStoreSpy,
-                                                concertSalesProjectionRepository,
-                                                projectionMetadataRepository);
+                Projections.createForTest(eventStoreSpy,
+                                          concertSalesProjectionRepository,
+                                          projectionMetadataRepository);
 
         eventStoreSpy
                 .assertSubscribeCalledWithLastGlobalSequenceOf(0);
@@ -51,9 +51,9 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
                                        9L);
         projectionMetadataRepository.save(projectionMetadata);
         ConcertSalesProjector concertSalesProjector =
-                ProjectionUpdater.createForTest(eventStoreSpy,
-                                                concertSalesProjectionRepository,
-                                                projectionMetadataRepository);
+                Projections.createForTest(eventStoreSpy,
+                                          concertSalesProjectionRepository,
+                                          projectionMetadataRepository);
 
         eventStoreSpy
                 .assertSubscribeCalledWithLastGlobalSequenceOf(9L);
@@ -78,7 +78,7 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
                                            1L);
             projectionMetadataRepository.save(projectionMetadata);
             ConcertSalesProjector concertSalesProjector =
-                    ProjectionUpdater.createForTest(
+                    Projections.createForTest(
                             projectionMetadataRepository,
                             concertSalesProjectionRepository
                             );

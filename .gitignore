@@ -9,3 +9,4 @@ target/
 *.iml
 *.ipr
 events/
+/projector-with-separated-concerns.svg

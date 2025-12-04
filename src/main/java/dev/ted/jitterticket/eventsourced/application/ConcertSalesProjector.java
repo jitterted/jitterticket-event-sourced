@@ -26,9 +26,7 @@ public class ConcertSalesProjector {
     @Deprecated // should be a local variable
     private Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
 
-    private ProjectionMetadataRepository projectionMetadataRepository;
     private ConcertSalesProjectionRepository concertSalesProjectionRepository;
-    private EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
 
     public ConcertSalesProjector() {
     }
@@ -36,13 +34,11 @@ public class ConcertSalesProjector {
     ConcertSalesProjector(ProjectionMetadataRepository projectionMetadataRepository,
                           ConcertSalesProjectionRepository concertSalesProjectionRepository,
                           EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        this.projectionMetadataRepository = projectionMetadataRepository;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
-        this.concertEventStore = concertEventStore;
-        long lastGlobalEventSequenceSeen = projectionMetadataRepository
-                .lastGlobalEventSequenceSeenByProjectionName(PROJECTION_NAME)
-                .orElse(0L);
-        concertEventStore.subscribe(this, lastGlobalEventSequenceSeen);
+        //        long lastGlobalEventSequenceSeen = projectionMetadataRepository
+//                .lastGlobalEventSequenceSeenByProjectionName(PROJECTION_NAME)
+//                .orElse(0L);
+//        concertEventStore.subscribe(this, lastGlobalEventSequenceSeen);
     }
 
     @Deprecated
@@ -50,7 +46,7 @@ public class ConcertSalesProjector {
         return new ConcertSalesProjector(null, null, concertEventStore);
     }
 
-    @Deprecated // moves to ProjectionUpdater
+    @Deprecated // moves to Projections
     public Stream<ConcertSalesSummary> allSalesSummaries() {
         return concertSalesProjectionRepository
                 .findAll()
@@ -60,7 +56,7 @@ public class ConcertSalesProjector {
 
     // class ProjectorDispatcher (depends on EventStore)
     //     sends events (uncommitted ones that were just persisted) to...
-    //     class ProjectionUpdater (depends on Projection & Metadata Repositories)
+    //     class Projections (depends on Projection & Metadata Repositories)
     //         load last global event sequence (from metadata repo)
     //         load projection rows from database (from projection repo)
     //              ==> call (dispatch to) Projector.project(rows, events)

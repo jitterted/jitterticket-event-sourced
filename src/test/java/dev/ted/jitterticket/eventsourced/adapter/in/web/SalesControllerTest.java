@@ -2,7 +2,7 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
-import dev.ted.jitterticket.eventsourced.application.ProjectionUpdater;
+import dev.ted.jitterticket.eventsourced.application.Projections;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.junit.jupiter.api.Disabled;
@@ -23,7 +23,7 @@ class SalesControllerTest {
     @Test
     void salesViewShowsSummaryOfSampleDataConcertSales() {
         var concertStore = InMemoryEventStore.forConcerts();
-        ConcertSalesProjector concertSummaryProjector = ProjectionUpdater.createForTest(concertStore);
+        ConcertSalesProjector concertSummaryProjector = Projections.createForTest(concertStore);
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.scheduleConcertWith(
                 concertId,

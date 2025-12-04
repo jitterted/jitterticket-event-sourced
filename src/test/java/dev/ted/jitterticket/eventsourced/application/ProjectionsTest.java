@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.*;
 
 @Import(EventStoreConfiguration.class)
-public class ProjectionUpdaterTest extends DataJdbcContainerTest {
+public class ProjectionsTest extends DataJdbcContainerTest {
 
     private static final int MAX_CAPACITY = 100;
     private static final int MAX_TICKETS_PER_PURCHASE = 8;
@@ -56,10 +56,10 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
 
         @Test
         void noEventsExistReturnsEmptyProjectionWithNewlyCreatedMetadata() {
-            ProjectionUpdater projectionUpdater = createProjectionUpdater();
+            Projections projections = createProjectionUpdater();
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
-                    projectionUpdater.allSalesSummaries();
+                    projections.allSalesSummaries();
 
             assertThat(allSalesSummaries)
                     .isEmpty();
@@ -87,9 +87,9 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
                                                                      LocalTime.now(),
                                                                      MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             concertEventStore.save(concertId, Stream.of(concertScheduled));
-            ProjectionUpdater projectionUpdater = createProjectionUpdater();
+            Projections projections = createProjectionUpdater();
 
-            var allSalesSummaries = projectionUpdater.allSalesSummaries();
+            var allSalesSummaries = projections.allSalesSummaries();
             assertThat(allSalesSummaries)
                     .containsExactly(
                             new ConcertSalesProjector.ConcertSalesSummary(
@@ -116,10 +116,10 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
                                       .ticketsSold(6))
                               .stream();
             concertEventStore.save(concertId, concertEventStream);
-            ProjectionUpdater projectionUpdater = createProjectionUpdater();
+            Projections projections = createProjectionUpdater();
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
-                    projectionUpdater.allSalesSummaries();
+                    projections.allSalesSummaries();
 
             assertThat(allSalesSummaries)
                     .extracting(ConcertSalesProjector.ConcertSalesSummary::totalQuantity,
@@ -143,12 +143,12 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
                     new ProjectionMetadata(
                             ConcertSalesProjector.PROJECTION_NAME, 1));
 
-            ProjectionUpdater projectionUpdater =
-                    new ProjectionUpdater(new ConcertSalesProjector(),
-                                          InMemoryEventStore.forConcerts(),
-                                          projectionMetadataRepository,
-                                          concertSalesProjectionRepository);
-            var persistedSummaries = projectionUpdater.allSalesSummaries();
+            Projections projections =
+                    new Projections(new ConcertSalesProjector(),
+                                    InMemoryEventStore.forConcerts(),
+                                    projectionMetadataRepository,
+                                    concertSalesProjectionRepository);
+            var persistedSummaries = projections.allSalesSummaries();
 
             assertThat(persistedSummaries)
                     .containsExactly(concertSalesProjection.toSummary());
@@ -174,26 +174,25 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
                                       .ticketsSold(6))
                               .stream();
             concertEventStore.save(concertId, concertEventStream);
-            ProjectionUpdater projectionUpdater =
-                    new ProjectionUpdater(new ConcertSalesProjector(),
-                                          concertEventStore,
-                                          projectionMetadataRepository,
-                                          concertSalesProjectionRepository);
+            Projections projections =
+                    new Projections(new ConcertSalesProjector(),
+                                    concertEventStore,
+                                    projectionMetadataRepository,
+                                    concertSalesProjectionRepository);
 
-            var summaries = projectionUpdater.allSalesSummaries();
+            var summaries = projections.allSalesSummaries();
 
             assertThat(summaries)
-                    .hasSize(1)
                     .extracting(ConcertSalesProjector.ConcertSalesSummary::totalQuantity)
                     .containsExactly(6);
         }
     }
 
-    private ProjectionUpdater createProjectionUpdater() {
-        return new ProjectionUpdater(new ConcertSalesProjector(),
-                                     concertEventStore,
-                                     projectionMetadataRepository,
-                                     concertSalesProjectionRepository);
+    private Projections createProjectionUpdater() {
+        return new Projections(new ConcertSalesProjector(),
+                               concertEventStore,
+                               projectionMetadataRepository,
+                               concertSalesProjectionRepository);
     }
 
     @Deprecated // need to pull out any remaining useful notes
@@ -272,7 +271,7 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
             TicketsSold ticketsSold2ForConcert2 = new TicketsSold(concertId2, 2, quantity3, quantity3 * ticketPrice2);
             concertEventStore.save(concertId2, Stream.of(concertScheduled2, ticketsSold1ForConcert2, ticketsSold2ForConcert2));
             ConcertSalesProjector concertSalesProjector =
-                    ProjectionUpdater.createForTest(concertEventStore);
+                    Projections.createForTest(concertEventStore);
 
             var expectedSummary1 = new ConcertSalesProjector.ConcertSalesSummary(
                     concertId1,
@@ -324,7 +323,7 @@ public class ProjectionUpdaterTest extends DataJdbcContainerTest {
                     concertEventStore, ticketPrice);
             Concert concert = concertEventStore.findById(concertId).orElseThrow();
             ConcertSalesProjector concertSalesProjector =
-                    ProjectionUpdater.createForTest(concertEventStore);
+                    Projections.createForTest(concertEventStore);
             return new Fixture(concertId, concert, concertSalesProjector, concertEventStore);
         }
 
