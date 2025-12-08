@@ -23,7 +23,10 @@ class SalesControllerTest {
     @Test
     void salesViewShowsSummaryOfSampleDataConcertSales() {
         var concertStore = InMemoryEventStore.forConcerts();
-        ConcertSalesProjector concertSummaryProjector = Projections.createForTest(concertStore);
+        Projections projections = new Projections(new ConcertSalesProjector(),
+                                                  concertStore,
+                                                  null, null);
+
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.scheduleConcertWith(
                 concertId,
@@ -32,7 +35,7 @@ class SalesControllerTest {
                 LocalDateTime.of(2025, 12, 26, 19, 30),
                 LocalTime.of(18, 30)));
 
-        SalesController controller = new SalesController(concertSummaryProjector);
+        SalesController controller = new SalesController(projections);
 
         Model model = new ConcurrentModel();
         String viewName = controller.viewConcertSalesSummary(model);

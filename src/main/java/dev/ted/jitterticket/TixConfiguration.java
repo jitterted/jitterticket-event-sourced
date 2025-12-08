@@ -1,7 +1,10 @@
 package dev.ted.jitterticket;
 
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
+import dev.ted.jitterticket.eventsourced.application.Projections;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
@@ -33,8 +36,14 @@ public class TixConfiguration {
     }
 
     @Bean
-    ConcertSalesProjector concertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return ConcertSalesProjector.createNew(concertStore);
+    Projections concertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+                                      ProjectionMetadataRepository projectionMetadataRepository,
+                                      ConcertSalesProjectionRepository concertSalesProjectionRepository) {
+        ConcertSalesProjector concertSalesProjector = ConcertSalesProjector.createNew(concertStore);
+        return new Projections(concertSalesProjector,
+                               concertStore,
+                               projectionMetadataRepository,
+                               concertSalesProjectionRepository);
     }
 
     @Bean

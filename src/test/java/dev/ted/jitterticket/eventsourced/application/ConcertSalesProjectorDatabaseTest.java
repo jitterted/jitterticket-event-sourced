@@ -30,33 +30,37 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
     @Autowired
     ProjectionMetadataRepository projectionMetadataRepository;
 
-    @Test
-    void newSalesProjectorSubscribesWithLastGlobalEventSequenceOfZero() {
-        EventStoreSpy eventStoreSpy = new EventStoreSpy();
+    @Nested
+    class ProjectorInitiatesSubscription {
+        @Test
+        void newSalesProjectorSubscribesWithLastGlobalEventSequenceOfZero() {
+            EventStoreSpy eventStoreSpy = new EventStoreSpy();
 
-        ConcertSalesProjector concertSalesProjector =
-                Projections.createForTest(eventStoreSpy,
-                                          concertSalesProjectionRepository,
-                                          projectionMetadataRepository);
+            ConcertSalesProjector concertSalesProjector =
+                    Projections.createForTest(eventStoreSpy,
+                                              concertSalesProjectionRepository,
+                                              projectionMetadataRepository);
 
-        eventStoreSpy
-                .assertSubscribeCalledWithLastGlobalSequenceOf(0);
-    }
+            eventStoreSpy
+                    .assertSubscribeCalledWithLastGlobalSequenceOf(0);
+        }
 
-    @Test
-    void subscribeWith9WhenLastGlobalSequenceInProjectionTableHas9() {
-        EventStoreSpy eventStoreSpy = new EventStoreSpy();
-        ProjectionMetadata projectionMetadata =
-                new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
-                                       9L);
-        projectionMetadataRepository.save(projectionMetadata);
-        ConcertSalesProjector concertSalesProjector =
-                Projections.createForTest(eventStoreSpy,
-                                          concertSalesProjectionRepository,
-                                          projectionMetadataRepository);
+        @Test
+        void subscribeWith9WhenLastGlobalSequenceInProjectionTableHas9() {
+            EventStoreSpy eventStoreSpy = new EventStoreSpy();
+            ProjectionMetadata projectionMetadata =
+                    new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
+                                           9L);
+            projectionMetadataRepository.save(projectionMetadata);
+            ConcertSalesProjector concertSalesProjector =
+                    Projections.createForTest(eventStoreSpy,
+                                              concertSalesProjectionRepository,
+                                              projectionMetadataRepository);
 
-        eventStoreSpy
-                .assertSubscribeCalledWithLastGlobalSequenceOf(9L);
+            eventStoreSpy
+                    .assertSubscribeCalledWithLastGlobalSequenceOf(9L);
+        }
+
     }
 
     @Nested
