@@ -1,3 +1,19 @@
+Monday, December 8, 2025
+========================
+
+
+
+[Design Decision]
+
+* We have been storing the Global Event Sequence in the EventDto only for the sake of the InMemoryEventStore and the CsvStringsEventStore--the JdbcEventStore does not need it as filtering to return events after a GES is done in the database query.
+    * Therefore, we can remove the GES from the EventDto and change:
+        * InMemoryEventStore: duplicate the event storage to store in a List, which would be treated as append-only, and then the GES = Index + 1 (e.g., if the item is list[3] that is GES 4, since GES is 1-based)
+        * CsvStringsEventStore: do the filtering (dropping) of events in the reading of the CSV, before mapping to EventDto, e.g., stringsReaderAppender
+                    .readAllLines()
+                    .dropWhile(line.split(","...) where the column holding the GES > requestedGES)
+                    .map(this::csvToEventDto);
+
+
 Thursday, December 4, 2025
 ==========================
 [IntelliJ IDEA]

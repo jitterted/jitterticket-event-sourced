@@ -29,7 +29,8 @@ public class InMemoryEventStore<
         EventStore<ID, EVENT, AGGREGATE> {
 
     private final Map<ID, List<EventDto<EVENT>>> idToEventDtoMap = new HashMap<>();
-    private long globalEventSequence = 0L; // emulate what the database does: starting at 1
+    // emulate what the database does by effectively starting at 1, but we assign 0 as it gets incremented prior to use
+    private long globalEventSequence = 0L;
 
     private InMemoryEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         super(eventsToAggregate);

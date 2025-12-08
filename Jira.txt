@@ -45,7 +45,7 @@
                         [ ] ? Convert test delegation in the JdbcEventStoreTest to abstract base class?
 
 ==> CURRENT TASK ==>
-                    [ ] EventStore#save() returns last/highest/max global event sequence number as a result of the save
+                    [X] EventStore#save() returns last/highest/max global event sequence number as a result of the save
                     [ ] Projector.apply(events, lastGlobalEventSequence)
                     [ ] EventStore#subscribe(projector, lastGES)
                 [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
