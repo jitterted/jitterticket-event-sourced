@@ -38,7 +38,9 @@ public class Projections {
         updatePersistentProjection(projectionMetadataRepository,
                                    concertSalesProjectionRepository,
                                    concertSalesSummaries);
-        // subscribe to event store as of last GES
+
+        concertEventStore.subscribe(
+                concertSalesProjector, lastGlobalEventSequenceSeen);
     }
 
     private static void updatePersistentProjection(ProjectionMetadataRepository projectionMetadataRepository, ConcertSalesProjectionRepository concertSalesProjectionRepository, List<ConcertSalesProjector.ConcertSalesSummary> concertSalesSummaries) {
@@ -64,32 +66,6 @@ public class Projections {
                     ConcertSalesProjector.PROJECTION_NAME, 0L);
         }
     }
-
-    //region Creation Methods for Testing
-    @Deprecated // require the ProjectionMetadataRepository or create an in-memory version
-    public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        return new ConcertSalesProjector(null, null, concertEventStore);
-    }
-
-
-    public static ConcertSalesProjector createForTest(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
-                                                      ConcertSalesProjectionRepository concertSalesProjectionRepository,
-                                                      ProjectionMetadataRepository projectionMetadataRepository) {
-        return new ConcertSalesProjector(projectionMetadataRepository,
-                                         concertSalesProjectionRepository,
-                                         concertEventStore);
-    }
-
-    /**
-     * Supplies its own in-memory Event Store for Concerts
-     */
-    public static ConcertSalesProjector createForTest(ProjectionMetadataRepository projectionMetadataRepository, ConcertSalesProjectionRepository concertSalesProjectionRepository) {
-        return new ConcertSalesProjector(projectionMetadataRepository,
-                                         concertSalesProjectionRepository,
-                                         InMemoryEventStore.forConcerts()
-        );
-    }
-    //endregion
 
     public Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries() {
         return concertSalesProjectionRepository

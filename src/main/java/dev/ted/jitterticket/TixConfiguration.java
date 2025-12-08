@@ -39,8 +39,7 @@ public class TixConfiguration {
     Projections concertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
                                       ProjectionMetadataRepository projectionMetadataRepository,
                                       ConcertSalesProjectionRepository concertSalesProjectionRepository) {
-        ConcertSalesProjector concertSalesProjector = ConcertSalesProjector.createNew(concertStore);
-        return new Projections(concertSalesProjector,
+        return new Projections(new ConcertSalesProjector(),
                                concertStore,
                                projectionMetadataRepository,
                                concertSalesProjectionRepository);

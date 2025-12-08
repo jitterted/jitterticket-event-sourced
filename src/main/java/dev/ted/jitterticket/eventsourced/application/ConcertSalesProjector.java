@@ -1,10 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjection;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
-import dev.ted.jitterticket.eventsourced.application.port.EventStore;
-import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
@@ -25,34 +21,6 @@ public class ConcertSalesProjector {
 
     @Deprecated // should be a local variable
     private Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
-
-    private ConcertSalesProjectionRepository concertSalesProjectionRepository;
-
-    public ConcertSalesProjector() {
-    }
-
-    ConcertSalesProjector(ProjectionMetadataRepository projectionMetadataRepository,
-                          ConcertSalesProjectionRepository concertSalesProjectionRepository,
-                          EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        this.concertSalesProjectionRepository = concertSalesProjectionRepository;
-        //        long lastGlobalEventSequenceSeen = projectionMetadataRepository
-//                .lastGlobalEventSequenceSeenByProjectionName(PROJECTION_NAME)
-//                .orElse(0L);
-//        concertEventStore.subscribe(this, lastGlobalEventSequenceSeen);
-    }
-
-    @Deprecated
-    public static ConcertSalesProjector createNew(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        return new ConcertSalesProjector(null, null, concertEventStore);
-    }
-
-    @Deprecated // moves to Projections
-    public Stream<ConcertSalesSummary> allSalesSummaries() {
-        return concertSalesProjectionRepository
-                .findAll()
-                .stream()
-                .map(ConcertSalesProjection::toSummary);
-    }
 
     // class ProjectorDispatcher (depends on EventStore)
     //     sends events (uncommitted ones that were just persisted) to...

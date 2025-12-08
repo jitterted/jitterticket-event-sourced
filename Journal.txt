@@ -1,7 +1,8 @@
 Monday, December 8, 2025
 ========================
 
-
+[IntelliJ IDEA]
+    [ ] bug: when doing a CMD+B (go to usage) from a static creation method in a production class to a SINGLE usage in another class (test) when the window is split into two, the caret does not move to the other pane. Works fine if not split.
 
 [Design Decision]
 
