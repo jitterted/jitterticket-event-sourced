@@ -30,10 +30,22 @@ public class Projections {
 
         this.ensureMetadataExistsIn(projectionMetadataRepository);
 
+        long lastGlobalEventSequenceSeen = this.projectionMetadataRepository
+                .lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME)
+                .orElse(0L);
         List<ConcertSalesProjector.ConcertSalesSummary> concertSalesSummaries
-                = this.catchUpForAllEventsInEventStore().toList();
+                = this.catchUpForAllEventsInEventStore(lastGlobalEventSequenceSeen).toList();
+        updatePersistentProjection(projectionMetadataRepository,
+                                   concertSalesProjectionRepository,
+                                   concertSalesSummaries);
+        // subscribe to event store as of last GES
+    }
+
+    private static void updatePersistentProjection(ProjectionMetadataRepository projectionMetadataRepository, ConcertSalesProjectionRepository concertSalesProjectionRepository, List<ConcertSalesProjector.ConcertSalesSummary> concertSalesSummaries) {
         concertSalesSummaries.forEach(css -> {
-            concertSalesProjectionRepository.deleteById(css.concertId().id());
+            // TODO: improve how we do this: upsert instead of delete/insert
+            concertSalesProjectionRepository.deleteById(
+                    css.concertId().id());
             concertSalesProjectionRepository.save(
                     ConcertSalesProjection.createFromSummary(css));
         });
@@ -43,7 +55,6 @@ public class Projections {
             projectionMetadata.setLastGlobalEventSequenceSeen(1L);
             projectionMetadataRepository.save(projectionMetadata);
         }
-
     }
 
     private void ensureMetadataExistsIn(ProjectionMetadataRepository projectionMetadataRepository) {
@@ -87,10 +98,7 @@ public class Projections {
                 .map(ConcertSalesProjection::toSummary);
     }
 
-    private Stream<ConcertSalesProjector.ConcertSalesSummary> catchUpForAllEventsInEventStore() {
-        long lastGlobalEventSequenceSeen = projectionMetadataRepository
-                .lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME)
-                .orElse(0L);
+    private Stream<ConcertSalesProjector.ConcertSalesSummary> catchUpForAllEventsInEventStore(long lastGlobalEventSequenceSeen) {
         Stream<ConcertEvent> concertEventStream =
                 concertEventStore.allEventsAfter(lastGlobalEventSequenceSeen);
         List<ConcertSalesProjection> loadedProjectionRows =

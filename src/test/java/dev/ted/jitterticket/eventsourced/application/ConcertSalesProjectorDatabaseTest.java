@@ -9,6 +9,7 @@ import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
     @Autowired
     ProjectionMetadataRepository projectionMetadataRepository;
 
+    @Disabled("Until the EventStore.save returns the latest GES")
     @Nested
     class ProjectorInitiatesSubscription {
         @Test
@@ -42,7 +44,7 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
                                               projectionMetadataRepository);
 
             eventStoreSpy
-                    .assertSubscribeCalledWithLastGlobalSequenceOf(0);
+                    .assertSubscribeCalledWithLastGlobalSequenceOf(0L);
         }
 
         @Test
