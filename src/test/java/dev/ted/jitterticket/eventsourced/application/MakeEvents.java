@@ -51,15 +51,11 @@ public class MakeEvents {
         return this;
     }
 
-    private ConcertScheduled createConcertScheduled(ConcertId concertId, int ticketPrice, String artistName) {
-        return new ConcertScheduled(concertId,
-                                    eventSequence++,
-                                    artistName,
-                                    ticketPrice,
-                                    LocalDateTime.now(),
-                                    LocalTime.now(),
-                                    100,
-                                    8);
+    /**
+     * Don't care about any of the values (ID, artist, etc.) in the event
+     */
+    public MakeEvents concertScheduled() {
+        return concertScheduled(ConcertId.createRandom());
     }
 
     public MakeEvents reschedule(ConcertId concertId, LocalDateTime newShowDateTime, LocalTime newDoorsTime) {
@@ -69,6 +65,17 @@ public class MakeEvents {
                                        newShowDateTime,
                                        newDoorsTime));
         return this;
+    }
+
+    private ConcertScheduled createConcertScheduled(ConcertId concertId, int ticketPrice, String artistName) {
+        return new ConcertScheduled(concertId,
+                                    eventSequence++,
+                                    artistName,
+                                    ticketPrice,
+                                    LocalDateTime.now(),
+                                    LocalTime.now(),
+                                    100,
+                                    8);
     }
 
     public List<ConcertEvent> list() {

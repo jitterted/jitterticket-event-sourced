@@ -29,7 +29,7 @@ public class InMemoryEventStore<
         EventStore<ID, EVENT, AGGREGATE> {
 
     private final Map<ID, List<EventDto<EVENT>>> idToEventDtoMap = new HashMap<>();
-    private long globalEventSequence = 1L; // emulate what the database does: starting at 1
+    private long globalEventSequence = 0L; // emulate what the database does: starting at 1
 
     private InMemoryEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         super(eventsToAggregate);
@@ -44,19 +44,20 @@ public class InMemoryEventStore<
     }
 
     @Override
-    public void save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
+    public long save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
         List<EventDto<EVENT>> existingEventDtos = idToEventDtoMap
                 .computeIfAbsent(aggregateId, _ -> new ArrayList<>());
         List<EventDto<EVENT>> freshEventDtos =
                 uncommittedEvents.map(event -> EventDto.from(
                                          aggregateId.id(),
                                          event.eventSequence(),
-                                         globalEventSequence++,
+                                         ++globalEventSequence,
                                          event))
                                  .toList();
         existingEventDtos.addAll(freshEventDtos);
 
         idToEventDtoMap.put(aggregateId, existingEventDtos);
+        return globalEventSequence;
     }
 
     @Override

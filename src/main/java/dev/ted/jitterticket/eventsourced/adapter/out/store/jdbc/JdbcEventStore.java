@@ -58,7 +58,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     }
 
     @Override
-    public void save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
+    public long save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
         // assumes there's at least one uncommittedEvent in the incoming stream!
         List<EventDbo> dbos = uncommittedEvents
                 .map(event -> EventDto.from(aggregateId.id(),
@@ -77,6 +77,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 //                                .max()
 //                                .orElseThrow();
 //        return highestGlobalSequence;
+        return -99L;
     }
 
     @Override

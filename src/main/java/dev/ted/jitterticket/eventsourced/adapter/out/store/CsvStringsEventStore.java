@@ -72,14 +72,14 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
     }
 
     @Override
-    public void save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
+    public long save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
         AtomicLong globalEventSequence = new AtomicLong(
-                stringsReaderAppender.readAllLines().count() + 1);
+                stringsReaderAppender.readAllLines().count());
         List<EventDto<EVENT>> uncommittedEventDtos =
                 uncommittedEvents.map(event -> EventDto.from(
                                          aggregateId.id(),
                                          event.eventSequence(),
-                                         globalEventSequence.getAndIncrement(),
+                                         globalEventSequence.incrementAndGet(),
                                          event))
                                  .toList();
         List<String> newCsvLines = uncommittedEventDtos
@@ -87,6 +87,7 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
                 .map(CsvStringsEventStore::toCsv)
                 .toList();
         stringsReaderAppender.appendLines(newCsvLines);
+        return globalEventSequence.get();
     }
 
     @Override

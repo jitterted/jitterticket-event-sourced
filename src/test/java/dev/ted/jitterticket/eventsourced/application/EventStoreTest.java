@@ -258,6 +258,21 @@ public class EventStoreTest {
                                      secondEvent,
                                      thirdEvent);
         }
+
+        @ParameterizedTest(name = "Using {0} Storage")
+        @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
+        void lastGlobalEventSequenceSavedReturnedFromSave(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+            ConcertId concertId = ConcertId.createRandom();
+            Stream<ConcertEvent> oneEvent = MakeEvents.with()
+                                                      .concertScheduled(concertId)
+                                                      .stream();
+
+            long lastGlobalEventSequenceSaved =
+                    concertStore.save(concertId, oneEvent);
+
+            assertThat(lastGlobalEventSequenceSaved)
+                        .isEqualTo(1);
+        }
     }
 
     @ParameterizedClass(name = "Using {0} Storage")

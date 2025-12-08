@@ -115,7 +115,7 @@ class ConcertSalesProjectorDatabaseTest extends DataJdbcContainerTest {
         public void save(EventSourcedAggregate aggregate) {}
 
         @Override
-        public void save(Id aggregateId, Stream uncommittedEvents) {
+        public long save(Id aggregateId, Stream uncommittedEvents) {
             throw new UnsupportedOperationException();
         }
 
