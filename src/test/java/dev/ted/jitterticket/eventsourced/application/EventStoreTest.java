@@ -261,7 +261,7 @@ public class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        void lastGlobalEventSequenceSavedReturnedFromSave(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public void lastGlobalEventSequenceSavedReturnedFromSave(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId = ConcertId.createRandom();
             Stream<ConcertEvent> oneEvent = MakeEvents.with()
                                                       .concertScheduled(concertId)
@@ -271,12 +271,13 @@ public class EventStoreTest {
                     concertStore.save(concertId, oneEvent);
 
             assertThat(lastGlobalEventSequenceSaved)
+                    .as("1 new event was saved in an empty store, so expected last Global Event Sequence returned to be 1")
                     .isEqualTo(1);
         }
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        void lastGlobalEventSequenceSavedReturnedAfterMultipleSaves(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public void lastGlobalEventSequenceSavedReturnedAfterMultipleSaves(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertIdFirst = ConcertId.createRandom();
             Stream<ConcertEvent> onePreExistingEvent = MakeEvents.with().concertScheduled().stream();
             concertStore.save(concertIdFirst, onePreExistingEvent);
@@ -291,7 +292,7 @@ public class EventStoreTest {
                     concertStore.save(concertIdSecond, twoNewEvents);
 
             assertThat(lastGlobalEventSequenceSaved)
-                    .isEqualTo(3);
+                    .as("2 new events were saved in a store containing 1 event, so expected last Global Event Sequence returned to be 3")                    .isEqualTo(3);
         }
     }
 

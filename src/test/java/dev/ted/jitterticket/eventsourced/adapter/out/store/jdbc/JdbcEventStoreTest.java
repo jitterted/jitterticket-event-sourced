@@ -122,7 +122,7 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
         @Test
         void emptyListReturnedForUnknownAggregateId() {
             delegatedConcertEventStoreEventsForAggregate
-                   .emptyListReturnedForUnknownAggregateId(concertStore);
+                    .emptyListReturnedForUnknownAggregateId(concertStore);
         }
 
         @Test
@@ -135,6 +135,18 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
         void savingEventsDirectlyInAnyOrderAreReturnedInOrderOfEventSequence() {
             delegatedConcertEventStoreEventsForAggregate
                     .savingEventsDirectlyInAnyOrderAreReturnedInOrderOfEventSequence(concertStore);
+        }
+
+        @Test
+        void lastGlobalEventSequenceSavedReturnedFromSave() {
+            delegatedConcertEventStoreEventsForAggregate
+                    .lastGlobalEventSequenceSavedReturnedFromSave(concertStore);
+        }
+
+        @Test
+        void lastGlobalEventSequenceSavedReturnedAfterMultipleSaves() {
+            delegatedConcertEventStoreEventsForAggregate
+                    .lastGlobalEventSequenceSavedReturnedAfterMultipleSaves(concertStore);
         }
     }
 

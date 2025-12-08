@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -46,4 +47,5 @@ public interface EventDboRepository extends CrudRepository<EventDbo, UUID> {
     @Query("SELECT COALESCE(MAX(event_sequence), 0) FROM events WHERE aggregate_root_id = :aggregateRootId")
     Integer getMaxEventSequence(@Param("aggregateRootId") UUID aggregateRootId);
 
+    Optional<EventDbo> findByAggregateRootIdAndEventSequence(UUID aggregateRootId, Integer eventSequence);
 }

@@ -16,6 +16,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import jakarta.annotation.Nonnull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -71,13 +72,15 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                         dto.getEventType(),
                         dto.getJson()))
                 .toList();
-        Iterable<EventDbo> savedEventDbos = eventDboRepository.saveAll(dbos);
-//        long highestGlobalSequence = StreamSupport.stream(savedEventDbos.spliterator(), false)
-//                                .mapToLong(EventDbo::getGlobalSequence)
-//                                .max()
-//                                .orElseThrow();
-//        return highestGlobalSequence;
-        return -99L;
+        eventDboRepository.saveAll(dbos);
+        EventDbo lastDboToWrite = dbos.getLast();
+        Optional<EventDbo> lastEventDboSaved =
+                eventDboRepository.findByAggregateRootIdAndEventSequence(
+                        lastDboToWrite.getAggregateRootId(),
+                        lastDboToWrite.getEventSequence());
+        return lastEventDboSaved
+                .map(EventDbo::getGlobalSequence)
+                .orElseThrow(() -> new IllegalStateException("Could not find event saved with Event id: " + lastDboToWrite.getAggregateRootId() + " and Event Sequence: " + lastDboToWrite.getEventSequence()));
     }
 
     @Override
