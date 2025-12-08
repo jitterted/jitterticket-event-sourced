@@ -271,7 +271,27 @@ public class EventStoreTest {
                     concertStore.save(concertId, oneEvent);
 
             assertThat(lastGlobalEventSequenceSaved)
-                        .isEqualTo(1);
+                    .isEqualTo(1);
+        }
+
+        @ParameterizedTest(name = "Using {0} Storage")
+        @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
+        void lastGlobalEventSequenceSavedReturnedAfterMultipleSaves(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+            ConcertId concertIdFirst = ConcertId.createRandom();
+            Stream<ConcertEvent> onePreExistingEvent = MakeEvents.with().concertScheduled().stream();
+            concertStore.save(concertIdFirst, onePreExistingEvent);
+            ConcertId concertIdSecond = ConcertId.createRandom();
+            Stream<ConcertEvent> twoNewEvents = MakeEvents
+                    .with()
+                    .concertScheduled(concertIdSecond,
+                                      concert -> concert.ticketsSold(2))
+                    .stream();
+
+            long lastGlobalEventSequenceSaved =
+                    concertStore.save(concertIdSecond, twoNewEvents);
+
+            assertThat(lastGlobalEventSequenceSaved)
+                    .isEqualTo(3);
         }
     }
 
