@@ -5,9 +5,12 @@ import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProj
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.DataJdbcContainerTest;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.EventDboRepository;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.JdbcEventStore;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadata;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
+import dev.ted.jitterticket.eventsourced.domain.Id;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
@@ -24,6 +27,7 @@ import org.springframework.context.annotation.Import;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -47,6 +51,7 @@ public class ProjectionsTest extends DataJdbcContainerTest {
 
     @Autowired
     EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
+
 
     @Nested
     class ProjectionNewlyCreated {
@@ -185,12 +190,150 @@ public class ProjectionsTest extends DataJdbcContainerTest {
         }
     }
 
+    @Nested
+    class ProjectorInitiatesSubscription {
+        @Test
+        void newSalesProjectorSubscribesWithLastGlobalEventSequenceOfZero() {
+            ProjectionsTest.EventStoreSpy eventStoreSpy = new ProjectionsTest.EventStoreSpy();
+
+            new Projections(new ConcertSalesProjector(),
+                            eventStoreSpy,
+                            projectionMetadataRepository,
+                            concertSalesProjectionRepository
+            );
+
+            eventStoreSpy
+                    .assertSubscribedAndEventsAfterInvoked(0L);
+        }
+
+        @Test
+        void subscribeWith9WhenLastGlobalSequenceInProjectionTableHas9() {
+            ProjectionsTest.EventStoreSpy eventStoreSpy = new ProjectionsTest.EventStoreSpy();
+            ProjectionMetadata projectionMetadata =
+                    new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
+                                           9L);
+            projectionMetadataRepository.save(projectionMetadata);
+            new Projections(new ConcertSalesProjector(),
+                            eventStoreSpy,
+                            projectionMetadataRepository,
+                            concertSalesProjectionRepository
+            );
+
+            eventStoreSpy
+                    .assertSubscribedAndEventsAfterInvoked(9L);
+        }
+
+    }
+
+    @Nested
+    class AllProjectedSummaries {
+
+        @Test
+        void loadsProjectionOfSingleConcertScheduledEventFromRepository() {
+            ConcertId concertId = ConcertId.createRandom();
+            String artist = "Artist";
+            LocalDateTime showDateTime = LocalDate.now().atStartOfDay();
+            concertSalesProjectionRepository.save(
+                    new ConcertSalesProjection(
+                            concertId.id(), artist,
+                            showDateTime.toLocalDate(),
+                            0, 0)
+            );
+            ProjectionMetadata projectionMetadata =
+                    new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
+                                           1L);
+            projectionMetadataRepository.save(projectionMetadata);
+            Projections projections = new Projections(new ConcertSalesProjector(),
+                                                      JdbcEventStore.forConcerts(eventDboRepository),
+                                                      projectionMetadataRepository,
+                                                      concertSalesProjectionRepository
+            );
+
+
+            Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
+                    projections.allSalesSummaries();
+
+            assertThat(allSalesSummaries)
+                    .containsExactly(
+                            new ConcertSalesProjector.ConcertSalesSummary(
+                                    concertId, artist,
+                                    showDateTime,
+                                    0, 0
+                            )
+                    );
+        }
+    }
+
+    //region Fixture
     private Projections createProjectionUpdater() {
         return new Projections(new ConcertSalesProjector(),
                                concertEventStore,
                                projectionMetadataRepository,
                                concertSalesProjectionRepository);
     }
+    //endregion
+
+
+    //region Test Doubles
+    @SuppressWarnings("rawtypes")
+    static class EventStoreSpy implements EventStore {
+
+        private boolean subscribeInvoked = false;
+        private long subscribedLastGlobalEventSequence;
+        private long allEventsAfterGlobalEventSequence;
+
+        @Override
+        public void save(EventSourcedAggregate aggregate) {
+        }
+
+        @Override
+        public long save(Id aggregateId, Stream uncommittedEvents) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Optional findById(Id id) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Stream allEvents() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List eventsForAggregate(Id id) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void subscribe(ConcertSalesProjector concertSalesProjector, long lastGlobalEventSequence) {
+            subscribeInvoked = true;
+            subscribedLastGlobalEventSequence = lastGlobalEventSequence;
+        }
+
+        public void assertSubscribedAndEventsAfterInvoked(long expectedLastGlobalSequence) {
+            assertThat(subscribeInvoked)
+                    .as("Expected subscribe to be called")
+                    .isTrue();
+
+            assertThat(subscribedLastGlobalEventSequence)
+                    .as("Expected subscribe to be called with the correct last global event sequence")
+                    .isEqualTo(expectedLastGlobalSequence);
+
+            assertThat(allEventsAfterGlobalEventSequence)
+                    .as("Expected request for all events after the subscribed last global event sequence")
+                    .isEqualTo(expectedLastGlobalSequence);
+        }
+
+        @Override
+        public Stream allEventsAfter(long globalEventSequence) {
+            allEventsAfterGlobalEventSequence = globalEventSequence;
+            return Stream.empty();
+        }
+    }
+    //endregion Test Doubles
+
 
     @Deprecated // need to pull out any remaining useful notes
     class OldStuff {

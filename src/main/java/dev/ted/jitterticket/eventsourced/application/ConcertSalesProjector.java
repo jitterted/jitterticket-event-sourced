@@ -22,7 +22,7 @@ public class ConcertSalesProjector {
     @Deprecated // should be a local variable
     private Map<ConcertId, ConcertSalesSummary> salesSummaryMap = new HashMap<>();
 
-    // class ProjectorDispatcher (depends on EventStore)
+    // class ProjectorMediator (depends on EventStore)
     //     sends events (uncommitted ones that were just persisted) to...
     //     class Projections (depends on Projection & Metadata Repositories)
     //         load last global event sequence (from metadata repo)
@@ -30,20 +30,6 @@ public class ConcertSalesProjector {
     //              ==> call (dispatch to) Projector.project(rows, events)
     //         save updated projection rows (to projection repo)
     //         save last global event sequence (to metadata repo)
-
-    // class ProjectionEventHandler
-    //   #register(Projector, ProjectionRepository, "projection_name", ConcertSalesProjection.class)
-    //   void eventHandler(Stream<ConcertEvent> concertEvents, lastGlobalEventSequence)
-    //     loadedProjectionRows = load ConcertSalesProjection from DB (or create the Projection in memory within a test)
-    //              ProjectionRepository.findAll() -> List<Object> (raw list)
-    //       projector.load(loadedProjectionRows) // transforms ConcertSalesProjection -> internal Map
-    //       // applies events and transforms internal Map, returning the updated ConcertSalesProjection
-    //       List<Object> updatedProjectionRows = projector.project(concertEvents) // "domain" aggregation/summarization logic
-    //                                      Optimization: only return CHANGED "rows"
-    //
-    //       List<Object> updatedProjectionRows = projector.project(loadedProjectionRows, concertEvents)
-    //     projectionRepository.saveAll(updatedProjectionRows)
-    //     metadataRepository.save(projectionName, lastGlobalEventSequence)
 
     public List<ConcertSalesProjection> project(List<ConcertSalesProjection> loadedProjectionRows,
                                                 Stream<ConcertEvent> concertEvents) {

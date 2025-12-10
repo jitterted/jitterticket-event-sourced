@@ -45,9 +45,9 @@
                         [ ] ? Convert test delegation in the JdbcEventStoreTest to abstract base class?
                     [X] EventStore#save() returns last/highest/max global event sequence number as a result of the save
                     [X] EventStore#subscribe(projector, lastGES)
+                    [X] Combine tests from ConcertSalesProjectorDatabaseTest into ProjectionsTest
 
 ==> CURRENT TASK ==>
-                    [ ] Combine tests from ConcertSalesProjectorDatabaseTest into ProjectionsTest
                     [ ] Update Beans and SalesController to use Projections instead of ConcertSalesProjector
                     [ ] Clean up I/O-related classes from ConcertSalesProjector, e.g., it shouldn't be handed Projection (DB) objects, instead convert to ConcertSalesSummary, and it should return updated ConcertSalesSummary objects
                         [ ] Rename ConcertSalesProjection to ConcertSalesSummaryDbo?
