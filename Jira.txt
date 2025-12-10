@@ -46,13 +46,14 @@
                     [X] EventStore#save() returns last/highest/max global event sequence number as a result of the save
                     [X] EventStore#subscribe(projector, lastGES)
                     [X] Combine tests from ConcertSalesProjectorDatabaseTest into ProjectionsTest
+                    [X] Update Beans and SalesController to use ConcertSalesProjectionMediator instead of ConcertSalesProjector
+                    [X] Clean up any other @Deprecated methods
 
 ==> CURRENT TASK ==>
-                    [ ] Update Beans and SalesController to use Projections instead of ConcertSalesProjector
+                    [ ] Mediator.handle(events, lastGlobalEventSequence)
+                    [ ] Test EventStore calls Mediator upon store.save()
                     [ ] Clean up I/O-related classes from ConcertSalesProjector, e.g., it shouldn't be handed Projection (DB) objects, instead convert to ConcertSalesSummary, and it should return updated ConcertSalesSummary objects
                         [ ] Rename ConcertSalesProjection to ConcertSalesSummaryDbo?
-                    [ ] Clean up any other @Deprecated methods
-                    [ ] Projector.apply(events, lastGlobalEventSequence)
                 [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
                 [ ] Rescheduled -> UPDATE data for ConcertId

@@ -36,13 +36,15 @@ public class TixConfiguration {
     }
 
     @Bean
-    ConcertSalesProjectionMediator concertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-                                                         ProjectionMetadataRepository projectionMetadataRepository,
-                                                         ConcertSalesProjectionRepository concertSalesProjectionRepository) {
-        return new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
-                                                  concertStore,
-                                                  projectionMetadataRepository,
-                                                  concertSalesProjectionRepository);
+    ConcertSalesProjectionMediator concertSalesProjectionMediator(
+            EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+            ProjectionMetadataRepository projectionMetadataRepository,
+            ConcertSalesProjectionRepository concertSalesProjectionRepository) {
+        return new ConcertSalesProjectionMediator(
+                new ConcertSalesProjector(),
+                concertStore,
+                projectionMetadataRepository,
+                concertSalesProjectionRepository);
     }
 
     @Bean

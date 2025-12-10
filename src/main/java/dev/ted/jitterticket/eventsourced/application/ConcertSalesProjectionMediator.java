@@ -33,29 +33,38 @@ public class ConcertSalesProjectionMediator {
         long lastGlobalEventSequenceSeen = this.projectionMetadataRepository
                 .lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME)
                 .orElse(0L);
-        List<ConcertSalesProjector.ConcertSalesSummary> concertSalesSummaries
-                = this.catchUpForAllEventsInEventStore(lastGlobalEventSequenceSeen).toList();
-        updatePersistentProjection(projectionMetadataRepository,
-                                   concertSalesProjectionRepository,
-                                   concertSalesSummaries);
+        Stream<ConcertEvent> concertEventStream =
+                this.concertEventStore.allEventsAfter(lastGlobalEventSequenceSeen);
 
-        concertEventStore.subscribe(
-                concertSalesProjector, lastGlobalEventSequenceSeen);
+        handle(concertEventStream, lastGlobalEventSequenceSeen);
+
+        concertEventStore.subscribe(this);
     }
 
-    private static void updatePersistentProjection(ProjectionMetadataRepository projectionMetadataRepository, ConcertSalesProjectionRepository concertSalesProjectionRepository, List<ConcertSalesProjector.ConcertSalesSummary> concertSalesSummaries) {
+    public void handle(Stream<ConcertEvent> concertEventStream, long lastGlobalEventSequenceSeen) {
+        // load projection
+        List<ConcertSalesProjection> loadedProjectionRows =
+                this.concertSalesProjectionRepository.findAll();
+        // update projection
+        List<ConcertSalesProjector.ConcertSalesSummary> concertSalesSummaries
+                = this.concertSalesProjector.project(loadedProjectionRows,
+                                                     concertEventStream)
+                                            .stream()
+                                            .map(ConcertSalesProjection::toSummary).toList();
+        // store updated projection
         concertSalesSummaries.forEach(css -> {
-            // TODO: improve how we do this: upsert instead of delete/insert
-            concertSalesProjectionRepository.deleteById(
+            // this will be replaced by a Projection "holder" entity that will have a list of the summary objects
+            // and then the repository will handle the deletion/save of the individual summaries
+            this.concertSalesProjectionRepository.deleteById(
                     css.concertId().id());
-            concertSalesProjectionRepository.save(
+            this.concertSalesProjectionRepository.save(
                     ConcertSalesProjection.createFromSummary(css));
         });
         if (!concertSalesSummaries.isEmpty()) {
             ProjectionMetadata projectionMetadata = new ProjectionMetadata();
             projectionMetadata.setProjectionName(ConcertSalesProjector.PROJECTION_NAME);
-            projectionMetadata.setLastGlobalEventSequenceSeen(1L);
-            projectionMetadataRepository.save(projectionMetadata);
+            projectionMetadata.setLastGlobalEventSequenceSeen(lastGlobalEventSequenceSeen);
+            this.projectionMetadataRepository.save(projectionMetadata);
         }
     }
 
@@ -74,15 +83,4 @@ public class ConcertSalesProjectionMediator {
                 .map(ConcertSalesProjection::toSummary);
     }
 
-    private Stream<ConcertSalesProjector.ConcertSalesSummary> catchUpForAllEventsInEventStore(long lastGlobalEventSequenceSeen) {
-        Stream<ConcertEvent> concertEventStream =
-                concertEventStore.allEventsAfter(lastGlobalEventSequenceSeen);
-        List<ConcertSalesProjection> loadedProjectionRows =
-                concertSalesProjectionRepository.findAll();
-        return concertSalesProjector.project(loadedProjectionRows,
-                                             concertEventStream
-                                    )
-                                    .stream()
-                                    .map(ConcertSalesProjection::toSummary);
-    }
 }

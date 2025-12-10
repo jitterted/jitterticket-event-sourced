@@ -6,7 +6,7 @@ autonumber
 control SpringAppConfig
 boundary MvcController
 database ConcertEventStore
-participant ProjectionUpdater as "Projection Updater\n<<txn script>>"
+participant ProjectionMediator as "Projection Mediator\n<<txn script>>"
 participant ConcertSalesProjector as "Concert Sales Projector\n<<domain>>"
 database ConcertSalesProjectionRepository
 database ProjectionMetadataRepository
@@ -21,39 +21,45 @@ ConcertEventStore --> SpringAppConfig: eventStore
 SpringAppConfig -> ConcertSalesProjector: create new
 activate ConcertSalesProjector
 ConcertSalesProjector --> SpringAppConfig: concertSalesProjector
-SpringAppConfig -> ProjectionUpdater: create(concertSalesProjector,\n    eventStore,\n    metadataRepository,\n    concertSalesProjectionRepository)
-activate ProjectionUpdater
-ProjectionUpdater -> ProjectionMetadataRepository: existsByProjectionName(projection name)
-ProjectionMetadataRepository --> ProjectionUpdater: exists?
+SpringAppConfig -> ProjectionMediator: create(concertSalesProjector,\n    eventStore,\n    metadataRepository,\n    concertSalesProjectionRepository)
+activate ProjectionMediator
+ProjectionMediator -> ProjectionMetadataRepository: existsByProjectionName(projection name)
+ProjectionMetadataRepository --> ProjectionMediator: exists?
 alt if metadata does not exist for projection (exists=false)
-    ProjectionUpdater -> ProjectionMetadataRepository: saveIfNotExists(projection name, 0)
+    ProjectionMediator -> ProjectionMetadataRepository: saveIfNotExists(projection name, 0)
 end
-ProjectionUpdater -> ProjectionMetadataRepository: findLastGlobalEventSequenceFor\n(projectionId)
-ProjectionMetadataRepository --> ProjectionUpdater: lastGlobalEventSequence
-ProjectionUpdater -> ConcertEventStore: allEventsAfter\n(lastGlobalEventSequence)
-ConcertEventStore --> ProjectionUpdater: Stream<event>\n(might be empty)
-note over ProjectionUpdater: this is the "catch up" process
+ProjectionMediator -> ProjectionMetadataRepository: findLastGlobalEventSequenceFor\n(projectionId)
+ProjectionMetadataRepository --> ProjectionMediator: lastGlobalEventSequence
+note over ProjectionMediator: this is the "catch up" process
+ProjectionMediator -> ConcertEventStore: allEventsAfter\n(lastGlobalEventSequence)
+ConcertEventStore --> ProjectionMediator: Stream<event>\n(might be empty)
+note over ProjectionMediator: this is "process events"
 alt if Stream<event> is NOT empty
-    ProjectionUpdater -> ConcertSalesProjectionRepository: loadAllRows()
-    ConcertSalesProjectionRepository --> ProjectionUpdater: projectionRows
-    ProjectionUpdater -> ConcertSalesProjector: project(projectionRows, Stream<event>)
-    ConcertSalesProjector --> ProjectionUpdater: Stream<projectionRows> updatedRows
-    ProjectionUpdater -> ConcertSalesProjectionRepository: save(updatedRows)
-    ProjectionUpdater -> ProjectionMetadataRepository: save(lastGlobalEventSequence)
+    ProjectionMediator -> ConcertSalesProjectionRepository: loadAllRows()
+    ConcertSalesProjectionRepository --> ProjectionMediator: projectionRows
+    ProjectionMediator -> ConcertSalesProjector: project(projectionRows, Stream<event>)
+    ConcertSalesProjector --> ProjectionMediator: Stream<projectionRows> updatedRows
+    ProjectionMediator -> ConcertSalesProjectionRepository: save(updatedRows)
+    ProjectionMediator -> ProjectionMetadataRepository: save(lastGlobalEventSequence)
 end
-ProjectionUpdater -> ConcertEventStore: subscribe\n(projectionUpdater)
-ConcertEventStore --> ProjectionUpdater
-ProjectionUpdater --> SpringAppConfig: projectionUpdater
+ProjectionMediator -> ConcertEventStore: subscribe\n(projectionMediator)
+ConcertEventStore --> ProjectionMediator
+ProjectionMediator --> SpringAppConfig: projectionMediator
+
+== Handling Newly Saved Events from the Event Store ==
+
+ConcertEventStore -> ProjectionMediator: handle\n(sequenceCheckpoint, Stream<Event>)
+note left of ProjectionMediator: do "process events"
 
 == Viewing the Projection ==
 
-MvcController -> ProjectionUpdater: allProjectedSummaries()
-ProjectionUpdater -> ProjectionMetadataRepository: findLastGlobalEventSequenceFor(projectionId)
-ProjectionMetadataRepository --> ProjectionUpdater: lastGlobalEventSequence
-ProjectionUpdater -> ConcertSalesProjectionRepository: load Projection
-ConcertSalesProjectionRepository --> ProjectionUpdater: projectionRows
+MvcController -> ProjectionMediator: allProjectedSummaries()
+ProjectionMediator -> ProjectionMetadataRepository: findLastGlobalEventSequenceFor(projectionId)
+ProjectionMetadataRepository --> ProjectionMediator: lastGlobalEventSequence
+ProjectionMediator -> ConcertSalesProjectionRepository: load Projection
+ConcertSalesProjectionRepository --> ProjectionMediator: projectionRows
 alt if new events were loaded from event store
-    ProjectionUpdater -> ProjectionUpdater: catch up (see above)
+    ProjectionMediator -> ProjectionMediator: catch up (see above)
 end
 
 ConcertSalesProjector --> MvcController: List<ProjectedSummaries>

@@ -50,8 +50,7 @@ public class ConcertSalesProjector {
                                           Function.identity()));
     }
 
-    @Deprecated // should be for internal use only
-    public void apply(Stream<ConcertEvent> concertEvents) {
+    private void apply(Stream<ConcertEvent> concertEvents) {
         concertEvents
                 .forEach(concertEvent -> {
                     switch (concertEvent) {

@@ -1,3 +1,9 @@
+Wednesday, December 10, 2025
+============================
+[IntelliJ IDEA]
+    [ ] confusing dialog: when attempting to Safe Delete a single parameter from a method that comes from an interface, the dialog(s) were very confusing in terms of what would actually be deleted
+
+
 Monday, December 8, 2025
 ========================
 

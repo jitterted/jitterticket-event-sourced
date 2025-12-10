@@ -58,7 +58,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
 
         @Test
         void noEventsExistReturnsEmptyProjectionWithNewlyCreatedMetadata() {
-            ConcertSalesProjectionMediator mediator = createProjectionUpdater();
+            ConcertSalesProjectionMediator mediator = createProjectionMediator();
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
                     mediator.allSalesSummaries();
@@ -89,7 +89,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                                                                      LocalTime.now(),
                                                                      MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             concertEventStore.save(concertId, Stream.of(concertScheduled));
-            ConcertSalesProjectionMediator mediator = createProjectionUpdater();
+            ConcertSalesProjectionMediator mediator = createProjectionMediator();
 
             var allSalesSummaries = mediator.allSalesSummaries();
             assertThat(allSalesSummaries)
@@ -118,7 +118,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                                       .ticketsSold(6))
                               .stream();
             concertEventStore.save(concertId, concertEventStream);
-            ConcertSalesProjectionMediator mediator = createProjectionUpdater();
+            ConcertSalesProjectionMediator mediator = createProjectionMediator();
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
                     mediator.allSalesSummaries();
@@ -191,7 +191,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
     }
 
     @Nested
-    class ProjectorInitiatesSubscription {
+    class ProjectorCatchesUpAndInitiatesSubscription {
         @Test
         void newSalesProjectorSubscribesWithLastGlobalEventSequenceOfZero() {
             ConcertSalesProjectionMediatorTest.EventStoreSpy eventStoreSpy = new ConcertSalesProjectionMediatorTest.EventStoreSpy();
@@ -243,11 +243,12 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                     new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
                                            1L);
             projectionMetadataRepository.save(projectionMetadata);
-            ConcertSalesProjectionMediator mediator = new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
-                                                                                         JdbcEventStore.forConcerts(eventDboRepository),
-                                                                                         projectionMetadataRepository,
-                                                                                         concertSalesProjectionRepository
-            );
+            ConcertSalesProjectionMediator mediator =
+                    new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
+                                                       JdbcEventStore.forConcerts(eventDboRepository),
+                                                       projectionMetadataRepository,
+                                                       concertSalesProjectionRepository
+                    );
 
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
@@ -264,8 +265,38 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         }
     }
 
+    @Nested
+    class HandlesNewEventsFromEventStoreSave {
+        @Test
+        void newProjectionUpdatesProjectionDataAndCheckpoint() {
+            ConcertSalesProjectionMediator mediator = createProjectionMediator();
+            Stream<ConcertEvent> twoEvents = MakeEvents.with()
+                                                    .concertScheduled()
+                                                    .concertScheduled()
+                                                    .stream();
+
+            long lastGlobalEventSequenceSeen = 2;
+            mediator.handle(twoEvents, lastGlobalEventSequenceSeen);
+
+
+            assertThat(concertSalesProjectionRepository.count())
+                    .as("Expected Concert Sales Projection to have 2 entries")
+                    .isEqualTo(2);
+            assertThat(projectionMetadataRepository
+                               .lastGlobalEventSequenceSeenByProjectionName(
+                                       ConcertSalesProjector.PROJECTION_NAME))
+                    .as("Expected global event sequence checkpoint to be 2, for the 2 events handled")
+                    .contains(lastGlobalEventSequenceSeen);
+        }
+
+        @Test
+        void existingProjectionUpdatesProjectionDataAndCheckpoint() {
+            fail("handle two streams of events");
+        }
+    }
+
     //region Fixture
-    private ConcertSalesProjectionMediator createProjectionUpdater() {
+    private ConcertSalesProjectionMediator createProjectionMediator() {
         return new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
                                                   concertEventStore,
                                                   projectionMetadataRepository,
@@ -279,7 +310,6 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
     static class EventStoreSpy implements EventStore {
 
         private boolean subscribeInvoked = false;
-        private long subscribedLastGlobalEventSequence;
         private long allEventsAfterGlobalEventSequence;
 
         @Override
@@ -307,19 +337,14 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         }
 
         @Override
-        public void subscribe(ConcertSalesProjector concertSalesProjector, long lastGlobalEventSequence) {
+        public void subscribe(ConcertSalesProjectionMediator eventConsumer) {
             subscribeInvoked = true;
-            subscribedLastGlobalEventSequence = lastGlobalEventSequence;
         }
 
         public void assertSubscribedAndEventsAfterInvoked(long expectedLastGlobalSequence) {
             assertThat(subscribeInvoked)
                     .as("Expected subscribe to be called")
                     .isTrue();
-
-            assertThat(subscribedLastGlobalEventSequence)
-                    .as("Expected subscribe to be called with the correct last global event sequence")
-                    .isEqualTo(expectedLastGlobalSequence);
 
             assertThat(allEventsAfterGlobalEventSequence)
                     .as("Expected request for all events after the subscribed last global event sequence")

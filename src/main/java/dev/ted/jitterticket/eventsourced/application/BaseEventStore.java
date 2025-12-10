@@ -5,7 +5,6 @@ import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import jakarta.annotation.Nonnull;
 
 import java.util.List;
@@ -17,7 +16,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         implements EventStore<ID, EVENT, AGGREGATE> {
 
     protected final Function<List<EVENT>, AGGREGATE> eventsToAggregate;
-    private ConcertSalesProjector concertSalesProjector;
+    private ConcertSalesProjectionMediator eventConsumer;
 
     public BaseEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         this.eventsToAggregate = eventsToAggregate;
@@ -30,14 +29,14 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         }
         Stream<EVENT> uncommittedEvents = aggregate.uncommittedEvents();
 
-        save(aggregateId, uncommittedEvents); // get the highest global sequence number post-save
-        // load the last global event sequence that was created
-        if (concertSalesProjector != null) {
-            concertSalesProjector.apply(
-                    (Stream<ConcertEvent>) aggregate.uncommittedEvents()
-                    // , lastGlobalEventSequence
-            );
-        }
+        // checkpoint = the highest global sequence number post-save
+        long checkpoint = save(aggregateId, uncommittedEvents);
+//        if (eventConsumer != null) {
+//            eventConsumer.apply(
+//                    (Stream<ConcertEvent>) aggregate.uncommittedEvents()
+//                    // , checkpoint
+//            );
+//        }
     }
 
     protected abstract @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id);
@@ -51,9 +50,8 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
     }
 
     @Override
-    public void subscribe(ConcertSalesProjector concertSalesProjector, long lastGlobalEventSequence) {
-        this.concertSalesProjector = concertSalesProjector;
-        concertSalesProjector.apply((Stream<ConcertEvent>) allEvents());
+    public void subscribe(ConcertSalesProjectionMediator eventConsumer) {
+        this.eventConsumer = eventConsumer;
     }
 
     @Override
