@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.*;
 
 @Import(EventStoreConfiguration.class)
-public class ProjectionsTest extends DataJdbcContainerTest {
+public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
 
     private static final int MAX_CAPACITY = 100;
     private static final int MAX_TICKETS_PER_PURCHASE = 8;
@@ -58,10 +58,10 @@ public class ProjectionsTest extends DataJdbcContainerTest {
 
         @Test
         void noEventsExistReturnsEmptyProjectionWithNewlyCreatedMetadata() {
-            Projections projections = createProjectionUpdater();
+            ConcertSalesProjectionMediator mediator = createProjectionUpdater();
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
-                    projections.allSalesSummaries();
+                    mediator.allSalesSummaries();
 
             assertThat(allSalesSummaries)
                     .isEmpty();
@@ -89,9 +89,9 @@ public class ProjectionsTest extends DataJdbcContainerTest {
                                                                      LocalTime.now(),
                                                                      MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             concertEventStore.save(concertId, Stream.of(concertScheduled));
-            Projections projections = createProjectionUpdater();
+            ConcertSalesProjectionMediator mediator = createProjectionUpdater();
 
-            var allSalesSummaries = projections.allSalesSummaries();
+            var allSalesSummaries = mediator.allSalesSummaries();
             assertThat(allSalesSummaries)
                     .containsExactly(
                             new ConcertSalesProjector.ConcertSalesSummary(
@@ -118,10 +118,10 @@ public class ProjectionsTest extends DataJdbcContainerTest {
                                       .ticketsSold(6))
                               .stream();
             concertEventStore.save(concertId, concertEventStream);
-            Projections projections = createProjectionUpdater();
+            ConcertSalesProjectionMediator mediator = createProjectionUpdater();
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
-                    projections.allSalesSummaries();
+                    mediator.allSalesSummaries();
 
             assertThat(allSalesSummaries)
                     .extracting(ConcertSalesProjector.ConcertSalesSummary::totalQuantity,
@@ -145,12 +145,12 @@ public class ProjectionsTest extends DataJdbcContainerTest {
                     new ProjectionMetadata(
                             ConcertSalesProjector.PROJECTION_NAME, 1));
 
-            Projections projections =
-                    new Projections(new ConcertSalesProjector(),
-                                    InMemoryEventStore.forConcerts(),
-                                    projectionMetadataRepository,
-                                    concertSalesProjectionRepository);
-            var persistedSummaries = projections.allSalesSummaries();
+            ConcertSalesProjectionMediator mediator =
+                    new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
+                                                       InMemoryEventStore.forConcerts(),
+                                                       projectionMetadataRepository,
+                                                       concertSalesProjectionRepository);
+            var persistedSummaries = mediator.allSalesSummaries();
 
             assertThat(persistedSummaries)
                     .containsExactly(concertSalesProjection.toSummary());
@@ -176,13 +176,13 @@ public class ProjectionsTest extends DataJdbcContainerTest {
                                       .ticketsSold(6))
                               .stream();
             concertEventStore.save(concertId, concertEventStream);
-            Projections projections =
-                    new Projections(new ConcertSalesProjector(),
-                                    concertEventStore,
-                                    projectionMetadataRepository,
-                                    concertSalesProjectionRepository);
+            ConcertSalesProjectionMediator mediator =
+                    new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
+                                                       concertEventStore,
+                                                       projectionMetadataRepository,
+                                                       concertSalesProjectionRepository);
 
-            var summaries = projections.allSalesSummaries();
+            var summaries = mediator.allSalesSummaries();
 
             assertThat(summaries)
                     .extracting(ConcertSalesProjector.ConcertSalesSummary::totalQuantity)
@@ -194,12 +194,12 @@ public class ProjectionsTest extends DataJdbcContainerTest {
     class ProjectorInitiatesSubscription {
         @Test
         void newSalesProjectorSubscribesWithLastGlobalEventSequenceOfZero() {
-            ProjectionsTest.EventStoreSpy eventStoreSpy = new ProjectionsTest.EventStoreSpy();
+            ConcertSalesProjectionMediatorTest.EventStoreSpy eventStoreSpy = new ConcertSalesProjectionMediatorTest.EventStoreSpy();
 
-            new Projections(new ConcertSalesProjector(),
-                            eventStoreSpy,
-                            projectionMetadataRepository,
-                            concertSalesProjectionRepository
+            new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
+                                               eventStoreSpy,
+                                               projectionMetadataRepository,
+                                               concertSalesProjectionRepository
             );
 
             eventStoreSpy
@@ -208,15 +208,15 @@ public class ProjectionsTest extends DataJdbcContainerTest {
 
         @Test
         void subscribeWith9WhenLastGlobalSequenceInProjectionTableHas9() {
-            ProjectionsTest.EventStoreSpy eventStoreSpy = new ProjectionsTest.EventStoreSpy();
+            ConcertSalesProjectionMediatorTest.EventStoreSpy eventStoreSpy = new ConcertSalesProjectionMediatorTest.EventStoreSpy();
             ProjectionMetadata projectionMetadata =
                     new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
                                            9L);
             projectionMetadataRepository.save(projectionMetadata);
-            new Projections(new ConcertSalesProjector(),
-                            eventStoreSpy,
-                            projectionMetadataRepository,
-                            concertSalesProjectionRepository
+            new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
+                                               eventStoreSpy,
+                                               projectionMetadataRepository,
+                                               concertSalesProjectionRepository
             );
 
             eventStoreSpy
@@ -243,15 +243,15 @@ public class ProjectionsTest extends DataJdbcContainerTest {
                     new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
                                            1L);
             projectionMetadataRepository.save(projectionMetadata);
-            Projections projections = new Projections(new ConcertSalesProjector(),
-                                                      JdbcEventStore.forConcerts(eventDboRepository),
-                                                      projectionMetadataRepository,
-                                                      concertSalesProjectionRepository
+            ConcertSalesProjectionMediator mediator = new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
+                                                                                         JdbcEventStore.forConcerts(eventDboRepository),
+                                                                                         projectionMetadataRepository,
+                                                                                         concertSalesProjectionRepository
             );
 
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
-                    projections.allSalesSummaries();
+                    mediator.allSalesSummaries();
 
             assertThat(allSalesSummaries)
                     .containsExactly(
@@ -265,11 +265,11 @@ public class ProjectionsTest extends DataJdbcContainerTest {
     }
 
     //region Fixture
-    private Projections createProjectionUpdater() {
-        return new Projections(new ConcertSalesProjector(),
-                               concertEventStore,
-                               projectionMetadataRepository,
-                               concertSalesProjectionRepository);
+    private ConcertSalesProjectionMediator createProjectionUpdater() {
+        return new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
+                                                  concertEventStore,
+                                                  projectionMetadataRepository,
+                                                  concertSalesProjectionRepository);
     }
     //endregion
 

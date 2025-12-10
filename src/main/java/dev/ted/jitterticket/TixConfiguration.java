@@ -2,9 +2,9 @@ package dev.ted.jitterticket;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
+import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjectionMediator;
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
-import dev.ted.jitterticket.eventsourced.application.Projections;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
@@ -36,13 +36,13 @@ public class TixConfiguration {
     }
 
     @Bean
-    Projections concertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-                                      ProjectionMetadataRepository projectionMetadataRepository,
-                                      ConcertSalesProjectionRepository concertSalesProjectionRepository) {
-        return new Projections(new ConcertSalesProjector(),
-                               concertStore,
-                               projectionMetadataRepository,
-                               concertSalesProjectionRepository);
+    ConcertSalesProjectionMediator concertSalesProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+                                                         ProjectionMetadataRepository projectionMetadataRepository,
+                                                         ConcertSalesProjectionRepository concertSalesProjectionRepository) {
+        return new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
+                                                  concertStore,
+                                                  projectionMetadataRepository,
+                                                  concertSalesProjectionRepository);
     }
 
     @Bean

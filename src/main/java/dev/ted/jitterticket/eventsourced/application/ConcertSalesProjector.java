@@ -24,7 +24,7 @@ public class ConcertSalesProjector {
 
     // class ProjectorMediator (depends on EventStore)
     //     sends events (uncommitted ones that were just persisted) to...
-    //     class Projections (depends on Projection & Metadata Repositories)
+    //     class ConcertSalesProjectionMediator (depends on Projection & Metadata Repositories)
     //         load last global event sequence (from metadata repo)
     //         load projection rows from database (from projection repo)
     //              ==> call (dispatch to) Projector.project(rows, events)

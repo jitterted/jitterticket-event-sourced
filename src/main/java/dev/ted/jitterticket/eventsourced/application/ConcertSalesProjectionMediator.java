@@ -12,17 +12,17 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class Projections {
+public class ConcertSalesProjectionMediator {
 
     private final ConcertSalesProjector concertSalesProjector;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
     private final ProjectionMetadataRepository projectionMetadataRepository;
     private final ConcertSalesProjectionRepository concertSalesProjectionRepository;
 
-    public Projections(ConcertSalesProjector concertSalesProjector,
-                       EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
-                       ProjectionMetadataRepository projectionMetadataRepository,
-                       ConcertSalesProjectionRepository concertSalesProjectionRepository) {
+    public ConcertSalesProjectionMediator(ConcertSalesProjector concertSalesProjector,
+                                          EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
+                                          ProjectionMetadataRepository projectionMetadataRepository,
+                                          ConcertSalesProjectionRepository concertSalesProjectionRepository) {
         this.concertSalesProjector = concertSalesProjector;
         this.concertEventStore = concertEventStore;
         this.projectionMetadataRepository = projectionMetadataRepository;

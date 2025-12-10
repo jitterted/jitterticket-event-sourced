@@ -8,8 +8,8 @@
 
 ===>> CURRENT TASK:
 
-[ ] Store projections as tables in the database via incremental (per-event) updates
-    [ ] Incremental updates to projections as events are emitted/persisted
+[ ] Store concertSalesProjectionMediator as tables in the database via incremental (per-event) updates
+    [ ] Incremental updates to concertSalesProjectionMediator as events are emitted/persisted
         [ ] Create new projector that updates only via events directly received, e.g., projector.apply(uncommittedEvents):
                 ConcertSales=
                 ConcertId, Artist, Date, Tickets Sold, Total Sales
@@ -32,7 +32,7 @@
                     [X] Add table for projection+last GES
                     [X] Add table for sales projection
                     [X] JDBC repository for concert_sales_projection
-                    [X] JDBC repository for projections
+                    [X] JDBC repository for concertSalesProjectionMediator
                     [X] Load existing projection from database
                         [X] Add a specific query to get the GES directly as a Long instead of returning the db entity
                     [ ] Detour: refactor projector into DB infra + domain projection (the apply())
@@ -87,7 +87,7 @@
             [X] Use the selected projection type for selecting the functions (see comments)
             [X] Generalize the event viewer template
         [X] Create a map of projection (aggregate) type to ProjectionChoice, and pass that into the controller
-        [X] Need a function that provides a list of available projections (aggregates) to view, i.e., generalize the listConcerts() endpoint that uses concertSummaryProjector.allConcertSummaries()
+        [X] Need a function that provides a list of available concertSalesProjectionMediator (aggregates) to view, i.e., generalize the listConcerts() endpoint that uses concertSummaryProjector.allConcertSummaries()
         [X] Add concrete ProjectionChoice implementations for Customer aggregate and Concert Summary projection
             [X] Wrap the Map into ProjectionChoices class
         [-] Clean up "aggregate name" to be "projection name"
