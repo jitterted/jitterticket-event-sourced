@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class MakeEvents {
-    private int eventSequence = 0;
+    private long eventSequence = 1;
     private final List<ConcertEvent> events = new ArrayList<>();
 
     public static MakeEvents with() {

@@ -14,7 +14,7 @@ public final class ConcertScheduled extends ConcertEvent {
     private final int maxTicketsPerPurchase;
 
     public ConcertScheduled(ConcertId concertId,
-                            Integer eventSequence,
+                            Long eventSequence,
                             String artist,
                             int ticketPrice,
                             LocalDateTime showDateTime,

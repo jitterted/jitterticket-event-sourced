@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class EventSourcedAggregate<EVENT extends Event, ID extends Id> {
-    private final List<EVENT> uncommittedEvents = new ArrayList<>();
-    protected int lastLoadedEventSequenceNumber = -1;
     private ID id;
+    private final List<EVENT> uncommittedEvents = new ArrayList<>();
 
     protected void enqueue(EVENT event) {
         uncommittedEvents.add(event);
@@ -16,7 +15,6 @@ public abstract class EventSourcedAggregate<EVENT extends Event, ID extends Id> 
 
     protected void applyAll(List<EVENT> loadedEvents) {
         loadedEvents.forEach(this::apply);
-        lastLoadedEventSequenceNumber = loadedEvents.getLast().eventSequence();
     }
 
     protected abstract void apply(EVENT event);
@@ -33,7 +31,4 @@ public abstract class EventSourcedAggregate<EVENT extends Event, ID extends Id> 
         this.id = id;
     }
 
-    protected Integer nextEventSequenceNumber() {
-        return ++lastLoadedEventSequenceNumber;
-    }
 }

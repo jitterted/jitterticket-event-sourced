@@ -14,7 +14,7 @@ class EventViewTest {
     @Test
     void typeNameContainsClassSimpleName() {
         ConcertRescheduled event = new ConcertRescheduled(ConcertId.createRandom(),
-                                                          7,
+                                                          7L,
                                                           LocalDateTime.now(),
                                                           LocalTime.now());
 
@@ -29,7 +29,8 @@ class EventViewTest {
         ConcertId concertId = ConcertId.createRandom();
         LocalTime newDoorsTime = LocalTime.now();
         LocalDateTime newShowDateTime = LocalDateTime.now();
-        ConcertRescheduled event = new ConcertRescheduled(concertId, 5,
+        ConcertRescheduled event = new ConcertRescheduled(concertId,
+                                                          5L,
                                                           newShowDateTime,
                                                           newDoorsTime);
 

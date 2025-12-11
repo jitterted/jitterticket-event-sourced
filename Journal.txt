@@ -1,3 +1,12 @@
+Thursday, December 11, 2025
+===========================
+
+* Learned that Spring Data (JDBC) needs find + by as prefix/suffix for derived query names, e.g., `findAllOrderByEventSequenceAsc` won't work, because it's missing the `By` after `findAll`
+
+[IntelliJ IDEA]
+* Incorrectly displayed (misleading) two compile errors: an int that should be a long, and an event that should be a generic EVENT, but only the int<->long was a problem.
+
+
 Wednesday, December 10, 2025
 ============================
 [IntelliJ IDEA]

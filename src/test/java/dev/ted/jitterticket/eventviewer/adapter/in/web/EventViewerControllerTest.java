@@ -92,7 +92,7 @@ class EventViewerControllerTest {
         Fixture fixture = createAndSaveConcertWithThreeEvents();
 
         ConcurrentModel model = new ConcurrentModel();
-        int selectedEventSequence = fixture.concertEvents.getLast().eventSequence();
+        long selectedEventSequence = fixture.concertEvents.getLast().eventSequence();
         String viewName = fixture.controller().showEvents(
                 "concerts", fixture.concertIdAsString, selectedEventSequence, model);
 
@@ -125,7 +125,7 @@ class EventViewerControllerTest {
         int selectedEventAsDefault = -1;
         fixture.controller().showEvents("concerts", fixture.concertIdAsString, selectedEventAsDefault, model);
 
-        Integer defaultSelectedEvent = fixture.concertEvents.getLast().eventSequence();
+        long defaultSelectedEvent = fixture.concertEvents.getLast().eventSequence();
         assertThat(model)
                 .containsEntry("selectedEvent", defaultSelectedEvent);
     }
@@ -139,7 +139,7 @@ class EventViewerControllerTest {
         fixture.controller().showEvents("concerts", fixture.concertIdAsString,
                                         badSelectedEvent, model);
 
-        Integer mostRecentEventSequence = fixture.concertEvents.getLast().eventSequence();
+        long mostRecentEventSequence = fixture.concertEvents.getLast().eventSequence();
         assertThat(model)
                 .containsEntry("selectedEvent", mostRecentEventSequence);
     }
@@ -150,11 +150,11 @@ class EventViewerControllerTest {
 
         ConcurrentModel model = new ConcurrentModel();
         fixture.controller().showEvents("concerts", fixture.concertIdAsString,
-                                        1,
+                                        1L,
                                         model);
 
         assertThat(model)
-                .containsEntry("selectedEvent", 1)
+                .containsEntry("selectedEvent", 1L)
                 .extracting("events", InstanceOfAssertFactories.list(ConcertEvent.class))
                 .as("All events for the concert should be displayed, regardless of selected event")
                 .hasSize(fixture.concertEvents.size());

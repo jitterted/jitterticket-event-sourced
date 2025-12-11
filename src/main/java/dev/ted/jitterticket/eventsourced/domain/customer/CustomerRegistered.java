@@ -8,7 +8,7 @@ public final class CustomerRegistered extends CustomerEvent {
     private final String email;
 
     public CustomerRegistered(CustomerId customerId,
-                              Integer eventSequence,
+                              Long eventSequence,
                               String customerName,
                               String email) {
         super(customerId, eventSequence);

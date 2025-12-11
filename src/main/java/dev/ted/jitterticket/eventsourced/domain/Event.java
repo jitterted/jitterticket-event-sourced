@@ -1,13 +1,17 @@
 package dev.ted.jitterticket.eventsourced.domain;
 
 public abstract class Event {
-    private final Integer eventSequence;
+    private Long eventSequence;
 
-    protected Event(Integer eventSequence) {
+    protected Event(Long eventSequence) {
         this.eventSequence = eventSequence;
     }
 
-    public Integer eventSequence() {
+    public Long eventSequence() {
         return eventSequence;
+    }
+
+    public void setEventSequence(Long eventSequence) {
+        this.eventSequence = eventSequence;
     }
 }

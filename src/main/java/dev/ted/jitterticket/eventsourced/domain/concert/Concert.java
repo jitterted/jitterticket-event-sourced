@@ -38,7 +38,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                     int capacity,
                     int maxTicketsPerPurchase) {
         ConcertScheduled concertScheduled = new ConcertScheduled(
-                concertId, nextEventSequenceNumber(), artist, ticketPrice,
+                concertId, null, artist, ticketPrice,
                 showDateTime, doorsTime, capacity, maxTicketsPerPurchase
         );
         enqueue(concertScheduled);
@@ -117,13 +117,13 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                              LocalTime newDoorsTime) {
         // validation: new times must be X amount of time in the future
         ConcertRescheduled concertRescheduled =
-                new ConcertRescheduled(getId(), nextEventSequenceNumber(), newShowDateTime, newDoorsTime);
+                new ConcertRescheduled(getId(), null, newShowDateTime, newDoorsTime);
         enqueue(concertRescheduled);
     }
 
     public void sellTicketsTo(CustomerId customerId, int quantity) {
         TicketsSold ticketsSold = new TicketsSold(getId(),
-                                                  nextEventSequenceNumber(),
+                                                  null,
                                                   quantity,
                                                   quantity * ticketPrice);
         enqueue(ticketsSold);

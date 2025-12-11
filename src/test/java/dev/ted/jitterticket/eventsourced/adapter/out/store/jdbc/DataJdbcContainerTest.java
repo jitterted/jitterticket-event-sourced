@@ -48,7 +48,7 @@ public abstract class DataJdbcContainerTest {
             DECLARE
                 seq_name text;
             BEGIN
-                SELECT pg_get_serial_sequence('events', 'global_sequence') INTO seq_name;
+                SELECT pg_get_serial_sequence('events', 'event_sequence') INTO seq_name;
                 IF seq_name IS NOT NULL THEN
                     EXECUTE 'ALTER SEQUENCE ' || seq_name || ' RESTART WITH 1';
                 END IF;

@@ -16,36 +16,35 @@ public interface EventDboRepository extends CrudRepository<EventDbo, UUID> {
      * Find all events for a specific aggregate root in sequence order.
      * This is the primary method for reconstructing the aggregate's state.
      */
-    @Query("SELECT * FROM events WHERE aggregate_root_id = :aggregateRootId ORDER BY global_sequence")
+    @Query("SELECT * FROM events WHERE aggregate_root_id = :aggregateRootId ORDER BY event_sequence")
     List<EventDbo> findByAggregateRootId(@Param("aggregateRootId") UUID aggregateRootId);
 
     /**
-     * Find all events in global sequence order.
+     * Find all events in event sequence order.
      * Useful for event streaming and projections.
      */
-    @Query("SELECT * FROM events ORDER BY global_sequence")
-    List<EventDbo> findAllByGlobalSequence();
+    List<EventDbo> findAllByOrderByEventSequenceAsc();
 
     /**
      * Find events after a specific global sequence.
      * Useful for catching up event projections or subscribers.
      */
-    @Query("SELECT * FROM events WHERE global_sequence > :afterSequence ORDER BY global_sequence")
+    @Query("SELECT * FROM events WHERE event_sequence > :afterSequence ORDER BY event_sequence")
     List<EventDbo> findEventsAfter(@Param("afterSequence") Long afterSequence);
 
     /**
      * Find events by type across all aggregates.
      * Useful for building specific event type projections.
      */
-    @Query("SELECT * FROM events WHERE event_type = :eventType ORDER BY global_sequence")
+    @Query("SELECT * FROM events WHERE event_type = :eventType ORDER BY event_sequence")
     List<EventDbo> findByEventType(@Param("eventType") String eventType);
 
     /**
      * Get the maximum event sequence for an aggregate.
      * Useful for optimistic locking or determining the next sequence number.
      */
-    @Query("SELECT COALESCE(MAX(global_sequence), 0) FROM events WHERE aggregate_root_id = :aggregateRootId")
-    Integer getMaxEventSequence(@Param("aggregateRootId") UUID aggregateRootId);
+    @Query("SELECT COALESCE(MAX(event_sequence), 0) FROM events WHERE aggregate_root_id = :aggregateRootId")
+    Long getMaxEventSequence(@Param("aggregateRootId") UUID aggregateRootId);
 
-    Optional<EventDbo> findByAggregateRootIdAndEventSequence(UUID aggregateRootId, Integer eventSequence);
+    Optional<EventDbo> findByAggregateRootIdAndEventSequence(UUID aggregateRootId, Long eventSequence);
 }

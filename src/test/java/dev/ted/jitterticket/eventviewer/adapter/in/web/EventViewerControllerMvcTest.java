@@ -43,6 +43,6 @@ class EventViewerControllerMvcTest extends BaseMvcTest {
            .uri("/event-viewer/concerts/" + concertId.id())
            .assertThat()
            .hasStatus2xxSuccessful()
-           .model().containsEntry("selectedEvent", 0);
+           .model().containsEntry("selectedEvent", 1L);
     }
 }

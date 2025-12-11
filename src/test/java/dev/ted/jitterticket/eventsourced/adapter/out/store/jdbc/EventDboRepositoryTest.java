@@ -28,7 +28,7 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
     void shouldSaveAndRetrieveEvent() {
         // Given
         String jsonPayload = "{\"orderId\":\"123\",\"amount\":99.99}";
-        EventDbo event = new EventDbo(aggregateId1, 1, "OrderCreated", jsonPayload);
+        EventDbo event = new EventDbo(aggregateId1, "OrderCreated", jsonPayload);
 
         // When
         eventDboRepository.save(event);
@@ -46,7 +46,6 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
         assertThat(saved.getEventSequence()).isEqualTo(1);
         assertThat(saved.getEventType()).isEqualTo("OrderCreated");
         assertThat(saved.getJson()).isEqualTo(jsonPayload);
-        assertThat(saved.getGlobalSequence()).isNotNull();
         assertThat(saved.getCreatedAt()).isNotNull();
         assertThat(saved.getVersion()).isEqualTo(1);
     }
@@ -54,10 +53,10 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
     @Test
     void shouldFindEventsByAggregateRootId() {
         // Given
-        eventDboRepository.save(new EventDbo(aggregateId1, 1, "OrderCreated", "{\"orderId\":\"123\"}"));
-        eventDboRepository.save(new EventDbo(aggregateId1, 2, "OrderPaid", "{\"orderId\":\"123\",\"amount\":99.99}"));
-        eventDboRepository.save(new EventDbo(aggregateId1, 3, "OrderShipped", "{\"orderId\":\"123\",\"trackingId\":\"XYZ\"}"));
-        eventDboRepository.save(new EventDbo(aggregateId2, 1, "OrderCreated", "{\"orderId\":\"456\"}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderCreated", "{\"orderId\":\"123\"}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderPaid", "{\"orderId\":\"123\",\"amount\":99.99}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderShipped", "{\"orderId\":\"123\",\"trackingId\":\"XYZ\"}"));
+        eventDboRepository.save(new EventDbo(aggregateId2, "OrderCreated", "{\"orderId\":\"456\"}"));
 
         // When
         List<EventDbo> events = eventDboRepository.findByAggregateRootId(aggregateId1);
@@ -73,12 +72,12 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
     @Test
     void shouldFindAllEventsByGlobalSequence() {
         // Given
-        eventDboRepository.save(new EventDbo(aggregateId1, 1, "OrderCreated", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId2, 1, "OrderCreated", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId1, 2, "OrderPaid", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderCreated", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId2, "OrderCreated", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderPaid", "{}"));
 
         // When
-        List<EventDbo> events = eventDboRepository.findAllByGlobalSequence();
+        List<EventDbo> events = eventDboRepository.findAllByOrderByEventSequenceAsc();
 
         // Then
         assertThat(events).hasSize(3);
@@ -86,40 +85,40 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
         // Verify they're in global sequence order
         Long previousSequence = 0L;
         for (EventDbo event : events) {
-            assertThat(event.getGlobalSequence()).isGreaterThan(previousSequence);
-            previousSequence = event.getGlobalSequence();
+            assertThat(event.getEventSequence()).isGreaterThan(previousSequence);
+            previousSequence = event.getEventSequence();
         }
     }
 
     @Test
     void shouldFindEventsAfterGlobalSequence() {
         // Given
-        eventDboRepository.save(new EventDbo(aggregateId1, 1, "OrderCreated", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId1, 2, "OrderPaid", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId2, 1, "OrderCreated", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderCreated", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderPaid", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId2, "OrderCreated", "{}"));
 
         // Retrieve all events to get their global sequences
-        List<EventDbo> allEvents = eventDboRepository.findAllByGlobalSequence();
+        List<EventDbo> allEvents = eventDboRepository.findAllByOrderByEventSequenceAsc();
         assertThat(allEvents).hasSize(3);
 
-        Long firstGlobalSequence = allEvents.getFirst().getGlobalSequence();
+        Long firstGlobalSequence = allEvents.getFirst().getEventSequence();
 
         // When
         List<EventDbo> eventsAfter = eventDboRepository.findEventsAfter(firstGlobalSequence);
 
         // Then
         assertThat(eventsAfter).hasSize(2);
-        assertThat(eventsAfter.get(0).getGlobalSequence()).isGreaterThan(firstGlobalSequence);
-        assertThat(eventsAfter.get(1).getGlobalSequence()).isGreaterThan(firstGlobalSequence);
+        assertThat(eventsAfter.get(0).getEventSequence()).isGreaterThan(firstGlobalSequence);
+        assertThat(eventsAfter.get(1).getEventSequence()).isGreaterThan(firstGlobalSequence);
     }
 
     @Test
     void shouldFindEventsByEventType() {
         // Given
-        eventDboRepository.save(new EventDbo(aggregateId1, 1, "OrderCreated", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId1, 2, "OrderPaid", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId2, 1, "OrderCreated", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId2, 2, "OrderShipped", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderCreated", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderPaid", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId2, "OrderCreated", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId2, "OrderShipped", "{}"));
 
         // When
         List<EventDbo> orderCreatedEvents = eventDboRepository.findByEventType("OrderCreated");
@@ -133,12 +132,12 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
     @Test
     void shouldGetMaxEventSequenceForAggregate() {
         // Given
-        eventDboRepository.save(new EventDbo(aggregateId1, 1, "OrderCreated", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId1, 2, "OrderPaid", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId1, 3, "OrderShipped", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderCreated", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderPaid", "{}"));
+        eventDboRepository.save(new EventDbo(aggregateId1, "OrderShipped", "{}"));
 
         // When
-        Integer maxSequence = eventDboRepository.getMaxEventSequence(aggregateId1);
+        long maxSequence = eventDboRepository.getMaxEventSequence(aggregateId1);
 
         // Then
         assertThat(maxSequence).isEqualTo(3);
@@ -147,7 +146,7 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
     @Test
     void shouldReturnZeroForMaxEventSequenceWhenNoEvents() {
         // When
-        Integer maxSequence = eventDboRepository.getMaxEventSequence(UUID.randomUUID());
+        long maxSequence = eventDboRepository.getMaxEventSequence(UUID.randomUUID());
 
         // Then
         assertThat(maxSequence)
@@ -176,7 +175,7 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
                     }
                 }
                 """;
-        EventDbo event = new EventDbo(aggregateId1, 1, "OrderCreated", complexJson);
+        EventDbo event = new EventDbo(aggregateId1, "OrderCreated", complexJson);
 
         // When
         /*EventDbo saved = */eventDboRepository.save(event);

@@ -30,7 +30,7 @@ public class InMemoryEventStore<
 
     private final Map<ID, List<EventDto<EVENT>>> idToEventDtoMap = new HashMap<>();
     // emulate what the database does by effectively starting at 1, but we assign 0 as it gets incremented prior to use
-    private long globalEventSequence = 0L;
+    private long eventSequence = 0L;
 
     private InMemoryEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         super(eventsToAggregate);
@@ -51,21 +51,20 @@ public class InMemoryEventStore<
         List<EventDto<EVENT>> freshEventDtos =
                 uncommittedEvents.map(event -> EventDto.from(
                                          aggregateId.id(),
-                                         event.eventSequence(),
-                                         ++globalEventSequence,
+                                         ++eventSequence,
                                          event))
                                  .toList();
         existingEventDtos.addAll(freshEventDtos);
 
         idToEventDtoMap.put(aggregateId, existingEventDtos);
-        return globalEventSequence;
+        return eventSequence;
     }
 
     @Override
     protected @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id) {
         return idToEventDtoMap.getOrDefault(id, List.of())
                 .stream()
-                .sorted(Comparator.comparingInt(EventDto::getEventSequence))
+                .sorted(Comparator.comparingLong(EventDto::getEventSequence))
                 .toList();
     }
 
@@ -78,7 +77,7 @@ public class InMemoryEventStore<
     @Override
     public Stream<EVENT> allEventsAfter(long globalEventSequence) {
         return allEventsSortedByGlobalEventSequence()
-                              .dropWhile(eventDto -> eventDto.getGlobalEventSequence() <= globalEventSequence)
+                              .dropWhile(eventDto -> eventDto.getEventSequence() <= globalEventSequence)
                               .map(EventDto::toDomain);
     }
 
@@ -86,6 +85,6 @@ public class InMemoryEventStore<
         return idToEventDtoMap.values()
                               .stream()
                               .flatMap(Collection::stream)
-                              .sorted(Comparator.comparingLong(EventDto::getGlobalEventSequence));
+                              .sorted(Comparator.comparingLong(EventDto::getEventSequence));
     }
 }

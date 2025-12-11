@@ -13,7 +13,7 @@ public final class TicketsPurchased extends CustomerEvent {
     private final int paidAmount;
 
     public TicketsPurchased(CustomerId customerId,
-                            Integer eventSequence,
+                            Long eventSequence,
                             TicketOrderId ticketOrderId,
                             ConcertId concertId,
                             int quantity,

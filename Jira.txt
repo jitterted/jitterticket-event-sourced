@@ -50,10 +50,11 @@
                     [X] Clean up any other @Deprecated methods
 
 ==> CURRENT TASK ==>
-                [ ] Replace "local" (per-aggregate) event sequence with the global sequence (DB/Store-generated)
-                    [ ] Stop using event_sequence in JDBC queries (fix tests)
-                    [ ] Replace client-side generated event_sequence with DB-generated BIGSERIAL
-                        [ ] change primary key
+                [X] Replace "local" (per-aggregate) event sequence with the global sequence (DB/Store-generated)
+                    [X] Stop using event_sequence in JDBC queries (fix tests)
+                    [X] Replace client-side generated event_sequence with DB-generated BIGSERIAL
+                        [X] change primary key
+                [ ] Change the EventViewerController to use the correct range for selectedEvent, since they're no longer starting at 1, and _may_ have gaps
                 [ ] Mediator work...
                     [ ] Mediator.handle(events, lastGlobalEventSequence)
                     [ ] Test EventStore calls Mediator upon store.save()

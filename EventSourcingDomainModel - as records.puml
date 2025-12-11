@@ -1,7 +1,7 @@
 @startuml Event Implementation Hierarchy (with Records)
 
 interface Event {
-  +Integer eventSequence()
+  +Long eventSequence()
 }
 
 interface CustomerEvent {
@@ -14,14 +14,14 @@ interface ConcertEvent {
 
 class CustomerRegistered <<record>> {
   -CustomerId customerId
-  -Integer eventSequence
+  -Long eventSequence
   -String customerName
   -String email
 }
 
 class TicketsPurchased <<record>> {
   -CustomerId customerId
-  -Integer eventSequence
+  -Long eventSequence
   -TicketOrderId ticketOrderId
   -ConcertId concertId
   -int quantity
@@ -30,7 +30,7 @@ class TicketsPurchased <<record>> {
 
 class ConcertScheduled <<record>> {
   -ConcertId concertId
-  -Integer eventSequence
+  -Long eventSequence
   -String artist
   -int ticketPrice
   -LocalDateTime showDateTime
@@ -41,14 +41,14 @@ class ConcertScheduled <<record>> {
 
 class ConcertRescheduled <<record>> {
   -ConcertId concertId
-  -Integer eventSequence
+  -Long eventSequence
   -LocalDateTime newShowDateTime
   -LocalTime newDoorsTime
 }
 
 class TicketsSold <<record>> {
   -ConcertId concertId
-  -Integer eventSequence
+  -Long eventSequence
   -int quantity
   -int paidAmount
 }

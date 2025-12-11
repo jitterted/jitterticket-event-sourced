@@ -10,7 +10,7 @@ public final class ConcertRescheduled extends ConcertEvent {
     private final LocalTime newDoorsTime;
 
     public ConcertRescheduled(ConcertId concertId,
-                              Integer eventSequence,
+                              Long eventSequence,
                               LocalDateTime newShowDateTime,
                               LocalTime newDoorsTime) {
         super(concertId, eventSequence);

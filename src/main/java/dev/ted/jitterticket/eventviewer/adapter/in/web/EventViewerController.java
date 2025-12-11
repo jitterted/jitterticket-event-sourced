@@ -47,7 +47,7 @@ public class EventViewerController {
     @GetMapping("/{aggregateName}/{uuidString}")
     public String showEvents(@PathVariable("aggregateName") String aggregateName,
                              @PathVariable("uuidString") String uuidString,
-                             @RequestParam(value = "selectedEvent", required = false, defaultValue = "-1") int selectedEvent,
+                             @RequestParam(value = "selectedEvent", required = false, defaultValue = "-1") long selectedEvent,
                              Model model) {
         model.addAttribute("uuid", uuidString);
         UUID uuid = UUID.fromString(uuidString);
@@ -68,7 +68,7 @@ public class EventViewerController {
         return "event-viewer/view-events";
     }
 
-    private static List<? extends Event> selectEvents(int selectedEvent, List<? extends Event> allEvents) {
+    private static List<? extends Event> selectEvents(long selectedEvent, List<? extends Event> allEvents) {
         int eventIndex = allEvents.size() - 1;
         for (int i = 0; i < allEvents.size(); i++) {
             if (allEvents.get(i).eventSequence() == selectedEvent) {

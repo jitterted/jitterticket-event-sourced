@@ -14,10 +14,10 @@ import java.util.List;
 public class EventView {
 
     private final String eventName;
-    private final int eventSequence;
+    private final long eventSequence;
     private final List<FieldView> fields;
 
-    private EventView(String eventName, int eventSequence, List<FieldView> fields) {
+    private EventView(String eventName, long eventSequence, List<FieldView> fields) {
         this.eventName = eventName;
         this.eventSequence = eventSequence;
         this.fields = fields;
@@ -61,7 +61,7 @@ public class EventView {
         return fields;
     }
 
-    public int eventSequence() {
+    public long eventSequence() {
         return eventSequence;
     }
 

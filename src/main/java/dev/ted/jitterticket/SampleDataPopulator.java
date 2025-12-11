@@ -191,6 +191,6 @@ public class SampleDataPopulator implements ApplicationRunner {
                 "Another Customer", "another@example.com"
         ));
         customerStore.save(firstCustomerId,
-                           Stream.of(new TicketsPurchased(firstCustomerId, 1, TicketOrderId.createRandom(), SONIC_WAVES_CONCERT_ID, 3, 150)));
+                           Stream.of(new TicketsPurchased(firstCustomerId, 1L, TicketOrderId.createRandom(), SONIC_WAVES_CONCERT_ID, 3, 150)));
     }
 }

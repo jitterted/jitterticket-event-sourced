@@ -2,21 +2,21 @@ package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.ReadOnlyProperty;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+@SuppressWarnings("SpringDataJdbcAssociatedDbElementsInspection")
 @Table("events")
-public class EventDbo implements Persistable<UUID> {
+public class EventDbo {
 
-    // Composite primary key fields: prior to Spring Data JDBC 4.0, can't easily use a composite ID for @Id, but we have to mark one of these as the primary key
-    // so we mark the aggregateRootId and let the database handle the composite key constraint
-    @Id
+    // since the eventSequence is DB-generated, and is therefore unique per-event
+    // we no longer need a composite ID, though we still index on the aggregateRootId
+    // because we often retrieve rows for a specific aggregate
     private UUID aggregateRootId;
-    private Integer eventSequence;
+    @Id
+    private Long eventSequence;
 
     private String eventType;
     private String json;
@@ -24,40 +24,19 @@ public class EventDbo implements Persistable<UUID> {
     @ReadOnlyProperty
     private OffsetDateTime createdAt;
 
-    @ReadOnlyProperty
-    private Long globalSequence;
-
     private Integer version;
-
-    @Transient
-    private boolean isNew;
 
     public EventDbo() {
     }
 
     public EventDbo(UUID aggregateRootId,
-                    Integer eventSequence,
                     String eventType,
                     String json) {
         this.aggregateRootId = aggregateRootId;
-        this.eventSequence = eventSequence;
         this.eventType = eventType;
         this.json = json;
         this.version = 1;
-        this.isNew = true;
     }
-
-    //region Persistable interface implementation
-    @Override
-    public UUID getId() {
-        return aggregateRootId;
-    }
-
-    @Override
-    public boolean isNew() {
-        return isNew || globalSequence == null;
-    }
-    //endregion Persistable
 
     //region Getters and Setters
     public UUID getAggregateRootId() {
@@ -68,11 +47,11 @@ public class EventDbo implements Persistable<UUID> {
         this.aggregateRootId = aggregateRootId;
     }
 
-    public Integer getEventSequence() {
+    public Long getEventSequence() {
         return eventSequence;
     }
 
-    public void setEventSequence(Integer eventSequence) {
+    public void setEventSequence(Long eventSequence) {
         this.eventSequence = eventSequence;
     }
 
@@ -100,14 +79,6 @@ public class EventDbo implements Persistable<UUID> {
         this.createdAt = createdAt;
     }
 
-    public Long getGlobalSequence() {
-        return globalSequence;
-    }
-
-    public void setGlobalSequence(Long globalSequence) {
-        this.globalSequence = globalSequence;
-    }
-
     public Integer getVersion() {
         return version;
     }
@@ -125,7 +96,6 @@ public class EventDbo implements Persistable<UUID> {
                 ", eventType='" + eventType + '\'' +
                 ", json='" + json + '\'' +
                 ", createdAt=" + createdAt +
-                ", globalSequence=" + globalSequence +
                 ", version=" + version +
                 ']';
     }

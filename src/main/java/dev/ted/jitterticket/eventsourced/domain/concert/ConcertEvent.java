@@ -7,7 +7,7 @@ public abstract sealed class ConcertEvent extends Event
 
     private final ConcertId concertId;
 
-    protected ConcertEvent(ConcertId concertId, Integer eventSequence) {
+    protected ConcertEvent(ConcertId concertId, Long eventSequence) {
         super(eventSequence);
         this.concertId = concertId;
     }

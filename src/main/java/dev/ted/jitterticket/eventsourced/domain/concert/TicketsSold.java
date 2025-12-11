@@ -8,7 +8,7 @@ public final class TicketsSold extends ConcertEvent {
     private final int totalPaid;
 
     public TicketsSold(ConcertId concertId,
-                       Integer eventSequence,
+                       Long eventSequence,
                        int quantity,
                        int totalPaid) {
         super(concertId, eventSequence);

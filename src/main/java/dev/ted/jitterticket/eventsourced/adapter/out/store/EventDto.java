@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.StreamReadFeature;
@@ -20,6 +21,8 @@ import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 /**
@@ -29,8 +32,7 @@ public class EventDto<EVENT extends Event> {
     private static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
 
     private final UUID aggregateRootId; // ID for the Aggregate Root
-    private final Integer eventSequence;
-    private final Long globalEventSequence;
+    private final Long eventSequence;
     private final String eventType;
     private final String json; // blob of data - schemaless
 
@@ -38,17 +40,16 @@ public class EventDto<EVENT extends Event> {
         Table schema:
 
         PK   AggregateRootId
-             EventSequence (monotonically increasing per AggRootId)
-             GlobalEventSequence (a globally ordered sequence from the DB, starts at 1 for PostgreSQL)
+             EventSequence (a globally ordered sequence from the DB, starts at 1 for PostgreSQL)
              Version (optional: for versioning the schema)
         JSON String eventContent
 
-        AggRootId | EventSequence | GlobalEventSequence | Version | Timestamp | EventType          |  JSON Content
-        ----------------------------------------------------------------------------------------------------------------
-        0         | 0             | 1                   |         |           | ConcertScheduled   | {id: 0, eventSequence: 0, artist: "Judy", ... }
-        1         | 0             | 2                   |         |           | ConcertScheduled   | {id: 1, eventSequence: 0, artist: "Betty", ... }
-        0         | 1             | 3                   |         |           | TicketsSold        | {id: 0, eventSequence: 1, quantity: 4, totalPaid: 120 }
-        0         | 2             | 4                   |         |           | ConcertRescheduled | {id: 0, eventSequence: 2, newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
+        AggRootId | EventSequence | Version | Timestamp | EventType          |  JSON Content
+        ------------------------------------------------------------------------------------------
+        0         | 1             |         |           | ConcertScheduled   | {id: 0, eventSequence: 0, artist: "Judy", ... }
+        1         | 2             |         |           | ConcertScheduled   | {id: 1, eventSequence: 0, artist: "Betty", ... }
+        0         | 3             |         |           | TicketsSold        | {id: 0, eventSequence: 1, quantity: 4, totalPaid: 120 }
+        0         | 4             |         |           | ConcertRescheduled | {id: 0, eventSequence: 2, newShowDateTime: 2025-11-11 11:11, newDoorsTime: 10:11 }
     */
 
 
@@ -56,11 +57,9 @@ public class EventDto<EVENT extends Event> {
     //    so that when adding (and especially renaming) classes, the mapping works
 
     public EventDto(UUID aggregateRootId,
-                    Integer eventSequence,
-                    Long globalEventSequence,
+                    Long eventSequence,
                     String eventClassName,
                     String json) {
-        this.globalEventSequence = globalEventSequence;
         if (eventClassName == null) {
             throw new IllegalArgumentException("Event class name cannot be null, JSON is: " + json);
         }
@@ -91,14 +90,13 @@ public class EventDto<EVENT extends Event> {
 
     public static <EVENT extends Event> EventDto<EVENT> from(
             UUID aggregateRootId,
-            Integer eventSequence,
-            Long globalEventSequence, EVENT event) {
+            Long eventSequence,
+            EVENT event) {
         try {
             String json = OBJECT_MAPPER.writeValueAsString(event);
             String fullyQualifiedClassName = event.getClass().getName();
             return new EventDto<>(aggregateRootId,
                                   eventSequence,
-                                  globalEventSequence,
                                   fullyQualifiedClassName,
                                   json);
         } catch (JsonProcessingException e) {
@@ -111,7 +109,9 @@ public class EventDto<EVENT extends Event> {
 
         try {
             Class<EVENT> valueType = (Class<EVENT>) Class.forName(eventType);
-            return OBJECT_MAPPER.readValue(json, valueType);
+            EVENT event = OBJECT_MAPPER.readValue(json, valueType);
+            event.setEventSequence(this.eventSequence);
+            return event;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Problem converting JSON: " + json + " to " + eventType, e);
         } catch (ClassNotFoundException e) {
@@ -123,12 +123,8 @@ public class EventDto<EVENT extends Event> {
         return aggregateRootId;
     }
 
-    public Integer getEventSequence() {
+    public Long getEventSequence() {
         return eventSequence;
-    }
-
-    public Long getGlobalEventSequence() {
-        return globalEventSequence;
     }
 
     public String getEventType() {
@@ -146,13 +142,13 @@ public class EventDto<EVENT extends Event> {
         }
 
         EventDto<?> eventDto = (EventDto<?>) o;
-        return aggregateRootId.equals(eventDto.aggregateRootId) && eventSequence.equals(eventDto.eventSequence) && eventType.equals(eventDto.eventType) && json.equals(eventDto.json);
+        return aggregateRootId.equals(eventDto.aggregateRootId) && Objects.equals(eventSequence, eventDto.eventSequence) && eventType.equals(eventDto.eventType) && json.equals(eventDto.json);
     }
 
     @Override
     public int hashCode() {
         int result = aggregateRootId.hashCode();
-        result = 31 * result + eventSequence.hashCode();
+        result = 31 * result + Objects.hashCode(eventSequence);
         result = 31 * result + eventType.hashCode();
         result = 31 * result + json.hashCode();
         return result;
@@ -160,18 +156,18 @@ public class EventDto<EVENT extends Event> {
 
     @Override
     public String toString() {
-        return "EventDto {" +
-                "aggregateRootId=" + aggregateRootId +
-                ", eventSequence=" + eventSequence +
-                ", eventType='" + eventType + '\'' +
-                ", json='" + json + '\'' +
-                '}';
+        return new StringJoiner(", ", EventDto.class.getSimpleName() + "[", "]")
+                .add("aggregateRootId=" + aggregateRootId)
+                .add("globalEventSequence=" + eventSequence)
+                .add("eventType='" + eventType + "'")
+                .add("json='" + json + "'")
+                .toString();
     }
 }
 
 abstract class EventMixin {
-    @JsonProperty("eventSequence")
-    public abstract Integer eventSequence();
+    @JsonIgnore
+    public abstract Long eventSequence();
 }
 
 abstract class CustomerEventMixin {
@@ -188,7 +184,7 @@ abstract class CustomerRegisteredMixin {
     @JsonCreator
     public CustomerRegisteredMixin(
             @JsonProperty("customerId") CustomerId customerId,
-            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("eventSequence") Long eventSequence,
             @JsonProperty("customerName") String customerName,
             @JsonProperty("email") String email) {
     }
@@ -204,7 +200,7 @@ abstract class ConcertRescheduledMixin {
     @JsonCreator
     public ConcertRescheduledMixin(
             @JsonProperty("concertId") ConcertId concertId,
-            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("eventSequence") Long eventSequence,
             @JsonProperty("newShowDateTime") LocalDateTime newShowDateTime,
             @JsonProperty("newDoorsTime") LocalTime newDoorsTime
     ) {
@@ -224,7 +220,7 @@ abstract class TicketsSoldMixin {
     @JsonCreator
     public TicketsSoldMixin(
             @JsonProperty("concertId") ConcertId concertId,
-            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("eventSequence") Long eventSequence,
             @JsonProperty("quantity") int quantity,
             @JsonProperty("totalPaid") int totalPaid
     ) {
@@ -244,7 +240,7 @@ abstract class TicketsPurchasedMixin {
     @JsonCreator
     public TicketsPurchasedMixin(
             @JsonProperty("customerId") CustomerId customerId,
-            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("eventSequence") Long eventSequence,
             @JsonProperty("ticketOrderId") TicketOrderId ticketOrderId,
             @JsonProperty("concertId") ConcertId concertId,
             @JsonProperty("quantity") int quantity,
@@ -269,7 +265,7 @@ abstract class ConcertScheduledMixin {
     @JsonCreator
     public ConcertScheduledMixin(
             @JsonProperty("concertId") ConcertId concertId,
-            @JsonProperty("eventSequence") Integer eventSequence,
+            @JsonProperty("eventSequence") Long eventSequence,
             @JsonProperty("artist") String artist,
             @JsonProperty("ticketPrice") int ticketPrice,
             @JsonProperty("showDateTime") java.time.LocalDateTime showDateTime,

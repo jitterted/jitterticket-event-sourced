@@ -20,7 +20,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
-@SuppressWarnings("SpellCheckingInspection")
 class CsvStringsEventStoreTest {
 
     @Test
@@ -43,8 +42,8 @@ class CsvStringsEventStoreTest {
 
         assertThat(stringsReaderAppender.readAllLines())
                 .hasSize(2)
-                .containsExactly("a087bb99-b920-41d9-a25b-d96ac779be0b,0,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"eventSequence\":0,\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
-                                 "a087bb99-b920-41d9-a25b-d96ac779be0b,1,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"eventSequence\":1,\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}");
+                .containsExactly("a087bb99-b920-41d9-a25b-d96ac779be0b,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
+                                 "a087bb99-b920-41d9-a25b-d96ac779be0b,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}");
     }
 
     @Test
@@ -54,7 +53,7 @@ class CsvStringsEventStoreTest {
         ConcertId concertId = new ConcertId(UUID.fromString("a087bb99-b920-41d9-a25b-d96ac779be0b"));
         LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 10, 10, 20, 0);
         ConcertScheduled concertScheduled = new ConcertScheduled(concertId,
-                                                                 0,
+                                                                 0L,
                                                                  "Name of Artist",
                                                                  99,
                                                                  originalShowDateTime,
@@ -67,7 +66,7 @@ class CsvStringsEventStoreTest {
 
         LocalDateTime newShowDateTime = originalShowDateTime.plusMonths(1);
         ConcertRescheduled concertRescheduled = new ConcertRescheduled(
-                concertId, 1, newShowDateTime, newShowDateTime.toLocalTime().minusHours(1));
+                concertId, 1L, newShowDateTime, newShowDateTime.toLocalTime().minusHours(1));
 
         // save new event in a new event store instance
         CsvStringsEventStore.forConcerts(stringsReaderAppender)
@@ -75,8 +74,8 @@ class CsvStringsEventStoreTest {
 
         assertThat(stringsReaderAppender.readAllLines())
                 .hasSize(2)
-                .containsExactly("a087bb99-b920-41d9-a25b-d96ac779be0b,0,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"eventSequence\":0,\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
-                                 "a087bb99-b920-41d9-a25b-d96ac779be0b,1,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"eventSequence\":1,\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}");
+                .containsExactly("a087bb99-b920-41d9-a25b-d96ac779be0b,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
+                                 "a087bb99-b920-41d9-a25b-d96ac779be0b,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}");
 
     }
 
@@ -88,8 +87,8 @@ class CsvStringsEventStoreTest {
 
         stringsReaderAppender.appendLines(
                 List.of(
-                        concertUuidString + ",0,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"eventSequence\":0,\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
-                        concertUuidString + ",1,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"eventSequence\":1,\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}"
+                        concertUuidString + ",1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
+                        concertUuidString + ",2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}"
                 ));
 
         List<ConcertEvent> concertEvents = concertEventStore.eventsForAggregate(
@@ -108,9 +107,9 @@ class CsvStringsEventStoreTest {
         String concertUuidString = "a087bb99-b920-41d9-a25b-d96ac779be0b";
         String otherConcertUuidString = UUID.randomUUID().toString();
         stringsReaderAppender.appendLines(List.of(
-                concertUuidString + ",0,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"" + concertUuidString + "\"},\"eventSequence\":0,\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
-                otherConcertUuidString + ",0,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"" + otherConcertUuidString + "\"},\"eventSequence\":0,\"artist\":\"Other Concert - Should Not Be Returned\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
-                concertUuidString + ",1,3,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"" + concertUuidString + "\"},\"eventSequence\":1,\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}"));
+                concertUuidString + ",1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"" + concertUuidString + "\"},\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
+                otherConcertUuidString + ",2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"" + otherConcertUuidString + "\"},\"artist\":\"Other Concert - Should Not Be Returned\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
+                concertUuidString + ",3,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"" + concertUuidString + "\"},\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}"));
 
         Concert concert = concertEventStore.findById(new ConcertId(UUID.fromString(concertUuidString)))
                                            .orElseThrow();
@@ -127,7 +126,7 @@ class CsvStringsEventStoreTest {
         LocalDateTime newShowDateTime = LocalDateTime.now().plusMonths(1);
         List<ConcertEvent> concertEvents = List.of(
                 new ConcertScheduled(concertId,
-                                     0,
+                                     0L,
                                      "Name of Artist",
                                      99,
                                      LocalDateTime.now(),
@@ -135,7 +134,7 @@ class CsvStringsEventStoreTest {
                                      100,
                                      4)
                 , new ConcertRescheduled(concertId,
-                                         1,
+                                         1L,
                                          newShowDateTime,
                                          newShowDateTime.toLocalTime().minusHours(1))
         );
@@ -145,7 +144,6 @@ class CsvStringsEventStoreTest {
                 concertEvents.stream()
                              .map(event -> EventDto.from(
                                      concertId.id(),
-                                     event.eventSequence(),
                                      globalEventSequence.getAndIncrement(),
                                      event))
                              .toList();
@@ -179,19 +177,19 @@ class CsvStringsEventStoreTest {
     @Test
     void eventDtoConvertedToAndFromCsvCorrectly() {
         String customerUuid = "3ed83b5e-9564-42a5-8329-3cc5d5e14840";
+        long eventSequence = 1L;
         CustomerRegistered event = new CustomerRegistered(new CustomerId(UUID.fromString(customerUuid)),
-                                                          0,
+                                                          eventSequence,
                                                           "Customer Name",
                                                           "customer@example.com");
         EventDto<CustomerRegistered> originalEventDto =
                 EventDto.from(event.customerId().id(),
-                              event.eventSequence(),
-                              1L,
+                              eventSequence,
                               event);
 
         String csv = CsvStringsEventStore.toCsv(originalEventDto);
         assertThat(csv)
-                .isEqualTo("3ed83b5e-9564-42a5-8329-3cc5d5e14840,0,1,dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered,{\"customerId\":{\"id\":\"3ed83b5e-9564-42a5-8329-3cc5d5e14840\"},\"eventSequence\":0,\"customerName\":\"Customer Name\",\"email\":\"customer@example.com\"}");
+                .isEqualTo("3ed83b5e-9564-42a5-8329-3cc5d5e14840,1,dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered,{\"customerId\":{\"id\":\"3ed83b5e-9564-42a5-8329-3cc5d5e14840\"},\"customerName\":\"Customer Name\",\"email\":\"customer@example.com\"}");
 
         CsvStringsEventStore<ConcertId, ConcertEvent, Concert> concertEventStore = (CsvStringsEventStore<ConcertId, ConcertEvent, Concert>) CsvStringsEventStore.forConcerts(new ArrayListStringsReaderAppender());
         EventDto<? extends Event> eventDto = concertEventStore.csvToEventDto(csv);

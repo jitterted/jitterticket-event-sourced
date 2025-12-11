@@ -3,24 +3,22 @@
 -- Events table for storing event-sourced aggregates
 CREATE TABLE IF NOT EXISTS events (
     aggregate_root_id UUID NOT NULL,
-    event_sequence INTEGER NOT NULL,
+    -- This is a global sequence for ordering events (within and across aggregates)
+    -- per Postgres docs, this starts at 1
+    event_sequence BIGSERIAL,
     event_type TEXT NOT NULL,
     json TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
 
     -- Primary key is composite of aggregate_root_id and event_sequence
     PRIMARY KEY (aggregate_root_id, event_sequence)
-    
-    -- This is a global sequence for ordering events (within and across aggregates)
-    -- per Postgres docs, this starts at 1
-    , global_sequence BIGSERIAL
-    
+
     -- Optional: Add a version field for schema versioning
     , version INTEGER DEFAULT 1
 );
 
--- Index for global ordering if using global_sequence
-CREATE INDEX IF NOT EXISTS idx_events_global_sequence ON events (global_sequence);
+-- Index for global ordering, e.g., for queries like findAllAfter(event_sequence)
+CREATE INDEX IF NOT EXISTS idx_events_event_sequence ON events (event_sequence);
 
 -- Index for timestamp-based queries
 CREATE INDEX IF NOT EXISTS idx_events_created_at ON events (created_at);

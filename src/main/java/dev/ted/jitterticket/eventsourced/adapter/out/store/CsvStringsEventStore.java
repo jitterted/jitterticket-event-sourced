@@ -51,35 +51,31 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
     static String toCsv(EventDto<? extends Event> originalEventDto) {
         return originalEventDto.getAggregateRootId() + ","
                + originalEventDto.getEventSequence() + ","
-               + originalEventDto.getGlobalEventSequence() + ","
                + originalEventDto.getEventType() + ","
                + originalEventDto.getJson();
     }
 
     EventDto<EVENT> csvToEventDto(String csv) {
-        String[] splitCsv = csv.split(",", 5);
+        String[] splitCsv = csv.split(",", 4);
         UUID aggregateRootId = UUID.fromString(splitCsv[0]);
-        int eventSequence = Integer.parseInt(splitCsv[1]);
-        long globalEventSequence = Long.parseLong(splitCsv[2]);
-        String eventType = splitCsv[3];
-        String json = splitCsv[4];
+        long eventSequence = Long.parseLong(splitCsv[1]);
+        String eventType = splitCsv[2];
+        String json = splitCsv[3];
 
         return new EventDto<>(aggregateRootId,
                               eventSequence,
-                              globalEventSequence,
                               eventType,
                               json);
     }
 
     @Override
     public long save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
-        AtomicLong globalEventSequence = new AtomicLong(
+        AtomicLong eventSequence = new AtomicLong(
                 stringsReaderAppender.readAllLines().count());
         List<EventDto<EVENT>> uncommittedEventDtos =
                 uncommittedEvents.map(event -> EventDto.from(
                                          aggregateId.id(),
-                                         event.eventSequence(),
-                                         globalEventSequence.incrementAndGet(),
+                                         eventSequence.incrementAndGet(),
                                          event))
                                  .toList();
         List<String> newCsvLines = uncommittedEventDtos
@@ -87,7 +83,7 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
                 .map(CsvStringsEventStore::toCsv)
                 .toList();
         stringsReaderAppender.appendLines(newCsvLines);
-        return globalEventSequence.get();
+        return eventSequence.get();
     }
 
     @Override
@@ -99,14 +95,14 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
     protected @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id) {
         return allEventDtos()
                 .filter(dto -> dto.getAggregateRootId().equals(id.id()))
-                .sorted(Comparator.comparingInt(EventDto::getEventSequence))
+                .sorted(Comparator.comparingLong(EventDto::getEventSequence))
                 .toList();
     }
 
     @Override
     public Stream<EVENT> allEventsAfter(long globalEventSequence) {
         return allEventDtos()
-                .dropWhile(eventDto -> eventDto.getGlobalEventSequence() <= globalEventSequence)
+                .dropWhile(eventDto -> eventDto.getEventSequence() <= globalEventSequence)
                 .map(EventDto::toDomain);
 
     }

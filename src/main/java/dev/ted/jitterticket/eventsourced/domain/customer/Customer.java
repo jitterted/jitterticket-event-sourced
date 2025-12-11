@@ -33,7 +33,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     }
 
     private Customer(CustomerId customerId, String name, String email) {
-        enqueue(new CustomerRegistered(customerId, nextEventSequenceNumber(), name, email));
+        enqueue(new CustomerRegistered(customerId, null, name, email));
     }
 
     @Override
@@ -57,7 +57,7 @@ public class Customer extends EventSourcedAggregate<CustomerEvent, CustomerId> {
     public void purchaseTickets(Concert concert, TicketOrderId ticketOrderId, int quantity) {
         int paidAmount = quantity * concert.ticketPrice();
         TicketsPurchased ticketsPurchased =
-                new TicketsPurchased(getId(), nextEventSequenceNumber(), ticketOrderId, concert.getId(), quantity, paidAmount);
+                new TicketsPurchased(getId(), null, ticketOrderId, concert.getId(), quantity, paidAmount);
         enqueue(ticketsPurchased);
     }
     //endregion

@@ -51,7 +51,6 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                                  .stream()
                                  .map(dbo -> new EventDto<EVENT>(
                                          dbo.getAggregateRootId(),
-                                         dbo.getEventSequence(),
                                          null, // TODO this null will go away once the highest global event sequence is returned from save()
                                          dbo.getEventType(),
                                          dbo.getJson()))
@@ -63,12 +62,10 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
         // assumes there's at least one uncommittedEvent in the incoming stream!
         List<EventDbo> dbos = uncommittedEvents
                 .map(event -> EventDto.from(aggregateId.id(),
-                                            event.eventSequence(),
                                             null, // TODO this null will go away once the highest global event sequence is returned from save()
                                             event))
                 .map(dto -> new EventDbo(
                         dto.getAggregateRootId(),
-                        dto.getEventSequence(),
                         dto.getEventType(),
                         dto.getJson()))
                 .toList();
@@ -79,14 +76,14 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                         lastDboToWrite.getAggregateRootId(),
                         lastDboToWrite.getEventSequence());
         return lastEventDboSaved
-                .map(EventDbo::getGlobalSequence)
+                .map(EventDbo::getEventSequence)
                 .orElseThrow(() -> new IllegalStateException("Could not find event saved with Event id: " + lastDboToWrite.getAggregateRootId() + " and Event Sequence: " + lastDboToWrite.getEventSequence()));
     }
 
     @Override
     public Stream<EVENT> allEvents() {
         return mapToDomainEvents(eventDboRepository
-                                         .findAllByGlobalSequence());
+                                         .findAllByOrderByEventSequenceAsc());
     }
 
     @Override
@@ -101,7 +98,6 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                 .stream()
                 .map(dbo -> new EventDto<EVENT>(
                         dbo.getAggregateRootId(),
-                        dbo.getEventSequence(),
                         null, // TODO this null will go away once the highest global event sequence is returned from save()
                         dbo.getEventType(),
                         dbo.getJson()))

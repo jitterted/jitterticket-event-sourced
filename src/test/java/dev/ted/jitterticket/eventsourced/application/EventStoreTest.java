@@ -9,9 +9,6 @@ import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
@@ -126,6 +123,7 @@ public class EventStoreTest {
                     concertStore.allEvents();
 
             assertThat(concertEventStream)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("eventSequence")
                     .containsExactlyElementsOf(expectedEvents);
         }
 
@@ -226,37 +224,8 @@ public class EventStoreTest {
                     concertStore.eventsForAggregate(concertId);
 
             assertThat(eventsForAggregate)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("eventSequence")
                     .containsExactlyElementsOf(allEventsForConcert.toList());
-        }
-
-        @ParameterizedTest(name = "Using {0} Storage")
-        @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        public void savingEventsDirectlyInAnyOrderAreReturnedInOrderOfEventSequence(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-            ConcertId concertId = ConcertId.createRandom();
-            LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 4, 22, 19, 0);
-            LocalTime originalDoorsTime = LocalTime.of(18, 0);
-            int firstEventSequenceNumber = 0;
-            var firstEvent = new ConcertScheduled(
-                    concertId, firstEventSequenceNumber, "Headliner", 45,
-                    originalShowDateTime, originalDoorsTime,
-                    150, 8);
-            int secondEventSequenceNumber = 1;
-            var secondEvent = new ConcertRescheduled(
-                    concertId, secondEventSequenceNumber, originalShowDateTime.plusMonths(2).plusHours(1),
-                    originalDoorsTime.plusHours(1));
-            int thirdEventSequenceNumber = 2;
-            var thirdEvent = new TicketsSold(concertId, thirdEventSequenceNumber, 4, 4 * 45);
-
-            concertStore.save(concertId, Stream.of(
-                    thirdEvent,
-                    firstEvent,
-                    secondEvent
-            ));
-
-            assertThat(concertStore.eventsForAggregate(concertId))
-                    .containsExactly(firstEvent,
-                                     secondEvent,
-                                     thirdEvent);
         }
 
         @ParameterizedTest(name = "Using {0} Storage")
@@ -342,6 +311,7 @@ public class EventStoreTest {
             List<CustomerEvent> eventsForAggregate = customerStore.eventsForAggregate(customerId);
 
             assertThat(eventsForAggregate)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("eventSequence")
                     .containsExactlyElementsOf(allEventsForCustomer.toList());
         }
     }

@@ -7,7 +7,7 @@ public abstract sealed class CustomerEvent extends Event
 
     private final CustomerId customerId;
 
-    protected CustomerEvent(CustomerId customerId, Integer eventSequence) {
+    protected CustomerEvent(CustomerId customerId, Long eventSequence) {
         super(eventSequence);
         this.customerId = customerId;
     }

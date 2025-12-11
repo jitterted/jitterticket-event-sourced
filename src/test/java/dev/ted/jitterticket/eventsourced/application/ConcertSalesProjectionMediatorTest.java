@@ -84,7 +84,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             LocalDateTime showDateTime = LocalDateTime.of(2027, 2, 1, 20, 0);
             String artist = "First Concert";
             ConcertScheduled concertScheduled = new ConcertScheduled(concertId,
-                                                                     0,
+                                                                     1L,
                                                                      artist,
                                                                      TICKET_PRICE,
                                                                      showDateTime,
@@ -434,30 +434,31 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             int ticketPrice1 = 35;
             LocalDateTime showDateTime1 = LocalDateTime.now();
             String artist1 = "First Concert";
-            ConcertScheduled concertScheduled1 = new ConcertScheduled(concertId1, 0,
+            ConcertScheduled concertScheduled1 = new ConcertScheduled(concertId1,
+                                                                      1L,
                                                                       artist1,
                                                                       ticketPrice1,
                                                                       showDateTime1,
                                                                       LocalTime.now(),
                                                                       MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             int quantity1 = 2;
-            TicketsSold ticketsSoldForConcert1 = new TicketsSold(concertId1, 1, quantity1, quantity1 * ticketPrice1);
+            TicketsSold ticketsSoldForConcert1 = new TicketsSold(concertId1, 2L, quantity1, quantity1 * ticketPrice1);
             concertEventStore.save(concertId1, Stream.of(concertScheduled1, ticketsSoldForConcert1));
             ConcertId concertId2 = ConcertId.createRandom();
             int ticketPrice2 = 125;
             LocalDateTime showDateTime2 = LocalDateTime.now();
             String artist2 = "Second Concert";
             ConcertScheduled concertScheduled2 = new ConcertScheduled(
-                    concertId2, 0,
+                    concertId2, 1L,
                     artist2,
                     ticketPrice2,
                     showDateTime2,
                     LocalTime.now(),
                     MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             int quantity2 = 8;
-            TicketsSold ticketsSold1ForConcert2 = new TicketsSold(concertId2, 1, quantity2, quantity2 * ticketPrice2);
+            TicketsSold ticketsSold1ForConcert2 = new TicketsSold(concertId2, 1L, quantity2, quantity2 * ticketPrice2);
             int quantity3 = 6;
-            TicketsSold ticketsSold2ForConcert2 = new TicketsSold(concertId2, 2, quantity3, quantity3 * ticketPrice2);
+            TicketsSold ticketsSold2ForConcert2 = new TicketsSold(concertId2, 2L, quantity3, quantity3 * ticketPrice2);
             concertEventStore.save(concertId2, Stream.of(concertScheduled2, ticketsSold1ForConcert2, ticketsSold2ForConcert2));
             ConcertSalesProjector concertSalesProjector =
                     new ConcertSalesProjector();

@@ -11,6 +11,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -92,39 +93,65 @@ class EventDtoTest {
         return result;
     }
 
+    @Test
+    void uncommittedEventSerializedToJsonDoesNotContainEventSequence() {
+        ConcertId concertId = new ConcertId(UUID.fromString("18a5ae4c-ecdb-429a-b3fe-2c1853fb37d2"));
+        TicketsSold ticketsSold = new TicketsSold(concertId,
+                                                  null, 6, 150);
+
+        EventDto<TicketsSold> eventDto = EventDto.from(concertId.id(),
+                                                   null,
+                                                   ticketsSold);
+
+        assertThat(eventDto.getJson())
+                .isEqualTo(
+                """
+                {"concertId":{"id":"18a5ae4c-ecdb-429a-b3fe-2c1853fb37d2"},"quantity":6,"totalPaid":150}""");
+    }
+
     @ParameterizedTest
     @MethodSource("events")
     void eventRoundTripConversion(Event sourceEvent) {
+        long eventSequence = 17L;
         EventDto<Event> eventDto = EventDto.from(UUID.randomUUID(),
-                                                 14,
-                                                 null, sourceEvent);
+                                                 eventSequence,
+                                                 sourceEvent);
 
         Event actual = eventDto.toDomain();
 
         assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields("eventSequence")
                 .isEqualTo(sourceEvent);
+        assertThat(actual.eventSequence())
+                .as("Expected the eventSequence to be taken from the 'column' and not from the JSON")
+                .isEqualTo(eventSequence);
     }
 
     public static Stream<Arguments> events() {
         return Stream.of(
                 Arguments.of(new ConcertScheduled(ConcertId.createRandom(),
-                                                  0, "artist",
+                                                  null,
+                                                  "artist",
                                                   99,
                                                   LocalDateTime.now(),
                                                   LocalTime.now().minusHours(1),
                                                   100,
                                                   4))
                 , Arguments.of(new ConcertRescheduled(ConcertId.createRandom(),
-                                                      0, LocalDateTime.now(),
+                                                      null,
+                                                      LocalDateTime.now(),
                                                       LocalTime.now().minusHours(1)))
                 , Arguments.of(new CustomerRegistered(CustomerId.createRandom(),
-                                                      0, "customer name",
+                                                      null,
+                                                      "customer name",
                                                       "email@example.com"))
                 , Arguments.of(new TicketsSold(ConcertId.createRandom(),
-                                               0, 6, -1))
+                                               null, 6, 150))
                 , Arguments.of(new TicketsPurchased(
                         CustomerId.createRandom(),
-                        0, TicketOrderId.createRandom(),
+                        null,
+                        TicketOrderId.createRandom(),
                         ConcertId.createRandom(), 4, 100))
         );
     }

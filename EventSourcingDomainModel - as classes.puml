@@ -1,7 +1,7 @@
 @startuml Event Implementation Hierarchy (with Classes)
 
 abstract class Event {
-  +Integer eventSequence()
+  +Long eventSequence()
 }
 
 abstract class CustomerEvent {

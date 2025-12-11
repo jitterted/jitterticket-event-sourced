@@ -42,7 +42,7 @@ class ConcertSalesProjectorTest {
         LocalDateTime showDateTime = LocalDateTime.of(2026, 1, 1, 20, 0);
         Stream<ConcertEvent> concertEvents = Stream.of(
                 new ConcertScheduled(concertId,
-                                     0,
+                                     1L,
                                      "The Beatles",
                                      42,
                                      showDateTime,
@@ -70,14 +70,14 @@ class ConcertSalesProjectorTest {
         LocalDateTime showDateTime = LocalDateTime.of(2026, 1, 1, 20, 0);
         Stream<ConcertEvent> concertEvents = Stream.of(
                 new ConcertScheduled(concertId,
-                                     0,
+                                     1L,
                                      "The Beatles",
                                      75,
                                      showDateTime,
                                      LocalTime.now(),
                                      MAX_CAPACITY,
                                      MAX_TICKETS_PER_PURCHASE),
-                new TicketsSold(concertId, 1, 4, 4 * 75)
+                new TicketsSold(concertId, 1L, 4, 4 * 75)
         );
 
         List<ConcertSalesProjection> updatedProjectionRows =
@@ -186,7 +186,7 @@ class ConcertSalesProjectorTest {
     @Test
     void ticketsSoldWhenConcertScheduledEventNotSeenIsIgnoredThenProjectionIsEmpty() {
         ConcertId concertId = ConcertId.createRandom();
-        TicketsSold ticketsSold = new TicketsSold(concertId, 1, 3, 75);
+        TicketsSold ticketsSold = new TicketsSold(concertId, 1L, 3, 75);
 
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
         List<ConcertSalesProjection> concertSalesProjections =
