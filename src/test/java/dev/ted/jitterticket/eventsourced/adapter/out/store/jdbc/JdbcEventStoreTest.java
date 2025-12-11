@@ -132,12 +132,6 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
         }
 
         @Test
-        void savingEventsDirectlyInAnyOrderAreReturnedInOrderOfEventSequence() {
-            delegatedConcertEventStoreEventsForAggregate
-                    .savingEventsDirectlyInAnyOrderAreReturnedInOrderOfEventSequence(concertStore);
-        }
-
-        @Test
         void lastGlobalEventSequenceSavedReturnedFromSave() {
             delegatedConcertEventStoreEventsForAggregate
                     .lastGlobalEventSequenceSavedReturnedFromSave(concertStore);

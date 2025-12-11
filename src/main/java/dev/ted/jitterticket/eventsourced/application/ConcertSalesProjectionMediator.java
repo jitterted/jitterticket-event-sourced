@@ -30,13 +30,14 @@ public class ConcertSalesProjectionMediator {
 
         this.ensureMetadataExistsIn(projectionMetadataRepository);
 
-        long lastGlobalEventSequenceSeen = this.projectionMetadataRepository
+        long lastGlobalEventSequenceSeenByThisProjection = this.projectionMetadataRepository
                 .lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME)
                 .orElse(0L);
         Stream<ConcertEvent> concertEventStream =
-                this.concertEventStore.allEventsAfter(lastGlobalEventSequenceSeen);
+                this.concertEventStore.allEventsAfter(lastGlobalEventSequenceSeenByThisProjection);
 
-        handle(concertEventStream, lastGlobalEventSequenceSeen);
+        // handle needs the EventStore's lastGES so we know what the new checkpoint is
+        handle(concertEventStream, lastGlobalEventSequenceSeenByThisProjection);
 
         concertEventStore.subscribe(this);
     }

@@ -187,19 +187,4 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
         assertThat(retrieved.getFirst().getJson()).isEqualTo(complexJson);
     }
 
-    @Test
-    void shouldMaintainEventOrderingWithinAggregate() {
-        // Given - Save events out of order
-        eventDboRepository.save(new EventDbo(aggregateId1, 3, "OrderShipped", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId1, 1, "OrderCreated", "{}"));
-        eventDboRepository.save(new EventDbo(aggregateId1, 2, "OrderPaid", "{}"));
-
-        // When
-        List<EventDbo> events = eventDboRepository.findByAggregateRootId(aggregateId1);
-
-        // Then - Should be returned in sequence order
-        assertThat(events).hasSize(3);
-        assertThat(events).extracting(EventDbo::getEventSequence)
-                .containsExactly(1, 2, 3);
-    }
 }

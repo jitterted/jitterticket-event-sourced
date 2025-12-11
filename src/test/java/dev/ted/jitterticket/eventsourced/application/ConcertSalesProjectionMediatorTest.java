@@ -19,6 +19,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                     .isEqualTo(0L);
         }
 
+        @Disabled("Until we resolve the global vs. local event sequence question")
         @Test
         void oneConcertScheduledAndNoTicketsPurchasedReturnsOneSalesSummaryWithZeroSales() {
             ConcertId concertId = ConcertId.createRandom();
@@ -91,6 +93,12 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             concertEventStore.save(concertId, Stream.of(concertScheduled));
             ConcertSalesProjectionMediator mediator = createProjectionMediator();
 
+            assertThat(concertSalesProjectionRepository.count())
+                    .isEqualTo(1);
+            assertThat(projectionMetadataRepository.lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME))
+                    .isPresent()
+                    .get()
+                    .isEqualTo(1L);
             var allSalesSummaries = mediator.allSalesSummaries();
             assertThat(allSalesSummaries)
                     .containsExactly(
@@ -100,12 +108,6 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                                     0, 0
                             )
                     );
-            assertThat(concertSalesProjectionRepository.count())
-                    .isEqualTo(1);
-            assertThat(projectionMetadataRepository.lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME))
-                    .isPresent()
-                    .get()
-                    .isEqualTo(1L);
         }
 
         @Test
@@ -271,13 +273,12 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         void newProjectionUpdatesProjectionDataAndCheckpoint() {
             ConcertSalesProjectionMediator mediator = createProjectionMediator();
             Stream<ConcertEvent> twoEvents = MakeEvents.with()
-                                                    .concertScheduled()
-                                                    .concertScheduled()
-                                                    .stream();
+                                                       .concertScheduled()
+                                                       .concertScheduled()
+                                                       .stream();
 
             long lastGlobalEventSequenceSeen = 2;
             mediator.handle(twoEvents, lastGlobalEventSequenceSeen);
-
 
             assertThat(concertSalesProjectionRepository.count())
                     .as("Expected Concert Sales Projection to have 2 entries")
@@ -291,7 +292,30 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
 
         @Test
         void existingProjectionUpdatesProjectionDataAndCheckpoint() {
-            fail("handle two streams of events");
+            ConcertSalesProjectionMediator mediator = createProjectionMediator();
+            Stream<ConcertEvent> firstTwoEvents =
+                    MakeEvents.with()
+                              .concertScheduled()
+                              .concertScheduled()
+                              .stream();
+            ConcertId concertId = ConcertId.createRandom();
+            Stream<ConcertEvent> secondTwoEvents =
+                    MakeEvents.with()
+                              .concertScheduled(concertId)
+                              .reschedule(concertId, LocalDateTime.of(2026, 11, 1, 20, 0), LocalTime.of(19, 0))
+                              .stream();
+            mediator.handle(firstTwoEvents, 2L);
+
+            mediator.handle(secondTwoEvents, 4L);
+
+            assertThat(concertSalesProjectionRepository.count())
+                    .as("Expected Concert Sales Projection to have 3 entries")
+                    .isEqualTo(3);
+            assertThat(projectionMetadataRepository
+                               .lastGlobalEventSequenceSeenByProjectionName(
+                                       ConcertSalesProjector.PROJECTION_NAME))
+                    .as("Expected global event sequence checkpoint to be 4, for the 4 events handled")
+                    .contains(4L);
         }
     }
 

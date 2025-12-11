@@ -50,6 +50,11 @@
                     [X] Clean up any other @Deprecated methods
 
 ==> CURRENT TASK ==>
+                [ ] Replace "local" (per-aggregate) event sequence with the global sequence (DB/Store-generated)
+                    [ ] Stop using event_sequence in JDBC queries (fix tests)
+                    [ ] Replace client-side generated event_sequence with DB-generated BIGSERIAL
+                        [ ] change primary key
+                [ ] Mediator work...
                     [ ] Mediator.handle(events, lastGlobalEventSequence)
                     [ ] Test EventStore calls Mediator upon store.save()
                     [ ] Clean up I/O-related classes from ConcertSalesProjector, e.g., it shouldn't be handed Projection (DB) objects, instead convert to ConcertSalesSummary, and it should return updated ConcertSalesSummary objects
@@ -63,7 +68,7 @@
                     [ ] Create base class??
                 [ ] Redesign Projector startup to move retrieval of last-seen global event sequence and subscribing to the event store to Spring configuration (e.g., TixConfiguration) so that it fetches the info and subscribes the projector to the event store(s)
 
-    [ ] Configure TestContainer tests to reuse the same container to speed up tests
+    [X] Configure TestContainer tests to reuse the same container to speed up tests
     [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion
     [ ] Make more general way of registering projectors
         [ ] Generalize projectors to extract an interface

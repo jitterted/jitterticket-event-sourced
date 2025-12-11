@@ -16,7 +16,7 @@ public interface EventDboRepository extends CrudRepository<EventDbo, UUID> {
      * Find all events for a specific aggregate root in sequence order.
      * This is the primary method for reconstructing the aggregate's state.
      */
-    @Query("SELECT * FROM events WHERE aggregate_root_id = :aggregateRootId ORDER BY event_sequence")
+    @Query("SELECT * FROM events WHERE aggregate_root_id = :aggregateRootId ORDER BY global_sequence")
     List<EventDbo> findByAggregateRootId(@Param("aggregateRootId") UUID aggregateRootId);
 
     /**
@@ -44,7 +44,7 @@ public interface EventDboRepository extends CrudRepository<EventDbo, UUID> {
      * Get the maximum event sequence for an aggregate.
      * Useful for optimistic locking or determining the next sequence number.
      */
-    @Query("SELECT COALESCE(MAX(event_sequence), 0) FROM events WHERE aggregate_root_id = :aggregateRootId")
+    @Query("SELECT COALESCE(MAX(global_sequence), 0) FROM events WHERE aggregate_root_id = :aggregateRootId")
     Integer getMaxEventSequence(@Param("aggregateRootId") UUID aggregateRootId);
 
     Optional<EventDbo> findByAggregateRootIdAndEventSequence(UUID aggregateRootId, Integer eventSequence);
