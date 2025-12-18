@@ -30,19 +30,20 @@ public class ConcertSalesProjectionMediator {
 
         this.ensureMetadataExistsIn(projectionMetadataRepository);
 
-        long lastGlobalEventSequenceSeenByThisProjection = this.projectionMetadataRepository
+        long lastEventSequenceSeenByThisProjection = this.projectionMetadataRepository
                 .lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME)
                 .orElse(0L);
         Stream<ConcertEvent> concertEventStream =
-                this.concertEventStore.allEventsAfter(lastGlobalEventSequenceSeenByThisProjection);
+                this.concertEventStore.allEventsAfter(lastEventSequenceSeenByThisProjection);
 
         // handle needs the EventStore's lastGES so we know what the new checkpoint is
-        handle(concertEventStream, lastGlobalEventSequenceSeenByThisProjection);
+        handle(concertEventStream, lastEventSequenceSeenByThisProjection);
 
         concertEventStore.subscribe(this);
     }
 
-    public void handle(Stream<ConcertEvent> concertEventStream, long lastGlobalEventSequenceSeen) {
+    public void handle(Stream<ConcertEvent> concertEventStream,
+                       long lastEventSequenceSeen) {
         // load projection
         List<ConcertSalesProjection> loadedProjectionRows =
                 this.concertSalesProjectionRepository.findAll();
@@ -64,7 +65,7 @@ public class ConcertSalesProjectionMediator {
         if (!concertSalesSummaries.isEmpty()) {
             ProjectionMetadata projectionMetadata = new ProjectionMetadata();
             projectionMetadata.setProjectionName(ConcertSalesProjector.PROJECTION_NAME);
-            projectionMetadata.setLastGlobalEventSequenceSeen(lastGlobalEventSequenceSeen);
+            projectionMetadata.setLastEventSequenceSeen(lastEventSequenceSeen);
             this.projectionMetadataRepository.save(projectionMetadata);
         }
     }

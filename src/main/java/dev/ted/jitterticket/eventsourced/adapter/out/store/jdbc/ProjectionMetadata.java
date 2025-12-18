@@ -10,7 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class ProjectionMetadata implements Persistable<String> {
     @Id
     private String projectionName;
-    private long lastGlobalEventSequenceSeen;
+    private long lastEventSequenceSeen;
 
     @Transient
     private boolean isNew;
@@ -20,9 +20,9 @@ public class ProjectionMetadata implements Persistable<String> {
     }
 
     public ProjectionMetadata(String projectionName,
-                              long lastGlobalEventSequenceSeen) {
+                              long lastEventSequenceSeen) {
         this.projectionName = projectionName;
-        this.lastGlobalEventSequenceSeen = lastGlobalEventSequenceSeen;
+        this.lastEventSequenceSeen = lastEventSequenceSeen;
         this.isNew = true;
     }
 
@@ -47,12 +47,12 @@ public class ProjectionMetadata implements Persistable<String> {
         this.projectionName = projectionName;
     }
 
-    public long getLastGlobalEventSequenceSeen() {
-        return lastGlobalEventSequenceSeen;
+    public long getLastEventSequenceSeen() {
+        return lastEventSequenceSeen;
     }
 
-    public void setLastGlobalEventSequenceSeen(long lastGlobalEventSequenceSeen) {
-        this.lastGlobalEventSequenceSeen = lastGlobalEventSequenceSeen;
+    public void setLastEventSequenceSeen(long lastEventSequenceSeen) {
+        this.lastEventSequenceSeen = lastEventSequenceSeen;
     }
 
 }

@@ -1,7 +1,6 @@
 package dev.ted.jitterticket.eventsourced;
 
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoices;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -18,7 +17,6 @@ import static org.assertj.core.api.Assertions.*;
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @Tag("spring")
-@Disabled("while we're making schema changes")
 class JitterTicketEventSourcedApplicationTests {
 
 	@TempDir

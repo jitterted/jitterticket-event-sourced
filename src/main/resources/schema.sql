@@ -26,10 +26,10 @@ CREATE INDEX IF NOT EXISTS idx_events_created_at ON events (created_at);
 
 -- == PROJECTIONS == --
 
--- Table for storing just the last global event sequence that a ProjectionMetadata has seen/processed
+-- Table for storing just the last event sequence that a Projection has seen (even if its projection data didn't change: it still "saw" it)
 CREATE TABLE IF NOT EXISTS projection_metadata (
     projection_name TEXT NOT NULL PRIMARY KEY,
-    last_global_event_sequence_seen BIGINT DEFAULT 0
+    last_event_sequence_seen BIGINT DEFAULT 0
 );
 
 

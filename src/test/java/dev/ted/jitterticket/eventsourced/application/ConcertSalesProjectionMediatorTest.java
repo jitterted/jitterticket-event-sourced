@@ -19,7 +19,6 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,28 +76,27 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                     .isEqualTo(0L);
         }
 
-        @Disabled("Until we resolve the global vs. local event sequence question")
         @Test
         void oneConcertScheduledAndNoTicketsPurchasedReturnsOneSalesSummaryWithZeroSales() {
             ConcertId concertId = ConcertId.createRandom();
             LocalDateTime showDateTime = LocalDateTime.of(2027, 2, 1, 20, 0);
             String artist = "First Concert";
-            ConcertScheduled concertScheduled = new ConcertScheduled(concertId,
-                                                                     1L,
-                                                                     artist,
-                                                                     TICKET_PRICE,
-                                                                     showDateTime,
-                                                                     LocalTime.now(),
-                                                                     MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
+            ConcertScheduled concertScheduled =
+                    new ConcertScheduled(concertId,
+                                         1L,
+                                         artist,
+                                         TICKET_PRICE,
+                                         showDateTime,
+                                         LocalTime.now(),
+                                         MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
             concertEventStore.save(concertId, Stream.of(concertScheduled));
             ConcertSalesProjectionMediator mediator = createProjectionMediator();
 
             assertThat(concertSalesProjectionRepository.count())
                     .isEqualTo(1);
             assertThat(projectionMetadataRepository.lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME))
-                    .isPresent()
-                    .get()
-                    .isEqualTo(1L);
+                    .as("After projecting from a single event, the 'last' event sequence for the ConcertSalesProjection should be 1")
+                    .contains(1L);
             var allSalesSummaries = mediator.allSalesSummaries();
             assertThat(allSalesSummaries)
                     .containsExactly(

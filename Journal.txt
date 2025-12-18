@@ -1,3 +1,9 @@
+Thursday, December 18, 2025
+===========================
+[IntelliJ IDEA]
+[ ] Feature? Be able to find @Disabled tests just like we can find TODOs, given its own special window, just like "Find in Files" can be opened in a tab/window. Limited to Test code (scope) would help a lot.
+
+
 Thursday, December 11, 2025
 ===========================
 
