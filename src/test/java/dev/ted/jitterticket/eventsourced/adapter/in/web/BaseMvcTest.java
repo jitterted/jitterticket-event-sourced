@@ -3,7 +3,6 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 import dev.ted.jitterticket.TixConfiguration;
 import dev.ted.jitterticket.eventsourced.adapter.TestEventStoreConfiguration;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.context.annotation.Import;
@@ -22,8 +21,7 @@ import java.nio.file.Path;
 public class BaseMvcTest {
     @TempDir
     static Path tempDir;
-    @MockitoBean
-    ProjectionMetadataRepository projectionMetadataRepository;
+
     @MockitoBean
     ConcertSalesProjectionRepository concertSalesProjectionRepository;
 

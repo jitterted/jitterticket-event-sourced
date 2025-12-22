@@ -4,23 +4,28 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Table("projection_metadata")
-public class ProjectionMetadata implements Persistable<String> {
+import java.util.Set;
+
+@Table("concert_sales_projection")
+public class ConcertSalesProjectionDbo implements Persistable<String> {
     @Id
     private String projectionName;
     private long lastEventSequenceSeen;
+    @MappedCollection(idColumn = "concert_sales_projection")
+    private Set<ConcertSalesDbo> concertSales = Set.of();
 
     @Transient
     private boolean isNew;
 
     @PersistenceCreator
-    public ProjectionMetadata() {
+    public ConcertSalesProjectionDbo() {
     }
 
-    public ProjectionMetadata(String projectionName,
-                              long lastEventSequenceSeen) {
+    public ConcertSalesProjectionDbo(String projectionName,
+                                     long lastEventSequenceSeen) {
         this.projectionName = projectionName;
         this.lastEventSequenceSeen = lastEventSequenceSeen;
         this.isNew = true;
@@ -55,4 +60,11 @@ public class ProjectionMetadata implements Persistable<String> {
         this.lastEventSequenceSeen = lastEventSequenceSeen;
     }
 
+    public Set<ConcertSalesDbo> getConcertSales() {
+        return concertSales;
+    }
+
+    public void setConcertSales(Set<ConcertSalesDbo> concertSales) {
+        this.concertSales = concertSales;
+    }
 }

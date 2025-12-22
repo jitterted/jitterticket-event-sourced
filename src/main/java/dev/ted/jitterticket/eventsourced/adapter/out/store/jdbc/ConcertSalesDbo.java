@@ -2,7 +2,6 @@ package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
@@ -12,10 +11,9 @@ import java.time.LocalDate;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-@Table("concert_sales_projection")
-public class ConcertSalesProjection implements Persistable<UUID> {
+@Table("concert_sales")
+public class ConcertSalesDbo implements Persistable<UUID> {
 
-    @Id
     private UUID concertId;
     private String artistName;
     private LocalDate concertDate;
@@ -26,14 +24,14 @@ public class ConcertSalesProjection implements Persistable<UUID> {
     private boolean isNew;
 
     @PersistenceCreator
-    public ConcertSalesProjection() {
+    public ConcertSalesDbo() {
     }
 
-    public ConcertSalesProjection(UUID concertId,
-                                  String artistName,
-                                  LocalDate concertDate,
-                                  int ticketsSold,
-                                  int totalSales) {
+    public ConcertSalesDbo(UUID concertId,
+                           String artistName,
+                           LocalDate concertDate,
+                           int ticketsSold,
+                           int totalSales) {
         this.concertId = concertId;
         this.artistName = artistName;
         this.concertDate = concertDate;
@@ -42,8 +40,8 @@ public class ConcertSalesProjection implements Persistable<UUID> {
         this.isNew = true;
     }
 
-    public static ConcertSalesProjection createFromSummary(ConcertSalesProjector.ConcertSalesSummary css) {
-        return new ConcertSalesProjection(
+    public static ConcertSalesDbo createFromSummary(ConcertSalesProjector.ConcertSalesSummary css) {
+        return new ConcertSalesDbo(
                 css.concertId().id(),
                 css.artist(),
                 css.showDateTime().toLocalDate(),
@@ -117,7 +115,7 @@ public class ConcertSalesProjection implements Persistable<UUID> {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ConcertSalesProjection.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", ConcertSalesDbo.class.getSimpleName() + "[", "]")
                 .add("concertId=" + concertId)
                 .add("artistName='" + artistName + "'")
                 .add("concertDate=" + concertDate)

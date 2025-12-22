@@ -174,6 +174,7 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
             List<CustomerEvent> eventsForAggregate = store.eventsForAggregate(customerId);
 
             assertThat(eventsForAggregate)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields("eventSequence")
                     .containsExactlyElementsOf(allEventsForCustomer.toList());
         }
     }

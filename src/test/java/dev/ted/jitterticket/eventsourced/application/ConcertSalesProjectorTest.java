@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjection;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesDbo;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionDbo;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -21,17 +21,22 @@ class ConcertSalesProjectorTest {
 
     private static final int MAX_CAPACITY = 100;
     private static final int MAX_TICKETS_PER_PURCHASE = 8;
-    private static final List<ConcertSalesProjection> EMPTY_LOADED_PROJECTION_ROWS = Collections.emptyList();
+    private static final Stream<ConcertEvent> EMPTY_CONCERT_EVENT_STREAM = Stream.empty();
 
     @Test
     void noScheduledConcertsReturnsNoSalesSummaries() {
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
 
-        List<ConcertSalesProjection> updatedProjectionRows =
-                concertSalesProjector.project(List.of(),
-                                              Stream.empty());
+        ConcertSalesProjectionDbo updatedProjection =
+                concertSalesProjector.project(new ConcertSalesProjectionDbo("new_projection", 0L),
+                                              EMPTY_CONCERT_EVENT_STREAM);
 
-        assertThat(updatedProjectionRows)
+        assertThat(updatedProjection.getProjectionName())
+                .isEqualTo("new_projection");
+        assertThat(updatedProjection.getLastEventSequenceSeen())
+                .isZero();
+        assertThat(updatedProjection.getConcertSales())
+                .as("Expected the SET of Concert Sales to be empty")
                 .isEmpty();
     }
 
@@ -40,10 +45,11 @@ class ConcertSalesProjectorTest {
         ConcertSalesProjector projector = new ConcertSalesProjector();
         ConcertId concertId = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440000"));
         LocalDateTime showDateTime = LocalDateTime.of(2026, 1, 1, 20, 0);
+        long eventSequence = 23L;
         Stream<ConcertEvent> concertEvents = Stream.of(
                 new ConcertScheduled(concertId,
-                                     1L,
-                                     "The Beatles",
+                                     eventSequence,
+                                     "The Dessy Bells",
                                      42,
                                      showDateTime,
                                      LocalTime.now(),
@@ -51,14 +57,17 @@ class ConcertSalesProjectorTest {
                                      MAX_TICKETS_PER_PURCHASE)
         );
 
-        List<ConcertSalesProjection> updatedProjectionRows =
-                projector.project(EMPTY_LOADED_PROJECTION_ROWS, concertEvents);
+        ConcertSalesProjectionDbo updatedProjection =
+                projector.project(new ConcertSalesProjectionDbo("new_projection", 0L), concertEvents);
 
-        assertThat(updatedProjectionRows)
+        assertThat(updatedProjection.getLastEventSequenceSeen())
+                .as("Last event sequence seen should be the event sequence of the single event processed")
+                .isEqualTo(eventSequence);
+        assertThat(updatedProjection.getConcertSales())
                 .usingRecursiveFieldByFieldElementComparator()
-                .containsExactly(new ConcertSalesProjection(
+                .containsExactly(new ConcertSalesDbo(
                         concertId.id(),
-                        "The Beatles",
+                        "The Dessy Bells",
                         showDateTime.toLocalDate(),
                         0, 0));
     }
@@ -68,30 +77,34 @@ class ConcertSalesProjectorTest {
         ConcertSalesProjector projector = new ConcertSalesProjector();
         ConcertId concertId = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440000"));
         LocalDateTime showDateTime = LocalDateTime.of(2026, 1, 1, 20, 0);
+        long firstEventSequence = 27L;
+        long secondEventSequence = 29L;
         Stream<ConcertEvent> concertEvents = Stream.of(
                 new ConcertScheduled(concertId,
-                                     1L,
-                                     "The Beatles",
+                                     firstEventSequence,
+                                     "The Dessy Bells",
                                      75,
                                      showDateTime,
                                      LocalTime.now(),
                                      MAX_CAPACITY,
                                      MAX_TICKETS_PER_PURCHASE),
-                new TicketsSold(concertId, 1L, 4, 4 * 75)
+                new TicketsSold(concertId, secondEventSequence, 4, 4 * 75)
         );
 
-        List<ConcertSalesProjection> updatedProjectionRows =
-                projector.project(EMPTY_LOADED_PROJECTION_ROWS, concertEvents);
+        ConcertSalesProjectionDbo updatedProjection =
+                projector.project(new ConcertSalesProjectionDbo("new_projection", 0L), concertEvents);
 
-        assertThat(updatedProjectionRows)
+        assertThat(updatedProjection.getLastEventSequenceSeen())
+                .as("Last event sequence seen should be the event sequence of the last event processed")
+                .isEqualTo(secondEventSequence);
+        assertThat(updatedProjection.getConcertSales())
                 .usingRecursiveFieldByFieldElementComparator()
-                .containsExactly(new ConcertSalesProjection(
+                .containsExactly(new ConcertSalesDbo(
                         concertId.id(),
-                        "The Beatles",
+                        "The Dessy Bells",
                         showDateTime.toLocalDate(),
                         4,
                         4 * 75));
-
     }
 
     @Test
@@ -110,19 +123,18 @@ class ConcertSalesProjectorTest {
                           .stream();
 
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        List<ConcertSalesProjection> concertSalesProjections =
-                concertSalesProjector.project(List.of(),
+        ConcertSalesProjectionDbo concertSalesProjection =
+                concertSalesProjector.project(new ConcertSalesProjectionDbo("new_projection", 0L),
                                               concertEventStream);
 
-        assertThat(concertSalesProjections)
-                .extracting(ConcertSalesProjection::getConcertId,
-                            ConcertSalesProjection::getTicketsSold,
-                            ConcertSalesProjection::getTotalSales)
+        assertThat(concertSalesProjection.getConcertSales())
+                .extracting(ConcertSalesDbo::getConcertId,
+                            ConcertSalesDbo::getTicketsSold,
+                            ConcertSalesDbo::getTotalSales)
                 .containsExactlyInAnyOrder(
                         tuple(firstConcertId.id(), 4, 300),
                         tuple(secondConcertId.id(), 2 + 5, (2 + 5) * 50));
     }
-
 
     @Test
     void singleConcertRescheduled_ProjectsUpdatedDate() {
@@ -136,14 +148,14 @@ class ConcertSalesProjectorTest {
                           .stream();
 
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        List<ConcertSalesProjection> concertSalesProjections =
-                concertSalesProjector.project(List.of(),
+        ConcertSalesProjectionDbo concertSalesProjection =
+                concertSalesProjector.project(new ConcertSalesProjectionDbo("new_projection", 0L),
                                               concertEventStream);
 
-        assertThat(concertSalesProjections)
+        assertThat(concertSalesProjection.getConcertSales())
                 // TODO: figure out how to extract and retain type safety here
-                .extracting(ConcertSalesProjection::getConcertId,
-                            ConcertSalesProjection::getConcertDate)
+                .extracting(ConcertSalesDbo::getConcertId,
+                            ConcertSalesDbo::getConcertDate)
                 .containsExactly(
                         tuple(concertId.id(), newShowDateTime.toLocalDate())
                 );
@@ -161,22 +173,20 @@ class ConcertSalesProjectorTest {
                           .list();
         assertThat(concertEvents).hasSize(2);
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        ConcertSalesProjection expectedProjection =
-                concertSalesProjector.project(
-                                             Collections.emptyList(),
-                                             concertEvents.stream())
-                                     .getFirst();
+        ConcertSalesProjectionDbo expectedProjection =
+                concertSalesProjector.project(new ConcertSalesProjectionDbo("new_projection", 0L),
+                                              concertEvents.stream());
 
-        List<ConcertSalesProjection> initialProjection =
+        ConcertSalesProjectionDbo initialProjection =
                 concertSalesProjector.project(
-                                             Collections.emptyList(),
-                                             Stream.of(concertEvents.getFirst())
-                                     );
+                        new ConcertSalesProjectionDbo("new_projection", 0L),
+                        Stream.of(concertEvents.getFirst())
+                );
 
-        ConcertSalesProjection finalProjection =
+        ConcertSalesProjectionDbo finalProjection =
                 concertSalesProjector.project(initialProjection,
                                               Stream.of(concertEvents.getLast())
-                ).getFirst();
+                );
 
         assertThat(finalProjection)
                 .usingRecursiveComparison()
@@ -189,11 +199,11 @@ class ConcertSalesProjectorTest {
         TicketsSold ticketsSold = new TicketsSold(concertId, 1L, 3, 75);
 
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        List<ConcertSalesProjection> concertSalesProjections =
-                concertSalesProjector.project(List.of(),
+        ConcertSalesProjectionDbo concertSalesProjection =
+                concertSalesProjector.project(new ConcertSalesProjectionDbo("new_projection", 0L),
                                               Stream.of(ticketsSold));
 
-        assertThat(concertSalesProjections)
+        assertThat(concertSalesProjection.getConcertSales())
                 .isEmpty();
     }
 

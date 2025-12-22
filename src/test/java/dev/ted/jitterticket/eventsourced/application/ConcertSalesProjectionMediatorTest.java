@@ -1,13 +1,12 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.EventStoreConfiguration;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjection;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesDbo;
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionDbo;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.DataJdbcContainerTest;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.EventDboRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.JdbcEventStore;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadata;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
@@ -19,6 +18,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -44,20 +45,21 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
     EventDboRepository eventDboRepository;
 
     @Autowired
-    ProjectionMetadataRepository projectionMetadataRepository;
-
-    @Autowired
     ConcertSalesProjectionRepository concertSalesProjectionRepository;
 
     @Autowired
     EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
 
+    @BeforeEach
+    void beforeEach() {
+        concertSalesProjectionRepository.deleteAll();
+    }
 
     @Nested
     class ProjectionNewlyCreated {
 
         @Test
-        void noEventsExistReturnsEmptyProjectionWithNewlyCreatedMetadata() {
+        void noEventsInEventStoreReturnsEmptyProjectionWithNewlyCreatedMetadata() {
             ConcertSalesProjectionMediator mediator = createProjectionMediator();
 
             Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries =
@@ -66,12 +68,12 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             assertThat(allSalesSummaries)
                     .isEmpty();
 
-            Optional<Long> lastGlobalEventSequenceSeenByProjectionName =
-                    projectionMetadataRepository.lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME);
-            assertThat(lastGlobalEventSequenceSeenByProjectionName)
-                    .as("Expected the Metadata Repository to have an entry for the projection named: `%s`", ConcertSalesProjector.PROJECTION_NAME)
+            Optional<ConcertSalesProjectionDbo> concertSalesProjectionDbo = concertSalesProjectionRepository.findById(ConcertSalesProjector.PROJECTION_NAME);
+            assertThat(concertSalesProjectionDbo)
+                    .as("Expected the Repository to have an entry for the projection named: `%s`", ConcertSalesProjector.PROJECTION_NAME)
                     .isPresent()
                     .get()
+                    .extracting(ConcertSalesProjectionDbo::getLastEventSequenceSeen)
                     .as("No events were processed by the projector, so its last seen global event sequence should be 0")
                     .isEqualTo(0L);
         }
@@ -92,11 +94,15 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             concertEventStore.save(concertId, Stream.of(concertScheduled));
             ConcertSalesProjectionMediator mediator = createProjectionMediator();
 
-            assertThat(concertSalesProjectionRepository.count())
-                    .isEqualTo(1);
-            assertThat(projectionMetadataRepository.lastGlobalEventSequenceSeenByProjectionName(ConcertSalesProjector.PROJECTION_NAME))
+            ConcertSalesProjectionDbo concertSalesProjectionDbo = concertSalesProjectionRepository
+                    .findById(ConcertSalesProjector.PROJECTION_NAME)
+                    .orElseThrow();
+            assertThat(concertSalesProjectionDbo.getConcertSales())
+                    .as("Expected the projection to have a single concert sale summary after processing a single event")
+                    .hasSize(1);
+            assertThat(concertSalesProjectionDbo.getLastEventSequenceSeen())
                     .as("After projecting from a single event, the 'last' event sequence for the ConcertSalesProjection should be 1")
-                    .contains(1L);
+                    .isEqualTo(1L);
             var allSalesSummaries = mediator.allSalesSummaries();
             assertThat(allSalesSummaries)
                     .containsExactly(
@@ -137,37 +143,35 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
 
         @Test
         void noNewEventsReturnsPersistedProjection() {
-            ConcertSalesProjection concertSalesProjection = new ConcertSalesProjection(
+            ConcertSalesProjectionDbo concertSalesProjectionDbo = new ConcertSalesProjectionDbo(
+                    ConcertSalesProjector.PROJECTION_NAME, 1);
+            ConcertSalesDbo concertSalesDbo = new ConcertSalesDbo(
                     ConcertId.createRandom().id(),
                     "Artist Name", LocalDate.now(), 0, 0);
-            concertSalesProjectionRepository.save(concertSalesProjection);
-            projectionMetadataRepository.save(
-                    new ProjectionMetadata(
-                            ConcertSalesProjector.PROJECTION_NAME, 1));
+            concertSalesProjectionDbo.setConcertSales(Set.of(concertSalesDbo));
+            concertSalesProjectionRepository.save(concertSalesProjectionDbo);
 
             ConcertSalesProjectionMediator mediator =
                     new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
                                                        InMemoryEventStore.forConcerts(),
-                                                       projectionMetadataRepository,
                                                        concertSalesProjectionRepository);
             var persistedSummaries = mediator.allSalesSummaries();
 
             assertThat(persistedSummaries)
-                    .containsExactly(concertSalesProjection.toSummary());
+                    .containsExactly(ConcertSalesProjector.dboToSummary(concertSalesDbo));
         }
 
         @Test
         void projectionUsesPreviouslyPersistedDataWhenUpdated() {
-            // event store's max GES = 2
-            // metadata: last GES = 1, 1 row in projection table
-            // => should catch up 1 missing events after GES=1
+            // event store's max event sequence = 2
+            // metadata: last event sequence = 1, 1 concert row in projection table
+            // => should catch up 1 missing events after event sequence=1
             ConcertId concertId = ConcertId.createRandom();
-            ConcertSalesProjection concertSalesProjection = new ConcertSalesProjection(
+            ConcertSalesDbo concertSalesDbo = new ConcertSalesDbo(
                     concertId.id(), "Artist Name", LocalDate.now(), 0, 0);
-            concertSalesProjectionRepository.save(concertSalesProjection);
-            projectionMetadataRepository.save(
-                    new ProjectionMetadata(
-                            ConcertSalesProjector.PROJECTION_NAME, 1));
+            ConcertSalesProjectionDbo concertSalesProjectionDbo = new ConcertSalesProjectionDbo(
+                    ConcertSalesProjector.PROJECTION_NAME, 1);
+            concertSalesProjectionDbo.setConcertSales(Set.of(concertSalesDbo));
             var concertEventStore = InMemoryEventStore.forConcerts();
             Stream<ConcertEvent> concertEventStream =
                     MakeEvents.with()
@@ -179,7 +183,6 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             ConcertSalesProjectionMediator mediator =
                     new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
                                                        concertEventStore,
-                                                       projectionMetadataRepository,
                                                        concertSalesProjectionRepository);
 
             var summaries = mediator.allSalesSummaries();
@@ -198,7 +201,6 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
 
             new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
                                                eventStoreSpy,
-                                               projectionMetadataRepository,
                                                concertSalesProjectionRepository
             );
 
@@ -209,13 +211,11 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         @Test
         void subscribeWith9WhenLastGlobalSequenceInProjectionTableHas9() {
             ConcertSalesProjectionMediatorTest.EventStoreSpy eventStoreSpy = new ConcertSalesProjectionMediatorTest.EventStoreSpy();
-            ProjectionMetadata projectionMetadata =
-                    new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
-                                           9L);
-            projectionMetadataRepository.save(projectionMetadata);
+            ConcertSalesProjectionDbo concertSalesProjectionDbo = new ConcertSalesProjectionDbo(
+                    ConcertSalesProjector.PROJECTION_NAME, 9L);
+            concertSalesProjectionRepository.save(concertSalesProjectionDbo);
             new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
                                                eventStoreSpy,
-                                               projectionMetadataRepository,
                                                concertSalesProjectionRepository
             );
 
@@ -233,20 +233,18 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             ConcertId concertId = ConcertId.createRandom();
             String artist = "Artist";
             LocalDateTime showDateTime = LocalDate.now().atStartOfDay();
-            concertSalesProjectionRepository.save(
-                    new ConcertSalesProjection(
+            ConcertSalesProjectionDbo concertSalesProjectionDbo = new ConcertSalesProjectionDbo(
+                    ConcertSalesProjector.PROJECTION_NAME, 1L);
+            concertSalesProjectionDbo.setConcertSales(Set.of(
+                    new ConcertSalesDbo(
                             concertId.id(), artist,
                             showDateTime.toLocalDate(),
                             0, 0)
-            );
-            ProjectionMetadata projectionMetadata =
-                    new ProjectionMetadata(ConcertSalesProjector.PROJECTION_NAME,
-                                           1L);
-            projectionMetadataRepository.save(projectionMetadata);
+            ));
+            concertSalesProjectionRepository.save(concertSalesProjectionDbo);
             ConcertSalesProjectionMediator mediator =
                     new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
                                                        JdbcEventStore.forConcerts(eventDboRepository),
-                                                       projectionMetadataRepository,
                                                        concertSalesProjectionRepository
                     );
 
@@ -276,16 +274,17 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                                                        .stream();
 
             long lastGlobalEventSequenceSeen = 2;
-            mediator.handle(twoEvents, lastGlobalEventSequenceSeen);
+            mediator.handle(twoEvents);
 
-            assertThat(concertSalesProjectionRepository.count())
+            ConcertSalesProjectionDbo concertSalesProjectionDbo = concertSalesProjectionRepository
+                    .findById(ConcertSalesProjector.PROJECTION_NAME)
+                    .orElseThrow();
+            assertThat(concertSalesProjectionDbo.getConcertSales())
                     .as("Expected Concert Sales Projection to have 2 entries")
-                    .isEqualTo(2);
-            assertThat(projectionMetadataRepository
-                               .lastGlobalEventSequenceSeenByProjectionName(
-                                       ConcertSalesProjector.PROJECTION_NAME))
+                    .hasSize(2);
+            assertThat(concertSalesProjectionDbo.getLastEventSequenceSeen())
                     .as("Expected global event sequence checkpoint to be 2, for the 2 events handled")
-                    .contains(lastGlobalEventSequenceSeen);
+                    .isEqualTo(lastGlobalEventSequenceSeen);
         }
 
         @Test
@@ -302,18 +301,20 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                               .concertScheduled(concertId)
                               .reschedule(concertId, LocalDateTime.of(2026, 11, 1, 20, 0), LocalTime.of(19, 0))
                               .stream();
-            mediator.handle(firstTwoEvents, 2L);
+            mediator.handle(firstTwoEvents);
 
-            mediator.handle(secondTwoEvents, 4L);
+            mediator.handle(secondTwoEvents);
 
-            assertThat(concertSalesProjectionRepository.count())
+            ConcertSalesProjectionDbo concertSalesProjectionDbo = concertSalesProjectionRepository
+                    .findById(ConcertSalesProjector.PROJECTION_NAME)
+                    .orElseThrow();
+            assertThat(concertSalesProjectionDbo.getConcertSales())
                     .as("Expected Concert Sales Projection to have 3 entries")
-                    .isEqualTo(3);
-            assertThat(projectionMetadataRepository
-                               .lastGlobalEventSequenceSeenByProjectionName(
-                                       ConcertSalesProjector.PROJECTION_NAME))
+                    .hasSize(3);
+            assertThat(concertSalesProjectionDbo.getLastEventSequenceSeen())
                     .as("Expected global event sequence checkpoint to be 4, for the 4 events handled")
-                    .contains(4L);
+                    .isEqualTo(4L);
+
         }
     }
 
@@ -321,7 +322,6 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
     private ConcertSalesProjectionMediator createProjectionMediator() {
         return new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
                                                   concertEventStore,
-                                                  projectionMetadataRepository,
                                                   concertSalesProjectionRepository);
     }
     //endregion

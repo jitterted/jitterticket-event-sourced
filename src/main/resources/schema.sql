@@ -26,18 +26,23 @@ CREATE INDEX IF NOT EXISTS idx_events_created_at ON events (created_at);
 
 -- == PROJECTIONS == --
 
--- Table for storing just the last event sequence that a Projection has seen (even if its projection data didn't change: it still "saw" it)
-CREATE TABLE IF NOT EXISTS projection_metadata (
-    projection_name TEXT NOT NULL PRIMARY KEY,
-    last_event_sequence_seen BIGINT DEFAULT 0
+CREATE TABLE IF NOT EXISTS concert_sales_projection
+(
+    projection_name          TEXT NOT NULL PRIMARY KEY,
+    last_event_sequence_seen BIGINT NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS concert_sales
+(
+    concert_id               UUID PRIMARY KEY,
+    artist_name              TEXT NOT NULL ,
+    concert_date             DATE NOT NULL ,
+    tickets_sold             INTEGER NOT NULL,
+    total_sales              INTEGER NOT NULL,
 
--- Table for storing the concert sales summary projectionMetadata
-CREATE TABLE IF NOT EXISTS concert_sales_projection (
-    concert_id   UUID PRIMARY KEY,
-    artist_name  TEXT    NOT NULL,
-    concert_date DATE    NOT NULL, -- Maps directly to Java LocalDate
-    tickets_sold INTEGER NOT NULL DEFAULT 0,
-    total_sales  INTEGER NOT NULL DEFAULT 0
+    -- Foreign key to the parent
+    concert_sales_projection TEXT NOT NULL,
+    CONSTRAINT fk_projection FOREIGN KEY (concert_sales_projection)
+        REFERENCES concert_sales_projection (projection_name)
+            ON DELETE CASCADE
 );

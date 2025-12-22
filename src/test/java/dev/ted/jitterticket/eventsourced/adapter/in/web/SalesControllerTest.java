@@ -2,7 +2,6 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.DataJdbcContainerTest;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ProjectionMetadataRepository;
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjectionMediator;
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
@@ -26,9 +25,6 @@ class SalesControllerTest extends DataJdbcContainerTest {
     @Autowired
     private ConcertSalesProjectionRepository concertSalesProjectionRepository;
 
-    @Autowired
-    private ProjectionMetadataRepository projectionMetadataRepository;
-
     @Disabled("Until EventStore invokes event handling on the projector")
     @Test
     void salesViewShowsSummaryOfSampleDataConcertSales() {
@@ -36,7 +32,6 @@ class SalesControllerTest extends DataJdbcContainerTest {
         ConcertSalesProjectionMediator concertSalesProjectionMediator =
                 new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
                                                    concertStore,
-                                                   projectionMetadataRepository,
                                                    concertSalesProjectionRepository);
 
         ConcertId concertId = ConcertId.createRandom();

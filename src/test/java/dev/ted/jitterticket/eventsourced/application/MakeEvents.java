@@ -21,7 +21,6 @@ public class MakeEvents {
         return new MakeEvents();
     }
 
-
     public Stream<ConcertEvent> stream() {
         return events.stream();
     }

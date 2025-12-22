@@ -51,7 +51,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                                  .stream()
                                  .map(dbo -> new EventDto<EVENT>(
                                          dbo.getAggregateRootId(),
-                                         null, // TODO this null will go away once the highest global event sequence is returned from save()
+                                         dbo.getEventSequence(),
                                          dbo.getEventType(),
                                          dbo.getJson()))
                                  .toList();
@@ -62,7 +62,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
         // assumes there's at least one uncommittedEvent in the incoming stream!
         List<EventDbo> dbos = uncommittedEvents
                 .map(event -> EventDto.from(aggregateId.id(),
-                                            null, // TODO this null will go away once the highest global event sequence is returned from save()
+                                            null, // TODO this parameter shouldn't exist as event sequence is assigned upon DB INSERT
                                             event))
                 .map(dto -> new EventDbo(
                         dto.getAggregateRootId(),
@@ -88,8 +88,9 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     @Override
     public Stream<EVENT> allEventsAfter(long globalEventSequence) {
-        return mapToDomainEvents(eventDboRepository
-                                         .findEventsAfter(globalEventSequence));
+        return mapToDomainEvents(
+                eventDboRepository
+                        .findEventsAfter(globalEventSequence));
 
     }
 
@@ -98,7 +99,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                 .stream()
                 .map(dbo -> new EventDto<EVENT>(
                         dbo.getAggregateRootId(),
-                        null, // TODO this null will go away once the highest global event sequence is returned from save()
+                        dbo.getEventSequence(),
                         dbo.getEventType(),
                         dbo.getJson()))
                 .map(EventDto::toDomain)
