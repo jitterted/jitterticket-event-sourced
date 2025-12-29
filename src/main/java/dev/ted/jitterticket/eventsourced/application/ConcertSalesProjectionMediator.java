@@ -22,7 +22,6 @@ public class ConcertSalesProjectionMediator {
         this.concertEventStore = concertEventStore;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
 
-        // TODO: create repository custom method to just get the last event sequence seen
         ConcertSalesProjectionDbo loadedConcertSalesProjectionDbo = this.concertSalesProjectionRepository
                 .findById(ConcertSalesProjector.PROJECTION_NAME)
                 .orElse(createNewProjectionDbo());

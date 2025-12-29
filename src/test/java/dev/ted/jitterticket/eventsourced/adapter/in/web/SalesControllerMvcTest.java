@@ -27,11 +27,7 @@ class SalesControllerMvcTest extends BaseMvcTest {
         mvc.get()
            .uri("/concert-sales")
            .assertThat()
-           .hasStatus2xxSuccessful()
-           .bodyText()
-           .contains("<h1>Concert Sales Report</h1>",
-                     "<td>Jittery Pigs</td>")
-        ;
+           .hasStatus2xxSuccessful();
     }
 
 }

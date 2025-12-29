@@ -18,10 +18,11 @@ class SalesController {
 
     @GetMapping("/concert-sales")
     public String viewConcertSalesSummary(Model model) {
-        List<ConcertSalesSummaryView> salesSummaryViews = concertSalesProjectionMediator
-                .allSalesSummaries()
-                .map(ConcertSalesSummaryView::from)
-                .toList();
+        List<ConcertSalesSummaryView> salesSummaryViews =
+                concertSalesProjectionMediator
+                        .allSalesSummaries()
+                        .map(ConcertSalesSummaryView::from)
+                        .toList();
         model.addAttribute("salesSummaryViews", salesSummaryViews);
         return "concert-sales-view";
     }
