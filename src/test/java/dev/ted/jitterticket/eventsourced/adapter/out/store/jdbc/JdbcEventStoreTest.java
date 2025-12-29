@@ -134,7 +134,7 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
         @Test
         void lastGlobalEventSequenceSavedReturnedFromSave() {
             delegatedConcertEventStoreEventsForAggregate
-                    .lastGlobalEventSequenceSavedReturnedFromSave(concertStore);
+                    .eventSequenceAssignedWhenReturnedFromSave(concertStore);
         }
 
         @Test

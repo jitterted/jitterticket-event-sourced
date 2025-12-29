@@ -9,17 +9,55 @@ import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class MakeEvents {
-    private long eventSequence = 1;
     private final List<ConcertEvent> events = new ArrayList<>();
+    // need to simulate a monotonically increasing sequence
+    private final Iterator<Long> eventSequenceIterator;
+
+    public MakeEvents() {
+        this.eventSequenceIterator = new Iterator<>() {
+            private long eventSequence = 1;
+
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Long next() {
+                return eventSequence++;
+            }
+        };
+    }
+
+    public MakeEvents(Iterator<Long> eventSequenceIterator) {
+        this.eventSequenceIterator = eventSequenceIterator;
+    }
 
     public static MakeEvents with() {
         return new MakeEvents();
     }
+
+    public static MakeEvents withNullEventSequences() {
+        Iterator<Long> nullSupplyingIterator = new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Long next() {
+                return null;
+            }
+        };
+        return new MakeEvents(nullSupplyingIterator);
+    }
+
 
     public Stream<ConcertEvent> stream() {
         return events.stream();
@@ -27,7 +65,7 @@ public class MakeEvents {
 
     public MakeEvents concertScheduled(ConcertId concertId) {
         ConcertScheduled concertScheduled =
-                createConcertScheduled(concertId, 42, "Don't Care Artist Name");
+                createConcertScheduled(concertId, 42, "Don't Care Artist Name", LocalDateTime.now());
         events.add(concertScheduled);
         return this;
     }
@@ -37,13 +75,14 @@ public class MakeEvents {
         ConcertScheduled concertScheduled =
                 createConcertScheduled(concertId,
                                        customizer.ticketPrice,
-                                       customizer.artistName);
+                                       customizer.artistName,
+                                       customizer.showDateTime);
         events.add(concertScheduled);
         customizer.ticketsSoldQuantity
                 .stream()
                 .map(qty -> new TicketsSold(
                         concertId,
-                        eventSequence++,
+                        eventSequenceIterator.next(),
                         qty,
                         qty * customizer.ticketPrice))
                 .forEach(events::add);
@@ -60,18 +99,18 @@ public class MakeEvents {
     public MakeEvents reschedule(ConcertId concertId, LocalDateTime newShowDateTime, LocalTime newDoorsTime) {
         events.add(
                 new ConcertRescheduled(concertId,
-                                       eventSequence++,
+                                       eventSequenceIterator.next(),
                                        newShowDateTime,
                                        newDoorsTime));
         return this;
     }
 
-    private ConcertScheduled createConcertScheduled(ConcertId concertId, int ticketPrice, String artistName) {
+    private ConcertScheduled createConcertScheduled(ConcertId concertId, int ticketPrice, String artistName, LocalDateTime showDateTime) {
         return new ConcertScheduled(concertId,
-                                    eventSequence++,
+                                    eventSequenceIterator.next(),
                                     artistName,
                                     ticketPrice,
-                                    LocalDateTime.now(),
+                                    showDateTime,
                                     LocalTime.now(),
                                     100,
                                     8);
@@ -86,6 +125,7 @@ public class MakeEvents {
         private int ticketPrice = 42; // default
         private final List<Integer> ticketsSoldQuantity = new ArrayList<>();
         private String artistName = "Don't Care Artist Name"; // default
+        private LocalDateTime showDateTime = LocalDateTime.now();
 
         public ConcertCustomizer ticketPrice(int ticketPrice) {
             this.ticketPrice = ticketPrice;
@@ -99,6 +139,11 @@ public class MakeEvents {
 
         public ConcertCustomizer artistNamed(String artistName) {
             this.artistName = artistName;
+            return this;
+        }
+
+        public ConcertCustomizer showDate(LocalDateTime showDateTime) {
+            this.showDateTime = showDateTime;
             return this;
         }
     }

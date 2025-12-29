@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -164,28 +165,37 @@ class ConcertSalesProjectorTest {
     @Test
     void updatesPreviouslyComputedProjectionWithNewEvents() {
         ConcertId concertId = ConcertId.createRandom();
-        List<ConcertEvent> concertEvents =
+        LocalDateTime showDateTime = LocalDateTime.of(2026, 12, 21, 20, 0);
+        List<ConcertEvent> concertScheduledWithTicketsSoldEvents =
                 MakeEvents.with()
                           .concertScheduled(concertId, (concert) -> concert
                                   .artistNamed("Artist Name")
+                                  .showDate(showDateTime)
                                   .ticketPrice(35)
                                   .ticketsSold(6))
                           .list();
-        assertThat(concertEvents).hasSize(2);
-        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        ConcertSalesProjectionDbo expectedProjection =
-                concertSalesProjector.project(new ConcertSalesProjectionDbo("new_projection", 0L),
-                                              concertEvents.stream());
+        ConcertEvent concertScheduledEvent = concertScheduledWithTicketsSoldEvents.getFirst();
+        ConcertEvent ticketsSoldEvent = concertScheduledWithTicketsSoldEvents.getLast();
+        ConcertSalesProjectionDbo expectedProjection = new ConcertSalesProjectionDbo(
+                "new_projection",
+                ticketsSoldEvent.eventSequence());
+        expectedProjection.setConcertSales(Set.of(new ConcertSalesDbo(
+                concertId.id(),
+                "Artist Name",
+                showDateTime.toLocalDate(),
+                6, 6 * 35
+        )));
 
+        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
         ConcertSalesProjectionDbo initialProjection =
                 concertSalesProjector.project(
                         new ConcertSalesProjectionDbo("new_projection", 0L),
-                        Stream.of(concertEvents.getFirst())
+                        Stream.of(concertScheduledEvent)
                 );
 
         ConcertSalesProjectionDbo finalProjection =
                 concertSalesProjector.project(initialProjection,
-                                              Stream.of(concertEvents.getLast())
+                                              Stream.of(ticketsSoldEvent)
                 );
 
         assertThat(finalProjection)

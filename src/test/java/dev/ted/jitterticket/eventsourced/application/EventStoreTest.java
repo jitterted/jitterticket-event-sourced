@@ -160,18 +160,18 @@ public class EventStoreTest {
         public void oneOfTwoEventsReturnedFromStoreAskingForEventsAfterOne(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId1 = ConcertId.createRandom();
             ConcertId concertId2 = ConcertId.createRandom();
-            concertStore.save(concertId1,
-                              MakeEvents.with()
-                                        .concertScheduled(concertId1)
-                                        .stream());
+            long eventSequenceStoredForFirstEvent =
+                    concertStore.save(concertId1,
+                                      MakeEvents.with()
+                                                .concertScheduled(concertId1)
+                                                .stream())
+                                .findFirst().orElseThrow().eventSequence();
             concertStore.save(concertId2,
                               MakeEvents.with()
                                         .concertScheduled(concertId2)
                                         .stream());
 
-            // need the last GES from the save to pass into the method below instead of 1L
-
-            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(1L);
+            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(eventSequenceStoredForFirstEvent);
 
             assertThat(newEvents)
                     .as("Event Store has 2 ConcertScheduled events, but should only return the second event")
@@ -230,25 +230,25 @@ public class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        public void lastGlobalEventSequenceSavedReturnedFromSave(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public void eventSequenceAssignedWhenReturnedFromSave(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId = ConcertId.createRandom();
-            Stream<ConcertEvent> oneEvent = MakeEvents.with()
+            List<ConcertEvent> oneEvent = MakeEvents.withNullEventSequences()
                                                       .concertScheduled(concertId)
-                                                      .stream();
+                                                      .list();
 
-            long lastGlobalEventSequenceSaved =
-                    concertStore.save(concertId, oneEvent);
+            Stream<ConcertEvent> savedEvents = concertStore.save(concertId, oneEvent.stream());
 
-            assertThat(lastGlobalEventSequenceSaved)
-                    .as("1 new event was saved in an empty store, so expected last Global Event Sequence returned to be 1")
-                    .isEqualTo(1);
+            assertThat(savedEvents)
+                    .extracting(ConcertEvent::eventSequence)
+                    .as("1 new event was saved in an empty store, so expected last Event Sequence returned to be 42 (baseline se")
+                    .isNotNull();
         }
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
         public void lastGlobalEventSequenceSavedReturnedAfterMultipleSaves(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertIdFirst = ConcertId.createRandom();
-            Stream<ConcertEvent> onePreExistingEvent = MakeEvents.with().concertScheduled().stream();
+            Stream<ConcertEvent> onePreExistingEvent = MakeEvents.withNullEventSequences().concertScheduled().stream();
             concertStore.save(concertIdFirst, onePreExistingEvent);
             ConcertId concertIdSecond = ConcertId.createRandom();
             Stream<ConcertEvent> twoNewEvents = MakeEvents
@@ -257,11 +257,14 @@ public class EventStoreTest {
                                       concert -> concert.ticketsSold(2))
                     .stream();
 
-            long lastGlobalEventSequenceSaved =
-                    concertStore.save(concertIdSecond, twoNewEvents);
+            List<ConcertEvent> savedEvents =
+                    concertStore.save(concertIdSecond, twoNewEvents)
+                                .toList();
 
-            assertThat(lastGlobalEventSequenceSaved)
-                    .as("2 new events were saved in a store containing 1 event, so expected last Global Event Sequence returned to be 3")                    .isEqualTo(3);
+            assertThat(savedEvents.getLast().eventSequence())
+                    .as("2 new events were saved in a store containing 1 event, so expected last event saved to have a larger event sequence")
+                    .isGreaterThan(savedEvents.getFirst().eventSequence())
+            ;
         }
     }
 

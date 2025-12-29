@@ -60,7 +60,7 @@
                     [ ] Test EventStore calls Mediator upon store.save()
                     [ ] Clean up I/O-related classes from ConcertSalesProjector, e.g., it shouldn't be handed Projection (DB) objects, instead convert to ConcertSalesSummary, and it should return updated ConcertSalesSummary objects
                         [ ] Rename ConcertSalesProjection to ConcertSalesSummaryDbo?
-                [ ] Ensure EventDto is correct in terms of EventSequence, which isn't assigned until we write to the database, so the DTO can't have the sequence as part of the "payload" JSON?
+                [ ] Ensure EventDto is correct in terms of EventSequence as a field, which isn't assigned until we write to the database, so the DTO can't have the sequence as part of the "payload" JSON and it should only be in the metadata for the payload.
                 [ ] Scheduled -> INSERT new row in (database) table, fill sales with zeroes
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
                 [ ] Rescheduled -> UPDATE data for ConcertId

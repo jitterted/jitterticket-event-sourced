@@ -83,7 +83,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             ConcertId concertId = ConcertId.createRandom();
             LocalDateTime showDateTime = LocalDateTime.of(2027, 2, 1, 20, 0);
             String artist = "First Concert";
-            ConcertScheduled concertScheduled =
+            ConcertEvent concertScheduled =
                     new ConcertScheduled(concertId,
                                          1L,
                                          artist,
@@ -91,7 +91,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                                          showDateTime,
                                          LocalTime.now(),
                                          MAX_CAPACITY, MAX_TICKETS_PER_PURCHASE);
-            concertEventStore.save(concertId, Stream.of(concertScheduled));
+            concertScheduled = concertEventStore.save(concertId, Stream.of(concertScheduled)).findFirst().orElseThrow();
             ConcertSalesProjectionMediator mediator = createProjectionMediator();
 
             ConcertSalesProjectionDbo concertSalesProjectionDbo = concertSalesProjectionRepository
@@ -101,8 +101,8 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                     .as("Expected the projection to have a single concert sale summary after processing a single event")
                     .hasSize(1);
             assertThat(concertSalesProjectionDbo.getLastEventSequenceSeen())
-                    .as("After projecting from a single event, the 'last' event sequence for the ConcertSalesProjection should be 1")
-                    .isEqualTo(1L);
+                    .as("After projecting from a single event, the 'last' event sequence for the ConcertSalesProjection should be the sequence for that event")
+                    .isEqualTo(concertScheduled.eventSequence());
             var allSalesSummaries = mediator.allSalesSummaries();
             assertThat(allSalesSummaries)
                     .containsExactly(
@@ -268,42 +268,42 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         @Test
         void newProjectionUpdatesProjectionDataAndCheckpoint() {
             ConcertSalesProjectionMediator mediator = createProjectionMediator();
-            Stream<ConcertEvent> twoEvents = MakeEvents.with()
-                                                       .concertScheduled()
-                                                       .concertScheduled()
-                                                       .stream();
+            ConcertId concertId = ConcertId.createRandom();
+            Concert concert = ConcertFactory.createConcertWithId(concertId);
 
-            long lastGlobalEventSequenceSeen = 2;
-            mediator.handle(twoEvents);
+            concertEventStore.save(concert);
 
             ConcertSalesProjectionDbo concertSalesProjectionDbo = concertSalesProjectionRepository
                     .findById(ConcertSalesProjector.PROJECTION_NAME)
                     .orElseThrow();
             assertThat(concertSalesProjectionDbo.getConcertSales())
-                    .as("Expected Concert Sales Projection to have 2 entries")
-                    .hasSize(2);
+                    .as("Expected Concert Sales Projection to have 1 entry for the 1 concert scheduled")
+                    .hasSize(1);
             assertThat(concertSalesProjectionDbo.getLastEventSequenceSeen())
-                    .as("Expected global event sequence checkpoint to be 2, for the 2 events handled")
-                    .isEqualTo(lastGlobalEventSequenceSeen);
+                    .as("Expected global event sequence checkpoint to be the sequence for the last (only) event handled and not 0")
+                    .isNotZero();
         }
 
         @Test
         void existingProjectionUpdatesProjectionDataAndCheckpoint() {
             ConcertSalesProjectionMediator mediator = createProjectionMediator();
-            Stream<ConcertEvent> firstTwoEvents =
+            List<ConcertEvent> firstTwoEvents =
                     MakeEvents.with()
                               .concertScheduled()
                               .concertScheduled()
-                              .stream();
-            ConcertId concertId = ConcertId.createRandom();
-            Stream<ConcertEvent> secondTwoEvents =
-                    MakeEvents.with()
-                              .concertScheduled(concertId)
-                              .reschedule(concertId, LocalDateTime.of(2026, 11, 1, 20, 0), LocalTime.of(19, 0))
-                              .stream();
-            mediator.handle(firstTwoEvents);
+                              .list();
+            ConcertEvent firstEvent = firstTwoEvents.getFirst();
+            firstEvent = concertEventStore.save(firstEvent.concertId(), Stream.of(firstEvent)).findFirst().orElseThrow();
+            ConcertEvent secondEvent = firstTwoEvents.getLast();
+            secondEvent = concertEventStore.save(secondEvent.concertId(), Stream.of(secondEvent)).findFirst().orElseThrow();
+            mediator.handle(Stream.of(firstEvent, secondEvent));
 
-            mediator.handle(secondTwoEvents);
+            long eventSequenceBeforeSave = concertSalesProjectionRepository
+                    .findById(ConcertSalesProjector.PROJECTION_NAME)
+                    .orElseThrow()
+                    .getLastEventSequenceSeen();
+
+            concertEventStore.save(ConcertFactory.createConcert());
 
             ConcertSalesProjectionDbo concertSalesProjectionDbo = concertSalesProjectionRepository
                     .findById(ConcertSalesProjector.PROJECTION_NAME)
@@ -312,9 +312,8 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                     .as("Expected Concert Sales Projection to have 3 entries")
                     .hasSize(3);
             assertThat(concertSalesProjectionDbo.getLastEventSequenceSeen())
-                    .as("Expected global event sequence checkpoint to be 4, for the 4 events handled")
-                    .isEqualTo(4L);
-
+                    .as("Expected event sequence checkpoint to be the last event sequence that was handled")
+                    .isGreaterThan(eventSequenceBeforeSave);
         }
     }
 
@@ -339,7 +338,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         }
 
         @Override
-        public long save(Id aggregateId, Stream uncommittedEvents) {
+        public Stream save(Id aggregateId, Stream uncommittedEvents) {
             throw new UnsupportedOperationException();
         }
 

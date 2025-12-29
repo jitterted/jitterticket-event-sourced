@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extends EventSourcedAggregate<EVENT, ID>> {
     void save(AGGREGATE aggregate);
 
-    long save(ID aggregateId, Stream<EVENT> uncommittedEvents);
+    Stream<EVENT> save(ID aggregateId, Stream<EVENT> uncommittedEvents);
 
     Optional<AGGREGATE> findById(ID id);
 

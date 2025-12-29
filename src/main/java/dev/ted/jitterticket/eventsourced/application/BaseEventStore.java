@@ -5,6 +5,7 @@ import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import jakarta.annotation.Nonnull;
 
 import java.util.List;
@@ -29,14 +30,11 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         }
         Stream<EVENT> uncommittedEvents = aggregate.uncommittedEvents();
 
-        // checkpoint = the highest global sequence number post-save
-        long checkpoint = save(aggregateId, uncommittedEvents);
-//        if (eventConsumer != null) {
-//            eventConsumer.apply(
-//                    (Stream<ConcertEvent>) aggregate.uncommittedEvents()
-//                    // , checkpoint
-//            );
-//        }
+        // we need the events that were saved so we have their event sequences
+        Stream<EVENT> savedEvents = save(aggregateId, uncommittedEvents);
+        if (eventConsumer != null) {
+            eventConsumer.handle((Stream<ConcertEvent>) savedEvents);
+        }
     }
 
     protected abstract @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id);

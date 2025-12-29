@@ -45,7 +45,7 @@ public class InMemoryEventStore<
     }
 
     @Override
-    public long save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
+    public Stream<EVENT> save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
         List<EventDto<EVENT>> existingEventDtos = idToEventDtoMap
                 .computeIfAbsent(aggregateId, _ -> new ArrayList<>());
         List<EventDto<EVENT>> freshEventDtos =
@@ -57,7 +57,9 @@ public class InMemoryEventStore<
         existingEventDtos.addAll(freshEventDtos);
 
         idToEventDtoMap.put(aggregateId, existingEventDtos);
-        return eventSequence;
+        return freshEventDtos
+                .stream()
+                .map(EventDto::toDomain);
     }
 
     @Override

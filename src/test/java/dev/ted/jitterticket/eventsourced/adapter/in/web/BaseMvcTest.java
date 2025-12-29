@@ -13,7 +13,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.nio.file.Path;
 
 @Tag("mvc")
-@Tag("spring")
 @Import({
         TestEventStoreConfiguration.class,
         TixConfiguration.class

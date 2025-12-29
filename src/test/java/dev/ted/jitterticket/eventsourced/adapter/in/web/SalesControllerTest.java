@@ -7,7 +7,6 @@ import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ConcurrentModel;
@@ -25,7 +24,6 @@ class SalesControllerTest extends DataJdbcContainerTest {
     @Autowired
     private ConcertSalesProjectionRepository concertSalesProjectionRepository;
 
-    @Disabled("Until EventStore invokes event handling on the projector")
     @Test
     void salesViewShowsSummaryOfSampleDataConcertSales() {
         var concertStore = InMemoryEventStore.forConcerts();

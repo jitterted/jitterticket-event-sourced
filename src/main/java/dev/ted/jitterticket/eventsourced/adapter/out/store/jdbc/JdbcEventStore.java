@@ -16,9 +16,9 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import jakarta.annotation.Nonnull;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extends EventSourcedAggregate<EVENT, ID>> extends BaseEventStore<ID, EVENT, AGGREGATE> {
 
@@ -58,7 +58,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     }
 
     @Override
-    public long save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
+    public Stream<EVENT> save(ID aggregateId, Stream<EVENT> uncommittedEvents) {
         // assumes there's at least one uncommittedEvent in the incoming stream!
         List<EventDbo> dbos = uncommittedEvents
                 .map(event -> EventDto.from(aggregateId.id(),
@@ -69,15 +69,8 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                         dto.getEventType(),
                         dto.getJson()))
                 .toList();
-        eventDboRepository.saveAll(dbos);
-        EventDbo lastDboToWrite = dbos.getLast();
-        Optional<EventDbo> lastEventDboSaved =
-                eventDboRepository.findByAggregateRootIdAndEventSequence(
-                        lastDboToWrite.getAggregateRootId(),
-                        lastDboToWrite.getEventSequence());
-        return lastEventDboSaved
-                .map(EventDbo::getEventSequence)
-                .orElseThrow(() -> new IllegalStateException("Could not find event saved with Event id: " + lastDboToWrite.getAggregateRootId() + " and Event Sequence: " + lastDboToWrite.getEventSequence()));
+        Iterable<EventDbo> savedEventDbos = eventDboRepository.saveAll(dbos);
+        return mapToDomainEvents(savedEventDbos);
     }
 
     @Override
@@ -94,15 +87,14 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     }
 
-    private Stream<EVENT> mapToDomainEvents(List<EventDbo> allByGlobalSequence) {
-        return allByGlobalSequence
-                .stream()
-                .map(dbo -> new EventDto<EVENT>(
-                        dbo.getAggregateRootId(),
-                        dbo.getEventSequence(),
-                        dbo.getEventType(),
-                        dbo.getJson()))
-                .map(EventDto::toDomain)
-                .gather(Gatherers.filterAndCastTo(concreteEventClass));
+    private Stream<EVENT> mapToDomainEvents(Iterable<EventDbo> eventDbos) {
+        return StreamSupport.stream(eventDbos.spliterator(), false)
+                            .map(dbo -> new EventDto<EVENT>(
+                                    dbo.getAggregateRootId(),
+                                    dbo.getEventSequence(),
+                                    dbo.getEventType(),
+                                    dbo.getJson()))
+                            .map(EventDto::toDomain)
+                            .gather(Gatherers.filterAndCastTo(concreteEventClass));
     }
 }

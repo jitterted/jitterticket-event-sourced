@@ -25,7 +25,7 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
     }
 
     @Test
-    void shouldSaveAndRetrieveEvent() {
+    void shouldSaveAndRetrieveSingleEvent() {
         // Given
         String jsonPayload = "{\"orderId\":\"123\",\"amount\":99.99}";
         EventDbo event = new EventDbo(aggregateId1, "OrderCreated", jsonPayload);
@@ -43,7 +43,9 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
         assertThat(saved).isNotNull();
         System.out.println(saved);
         assertThat(saved.getAggregateRootId()).isEqualTo(aggregateId1);
-        assertThat(saved.getEventSequence()).isEqualTo(1);
+        assertThat(saved.getEventSequence())
+                .as("This should be the same as the initial database sequence value, which is defined in DataJdbcContainerTest.")
+                .isEqualTo(DB_EVENT_SEQUENCE_START);
         assertThat(saved.getEventType()).isEqualTo("OrderCreated");
         assertThat(saved.getJson()).isEqualTo(jsonPayload);
         assertThat(saved.getCreatedAt()).isNotNull();
@@ -63,9 +65,11 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
 
         // Then
         assertThat(events).hasSize(3);
-        assertThat(events.get(0).getEventSequence()).isEqualTo(1);
-        assertThat(events.get(1).getEventSequence()).isEqualTo(2);
-        assertThat(events.get(2).getEventSequence()).isEqualTo(3);
+        assertThat(events.get(0).getEventSequence())
+                .as("This should be the same as the initial database sequence value, which is defined in DataJdbcContainerTest.")
+                .isEqualTo(DB_EVENT_SEQUENCE_START);
+        assertThat(events.get(1).getEventSequence()).isEqualTo(DB_EVENT_SEQUENCE_START + 1);
+        assertThat(events.get(2).getEventSequence()).isEqualTo(DB_EVENT_SEQUENCE_START + 2);
         assertThat(events).allMatch(e -> e.getAggregateRootId().equals(aggregateId1));
     }
 
@@ -140,7 +144,10 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
         long maxSequence = eventDboRepository.getMaxEventSequence(aggregateId1);
 
         // Then
-        assertThat(maxSequence).isEqualTo(3);
+        assertThat(maxSequence)
+                .as("This should be the same as the initial database sequence value, which is defined in DataJdbcContainerTest, plus 3 (the number of events saved) - 1")
+                .isEqualTo(DB_EVENT_SEQUENCE_START + 3 - 1);
+
     }
 
     @Test

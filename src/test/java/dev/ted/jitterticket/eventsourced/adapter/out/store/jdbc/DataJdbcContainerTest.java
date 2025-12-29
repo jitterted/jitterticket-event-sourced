@@ -15,6 +15,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public abstract class DataJdbcContainerTest {
 
+    protected static final int DB_EVENT_SEQUENCE_START = 42;
     @ServiceConnection
     static PostgreSQLContainer<?> postgres;
 
@@ -50,9 +51,10 @@ public abstract class DataJdbcContainerTest {
             BEGIN
                 SELECT pg_get_serial_sequence('events', 'event_sequence') INTO seq_name;
                 IF seq_name IS NOT NULL THEN
-                    EXECUTE 'ALTER SEQUENCE ' || seq_name || ' RESTART WITH 1';
+                    EXECUTE 'ALTER SEQUENCE ' || seq_name || ' RESTART WITH %s';
                 END IF;
             END $$;
-        """);
+        """.formatted(DB_EVENT_SEQUENCE_START)
+        );
     }
 }
