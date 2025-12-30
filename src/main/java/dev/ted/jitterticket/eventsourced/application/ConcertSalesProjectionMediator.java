@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesDbo;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionDbo;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
@@ -7,6 +8,10 @@ import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ConcertSalesProjectionMediator {
@@ -36,15 +41,50 @@ public class ConcertSalesProjectionMediator {
         concertEventStore.subscribe(this);
     }
 
+    static ConcertSalesProjector.ConcertSalesSummary dboToSummary(ConcertSalesDbo concertSalesDbo) {
+        return new ConcertSalesProjector.ConcertSalesSummary(
+                new ConcertId(concertSalesDbo.getConcertId()),
+                concertSalesDbo.getArtistName(),
+                concertSalesDbo.getConcertDate().atStartOfDay(),
+                concertSalesDbo.getTicketsSold(),
+                concertSalesDbo.getTotalSales()
+        );
+    }
+
+    static ConcertSalesDbo summaryToDbo(ConcertSalesProjector.ConcertSalesSummary summary) {
+        return new ConcertSalesDbo(
+                summary.concertId().id(),
+                summary.artist(),
+                summary.showDateTime().toLocalDate(),
+                summary.totalQuantity(),
+                summary.totalSales()
+        );
+    }
+
     public void handle(Stream<ConcertEvent> concertEventStream) {
-        ConcertSalesProjectionDbo loadedProjectionDbo =
+        ConcertSalesProjectionDbo concertSalesProjectionDbo =
                 concertSalesProjectionRepository
                         .findById(ConcertSalesProjector.PROJECTION_NAME)
                         .orElse(createNewProjectionDbo());
 
-        ConcertSalesProjectionDbo concertSalesProjectionDbo
-                = concertSalesProjector.project(loadedProjectionDbo,
-                                                concertEventStream);
+        Map<ConcertId, ConcertSalesProjector.ConcertSalesSummary> salesSummaryMap =
+                concertSalesProjectionDbo.getConcertSales()
+                                         .stream()
+                                         .map(ConcertSalesProjectionMediator::dboToSummary)
+                                         .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::concertId,
+                                                             Function.identity()));
+
+        ConcertSalesProjector.ProjectionResult result = concertSalesProjector.project(salesSummaryMap, concertEventStream);
+
+        Set<ConcertSalesDbo> concertSalesDbos =
+                result.salesSummaries()
+                      .stream()
+                      .map(ConcertSalesProjectionMediator::summaryToDbo)
+                      .collect(Collectors.toUnmodifiableSet());
+
+        concertSalesProjectionDbo.setLastEventSequenceSeen(
+                result.lastEventSequenceSeen());
+        concertSalesProjectionDbo.setConcertSales(concertSalesDbos);
 
         concertSalesProjectionRepository.save(concertSalesProjectionDbo);
     }
@@ -60,7 +100,7 @@ public class ConcertSalesProjectionMediator {
                 .orElse(createNewProjectionDbo())
                 .getConcertSales()
                 .stream()
-                .map(ConcertSalesProjector::dboToSummary);
+                .map(ConcertSalesProjectionMediator::dboToSummary);
     }
 
 }

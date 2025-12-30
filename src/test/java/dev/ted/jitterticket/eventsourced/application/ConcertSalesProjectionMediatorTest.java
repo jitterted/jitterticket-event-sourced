@@ -158,7 +158,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             var persistedSummaries = mediator.allSalesSummaries();
 
             assertThat(persistedSummaries)
-                    .containsExactly(ConcertSalesProjector.dboToSummary(concertSalesDbo));
+                    .containsExactly(ConcertSalesProjectionMediator.dboToSummary(concertSalesDbo));
         }
 
         @Test
