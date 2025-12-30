@@ -68,7 +68,7 @@ public class ConcertSalesProjector {
     }
 
     ProjectionResult project(Map<ConcertId, ConcertSalesSummary> salesSummaryMap, Stream<ConcertEvent> concertEvents) {
-        Map<ConcertId, ConcertSalesSummary> mutableSalesSummaryMap = new HashMap<>(salesSummaryMap);
+        Map<ConcertId, ConcertSalesSummary> mutableMap = new HashMap<>(salesSummaryMap);
 
         AtomicReference<Long> lastEventSequenceSeenRef = new AtomicReference<>(0L);
 
@@ -78,21 +78,21 @@ public class ConcertSalesProjector {
                         throw new IllegalStateException("Event sequence cannot be null for event: " + concertEvent);
                     }
                     switch (concertEvent) {
-                        case ConcertScheduled concertScheduled -> mutableSalesSummaryMap.put(
+                        case ConcertScheduled concertScheduled -> mutableMap.put(
                                 concertScheduled.concertId(),
                                 ConcertSalesSummary.createSummaryFrom(concertScheduled));
-                        case TicketsSold ticketsSold -> mutableSalesSummaryMap.computeIfPresent(
+                        case TicketsSold ticketsSold -> mutableMap.computeIfPresent(
                                 ticketsSold.concertId(),
                                 (_, summary) -> summary.plusTicketsSold(ticketsSold));
                         case ConcertRescheduled concertRescheduled ->
-                                mutableSalesSummaryMap.computeIfPresent(
+                                mutableMap.computeIfPresent(
                                         concertRescheduled.concertId(),
                                 (_, summary) -> summary.withNewShowDateTime(concertRescheduled.newShowDateTime()));
                     }
                     lastEventSequenceSeenRef.set(concertEvent.eventSequence());
                 });
 
-        return new ProjectionResult(mutableSalesSummaryMap.values(),
+        return new ProjectionResult(mutableMap.values(),
                                     lastEventSequenceSeenRef.get());
     }
 
