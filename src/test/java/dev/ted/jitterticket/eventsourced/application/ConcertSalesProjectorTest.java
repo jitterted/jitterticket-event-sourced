@@ -1,7 +1,5 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesDbo;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionDbo;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
@@ -10,11 +8,12 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -30,7 +29,7 @@ class ConcertSalesProjectorTest {
         ConcertSalesProjector projector = new ConcertSalesProjector();
 
         ConcertSalesProjector.ProjectionResult projectionResult =
-                projector.project(new HashMap<>(),
+                projector.project(Collections.emptyMap(),
                                   EMPTY_CONCERT_EVENT_STREAM);
 
         assertThat(projectionResult.lastEventSequenceSeen())
@@ -58,7 +57,7 @@ class ConcertSalesProjectorTest {
         );
 
         ConcertSalesProjector.ProjectionResult projectionResult =
-                projector.project(new HashMap<>(), concertEvents);
+                projector.project(Collections.emptyMap(), concertEvents);
 
         assertThat(projectionResult.lastEventSequenceSeen())
                 .as("Last event sequence seen should be the event sequence of the single event processed")
@@ -92,7 +91,7 @@ class ConcertSalesProjectorTest {
         );
 
         ConcertSalesProjector.ProjectionResult projectionResult =
-                projector.project(new HashMap<>(), concertEvents);
+                projector.project(Collections.emptyMap(), concertEvents);
 
         assertThat(projectionResult.lastEventSequenceSeen())
                 .as("Last event sequence seen should be the event sequence of the last event processed")
@@ -105,10 +104,6 @@ class ConcertSalesProjectorTest {
                         showDateTime,
                         4,
                         4 * 75));
-    }
-
-    private static ConcertSalesProjectionDbo createEmptySnapshot() {
-        return new ConcertSalesProjectionDbo("new_projection", 0L);
     }
 
     @Test
@@ -128,7 +123,7 @@ class ConcertSalesProjectorTest {
 
         ConcertSalesProjector projector = new ConcertSalesProjector();
         ConcertSalesProjector.ProjectionResult projectionResult =
-                projector.project(new HashMap<>(), concertEventStream);
+                projector.project(Collections.emptyMap(), concertEventStream);
 
         assertThat(projectionResult.salesSummaries())
                 .extracting(ConcertSalesProjector.ConcertSalesSummary::concertId,
@@ -151,16 +146,15 @@ class ConcertSalesProjectorTest {
                           .stream();
 
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        ConcertSalesProjectionDbo concertSalesProjection =
-                concertSalesProjector.project(createEmptySnapshot(),
+        ConcertSalesProjector.ProjectionResult projectionResult =
+                concertSalesProjector.project(Collections.emptyMap(),
                                               concertEventStream);
 
-        assertThat(concertSalesProjection.getConcertSales())
-                // TODO: figure out how to extract and retain type safety here
-                .extracting(ConcertSalesDbo::getConcertId,
-                            ConcertSalesDbo::getConcertDate)
+        assertThat(projectionResult.salesSummaries())
+                .extracting(ConcertSalesProjector.ConcertSalesSummary::concertId,
+                            ConcertSalesProjector.ConcertSalesSummary::showDateTime)
                 .containsExactly(
-                        tuple(concertId.id(), newShowDateTime.toLocalDate())
+                        tuple(concertId, newShowDateTime)
                 );
     }
 
@@ -178,31 +172,27 @@ class ConcertSalesProjectorTest {
                           .list();
         ConcertEvent concertScheduledEvent = concertScheduledWithTicketsSoldEvents.getFirst();
         ConcertEvent ticketsSoldEvent = concertScheduledWithTicketsSoldEvents.getLast();
-        ConcertSalesProjectionDbo expectedProjection = new ConcertSalesProjectionDbo(
-                "new_projection",
-                ticketsSoldEvent.eventSequence());
-        expectedProjection.setConcertSales(Set.of(new ConcertSalesDbo(
-                concertId.id(),
-                "Artist Name",
-                showDateTime.toLocalDate(),
-                6, 6 * 35
-        )));
 
-        ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        ConcertSalesProjectionDbo initialProjection =
-                concertSalesProjector.project(
-                        createEmptySnapshot(),
-                        Stream.of(concertScheduledEvent)
-                );
+        ConcertSalesProjector projector = new ConcertSalesProjector();
+        ConcertSalesProjector.ProjectionResult initialProjection =
+                projector.project(Collections.emptyMap(), Stream.of(concertScheduledEvent));
 
-        ConcertSalesProjectionDbo finalProjection =
-                concertSalesProjector.project(initialProjection,
-                                              Stream.of(ticketsSoldEvent)
-                );
+        Map<ConcertId, ConcertSalesProjector.ConcertSalesSummary> secondSalesSummaryMap =
+                initialProjection.salesSummaries()
+                                 .stream()
+                                 .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::concertId, Function.identity()));
+        ConcertSalesProjector.ProjectionResult finalProjection =
+                projector.project(secondSalesSummaryMap, Stream.of(ticketsSoldEvent));
 
-        assertThat(finalProjection)
-                .usingRecursiveComparison()
-                .isEqualTo(expectedProjection);
+        assertThat(finalProjection.lastEventSequenceSeen())
+                .isEqualTo(ticketsSoldEvent.eventSequence());
+        assertThat(finalProjection.salesSummaries())
+                .containsExactly(new ConcertSalesProjector.ConcertSalesSummary(
+                        concertId,
+                        "Artist Name",
+                        showDateTime,
+                        6, 6 * 35
+                ));
     }
 
     @Test
@@ -211,11 +201,11 @@ class ConcertSalesProjectorTest {
         TicketsSold ticketsSold = new TicketsSold(concertId, 1L, 3, 75);
 
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
-        ConcertSalesProjectionDbo concertSalesProjection =
-                concertSalesProjector.project(createEmptySnapshot(),
+        ConcertSalesProjector.ProjectionResult projectionResult =
+                concertSalesProjector.project(Collections.emptyMap(),
                                               Stream.of(ticketsSold));
 
-        assertThat(concertSalesProjection.getConcertSales())
+        assertThat(projectionResult.salesSummaries())
                 .isEmpty();
     }
 

@@ -10,6 +10,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,28 +68,32 @@ public class ConcertSalesProjector {
     }
 
     ProjectionResult project(Map<ConcertId, ConcertSalesSummary> salesSummaryMap, Stream<ConcertEvent> concertEvents) {
+        Map<ConcertId, ConcertSalesSummary> mutableSalesSummaryMap = new HashMap<>(salesSummaryMap);
+
         AtomicReference<Long> lastEventSequenceSeenRef = new AtomicReference<>(0L);
+
         concertEvents
                 .forEach(concertEvent -> {
                     if (concertEvent.eventSequence() == null) {
                         throw new IllegalStateException("Event sequence cannot be null for event: " + concertEvent);
                     }
                     switch (concertEvent) {
-                        case ConcertScheduled concertScheduled -> salesSummaryMap.put(
+                        case ConcertScheduled concertScheduled -> mutableSalesSummaryMap.put(
                                 concertScheduled.concertId(),
                                 ConcertSalesSummary.createSummaryFrom(concertScheduled));
-                        case TicketsSold ticketsSold -> salesSummaryMap.computeIfPresent(
+                        case TicketsSold ticketsSold -> mutableSalesSummaryMap.computeIfPresent(
                                 ticketsSold.concertId(),
                                 (_, summary) -> summary.plusTicketsSold(ticketsSold));
-                        case ConcertRescheduled concertRescheduled -> salesSummaryMap.computeIfPresent(
-                                concertRescheduled.concertId(),
+                        case ConcertRescheduled concertRescheduled ->
+                                mutableSalesSummaryMap.computeIfPresent(
+                                        concertRescheduled.concertId(),
                                 (_, summary) -> summary.withNewShowDateTime(concertRescheduled.newShowDateTime()));
                     }
                     lastEventSequenceSeenRef.set(concertEvent.eventSequence());
                 });
-        Collection<ConcertSalesSummary> salesSummaries = salesSummaryMap.values();
-        long lastEventSequenceSeen = lastEventSequenceSeenRef.get();
-        return new ProjectionResult(salesSummaries, lastEventSequenceSeen);
+
+        return new ProjectionResult(mutableSalesSummaryMap.values(),
+                                    lastEventSequenceSeenRef.get());
     }
 
     record ProjectionResult(Collection<ConcertSalesSummary> salesSummaries,
