@@ -15,8 +15,6 @@ import java.util.stream.Stream;
 
 public class ConcertSalesProjector {
 
-    static final String PROJECTION_NAME = "concert_sales_projector";
-
     ProjectionResult project(Map<ConcertId, ConcertSalesSummary> salesSummaryMap, Stream<ConcertEvent> concertEvents) {
         Map<ConcertId, ConcertSalesSummary> mutableMap = new HashMap<>(salesSummaryMap);
 

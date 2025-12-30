@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 public class ConcertSalesProjectionMediator {
 
+    static final String PROJECTION_NAME = "concert_sales_projector";
     private final ConcertSalesProjector concertSalesProjector;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
     private final ConcertSalesProjectionRepository concertSalesProjectionRepository;
@@ -27,14 +28,11 @@ public class ConcertSalesProjectionMediator {
         this.concertEventStore = concertEventStore;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
 
-        // TODO: create convenience query for getting the event sequence checkpoint
-        ConcertSalesProjectionDbo loadedConcertSalesProjectionDbo =
-                this.concertSalesProjectionRepository
-                        .findById(ConcertSalesProjector.PROJECTION_NAME)
-                        .orElse(createNewProjectionDbo());
+        long lastEventSequenceSeen = concertSalesProjectionRepository
+                .findLastEventSequenceSeenByProjectionName(PROJECTION_NAME)
+                .orElse(0L);
         Stream<ConcertEvent> concertEventStream =
-                this.concertEventStore.allEventsAfter(
-                        loadedConcertSalesProjectionDbo.getLastEventSequenceSeen());
+                this.concertEventStore.allEventsAfter(lastEventSequenceSeen);
 
         handle(concertEventStream);
 
@@ -64,7 +62,7 @@ public class ConcertSalesProjectionMediator {
     public void handle(Stream<ConcertEvent> concertEventStream) {
         ConcertSalesProjectionDbo concertSalesProjectionDbo =
                 concertSalesProjectionRepository
-                        .findById(ConcertSalesProjector.PROJECTION_NAME)
+                        .findById(PROJECTION_NAME)
                         .orElse(createNewProjectionDbo());
 
         Map<ConcertId, ConcertSalesProjector.ConcertSalesSummary> salesSummaryMap =
@@ -91,12 +89,12 @@ public class ConcertSalesProjectionMediator {
 
     private static ConcertSalesProjectionDbo createNewProjectionDbo() {
         return new ConcertSalesProjectionDbo(
-                ConcertSalesProjector.PROJECTION_NAME, 0L);
+                PROJECTION_NAME, 0L);
     }
 
     public Stream<ConcertSalesProjector.ConcertSalesSummary> allSalesSummaries() {
         return concertSalesProjectionRepository
-                .findById(ConcertSalesProjector.PROJECTION_NAME)
+                .findById(PROJECTION_NAME)
                 .orElse(createNewProjectionDbo())
                 .getConcertSales()
                 .stream()

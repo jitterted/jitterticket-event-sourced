@@ -68,9 +68,9 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             assertThat(allSalesSummaries)
                     .isEmpty();
 
-            Optional<ConcertSalesProjectionDbo> concertSalesProjectionDbo = concertSalesProjectionRepository.findById(ConcertSalesProjector.PROJECTION_NAME);
+            Optional<ConcertSalesProjectionDbo> concertSalesProjectionDbo = concertSalesProjectionRepository.findById(ConcertSalesProjectionMediator.PROJECTION_NAME);
             assertThat(concertSalesProjectionDbo)
-                    .as("Expected the Repository to have an entry for the projection named: `%s`", ConcertSalesProjector.PROJECTION_NAME)
+                    .as("Expected the Repository to have an entry for the projection named: `%s`", ConcertSalesProjectionMediator.PROJECTION_NAME)
                     .isPresent()
                     .get()
                     .extracting(ConcertSalesProjectionDbo::getLastEventSequenceSeen)
@@ -95,7 +95,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             ConcertSalesProjectionMediator mediator = createProjectionMediator();
 
             ConcertSalesProjectionDbo concertSalesProjectionDbo = concertSalesProjectionRepository
-                    .findById(ConcertSalesProjector.PROJECTION_NAME)
+                    .findById(ConcertSalesProjectionMediator.PROJECTION_NAME)
                     .orElseThrow();
             assertThat(concertSalesProjectionDbo.getConcertSales())
                     .as("Expected the projection to have a single concert sale summary after processing a single event")
@@ -144,7 +144,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         @Test
         void noNewEventsReturnsPersistedProjection() {
             ConcertSalesProjectionDbo concertSalesProjectionDbo = new ConcertSalesProjectionDbo(
-                    ConcertSalesProjector.PROJECTION_NAME, 1);
+                    ConcertSalesProjectionMediator.PROJECTION_NAME, 1);
             ConcertSalesDbo concertSalesDbo = new ConcertSalesDbo(
                     ConcertId.createRandom().id(),
                     "Artist Name", LocalDate.now(), 0, 0);
@@ -170,7 +170,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             ConcertSalesDbo concertSalesDbo = new ConcertSalesDbo(
                     concertId.id(), "Artist Name", LocalDate.now(), 0, 0);
             ConcertSalesProjectionDbo concertSalesProjectionDbo = new ConcertSalesProjectionDbo(
-                    ConcertSalesProjector.PROJECTION_NAME, 1);
+                    ConcertSalesProjectionMediator.PROJECTION_NAME, 1);
             concertSalesProjectionDbo.setConcertSales(Set.of(concertSalesDbo));
             var concertEventStore = InMemoryEventStore.forConcerts();
             Stream<ConcertEvent> concertEventStream =
@@ -212,7 +212,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         void subscribeWith9WhenLastGlobalSequenceInProjectionTableHas9() {
             ConcertSalesProjectionMediatorTest.EventStoreSpy eventStoreSpy = new ConcertSalesProjectionMediatorTest.EventStoreSpy();
             ConcertSalesProjectionDbo concertSalesProjectionDbo = new ConcertSalesProjectionDbo(
-                    ConcertSalesProjector.PROJECTION_NAME, 9L);
+                    ConcertSalesProjectionMediator.PROJECTION_NAME, 9L);
             concertSalesProjectionRepository.save(concertSalesProjectionDbo);
             new ConcertSalesProjectionMediator(new ConcertSalesProjector(),
                                                eventStoreSpy,
@@ -234,7 +234,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             String artist = "Artist";
             LocalDateTime showDateTime = LocalDate.now().atStartOfDay();
             ConcertSalesProjectionDbo concertSalesProjectionDbo = new ConcertSalesProjectionDbo(
-                    ConcertSalesProjector.PROJECTION_NAME, 1L);
+                    ConcertSalesProjectionMediator.PROJECTION_NAME, 1L);
             concertSalesProjectionDbo.setConcertSales(Set.of(
                     new ConcertSalesDbo(
                             concertId.id(), artist,
@@ -274,7 +274,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             concertEventStore.save(concert);
 
             ConcertSalesProjectionDbo concertSalesProjectionDbo = concertSalesProjectionRepository
-                    .findById(ConcertSalesProjector.PROJECTION_NAME)
+                    .findById(ConcertSalesProjectionMediator.PROJECTION_NAME)
                     .orElseThrow();
             assertThat(concertSalesProjectionDbo.getConcertSales())
                     .as("Expected Concert Sales Projection to have 1 entry for the 1 concert scheduled")
@@ -299,14 +299,14 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             mediator.handle(Stream.of(firstEvent, secondEvent));
 
             long eventSequenceBeforeSave = concertSalesProjectionRepository
-                    .findById(ConcertSalesProjector.PROJECTION_NAME)
+                    .findById(ConcertSalesProjectionMediator.PROJECTION_NAME)
                     .orElseThrow()
                     .getLastEventSequenceSeen();
 
             concertEventStore.save(ConcertFactory.createConcert());
 
             ConcertSalesProjectionDbo concertSalesProjectionDbo = concertSalesProjectionRepository
-                    .findById(ConcertSalesProjector.PROJECTION_NAME)
+                    .findById(ConcertSalesProjectionMediator.PROJECTION_NAME)
                     .orElseThrow();
             assertThat(concertSalesProjectionDbo.getConcertSales())
                     .as("Expected Concert Sales Projection to have 3 entries")
