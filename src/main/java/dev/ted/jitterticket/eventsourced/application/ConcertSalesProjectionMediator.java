@@ -22,11 +22,14 @@ public class ConcertSalesProjectionMediator {
         this.concertEventStore = concertEventStore;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
 
-        ConcertSalesProjectionDbo loadedConcertSalesProjectionDbo = this.concertSalesProjectionRepository
-                .findById(ConcertSalesProjector.PROJECTION_NAME)
-                .orElse(createNewProjectionDbo());
+        // TODO: create convenience query for getting the event sequence checkpoint
+        ConcertSalesProjectionDbo loadedConcertSalesProjectionDbo =
+                this.concertSalesProjectionRepository
+                        .findById(ConcertSalesProjector.PROJECTION_NAME)
+                        .orElse(createNewProjectionDbo());
         Stream<ConcertEvent> concertEventStream =
-                this.concertEventStore.allEventsAfter(loadedConcertSalesProjectionDbo.getLastEventSequenceSeen());
+                this.concertEventStore.allEventsAfter(
+                        loadedConcertSalesProjectionDbo.getLastEventSequenceSeen());
 
         handle(concertEventStream);
 

@@ -21,16 +21,6 @@ public class ConcertSalesProjector {
 
     static final String PROJECTION_NAME = "concert_sales_projector";
 
-    // class ProjectorMediator (depends on EventStore)
-    //     sends events (uncommitted ones that were just persisted) to...
-    //     class ConcertSalesProjectionMediator (depends on Projection & Metadata Repositories)
-    //         load last event sequence (from metadata repo)
-    //         load projection rows from database (from projection repo)
-    //              ==> dispatch to Projector.project(rows, events)
-    //         save updated projection rows (to projection repo)
-    //         save last event sequence (to metadata repo)
-
-    // TODO: project should not be aware of Database Objects (DBO)
     public ConcertSalesProjectionDbo project(
             ConcertSalesProjectionDbo loadedProjectionDbo,
             Stream<ConcertEvent> concertEvents) {
@@ -42,8 +32,7 @@ public class ConcertSalesProjector {
                                    .collect(Collectors.toMap(ConcertSalesSummary::concertId,
                                                              Function.identity()));
 
-        ProjectionResult result = computeProjection(concertEvents,
-                                                    salesSummaryMap);
+        ProjectionResult result = project(salesSummaryMap, concertEvents);
 
         Set<ConcertSalesDbo> concertSalesDbos =
                 result.salesSummaries()
@@ -67,7 +56,7 @@ public class ConcertSalesProjector {
         );
     }
 
-    private ConcertSalesDbo summaryToDbo(ConcertSalesSummary summary) {
+    ConcertSalesDbo summaryToDbo(ConcertSalesSummary summary) {
         return new ConcertSalesDbo(
                 summary.concertId().id(),
                 summary.artist(),
@@ -77,7 +66,7 @@ public class ConcertSalesProjector {
         );
     }
 
-    private static ProjectionResult computeProjection(Stream<ConcertEvent> concertEvents, Map<ConcertId, ConcertSalesSummary> salesSummaryMap) {
+    ProjectionResult project(Map<ConcertId, ConcertSalesSummary> salesSummaryMap, Stream<ConcertEvent> concertEvents) {
         AtomicReference<Long> lastEventSequenceSeenRef = new AtomicReference<>(0L);
         concertEvents
                 .forEach(concertEvent -> {
@@ -102,7 +91,7 @@ public class ConcertSalesProjector {
         return new ProjectionResult(salesSummaries, lastEventSequenceSeen);
     }
 
-    private record ProjectionResult(Collection<ConcertSalesSummary> salesSummaries,
+    record ProjectionResult(Collection<ConcertSalesSummary> salesSummaries,
                                     long lastEventSequenceSeen) {}
 
 
