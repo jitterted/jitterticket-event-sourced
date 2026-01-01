@@ -14,6 +14,8 @@ import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import jakarta.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.function.Function;
@@ -21,6 +23,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extends EventSourcedAggregate<EVENT, ID>> extends BaseEventStore<ID, EVENT, AGGREGATE> {
+
+    private static final Logger log = LoggerFactory.getLogger(JdbcEventStore.class);
 
     private final EventDboRepository eventDboRepository;
     private final Class<EVENT> concreteEventClass;
@@ -70,25 +74,34 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
                         dto.getJson()))
                 .toList();
         Iterable<EventDbo> savedEventDbos = eventDboRepository.saveAll(dbos);
-        return mapToDomainEvents(savedEventDbos);
+        return mapToDomainEvents(StreamSupport.stream(savedEventDbos.spliterator(), false));
     }
 
     @Override
     public Stream<EVENT> allEvents() {
         return mapToDomainEvents(eventDboRepository
-                                         .findAllByOrderByEventSequenceAsc());
+                                         .findAllByOrderByEventSequenceAsc().stream());
     }
 
     @Override
-    public Stream<EVENT> allEventsAfter(long globalEventSequence) {
-        return mapToDomainEvents(
-                eventDboRepository
-                        .findEventsAfter(globalEventSequence));
-
+    public Stream<EVENT> allEventsAfter(long eventSequence) {
+        log.info("Counting events in database after event sequence: {}", eventSequence);
+        long newEventsCount = eventDboRepository.countEventsAfter(eventSequence);
+        log.info("Found {} new events", newEventsCount);
+        if (newEventsCount == 0) {
+            return Stream.empty();
+        }
+        log.info("Fetching List<EventDbo> after event sequence: {}", eventSequence);
+        List<EventDbo> eventsAfter = eventDboRepository.findEventsAfter(eventSequence);
+        log.info("Fetched {} events, mapping to Domain events", eventsAfter.size());
+        Stream<EVENT> domainEvents = mapToDomainEvents(eventsAfter.stream());
+        log.info("Mapped all events to Domain events");
+        return domainEvents;
     }
 
-    private Stream<EVENT> mapToDomainEvents(Iterable<EventDbo> eventDbos) {
-        return StreamSupport.stream(eventDbos.spliterator(), false)
+    private Stream<EVENT> mapToDomainEvents(Stream<EventDbo> eventDbos) {
+        return /*StreamSupport.stream(eventDbos.spliterator(), false)*/
+        eventDbos
                             .map(dbo -> new EventDto<EVENT>(
                                     dbo.getAggregateRootId(),
                                     dbo.getEventSequence(),

@@ -7,6 +7,8 @@ import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ConcertSalesProjectionMediator {
+
+    private static final Logger log = LoggerFactory.getLogger(ConcertSalesProjectionMediator.class);
 
     static final String PROJECTION_NAME = "concert_sales_projector";
     private final ConcertSalesProjector concertSalesProjector;
@@ -28,13 +32,19 @@ public class ConcertSalesProjectionMediator {
         this.concertEventStore = concertEventStore;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
 
+        log.info("Fetching last event sequence seen by the projection");
         long lastEventSequenceSeen = concertSalesProjectionRepository
                 .findLastEventSequenceSeenByProjectionName(PROJECTION_NAME)
                 .orElse(0L);
+
+        log.info("Fetching all events after the last event sequence: {}...", lastEventSequenceSeen);
         Stream<ConcertEvent> concertEventStream =
                 this.concertEventStore.allEventsAfter(lastEventSequenceSeen);
+        log.info("Fetched all events after last event sequence: {}", lastEventSequenceSeen);
 
+        log.info("Starting event handling for projection...");
         handle(concertEventStream);
+        log.info("Completed event handling for projection");
 
         concertEventStore.subscribe(this);
     }
@@ -65,6 +75,7 @@ public class ConcertSalesProjectionMediator {
                         .findById(PROJECTION_NAME)
                         .orElse(createNewProjectionDbo());
 
+        log.info("Converting {} Sales DBOs to Sales Summaries...", concertSalesProjectionDbo.getConcertSales().size());
         Map<ConcertId, ConcertSalesProjector.ConcertSalesSummary> salesSummaryMap =
                 concertSalesProjectionDbo.getConcertSales()
                                          .stream()
@@ -72,7 +83,12 @@ public class ConcertSalesProjectionMediator {
                                          .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::concertId,
                                                              Function.identity()));
 
-        ConcertSalesProjector.ProjectionResult result = concertSalesProjector.project(salesSummaryMap, concertEventStream);
+        log.info("Starting projection calculation...");
+        ConcertSalesProjector.ProjectionResult result =
+                concertSalesProjector.project(salesSummaryMap,
+                                              concertEventStream,
+                                              concertSalesProjectionDbo.getLastEventSequenceSeen());
+        log.info("Projection calculation completed, mapping Sales Summary to DBOs...");
 
         Set<ConcertSalesDbo> concertSalesDbos =
                 result.salesSummaries()
@@ -84,6 +100,7 @@ public class ConcertSalesProjectionMediator {
                 result.lastEventSequenceSeen());
         concertSalesProjectionDbo.setConcertSales(concertSalesDbos);
 
+        log.info("Saving concert sales projection with {} summaries to Repository", concertSalesDbos.size());
         concertSalesProjectionRepository.save(concertSalesProjectionDbo);
     }
 

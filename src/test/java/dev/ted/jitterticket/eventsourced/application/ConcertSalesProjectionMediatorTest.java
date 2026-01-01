@@ -299,9 +299,8 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             mediator.handle(Stream.of(firstEvent, secondEvent));
 
             long eventSequenceBeforeSave = concertSalesProjectionRepository
-                    .findById(ConcertSalesProjectionMediator.PROJECTION_NAME)
-                    .orElseThrow()
-                    .getLastEventSequenceSeen();
+                    .findLastEventSequenceSeenByProjectionName(ConcertSalesProjectionMediator.PROJECTION_NAME)
+                    .orElseThrow();
 
             concertEventStore.save(ConcertFactory.createConcert());
 
@@ -315,6 +314,27 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
                     .as("Expected event sequence checkpoint to be the last event sequence that was handled")
                     .isGreaterThan(eventSequenceBeforeSave);
         }
+
+        @Test
+        void existingProjectionUnchangedWhenEmptyEventStreamHandled() {
+            ConcertSalesProjectionMediator mediator = createProjectionMediator();
+            concertEventStore.save(ConcertFactory.createConcert());
+            ConcertSalesProjectionDbo initialProjectionDbo = concertSalesProjectionRepository
+                    .findById(ConcertSalesProjectionMediator.PROJECTION_NAME)
+                    .orElseThrow();
+
+            mediator.handle(Stream.empty());
+
+            ConcertSalesProjectionDbo afterProjectionDbo = concertSalesProjectionRepository
+                    .findById(ConcertSalesProjectionMediator.PROJECTION_NAME)
+                    .orElseThrow();
+
+            assertThat(afterProjectionDbo)
+                    .as("Expected Concert Sales Projection to be unchanged after handling an empty stream of events")
+                    .usingRecursiveComparison()
+                    .isEqualTo(initialProjectionDbo);
+        }
+
     }
 
     //region Fixture

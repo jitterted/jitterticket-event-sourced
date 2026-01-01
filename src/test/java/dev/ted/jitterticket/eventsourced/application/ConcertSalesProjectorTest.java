@@ -30,7 +30,7 @@ class ConcertSalesProjectorTest {
 
         ConcertSalesProjector.ProjectionResult projectionResult =
                 projector.project(Collections.emptyMap(),
-                                  EMPTY_CONCERT_EVENT_STREAM);
+                                  EMPTY_CONCERT_EVENT_STREAM, 0L);
 
         assertThat(projectionResult.lastEventSequenceSeen())
                 .isZero();
@@ -57,7 +57,7 @@ class ConcertSalesProjectorTest {
         );
 
         ConcertSalesProjector.ProjectionResult projectionResult =
-                projector.project(Collections.emptyMap(), concertEvents);
+                projector.project(Collections.emptyMap(), concertEvents, 0L);
 
         assertThat(projectionResult.lastEventSequenceSeen())
                 .as("Last event sequence seen should be the event sequence of the single event processed")
@@ -91,7 +91,7 @@ class ConcertSalesProjectorTest {
         );
 
         ConcertSalesProjector.ProjectionResult projectionResult =
-                projector.project(Collections.emptyMap(), concertEvents);
+                projector.project(Collections.emptyMap(), concertEvents, 0L);
 
         assertThat(projectionResult.lastEventSequenceSeen())
                 .as("Last event sequence seen should be the event sequence of the last event processed")
@@ -123,7 +123,7 @@ class ConcertSalesProjectorTest {
 
         ConcertSalesProjector projector = new ConcertSalesProjector();
         ConcertSalesProjector.ProjectionResult projectionResult =
-                projector.project(Collections.emptyMap(), concertEventStream);
+                projector.project(Collections.emptyMap(), concertEventStream, 0L);
 
         assertThat(projectionResult.salesSummaries())
                 .extracting(ConcertSalesProjector.ConcertSalesSummary::concertId,
@@ -148,7 +148,7 @@ class ConcertSalesProjectorTest {
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
         ConcertSalesProjector.ProjectionResult projectionResult =
                 concertSalesProjector.project(Collections.emptyMap(),
-                                              concertEventStream);
+                                              concertEventStream, 0L);
 
         assertThat(projectionResult.salesSummaries())
                 .extracting(ConcertSalesProjector.ConcertSalesSummary::concertId,
@@ -175,14 +175,12 @@ class ConcertSalesProjectorTest {
 
         ConcertSalesProjector projector = new ConcertSalesProjector();
         ConcertSalesProjector.ProjectionResult initialProjection =
-                projector.project(Collections.emptyMap(), Stream.of(concertScheduledEvent));
+                projector.project(Collections.emptyMap(), Stream.of(concertScheduledEvent), 0L);
 
         Map<ConcertId, ConcertSalesProjector.ConcertSalesSummary> secondSalesSummaryMap =
-                initialProjection.salesSummaries()
-                                 .stream()
-                                 .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::concertId, Function.identity()));
+                mapFromProjection(initialProjection);
         ConcertSalesProjector.ProjectionResult finalProjection =
-                projector.project(secondSalesSummaryMap, Stream.of(ticketsSoldEvent));
+                projector.project(secondSalesSummaryMap, Stream.of(ticketsSoldEvent), 0L);
 
         assertThat(finalProjection.lastEventSequenceSeen())
                 .isEqualTo(ticketsSoldEvent.eventSequence());
@@ -195,6 +193,30 @@ class ConcertSalesProjectorTest {
                 ));
     }
 
+    private static Map<ConcertId, ConcertSalesProjector.ConcertSalesSummary> mapFromProjection(ConcertSalesProjector.ProjectionResult initialProjection) {
+        return initialProjection.salesSummaries()
+                                .stream()
+                                .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::concertId, Function.identity()));
+    }
+
+    @Test
+    void lastEventSequenceSeenUnchangedWhenProcessingEmptyEventStream() {
+        Stream<ConcertEvent> concertEvents = MakeEvents.with()
+                .concertScheduled()
+                .stream();
+        ConcertSalesProjector projector = new ConcertSalesProjector();
+        ConcertSalesProjector.ProjectionResult initialProjectionResult =
+                projector.project(Collections.emptyMap(), concertEvents, 0L);
+
+        ConcertSalesProjector.ProjectionResult finalProjectionResult =
+                projector.project(mapFromProjection(initialProjectionResult),
+                                  Stream.empty(), initialProjectionResult.lastEventSequenceSeen());
+
+        assertThat(finalProjectionResult.lastEventSequenceSeen())
+                .as("The last event sequence seen should remain unchanged when processing an empty event stream")
+                .isEqualTo(initialProjectionResult.lastEventSequenceSeen());
+    }
+
     @Test
     void ticketsSoldWhenConcertScheduledEventNotSeenIsIgnoredThenProjectionIsEmpty() {
         ConcertId concertId = ConcertId.createRandom();
@@ -203,7 +225,7 @@ class ConcertSalesProjectorTest {
         ConcertSalesProjector concertSalesProjector = new ConcertSalesProjector();
         ConcertSalesProjector.ProjectionResult projectionResult =
                 concertSalesProjector.project(Collections.emptyMap(),
-                                              Stream.of(ticketsSold));
+                                              Stream.of(ticketsSold), 0L);
 
         assertThat(projectionResult.salesSummaries())
                 .isEmpty();

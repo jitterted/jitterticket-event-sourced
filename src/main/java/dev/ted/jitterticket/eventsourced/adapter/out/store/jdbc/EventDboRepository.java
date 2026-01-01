@@ -4,6 +4,7 @@ import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,8 +30,13 @@ public interface EventDboRepository extends CrudRepository<EventDbo, UUID> {
      * Find events after a specific global sequence.
      * Useful for catching up event projections or subscribers.
      */
+    @Transactional(readOnly = true)
     @Query("SELECT * FROM events WHERE event_sequence > :afterSequence ORDER BY event_sequence")
-    List<EventDbo> findEventsAfter(@Param("afterSequence") Long afterSequence);
+    List<EventDbo> findEventsAfter(@Param("afterSequence") Long afterSequence/*, String tableName */);
+
+
+    @Query("SELECT COUNT(*) FROM events WHERE event_sequence > :afterSequence")
+    long countEventsAfter(@Param("afterSequence") Long afterSequence);
 
     /**
      * Find events by type across all aggregates.

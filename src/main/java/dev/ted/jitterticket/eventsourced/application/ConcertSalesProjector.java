@@ -5,20 +5,25 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public class ConcertSalesProjector {
+    private static final Logger log = LoggerFactory.getLogger(ConcertSalesProjector.class);
 
-    ProjectionResult project(Map<ConcertId, ConcertSalesSummary> salesSummaryMap, Stream<ConcertEvent> concertEvents) {
+    ProjectionResult project(Map<ConcertId, ConcertSalesSummary> salesSummaryMap, Stream<ConcertEvent> concertEvents, long lastEventSequenceSeen) {
         Map<ConcertId, ConcertSalesSummary> mutableMap = new HashMap<>(salesSummaryMap);
 
-        AtomicReference<Long> lastEventSequenceSeenRef = new AtomicReference<>(0L);
+        AtomicReference<Long> lastEventSequenceSeenRef = new AtomicReference<>(lastEventSequenceSeen);
+        AtomicInteger eventSequenceCounter = new AtomicInteger(0);
 
         concertEvents
                 .forEach(concertEvent -> {
@@ -37,8 +42,10 @@ public class ConcertSalesProjector {
                                 (_, summary) -> summary.withNewShowDateTime(concertRescheduled.newShowDateTime()));
                     }
                     lastEventSequenceSeenRef.set(concertEvent.eventSequence());
+                    eventSequenceCounter.incrementAndGet();
                 });
 
+        log.info("Projection calculation completed, processed {} events", eventSequenceCounter.get());
         return new ProjectionResult(mutableMap.values(),
                                     lastEventSequenceSeenRef.get());
     }

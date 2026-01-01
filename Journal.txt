@@ -1,3 +1,32 @@
+Thursday, January 1, 2026
+=========================
+[Design Decision]
+* Revisiting original design decision (May 27, 2025) around one table for all events vs. table-per-aggregate type.
+  The original decision, one table per aggregate type, seems the best as there's no apparent downsides.
+  I never implemented it that way and now we see performance problems in pathological data layout, i.e.,
+  when there's 100,000 Concert events followed by 100,000 Customer events and the Projector only cares about the Concert events, yet we retrieve the 100,000 Customer events only to throw them away.
+
+  Alternative to Table-Per-Aggregate
+
+  Always do queries that provide the list of event types you're interested in.
+  Advantages:
+    * More flexible queries, e.g., projections (and other event consumers) can state explicitly the events that they care about, saving time retrieving events that would be ignored.
+    * No need to update the DDL schema to create the new table for new Aggregates
+
+  Complications:
+    * For Aggregate reconstitution:
+
+      1. Need to specify ALL of the events that are needed to reconstitute the aggregate, stored in a constant lookup table.
+         This table would need to be updated any time there are new events added for an aggregate.
+         Potential for mistake: not updating the table when new events are added.
+         Compensated by having a test to ensure all concrete event types are in that Aggregate-To-Events lookup table.
+      2a. Have a separate column for the aggregate type, which is somewhat wasteful and makes the query a bit more complicated.
+      2b. Prepend the aggregate type to the ID, e.g., CU-{UUID} and CO-{UUID}, and then the AggregateRootId type, it could be serialized into a single string (CU-{UUID} for a Customer-type Event), or could split it into two strings, "Customer" and "UUID" for expansion in the WHERE clause.
+
+  DECISION
+
+  => Keep a single table, with the existing schema, and always require queries for events to specify the concrete event types to be retrieved.
+
 Thursday, December 18, 2025
 ===========================
 [IntelliJ IDEA]

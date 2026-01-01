@@ -75,6 +75,8 @@
     [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion
     [ ] Make more general way of registering projectors
         [ ] Generalize projectors to extract an interface
+    [ ] Implement the constraint that Customer email addresses must be unique: ? do we need a special read-model/projection for that ?
+
 
     [ ] ArchUnit rule to ensure that only test code calls `createForTest...` methods
     [later with modulith] Figure out listener/subscription for when events are persisted
