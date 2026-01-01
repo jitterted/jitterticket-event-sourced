@@ -27,14 +27,15 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     private static final Logger log = LoggerFactory.getLogger(JdbcEventStore.class);
 
     private final EventDboRepository eventDboRepository;
-    private final Class<EVENT> concreteEventClass;
+    private final Class<EVENT> baseEventClass;
 
     private JdbcEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate,
                            EventDboRepository eventDboRepository,
-                           Class<EVENT> concreteEventClass) {
+                           Class<EVENT> baseEventClass) {
         super(eventsToAggregate);
         this.eventDboRepository = eventDboRepository;
-        this.concreteEventClass = concreteEventClass;
+        this.baseEventClass = baseEventClass;
+        // retrieve concrete subclasses of the (abstract) base event for use in Repository "findEventsAfter" query
     }
 
 
@@ -85,12 +86,6 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     @Override
     public Stream<EVENT> allEventsAfter(long eventSequence) {
-        log.info("Counting events in database after event sequence: {}", eventSequence);
-        long newEventsCount = eventDboRepository.countEventsAfter(eventSequence);
-        log.info("Found {} new events", newEventsCount);
-        if (newEventsCount == 0) {
-            return Stream.empty();
-        }
         log.info("Fetching List<EventDbo> after event sequence: {}", eventSequence);
         List<EventDbo> eventsAfter = eventDboRepository.findEventsAfter(eventSequence);
         log.info("Fetched {} events, mapping to Domain events", eventsAfter.size());
@@ -100,14 +95,13 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     }
 
     private Stream<EVENT> mapToDomainEvents(Stream<EventDbo> eventDbos) {
-        return /*StreamSupport.stream(eventDbos.spliterator(), false)*/
-        eventDbos
-                            .map(dbo -> new EventDto<EVENT>(
-                                    dbo.getAggregateRootId(),
-                                    dbo.getEventSequence(),
-                                    dbo.getEventType(),
-                                    dbo.getJson()))
-                            .map(EventDto::toDomain)
-                            .gather(Gatherers.filterAndCastTo(concreteEventClass));
+        return eventDbos
+                .map(dbo -> new EventDto<EVENT>(
+                        dbo.getAggregateRootId(),
+                        dbo.getEventSequence(),
+                        dbo.getEventType(),
+                        dbo.getJson()))
+                .map(EventDto::toDomain)
+                .gather(Gatherers.filterAndCastTo(baseEventClass));
     }
 }

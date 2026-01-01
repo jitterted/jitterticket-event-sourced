@@ -66,16 +66,14 @@
                 [ ] Rescheduled -> UPDATE data for ConcertId
 
             [ ] Convert ConcertSummaryProjector to be similar to ConcertSalesProjector
-                [ ] Extract IProjector (haha) interface
-                    [ ] Create base class??
+                [ ] Make more general way of registering projectors
+                    [ ] Generalize projectors to extract an interface
                 [ ] Redesign Projector startup to move retrieval of last-seen global event sequence and subscribing to the event store to Spring configuration (e.g., TixConfiguration) so that it fetches the info and subscribes the projector to the event store(s)
 
     [ ] Do some performance/benchmarks for 100 concerts, where each concert sells tickets to 10,000 Customers, overall generating 1MM events
+    [ ] Implement the constraint that Customer email addresses must be unique: ? do we need a special read-model/projection for that ?
     [X] Configure TestContainer tests to reuse the same container to speed up tests
     [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion
-    [ ] Make more general way of registering projectors
-        [ ] Generalize projectors to extract an interface
-    [ ] Implement the constraint that Customer email addresses must be unique: ? do we need a special read-model/projection for that ?
 
 
     [ ] ArchUnit rule to ensure that only test code calls `createForTest...` methods

@@ -1,8 +1,20 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
+import dev.ted.jitterticket.EventStoreConfiguration;
+import dev.ted.jitterticket.eventsourced.application.port.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,10 +22,17 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 
 @SuppressWarnings("AssertThatIsZeroOne")
+@Import(EventStoreConfiguration.class)
 class EventDboRepositoryTest extends DataJdbcContainerTest {
 
     @Autowired
     private EventDboRepository eventDboRepository;
+
+    @Autowired
+    EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
+
+    @Autowired
+    EventStore<CustomerId, CustomerEvent, Customer> customerEventStore;
 
     private UUID aggregateId1;
     private UUID aggregateId2;
@@ -164,28 +183,29 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
     void shouldHandleComplexJsonPayload() {
         // Given
         String complexJson = """
-                {
-                    "orderId": "ORD-12345",
-                    "customer": {
-                        "id": "CUST-001",
-                        "name": "John Doe",
-                        "email": "john@example.com"
-                    },
-                    "items": [
-                        {"sku": "ITEM-001", "quantity": 2, "price": 29.99},
-                        {"sku": "ITEM-002", "quantity": 1, "price": 49.99}
-                    ],
-                    "total": 109.97,
-                    "metadata": {
-                        "source": "web",
-                        "campaign": "summer-sale"
-                    }
-                }
-                """;
+                             {
+                                 "orderId": "ORD-12345",
+                                 "customer": {
+                                     "id": "CUST-001",
+                                     "name": "John Doe",
+                                     "email": "john@example.com"
+                                 },
+                                 "items": [
+                                     {"sku": "ITEM-001", "quantity": 2, "price": 29.99},
+                                     {"sku": "ITEM-002", "quantity": 1, "price": 49.99}
+                                 ],
+                                 "total": 109.97,
+                                 "metadata": {
+                                     "source": "web",
+                                     "campaign": "summer-sale"
+                                 }
+                             }
+                             """;
         EventDbo event = new EventDbo(aggregateId1, "OrderCreated", complexJson);
 
         // When
-        /*EventDbo saved = */eventDboRepository.save(event);
+        /*EventDbo saved = */
+        eventDboRepository.save(event);
         List<EventDbo> retrieved = eventDboRepository.findByAggregateRootId(aggregateId1);
 
         // Then
@@ -193,4 +213,16 @@ class EventDboRepositoryTest extends DataJdbcContainerTest {
         assertThat(retrieved.getFirst().getJson()).isEqualTo(complexJson);
     }
 
+    @Test
+    void findEventsAfterOnlyReturnsEventsOfSpecifiedType() {
+        customerEventStore.save(CustomerFactory.newlyRegistered());
+        concertEventStore.save(ConcertFactory.createConcert());
+
+        List<EventDbo> eventsFound = eventDboRepository
+                .findEventsAfter(0L, List.of(ConcertScheduled.class.getName()));
+
+        assertThat(eventsFound)
+                .extracting(EventDbo::getEventType)
+                .containsExactly(ConcertScheduled.class.getName());
+    }
 }
