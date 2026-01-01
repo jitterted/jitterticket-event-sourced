@@ -10,14 +10,9 @@ import dev.ted.jitterticket.eventsourced.domain.Id;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
-import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
-import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +36,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
         super(eventsToAggregate);
         this.eventDboRepository = eventDboRepository;
         this.baseEventClass = baseEventClass;
-        // retrieve concrete subclasses of the (abstract) base event for use in Repository "findEventsAfter" query
-        if (baseEventClass == ConcertEvent.class) {
-            eventTypes = List.of(ConcertScheduled.class.getName(), ConcertRescheduled.class.getName(), TicketsSold.class.getName());
-        } else {
-            eventTypes = List.of(CustomerRegistered.class.getName(), TicketsPurchased.class.getName());
-        }
+        this.eventTypes = Event.allConcreteImplementationsOf(baseEventClass).stream().map(Class::getName).toList();
     }
 
 
