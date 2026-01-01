@@ -10,9 +10,14 @@ import dev.ted.jitterticket.eventsourced.domain.Id;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
+import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +33,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     private final EventDboRepository eventDboRepository;
     private final Class<EVENT> baseEventClass;
+    private final List<String> eventTypes;
 
     private JdbcEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate,
                            EventDboRepository eventDboRepository,
@@ -36,6 +42,11 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
         this.eventDboRepository = eventDboRepository;
         this.baseEventClass = baseEventClass;
         // retrieve concrete subclasses of the (abstract) base event for use in Repository "findEventsAfter" query
+        if (baseEventClass == ConcertEvent.class) {
+            eventTypes = List.of(ConcertScheduled.class.getName(), ConcertRescheduled.class.getName(), TicketsSold.class.getName());
+        } else {
+            eventTypes = List.of(CustomerRegistered.class.getName(), TicketsPurchased.class.getName());
+        }
     }
 
 
@@ -78,16 +89,16 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
         return mapToDomainEvents(StreamSupport.stream(savedEventDbos.spliterator(), false));
     }
 
+    @Deprecated // should use allEventsAfter instead, passing in types of desired events
     @Override
     public Stream<EVENT> allEvents() {
-        return mapToDomainEvents(eventDboRepository
-                                         .findAllByOrderByEventSequenceAsc().stream());
+        return allEventsAfter(0L);
     }
 
     @Override
     public Stream<EVENT> allEventsAfter(long eventSequence) {
         log.info("Fetching List<EventDbo> after event sequence: {}", eventSequence);
-        List<EventDbo> eventsAfter = eventDboRepository.findEventsAfter(eventSequence);
+        List<EventDbo> eventsAfter = eventDboRepository.findEventsAfter(eventSequence, eventTypes);
         log.info("Fetched {} events, mapping to Domain events", eventsAfter.size());
         Stream<EVENT> domainEvents = mapToDomainEvents(eventsAfter.stream());
         log.info("Mapped all events to Domain events");

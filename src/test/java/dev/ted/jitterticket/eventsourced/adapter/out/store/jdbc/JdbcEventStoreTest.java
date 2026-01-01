@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
 import dev.ted.jitterticket.eventsourced.application.EventStoreTest;
+import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -43,13 +44,19 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
             CustomerId onlyCustomerId = new CustomerId(UUID.fromString("68f5b2c2-d70d-4992-ad78-c94809ae9a6a"));
             customerStore.save(Customer.register(onlyCustomerId, "First Customer", "first@example.com"));
             var concertStore = concertStore();
-            concertStore.save(ConcertFactory.createConcertWithArtist("Concert"));
+            Concert concert = ConcertFactory.createConcertWithArtist("Concert");
+            concertStore.save(concert);
+            PurchaseTicketsUseCase purchaseTickets = PurchaseTicketsUseCase.createForTest(concertStore, customerStore, TicketOrderId.createRandom());
+            purchaseTickets.purchaseTickets(concert.getId(), onlyCustomerId, 4);
 
-            assertThat(customerStore.allEvents())
-                    .as("Only one Customer event should be in the store")
+            assertThat(customerStore.allEventsAfter(0))
+                    .as("Two Customer events should be in the store: registered and purchased tickets")
+                    .hasSize(2)
+                    .as("Both events belong to the only customer")
                     .map(CustomerEvent::customerId)
-                    .containsExactly(onlyCustomerId);
+                    .containsOnly(onlyCustomerId);
         }
+
     }
 
     @Nested
@@ -114,9 +121,9 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
         }
 
         @Test
-        void noEventsReturnedForAllEventsAfterTheMaxGlobalEventSequence() {
+        void noEventsReturnedForAllEventsAfterTheMaxEventSequence() {
             delegatedConcertEventStoreAllEvents
-                    .noEventsReturnedForAllEventsAfterTheMaxGlobalEventSequence(concertStore);
+                    .noEventsReturnedForAllEventsAfterTheMaxEventSequence(concertStore);
         }
 
         @Test

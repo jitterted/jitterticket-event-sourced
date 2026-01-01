@@ -181,7 +181,7 @@ public class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
-        public void noEventsReturnedForAllEventsAfterTheMaxGlobalEventSequence(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        public void noEventsReturnedForAllEventsAfterTheMaxEventSequence(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(2L);
 
             assertThat(newEvents)
