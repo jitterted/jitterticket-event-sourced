@@ -65,9 +65,15 @@
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
                 [ ] Rescheduled -> UPDATE data for ConcertId
 
-            [ ] Convert ConcertSummaryProjector to be similar to ConcertSalesProjector
-                [ ] Make more general way of registering projectors
-                    [ ] Generalize projectors to extract an interface
+            [ ] Convert ConcertSummaryProjector and RegisteredCustomersProjector to be similar to ConcertSalesProjector
+                [X] Make more general way of registering projectors
+                    [X] Generalize projectors to extract an interface
+                [X] Convert RegisteredCustomersProjector to use new interface
+                    [ ] Persist Registered Customers in database
+                [ ] Convert ConcertSummaryProjector to use interface
+                    [ ] Update to be the AvailableConcertsProjector
+                        [ ] Ignore concerts that are in the past
+                        [ ] Add tickets available information
                 [ ] Redesign Projector startup to move retrieval of last-seen global event sequence and subscribing to the event store to Spring configuration (e.g., TixConfiguration) so that it fetches the info and subscribes the projector to the event store(s)
 
     [ ] Implement the constraint that Customer email addresses must be unique: ? do we need a special read-model/projection for that ?
