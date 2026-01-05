@@ -14,39 +14,43 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ConcertSummaryProjector {
+public class ConcertSummaryProjector implements EventConsumer<ConcertEvent> {
 
-    private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
+    protected final Map<ConcertId, ConcertSummary> concertSummaryMap = new HashMap<>();
 
     public ConcertSummaryProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        this.concertStore = concertStore;
+        concertStore.allEvents().forEach(this::apply);
+        concertStore.subscribe(this);
     }
 
     public Stream<ConcertSummary> allConcertSummaries() {
-        Map<ConcertId, ConcertSummary> views = new HashMap<>();
-        concertStore.allEvents()
-                    .forEach(concertEvent -> {
-                                 switch (concertEvent) {
-                                     case ConcertScheduled scheduled -> views.put(scheduled.concertId(),
-                                                                                  new ConcertSummary(scheduled.concertId(),
-                                                                                                     scheduled.artist(),
-                                                                                                     scheduled.ticketPrice(),
-                                                                                                     scheduled.showDateTime(),
-                                                                                                     scheduled.doorsTime()));
-                                     case ConcertRescheduled rescheduled -> {
-                                         ConcertSummary oldView = views.get(rescheduled.concertId());
-                                         ConcertSummary rescheduledView = rescheduleTo(rescheduled.newShowDateTime(),
-                                                                                       rescheduled.newDoorsTime(),
-                                                                                       oldView);
-                                         views.put(rescheduled.concertId(), rescheduledView);
-                                     }
-                                     case TicketsSold ticketsSold -> {
-                                         // don't care about this event for this projector
-                                     }
-                                 }
-                             }
-                    );
-        return views.values().stream();
+        return concertSummaryMap.values().stream();
+    }
+
+    @Override
+    public void handle(Stream<ConcertEvent> concertEventStream) {
+        concertEventStream.forEach(this::apply);
+    }
+
+    private void apply(ConcertEvent concertEvent) {
+        switch (concertEvent) {
+            case ConcertScheduled scheduled -> concertSummaryMap.put(scheduled.concertId(),
+                                                                     new ConcertSummary(scheduled.concertId(),
+                                                                                        scheduled.artist(),
+                                                                                        scheduled.ticketPrice(),
+                                                                                        scheduled.showDateTime(),
+                                                                                        scheduled.doorsTime()));
+            case ConcertRescheduled rescheduled -> {
+                ConcertSummary oldView = concertSummaryMap.get(rescheduled.concertId());
+                ConcertSummary rescheduledView = rescheduleTo(rescheduled.newShowDateTime(),
+                                                              rescheduled.newDoorsTime(),
+                                                              oldView);
+                concertSummaryMap.put(rescheduled.concertId(), rescheduledView);
+            }
+            case TicketsSold ticketsSold -> {
+                // don't care about this event for this projector
+            }
+        }
     }
 
     private ConcertSummary rescheduleTo(LocalDateTime newShowDateTime, LocalTime newDoorsTime, ConcertSummary oldView) {
@@ -58,5 +62,4 @@ public class ConcertSummaryProjector {
                 newDoorsTime
         );
     }
-
 }

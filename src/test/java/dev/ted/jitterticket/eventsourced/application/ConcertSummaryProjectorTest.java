@@ -60,13 +60,13 @@ class ConcertSummaryProjectorTest {
     @Test
     void projectorReturnsSingleConcertForSavedAndRescheduledConcerts() {
         var concertStore = InMemoryEventStore.forConcerts();
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
         ConcertId concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
                                                              "Desi Bells",
                                                              35,
                                                              LocalDateTime.of(2025, 4, 22, 19, 0),
                                                              LocalTime.of(18, 0)));
+        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
         Concert rescheduledConcert = concertStore.findById(concertId).orElseThrow();
         rescheduledConcert.rescheduleTo(LocalDateTime.of(2025, 7, 11, 20, 0),
                                         LocalTime.of(19, 0));

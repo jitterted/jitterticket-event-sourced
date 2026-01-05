@@ -53,8 +53,6 @@
                     [X] Stop using event_sequence in JDBC queries (fix tests)
                     [X] Replace client-side generated event_sequence with DB-generated BIGSERIAL
                         [X] change primary key
-==> CURRENT TASK ==>
-                [ ] Change the EventViewerController to use the correct range for selectedEvent, since they're no longer starting at 1, and _may_ have gaps
                 [X] Mediator work...
                     [X] Mediator.handle(events, lastGlobalEventSequence)
                     [X] Test EventStore calls Mediator upon store.save()
@@ -65,10 +63,14 @@
                 [ ] TicketsSold -> SELECT existing SOLD & SALES, then UPDATE new SOLD (+= qty) and new SALES (+= paidAmount)
                 [ ] Rescheduled -> UPDATE data for ConcertId
 
+            [ ] Change the EventViewerController to use the correct range for selectedEvent, since they're no longer starting at 1, and _may_ have gaps (This SEEMS to work OK?)
+                [ ] Add paging for when we have LOTS of events
+
             [ ] Convert ConcertSummaryProjector and RegisteredCustomersProjector to be similar to ConcertSalesProjector
                 [X] Make more general way of registering projectors
                     [X] Generalize projectors to extract an interface
                 [X] Convert RegisteredCustomersProjector to use new interface
+==> CURRENT TASK ==>
                     [ ] Persist Registered Customers in database
                 [ ] Convert ConcertSummaryProjector to use interface
                     [ ] Update to be the AvailableConcertsProjector
