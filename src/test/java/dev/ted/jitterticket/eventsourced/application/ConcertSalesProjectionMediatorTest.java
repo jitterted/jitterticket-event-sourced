@@ -368,11 +368,6 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         }
 
         @Override
-        public Stream allEvents() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public List eventsForAggregate(Id id) {
             throw new UnsupportedOperationException();
         }

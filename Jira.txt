@@ -72,7 +72,7 @@
                 [X] Convert RegisteredCustomersProjector to use new interface
 ==> CURRENT TASK ==>
                     [ ] Persist Registered Customers in database
-                [ ] Convert ConcertSummaryProjector to use interface
+                [X] Convert ConcertSummaryProjector to use interface
                     [ ] Update to be the AvailableConcertsProjector
                         [ ] Ignore concerts that are in the past
                         [ ] Add tickets available information

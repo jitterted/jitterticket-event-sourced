@@ -16,11 +16,9 @@ public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     Optional<AGGREGATE> findById(ID id);
 
-    Stream<EVENT> allEvents();
-
     List<EVENT> eventsForAggregate(ID id);
 
-    void subscribe(EventConsumer eventConsumer);
+    void subscribe(EventConsumer<EVENT> eventConsumer);
 
     Stream<EVENT> allEventsAfter(long globalEventSequence);
 }

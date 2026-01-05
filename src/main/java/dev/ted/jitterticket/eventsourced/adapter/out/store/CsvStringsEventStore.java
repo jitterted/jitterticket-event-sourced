@@ -88,11 +88,6 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
     }
 
     @Override
-    public Stream<EVENT> allEvents() {
-        return allEventDtos().map(EventDto::toDomain);
-    }
-
-    @Override
     protected @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id) {
         return allEventDtos()
                 .filter(dto -> dto.getAggregateRootId().equals(id.id()))

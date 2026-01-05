@@ -47,7 +47,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
     }
 
     @Override
-    public void subscribe(EventConsumer eventConsumer) {
+    public void subscribe(EventConsumer<EVENT> eventConsumer) {
         this.eventConsumer = eventConsumer;
     }
 

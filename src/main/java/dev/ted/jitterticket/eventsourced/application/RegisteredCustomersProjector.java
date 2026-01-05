@@ -18,7 +18,7 @@ public class RegisteredCustomersProjector implements EventConsumer<CustomerEvent
     public RegisteredCustomersProjector(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
         this.customerStore = customerStore;
         Stream<CustomerEvent> allCustomerEvents = this.customerStore
-                .allEvents();
+                .allEventsAfter(0L);
         this.customerSummaries.addAll(registeredCustomers(allCustomerEvents));
         this.customerStore.subscribe(this);
     }

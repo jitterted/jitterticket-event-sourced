@@ -120,7 +120,7 @@ public class EventStoreTest {
             concertStore.save(rescheduledConcert);
 
             Stream<ConcertEvent> concertEventStream =
-                    concertStore.allEvents();
+                    concertStore.allEventsAfter(0L);
 
             assertThat(concertEventStream)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("eventSequence")

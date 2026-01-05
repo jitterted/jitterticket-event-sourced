@@ -71,12 +71,6 @@ public class InMemoryEventStore<
     }
 
     @Override
-    public Stream<EVENT> allEvents() {
-        return allEventsSortedByGlobalEventSequence()
-                .map(EventDto::toDomain);
-    }
-
-    @Override
     public Stream<EVENT> allEventsAfter(long globalEventSequence) {
         return allEventsSortedByGlobalEventSequence()
                               .dropWhile(eventDto -> eventDto.getEventSequence() <= globalEventSequence)

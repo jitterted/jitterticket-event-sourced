@@ -79,12 +79,6 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
         return mapToDomainEvents(StreamSupport.stream(savedEventDbos.spliterator(), false));
     }
 
-    @Deprecated // should use allEventsAfter instead, passing in types of desired events
-    @Override
-    public Stream<EVENT> allEvents() {
-        return allEventsAfter(0L);
-    }
-
     @Override
     public Stream<EVENT> allEventsAfter(long eventSequence) {
         log.info("Fetching List<EventDbo> after event sequence: {}", eventSequence);
