@@ -20,6 +20,10 @@ CREATE TABLE IF NOT EXISTS events (
 -- Index for global ordering, e.g., for queries like findAllAfter(event_sequence)
 CREATE INDEX IF NOT EXISTS idx_events_event_sequence ON events (event_sequence);
 
+CREATE INDEX IF NOT EXISTS idx_events_event_type ON events (event_type);
+
+CREATE INDEX IF NOT EXISTS idx_events_event_type_and_sequence ON events (event_type, event_sequence);
+
 -- Index for timestamp-based queries
 CREATE INDEX IF NOT EXISTS idx_events_created_at ON events (created_at);
 
