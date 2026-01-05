@@ -19,7 +19,8 @@ class BaseEventStoreTest {
         AtomicInteger counter = new AtomicInteger(0);
         EventConsumer<ConcertEvent> eventConsumerCountingSpy =
                 concertEventStream -> {
-                    concertEventStream.toList(); // consume the event stream!
+                    //noinspection ResultOfMethodCallIgnored
+                    concertEventStream.toList(); // consume the event stream to emulate what a real event consumer does
                     counter.incrementAndGet();
                 };
         concertEventStore.subscribe(eventConsumerCountingSpy);
