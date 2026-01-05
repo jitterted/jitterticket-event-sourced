@@ -66,24 +66,27 @@ public class LargeSampleDataPopulator implements ApplicationRunner {
         concertSalesProjectionRepository.deleteAll();
         log.info("Cleared existing data, starting population of large sample dataset");
 
-        List<Customer> customers = createCustomerObjects(1000);
+        List<Customer> customers = createCustomerObjects(10_000);
         log.info("Created {} customer objects", customers.size());
         List<Concert> concerts = createConcertObjects(100);
         log.info("Created {} concert objects", concerts.size());
+        log.info("Saving concerts and customers to event store");
+        concerts.forEach(concertStore::save);
+        customers.forEach(customerStore::save);
 
         log.info("Starting ticket sales processing for {} customers and {} concerts", customers.size(), concerts.size());
+        long start = System.currentTimeMillis();
         for (Concert concert : concerts) {
             for (Customer customer : customers) {
                 int quantity = random.nextBoolean() ? 2 : 4;
                 concert.sellTicketsTo(customer.getId(), quantity);
                 customer.purchaseTickets(concert, TicketOrderId.createRandom(), quantity);
             }
+            concertStore.save(concert);
+            customers.forEach(customerStore::save);
         }
-        log.info("Completed ticket sales processing");
+        log.info("Completed ticket sales processing after {}ms", System.currentTimeMillis() - start);
 
-        log.info("Saving concerts and customers to event store");
-        concerts.forEach(concertStore::save);
-        customers.forEach(customerStore::save);
         log.info("Successfully populated database with {} concerts and {} customers", concerts.size(), customers.size());
     }
 

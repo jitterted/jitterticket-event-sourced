@@ -49,11 +49,11 @@
                     [X] Update Beans and SalesController to use ConcertSalesProjectionMediator instead of ConcertSalesProjector
                     [X] Clean up any other @Deprecated methods
 
-==> CURRENT TASK ==>
                 [X] Replace "local" (per-aggregate) event sequence with the global sequence (DB/Store-generated)
                     [X] Stop using event_sequence in JDBC queries (fix tests)
                     [X] Replace client-side generated event_sequence with DB-generated BIGSERIAL
                         [X] change primary key
+==> CURRENT TASK ==>
                 [ ] Change the EventViewerController to use the correct range for selectedEvent, since they're no longer starting at 1, and _may_ have gaps
                 [X] Mediator work...
                     [X] Mediator.handle(events, lastGlobalEventSequence)
@@ -70,10 +70,10 @@
                     [ ] Generalize projectors to extract an interface
                 [ ] Redesign Projector startup to move retrieval of last-seen global event sequence and subscribing to the event store to Spring configuration (e.g., TixConfiguration) so that it fetches the info and subscribes the projector to the event store(s)
 
-    [ ] Do some performance/benchmarks for 100 concerts, where each concert sells tickets to 10,000 Customers, overall generating 1MM events
     [ ] Implement the constraint that Customer email addresses must be unique: ? do we need a special read-model/projection for that ?
-    [X] Configure TestContainer tests to reuse the same container to speed up tests
     [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion
+    [X] Do some performance/benchmarks for 100 concerts, where each concert sells tickets to 10,000 Customers, overall generating 1MM events
+    [X] Configure TestContainer tests to reuse the same container to speed up tests
 
 
     [ ] ArchUnit rule to ensure that only test code calls `createForTest...` methods
