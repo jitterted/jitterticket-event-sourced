@@ -378,7 +378,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         }
 
         @Override
-        public void subscribe(ConcertSalesProjectionMediator eventConsumer) {
+        public void subscribe(EventConsumer eventConsumer) {
             subscribeInvoked = true;
         }
 

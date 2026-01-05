@@ -5,7 +5,6 @@ import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import jakarta.annotation.Nonnull;
 
 import java.util.List;
@@ -17,7 +16,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         implements EventStore<ID, EVENT, AGGREGATE> {
 
     protected final Function<List<EVENT>, AGGREGATE> eventsToAggregate;
-    private ConcertSalesProjectionMediator eventConsumer;
+    private EventConsumer<EVENT> eventConsumer;
 
     public BaseEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         this.eventsToAggregate = eventsToAggregate;
@@ -33,7 +32,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         // we need the events that were saved so we have their event sequences
         Stream<EVENT> savedEvents = save(aggregateId, uncommittedEvents);
         if (eventConsumer != null) {
-            eventConsumer.handle((Stream<ConcertEvent>) savedEvents);
+            eventConsumer.handle(savedEvents);
         }
     }
 
@@ -48,7 +47,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
     }
 
     @Override
-    public void subscribe(ConcertSalesProjectionMediator eventConsumer) {
+    public void subscribe(EventConsumer eventConsumer) {
         this.eventConsumer = eventConsumer;
     }
 

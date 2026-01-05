@@ -1,3 +1,15 @@
+Monday, January 5, 2026
+=======================
+[Design Thinking]
+* Needed for all Projectors
+    * All have the Mediator's handle(Stream<EVENT>)
+    * All track the last event sequence seen (checkpoint), but this looks hard to generalize right now
+* Specific to each Projector's purpose/data
+    * Which specific events they care about (optional)
+    * How the projection is persisted
+    * How the projection is computed
+* So: extract an interface for the `handle(Stream<EVENT> eventStream)` method and have the BaseEventStore call that method for each subscriber
+
 Thursday, January 1, 2026
 =========================
 [Design Decision]

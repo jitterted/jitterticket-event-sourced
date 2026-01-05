@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ConcertSalesProjectionMediator {
+public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEvent> {
 
     private static final Logger log = LoggerFactory.getLogger(ConcertSalesProjectionMediator.class);
 
@@ -69,6 +69,7 @@ public class ConcertSalesProjectionMediator {
         );
     }
 
+    @Override
     public void handle(Stream<ConcertEvent> concertEventStream) {
         ConcertSalesProjectionDbo concertSalesProjectionDbo =
                 concertSalesProjectionRepository
