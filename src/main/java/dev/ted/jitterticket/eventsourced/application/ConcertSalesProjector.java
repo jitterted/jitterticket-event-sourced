@@ -19,7 +19,9 @@ import java.util.stream.Stream;
 public class ConcertSalesProjector {
     private static final Logger log = LoggerFactory.getLogger(ConcertSalesProjector.class);
 
-    ProjectionResult project(Map<ConcertId, ConcertSalesSummary> salesSummaryMap, Stream<ConcertEvent> concertEvents, long lastEventSequenceSeen) {
+    ProjectionResult project(Map<ConcertId, ConcertSalesSummary> salesSummaryMap,
+                             Stream<ConcertEvent> concertEvents,
+                             long lastEventSequenceSeen) {
         Map<ConcertId, ConcertSalesSummary> mutableMap = new HashMap<>(salesSummaryMap);
 
         AtomicReference<Long> lastEventSequenceSeenRef = new AtomicReference<>(lastEventSequenceSeen);

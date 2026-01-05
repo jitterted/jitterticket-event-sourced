@@ -70,7 +70,7 @@ public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEven
     }
 
     @Override
-    public void handle(Stream<ConcertEvent> concertEventStream) {
+    public void handle(Stream<ConcertEvent> eventStream) {
         ConcertSalesProjectionDbo concertSalesProjectionDbo =
                 concertSalesProjectionRepository
                         .findById(PROJECTION_NAME)
@@ -87,7 +87,7 @@ public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEven
         log.info("Starting projection calculation...");
         ConcertSalesProjector.ProjectionResult result =
                 concertSalesProjector.project(salesSummaryMap,
-                                              concertEventStream,
+                                              eventStream,
                                               concertSalesProjectionDbo.getLastEventSequenceSeen());
         log.info("Projection calculation completed, mapping Sales Summary to DBOs...");
 

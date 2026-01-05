@@ -19,24 +19,39 @@ class RegisteredCustomersProjectorTest {
     }
 
     @Test
-    void allCustomersReturnsCustomerSummariesForRegisteredCustomers() {
+    void projectorCollectsExistingCustomerRegisteredEvents() {
         var customerStore = InMemoryEventStore.forCustomers();
+        CustomerId existingCustomerId = CustomerId.createRandom();
+        customerStore.save(Customer.register(existingCustomerId, "John Doe", "john.doe@example.com"));
+
         RegisteredCustomersProjector registeredCustomersProjector =
                 new RegisteredCustomersProjector(customerStore);
 
+        assertThat(registeredCustomersProjector.allCustomers())
+                .containsExactly(
+                        new RegisteredCustomersProjector.CustomerSummary(existingCustomerId, "John Doe")
+                );
+    }
+
+    @Test
+    void newlySavedCustomersUpdatesProjector() {
+        var customerStore = InMemoryEventStore.forCustomers();
         CustomerId firstCustomerId = CustomerId.createRandom();
+        customerStore.save(Customer.register(firstCustomerId, "First Customer", "john.doe@example.com"));
+        RegisteredCustomersProjector registeredCustomersProjector =
+                new RegisteredCustomersProjector(customerStore);
+
         CustomerId secondCustomerId = CustomerId.createRandom();
         CustomerId thirdCustomerId = CustomerId.createRandom();
 
-        customerStore.save(Customer.register(firstCustomerId, "John Doe", "john.doe@example.com"));
-        customerStore.save(Customer.register(secondCustomerId, "Jane Smith", "jane.smith@example.com"));
-        customerStore.save(Customer.register(thirdCustomerId, "Bob Wilson", "bob.wilson@example.com"));
+        customerStore.save(Customer.register(secondCustomerId, "Second Customer", "jane.smith@example.com"));
+        customerStore.save(Customer.register(thirdCustomerId, "Third Customer", "bob.wilson@example.com"));
 
         assertThat(registeredCustomersProjector.allCustomers())
                 .containsExactlyInAnyOrder(
-                        new CustomerSummary(firstCustomerId, "John Doe"),
-                        new CustomerSummary(secondCustomerId, "Jane Smith"),
-                        new CustomerSummary(thirdCustomerId, "Bob Wilson")
+                        new RegisteredCustomersProjector.CustomerSummary(firstCustomerId, "First Customer"),
+                        new RegisteredCustomersProjector.CustomerSummary(secondCustomerId, "Second Customer"),
+                        new RegisteredCustomersProjector.CustomerSummary(thirdCustomerId, "Third Customer")
                 );
     }
 }
