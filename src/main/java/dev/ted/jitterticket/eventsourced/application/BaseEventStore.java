@@ -7,6 +7,7 @@ import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
 import jakarta.annotation.Nonnull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -16,7 +17,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         implements EventStore<ID, EVENT, AGGREGATE> {
 
     protected final Function<List<EVENT>, AGGREGATE> eventsToAggregate;
-    private EventConsumer<EVENT> eventConsumer;
+    private final List<EventConsumer<EVENT>> eventConsumers = new ArrayList<>();
 
     public BaseEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         this.eventsToAggregate = eventsToAggregate;
@@ -30,10 +31,10 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         Stream<EVENT> uncommittedEvents = aggregate.uncommittedEvents();
 
         // we need the events that were saved so we have their event sequences
-        Stream<EVENT> savedEvents = save(aggregateId, uncommittedEvents);
-        if (eventConsumer != null) {
-            eventConsumer.handle(savedEvents);
-        }
+        // convert to a list so we can pass a stream to each event consumer without worrying about being consumed
+        List<EVENT> savedEvents = save(aggregateId, uncommittedEvents).toList();
+        eventConsumers.forEach(eventConsumer ->
+                                       eventConsumer.handle(savedEvents.stream()));
     }
 
     protected abstract @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id);
@@ -48,7 +49,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
 
     @Override
     public void subscribe(EventConsumer<EVENT> eventConsumer) {
-        this.eventConsumer = eventConsumer;
+        eventConsumers.add(eventConsumer);
     }
 
     @Override

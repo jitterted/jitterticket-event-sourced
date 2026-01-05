@@ -76,6 +76,7 @@
                     [ ] Update to be the AvailableConcertsProjector
                         [ ] Ignore concerts that are in the past
                         [ ] Add tickets available information
+                [ ] BaseEventStore needs to handle more than 1 subscriber
                 [ ] Redesign Projector startup to move retrieval of last-seen global event sequence and subscribing to the event store to Spring configuration (e.g., TixConfiguration) so that it fetches the info and subscribes the projector to the event store(s)
 
     [ ] Implement the constraint that Customer email addresses must be unique: ? do we need a special read-model/projection for that ?

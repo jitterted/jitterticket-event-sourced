@@ -10,6 +10,17 @@ Monday, January 5, 2026
     * How the projection is computed
 * So: extract an interface for the `handle(Stream<EVENT> eventStream)` method and have the BaseEventStore call that method for each subscriber
 
+[AssertJ Issue?]
+* AssertionError for expecting value of an AtomicInteger is currently not readable:
+    ```
+    Expecting AtomicInteger(1) to have value:
+      2
+    but did not.
+    ```
+  Because at first I didn't see the `1` inside the parens.
+  Would prefer similar output to comparing primitives and/or making the "show differences" link in IntelliJ IDEA show up.
+
+
 Thursday, January 1, 2026
 =========================
 [Design Decision]
