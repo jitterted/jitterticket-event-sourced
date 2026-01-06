@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class RegisteredCustomersProjector implements EventConsumer<CustomerEvent> {
-    private final List<CustomerSummary> customerSummaries = new ArrayList<>();
+    private final List<RegisteredCustomer> customerSummaries = new ArrayList<>();
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
 
     public RegisteredCustomersProjector(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
@@ -28,18 +28,18 @@ public class RegisteredCustomersProjector implements EventConsumer<CustomerEvent
         customerSummaries.addAll(registeredCustomers(eventStream));
     }
 
-    public Stream<CustomerSummary> allCustomers() {
+    public Stream<RegisteredCustomer> allCustomers() {
         return customerSummaries.stream();
     }
 
-    private List<CustomerSummary> registeredCustomers(Stream<CustomerEvent> allCustomerEvents) {
+    private List<RegisteredCustomer> registeredCustomers(Stream<CustomerEvent> allCustomerEvents) {
         return allCustomerEvents
                 .gather(Gatherers.filterAndCastTo(CustomerRegistered.class))
-                .map(registered -> new CustomerSummary(
+                .map(registered -> new RegisteredCustomer(
                         registered.customerId(),
                         registered.customerName()))
                 .toList();
     }
 
-    public record CustomerSummary(CustomerId customerId, String name) {}
+    public record RegisteredCustomer(CustomerId customerId, String name) {}
 }

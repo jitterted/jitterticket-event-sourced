@@ -29,7 +29,7 @@ class RegisteredCustomersProjectorTest {
 
         assertThat(registeredCustomersProjector.allCustomers())
                 .containsExactly(
-                        new RegisteredCustomersProjector.CustomerSummary(existingCustomerId, "John Doe")
+                        new RegisteredCustomersProjector.RegisteredCustomer(existingCustomerId, "John Doe")
                 );
     }
 
@@ -49,9 +49,9 @@ class RegisteredCustomersProjectorTest {
 
         assertThat(registeredCustomersProjector.allCustomers())
                 .containsExactlyInAnyOrder(
-                        new RegisteredCustomersProjector.CustomerSummary(firstCustomerId, "First Customer"),
-                        new RegisteredCustomersProjector.CustomerSummary(secondCustomerId, "Second Customer"),
-                        new RegisteredCustomersProjector.CustomerSummary(thirdCustomerId, "Third Customer")
+                        new RegisteredCustomersProjector.RegisteredCustomer(firstCustomerId, "First Customer"),
+                        new RegisteredCustomersProjector.RegisteredCustomer(secondCustomerId, "Second Customer"),
+                        new RegisteredCustomersProjector.RegisteredCustomer(thirdCustomerId, "Third Customer")
                 );
     }
 }

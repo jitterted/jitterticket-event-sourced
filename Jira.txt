@@ -77,7 +77,7 @@
 
     [ ] Convert Registered Customers projector to use new generic design
         REFACTOR:
-            [ ] Rename CustomerSummary -> RegisteredCustomer
+            [X] Rename CustomerSummary -> RegisteredCustomer
             [ ] Wrap List<RegisteredCustomer> inside of RegisteredCustomers
             [ ] Split into DomainProjector<CustomerEvent, RegisteredCustomers> implementation and ProjectionMediator that doesn't yet use a Port: takes EventStore, DomainProjector, Executor
         NEW BEHAVIOR->PERSISTING PROJECTION
