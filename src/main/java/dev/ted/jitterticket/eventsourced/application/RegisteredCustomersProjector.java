@@ -7,39 +7,37 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class RegisteredCustomersProjector implements EventConsumer<CustomerEvent> {
-    private final List<RegisteredCustomer> customerSummaries = new ArrayList<>();
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
+    private final RegisteredCustomers registeredCustomers = new RegisteredCustomers();
 
     public RegisteredCustomersProjector(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
         this.customerStore = customerStore;
         Stream<CustomerEvent> allCustomerEvents = this.customerStore
                 .allEventsAfter(0L);
-        this.customerSummaries.addAll(registeredCustomers(allCustomerEvents));
+        registeredCustomers.add(registeredCustomers(allCustomerEvents));
         this.customerStore.subscribe(this);
     }
 
     @Override
     public void handle(Stream<CustomerEvent> eventStream) {
-        customerSummaries.addAll(registeredCustomers(eventStream));
+        registeredCustomers.add(registeredCustomers(eventStream));
     }
 
-    public Stream<RegisteredCustomer> allCustomers() {
-        return customerSummaries.stream();
+    public RegisteredCustomers allCustomers() {
+        return registeredCustomers;
     }
 
-    private List<RegisteredCustomer> registeredCustomers(Stream<CustomerEvent> allCustomerEvents) {
+    private List<RegisteredCustomers.RegisteredCustomer> registeredCustomers(Stream<CustomerEvent> allCustomerEvents) {
         return allCustomerEvents
                 .gather(Gatherers.filterAndCastTo(CustomerRegistered.class))
-                .map(registered -> new RegisteredCustomer(
+                .map(registered -> new RegisteredCustomers.RegisteredCustomer(
                         registered.customerId(),
                         registered.customerName()))
                 .toList();
     }
 
-    public record RegisteredCustomer(CustomerId customerId, String name) {}
 }

@@ -23,7 +23,7 @@ public class CustomerProjectionChoice extends ProjectionChoice {
 
     @Override
     public List<AggregateSummaryView> aggregateSummaryViews() {
-        return projector.allCustomers()
+        return projector.allCustomers().asStream()
                         .map(customerSummary -> new AggregateSummaryView(
                                 customerSummary.customerId().id().toString(),
                                 customerSummary.name()

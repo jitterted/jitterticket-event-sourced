@@ -14,7 +14,7 @@ class RegisteredCustomersProjectorTest {
         RegisteredCustomersProjector registeredCustomersProjector =
                 new RegisteredCustomersProjector(customerStore);
 
-        assertThat(registeredCustomersProjector.allCustomers())
+        assertThat(registeredCustomersProjector.allCustomers().asList())
                 .isEmpty();
     }
 
@@ -27,9 +27,9 @@ class RegisteredCustomersProjectorTest {
         RegisteredCustomersProjector registeredCustomersProjector =
                 new RegisteredCustomersProjector(customerStore);
 
-        assertThat(registeredCustomersProjector.allCustomers())
+        assertThat(registeredCustomersProjector.allCustomers().asList())
                 .containsExactly(
-                        new RegisteredCustomersProjector.RegisteredCustomer(existingCustomerId, "John Doe")
+                        new RegisteredCustomers.RegisteredCustomer(existingCustomerId, "John Doe")
                 );
     }
 
@@ -47,11 +47,11 @@ class RegisteredCustomersProjectorTest {
         customerStore.save(Customer.register(secondCustomerId, "Second Customer", "jane.smith@example.com"));
         customerStore.save(Customer.register(thirdCustomerId, "Third Customer", "bob.wilson@example.com"));
 
-        assertThat(registeredCustomersProjector.allCustomers())
+        assertThat(registeredCustomersProjector.allCustomers().asList())
                 .containsExactlyInAnyOrder(
-                        new RegisteredCustomersProjector.RegisteredCustomer(firstCustomerId, "First Customer"),
-                        new RegisteredCustomersProjector.RegisteredCustomer(secondCustomerId, "Second Customer"),
-                        new RegisteredCustomersProjector.RegisteredCustomer(thirdCustomerId, "Third Customer")
+                        new RegisteredCustomers.RegisteredCustomer(firstCustomerId, "First Customer"),
+                        new RegisteredCustomers.RegisteredCustomer(secondCustomerId, "Second Customer"),
+                        new RegisteredCustomers.RegisteredCustomer(thirdCustomerId, "Third Customer")
                 );
     }
 }

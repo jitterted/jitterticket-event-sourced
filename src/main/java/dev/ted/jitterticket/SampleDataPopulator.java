@@ -178,7 +178,7 @@ public class SampleDataPopulator implements ApplicationRunner {
 
     private void populateCustomerSampleData() {
         // don't add sample data if the store already has CUSTOMER data
-        if (registeredCustomersProjector.allCustomers().findAny().isPresent()) {
+        if (registeredCustomersProjector.allCustomers().hasData()) {
             return;
         }
 
