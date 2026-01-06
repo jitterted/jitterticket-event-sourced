@@ -66,18 +66,36 @@
             [ ] Change the EventViewerController to use the correct range for selectedEvent, since they're no longer starting at 1, and _may_ have gaps (This SEEMS to work OK?)
                 [ ] Add paging for when we have LOTS of events
 
+            [X] BaseEventStore needs to handle more than 1 subscriber
             [ ] Convert ConcertSummaryProjector and RegisteredCustomersProjector to be similar to ConcertSalesProjector
                 [X] Make more general way of registering projectors
                     [X] Generalize projectors to extract an interface
                 [X] Convert RegisteredCustomersProjector to use new interface
 ==> CURRENT TASK ==>
-                    [ ] Persist Registered Customers in database
                 [X] Convert ConcertSummaryProjector to use interface
-                    [ ] Update to be the AvailableConcertsProjector
-                        [ ] Ignore concerts that are in the past
-                        [ ] Add tickets available information
-                [ ] BaseEventStore needs to handle more than 1 subscriber
                 [ ] Redesign Projector startup to move retrieval of last-seen global event sequence and subscribing to the event store to Spring configuration (e.g., TixConfiguration) so that it fetches the info and subscribes the projector to the event store(s)
+
+    [ ] Convert Registered Customers projector to use new generic design
+        REFACTOR:
+            [ ] Rename CustomerSummary -> RegisteredCustomer
+            [ ] Wrap List<RegisteredCustomer> inside of RegisteredCustomers
+            [ ] Split into DomainProjector<CustomerEvent, RegisteredCustomers> implementation and ProjectionMediator that doesn't yet use a Port: takes EventStore, DomainProjector, Executor
+        NEW BEHAVIOR->PERSISTING PROJECTION
+            [ ] Create ProjectionPort<STATE> interface
+            [ ] RegisteredCustomersPort implements ProjectionPort<RegisteredCustomers>
+            [ ] Update ProjectionMediator constructor to accept the ProjectionPort<RegisteredCustomers>
+            [ ] Update handle()/processEvents() implementation to flush updates
+
+    [ ] Convert Concert Summary projector to new design
+        [ ] Rename to AvailableConcerts
+        [ ] Repeat similar steps from Registered Customers conversion
+
+    [ ] Add new functionality to the AvailableConcertsProjection:
+        [ ] Ignore concerts that are in the past
+        [ ] Add tickets available information
+
+
+
 
     [ ] Implement the constraint that Customer email addresses must be unique: ? do we need a special read-model/projection for that ?
     [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion
