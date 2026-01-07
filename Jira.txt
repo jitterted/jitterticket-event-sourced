@@ -80,6 +80,9 @@
             [X] Rename CustomerSummary -> RegisteredCustomer
             [X] Wrap List<RegisteredCustomer> inside of RegisteredCustomers
             [ ] Split into DomainProjector<CustomerEvent, RegisteredCustomers> implementation and ProjectionMediator that doesn't yet use a Port: takes EventStore, DomainProjector, Executor
+                [X] Implement stateless project()
+                [ ] Extract stateful code to ProjectionMediator
+            [ ] Don't forget to clean up the $OldStuff in ConcertSalesProjectionTest
         NEW BEHAVIOR->PERSISTING PROJECTION
             [ ] Create ProjectionPort<STATE> interface
             [ ] RegisteredCustomersPort implements ProjectionPort<RegisteredCustomers>

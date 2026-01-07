@@ -10,7 +10,9 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class RegisteredCustomersProjector implements EventConsumer<CustomerEvent> {
+public class RegisteredCustomersProjector implements
+        EventConsumer<CustomerEvent>,
+        DomainProjector<CustomerEvent, RegisteredCustomers> {
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
     private final RegisteredCustomers registeredCustomers = new RegisteredCustomers();
 
@@ -20,6 +22,10 @@ public class RegisteredCustomersProjector implements EventConsumer<CustomerEvent
                 .allEventsAfter(0L);
         registeredCustomers.add(registeredCustomers(allCustomerEvents));
         this.customerStore.subscribe(this);
+    }
+
+    public RegisteredCustomersProjector() {
+        customerStore = null;
     }
 
     @Override
@@ -38,6 +44,23 @@ public class RegisteredCustomersProjector implements EventConsumer<CustomerEvent
                         registered.customerId(),
                         registered.customerName()))
                 .toList();
+    }
+
+    @Override
+    public ProjectorResult<RegisteredCustomers> project(
+            RegisteredCustomers currentState,
+            Stream<CustomerEvent> customerEventStream) {
+        List<RegisteredCustomers.RegisteredCustomer> newlyRegisteredCustomers = customerEventStream
+                .gather(Gatherers.filterAndCastTo(CustomerRegistered.class))
+                .map(registered -> new RegisteredCustomers.RegisteredCustomer(
+                        registered.customerId(),
+                        registered.customerName()))
+                .toList();
+
+        RegisteredCustomers newState = currentState.withNew(newlyRegisteredCustomers);
+
+        return new ProjectorResult<>(newState,
+                                     new RegisteredCustomers(newlyRegisteredCustomers));
     }
 
 }
