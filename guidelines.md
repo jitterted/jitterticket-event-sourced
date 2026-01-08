@@ -29,7 +29,7 @@ The project follows a hexagonal (ports and adapters) architecture:
 ## Development Workflow
 
 1. **Understand the requirements**: Make sure you understand what you're building before writing code
-2. **Write tests first**: Follow TDD principles when implementing new features
+2. **Write tests first**: Follow TDD principles when implementing new features. When making changes to existing code, ensure a failing test is written first to demonstrate the need for the change or the presence of a bug.
 3. **Keep the domain model clean**: Avoid adding infrastructure concerns to domain classes
 4. **Commit frequently**: Make small, focused commits with clear messages
 5. **Run tests before committing**: Always run the "I/O-Free Tests" run configuration before committing changes
@@ -48,6 +48,7 @@ Tests in this project are categorized using JUnit 5 tags:
 ### Assertion Guidelines
 
 - **Always use AssertJ's assertThat**: JUnit tests should always use AssertJ's `assertThat` syntax for assertions
+- **Prefer specialized exception assertions**: When checking for exceptions, prefer specialized AssertJ assertions like `assertThatIllegalArgumentException()`, `assertThatIllegalStateException()`, `assertThatNullPointerException()`, or `assertThatIOException()` over the generic `assertThatThrownBy(...)`. These assertions should also include a check for the exception message using `.withMessage(...)` or similar methods.
 - **Method chaining style**: Each method call in the chained methods should be on a new line for better readability
   ```java
   // Correct style
@@ -94,6 +95,7 @@ Run these tests before submitting a pull request:
 6. **Always specify parameter names in annotations**: For Spring MVC controller methods, always concretely specify the names of parameters in annotations like @PathVariable, @RequestParam, etc. For example, use `@PathVariable("userId") String userId` instead of `@PathVariable String userId`.
 7. **Import static methods**: Use static imports for the following methods instead of using fully-qualified names in the code: for test assertions, use `import static org.assertj.core.api.Assertions.*;` and then call `tuple(a, b)` instead of `Assertions.tuple(a, b)`.
 8. **Ensure that code is formatted**: reformat the code files after you're done.
+9. **Value Object Validation**: when creating a value object that is implemented as a class, always do necessary validation in the public `of()` or similar method and keep the private constructor as simple as possible. Never add a parameter to a constructor to skip validation as it's not needed, since the existing constructor doesn't do any validation. In general, don't add parameters that aren't used in the method.
 
 ### Naming Conventions
 
