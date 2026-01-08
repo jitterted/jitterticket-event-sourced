@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.application.ProjectionPersistencePort.Snapshot;
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.ObjectAssert;
 
 public class SnapshotAssert<STATE> extends AbstractAssert<SnapshotAssert<STATE>, Snapshot<STATE>> {
 
@@ -37,4 +38,11 @@ public class SnapshotAssert<STATE> extends AbstractAssert<SnapshotAssert<STATE>,
         }
         return this;
     }
+
+    public ObjectAssert<STATE> state() {
+        isNotNull();
+        return new ObjectAssert<>(actual.state());
+    }
+
+
 }

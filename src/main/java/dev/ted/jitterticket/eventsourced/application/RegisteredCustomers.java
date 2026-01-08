@@ -14,6 +14,10 @@ public class RegisteredCustomers {
     public RegisteredCustomers() {
     }
 
+    public RegisteredCustomers(RegisteredCustomer... registeredCustomers) {
+        add(registeredCustomers);
+    }
+
     public RegisteredCustomers(List<RegisteredCustomer> registeredCustomers) {
         add(registeredCustomers);
     }
@@ -22,6 +26,10 @@ public class RegisteredCustomers {
         RegisteredCustomers newState = new RegisteredCustomers(asList());
         newState.add(newlyRegisteredCustomers);
         return newState;
+    }
+
+    public RegisteredCustomers withNew(RegisteredCustomers delta) {
+        return withNew(delta.asList());
     }
 
     void add(List<RegisteredCustomer> newlyRegisteredCustomers) {
