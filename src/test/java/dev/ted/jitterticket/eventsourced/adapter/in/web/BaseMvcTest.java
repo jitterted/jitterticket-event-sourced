@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.TixConfiguration;
+import dev.ted.jitterticket.ProjectionConfiguration;
+import dev.ted.jitterticket.UseCaseConfiguration;
 import dev.ted.jitterticket.eventsourced.adapter.TestEventStoreConfiguration;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import org.junit.jupiter.api.Tag;
@@ -15,7 +16,8 @@ import java.nio.file.Path;
 @Tag("mvc")
 @Import({
         TestEventStoreConfiguration.class,
-        TixConfiguration.class
+        ProjectionConfiguration.class,
+        UseCaseConfiguration.class
 })
 public class BaseMvcTest {
     @TempDir

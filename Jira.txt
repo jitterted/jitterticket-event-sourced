@@ -71,7 +71,6 @@
                 [X] Make more general way of registering projectors
                     [X] Generalize projectors to extract an interface
                 [X] Convert RegisteredCustomersProjector to use new interface
-==> CURRENT TASK ==>
                 [X] Convert ConcertSummaryProjector to use interface
                 [ ] Redesign Projector startup to move retrieval of last-seen global event sequence and subscribing to the event store to Spring configuration (e.g., TixConfiguration) so that it fetches the info and subscribes the projector to the event store(s)
 
@@ -81,7 +80,11 @@
             [X] Wrap List<RegisteredCustomer> inside of RegisteredCustomers
             [ ] Split into DomainProjector<CustomerEvent, RegisteredCustomers> implementation and ProjectionMediator that doesn't yet use a Port: takes EventStore, DomainProjector, Executor
                 [X] Implement stateless project()
-                [ ] Extract stateful code to ProjectionMediator
+                [X] Define ProjectionCoordinator concrete class
+                [X] Extract stateful code to ProjectionCoordinator
+==> CURRENT TASK ==>
+                [ ] Have Spring config use the new ProjectionCoordinator instead of RegisteredCustomersProjector
+                [ ] Remove obsolete code from RegisteredCustomersProjector
             [ ] Don't forget to clean up the $OldStuff in ConcertSalesProjectionTest
         NEW BEHAVIOR->PERSISTING PROJECTION
             [ ] Create ProjectionPort<STATE> interface
@@ -89,7 +92,7 @@
             [ ] Update ProjectionMediator constructor to accept the ProjectionPort<RegisteredCustomers>
             [ ] Update handle()/processEvents() implementation to flush updates
 
-    [ ] Convert Concert Summary projector to new design
+    [ ] Convert Available Concerts projector to new design
         [ ] Rename to AvailableConcerts
         [ ] Repeat similar steps from Registered Customers conversion
 

@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class RegisteredCustomersProjector implements
-        EventConsumer<CustomerEvent>,
         DomainProjector<CustomerEvent, RegisteredCustomers> {
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
     private final RegisteredCustomers registeredCustomers = new RegisteredCustomers();
@@ -21,16 +20,10 @@ public class RegisteredCustomersProjector implements
         Stream<CustomerEvent> allCustomerEvents = this.customerStore
                 .allEventsAfter(0L);
         registeredCustomers.add(registeredCustomers(allCustomerEvents));
-        this.customerStore.subscribe(this);
     }
 
     public RegisteredCustomersProjector() {
         customerStore = null;
-    }
-
-    @Override
-    public void handle(Stream<CustomerEvent> eventStream) {
-        registeredCustomers.add(registeredCustomers(eventStream));
     }
 
     public RegisteredCustomers allCustomers() {
@@ -50,12 +43,13 @@ public class RegisteredCustomersProjector implements
     public ProjectorResult<RegisteredCustomers> project(
             RegisteredCustomers currentState,
             Stream<CustomerEvent> customerEventStream) {
-        List<RegisteredCustomers.RegisteredCustomer> newlyRegisteredCustomers = customerEventStream
-                .gather(Gatherers.filterAndCastTo(CustomerRegistered.class))
-                .map(registered -> new RegisteredCustomers.RegisteredCustomer(
-                        registered.customerId(),
-                        registered.customerName()))
-                .toList();
+        List<RegisteredCustomers.RegisteredCustomer> newlyRegisteredCustomers =
+                customerEventStream
+                        .gather(Gatherers.filterAndCastTo(CustomerRegistered.class))
+                        .map(registered -> new RegisteredCustomers.RegisteredCustomer(
+                                registered.customerId(),
+                                registered.customerName()))
+                        .toList();
 
         RegisteredCustomers newState = currentState.withNew(newlyRegisteredCustomers);
 
