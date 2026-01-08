@@ -96,6 +96,7 @@ Run these tests before submitting a pull request:
 7. **Import static methods**: Use static imports for the following methods instead of using fully-qualified names in the code: for test assertions, use `import static org.assertj.core.api.Assertions.*;` and then call `tuple(a, b)` instead of `Assertions.tuple(a, b)`.
 8. **Ensure that code is formatted**: reformat the code files after you're done.
 9. **Value Object Validation**: when creating a value object that is implemented as a class, always do necessary validation in the public `of()` or similar method and keep the private constructor as simple as possible. Never add a parameter to a constructor to skip validation as it's not needed, since the existing constructor doesn't do any validation. In general, don't add parameters that aren't used in the method.
+10. **Guard Clauses**: for guard clauses, avoid nesting if statements unless absolutely necessary.
 
 ### Naming Conventions
 

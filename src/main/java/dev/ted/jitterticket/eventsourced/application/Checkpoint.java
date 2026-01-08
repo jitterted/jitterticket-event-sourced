@@ -12,10 +12,10 @@ public class Checkpoint {
     }
 
     public static Checkpoint of(long value) {
+        if (value == 0) {
+            throw new IllegalArgumentException("Checkpoint value must be 1 or more, or use the constant Checkpoint.INITIAL for 0.");
+        }
         if (value < 1) {
-            if (value == 0) {
-                throw new IllegalArgumentException("Checkpoint value must be 1 or more, or use the constant Checkpoint.INITIAL for 0.");
-            }
             throw new IllegalArgumentException("Checkpoint value must be 1 or more.");
         }
         return new Checkpoint(value);
