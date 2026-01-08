@@ -47,7 +47,7 @@ public class ConcertSalesProjector {
                     eventSequenceCounter.incrementAndGet();
                 });
 
-        log.info("Projection calculation completed, processed {} events", eventSequenceCounter.get());
+        log.debug("Projection calculation completed, processed {} events", eventSequenceCounter.get());
         return new ProjectionResult(mutableMap.values(),
                                     lastEventSequenceSeenRef.get());
     }

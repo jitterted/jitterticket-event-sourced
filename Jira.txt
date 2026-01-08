@@ -82,10 +82,10 @@
                 [X] Implement stateless project()
                 [X] Define ProjectionCoordinator concrete class
                 [X] Extract stateful code to ProjectionCoordinator
-==> CURRENT TASK ==>
                 [X] Have Spring config use the new ProjectionCoordinator instead of RegisteredCustomersProjector
                 [X] Remove obsolete code from RegisteredCustomersProjector
-            [ ] Don't forget to clean up the $OldStuff in ConcertSalesProjectionTest
+            [X] Don't forget to clean up the $OldStuff in ConcertSalesProjectionTest
+==> CURRENT TASK ==>
         NEW BEHAVIOR->PERSISTING PROJECTION
             [ ] Create ProjectionPort<STATE> interface
             [ ] RegisteredCustomersPort implements ProjectionPort<RegisteredCustomers>

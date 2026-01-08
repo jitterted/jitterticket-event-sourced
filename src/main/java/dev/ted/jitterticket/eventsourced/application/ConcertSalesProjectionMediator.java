@@ -32,19 +32,19 @@ public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEven
         this.concertEventStore = concertEventStore;
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
 
-        log.info("Fetching last event sequence seen by the projection");
+        log.debug("Fetching last event sequence seen by the projection");
         long lastEventSequenceSeen = concertSalesProjectionRepository
                 .findLastEventSequenceSeenByProjectionName(PROJECTION_NAME)
                 .orElse(0L);
 
-        log.info("Fetching all events after the last event sequence: {}...", lastEventSequenceSeen);
+        log.debug("Fetching all events after the last event sequence: {}...", lastEventSequenceSeen);
         Stream<ConcertEvent> concertEventStream =
                 this.concertEventStore.allEventsAfter(lastEventSequenceSeen);
-        log.info("Fetched all events after last event sequence: {}", lastEventSequenceSeen);
+        log.debug("Fetched all events after last event sequence: {}", lastEventSequenceSeen);
 
-        log.info("Starting event handling for projection...");
+        log.debug("Starting event handling for projection...");
         handle(concertEventStream);
-        log.info("Completed event handling for projection");
+        log.debug("Completed event handling for projection");
 
         concertEventStore.subscribe(this);
     }
@@ -76,7 +76,7 @@ public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEven
                         .findById(PROJECTION_NAME)
                         .orElse(createNewProjectionDbo());
 
-        log.info("Converting {} Sales DBOs to Sales Summaries...", concertSalesProjectionDbo.getConcertSales().size());
+        log.debug("Converting {} Sales DBOs to Sales Summaries...", concertSalesProjectionDbo.getConcertSales().size());
         Map<ConcertId, ConcertSalesProjector.ConcertSalesSummary> salesSummaryMap =
                 concertSalesProjectionDbo.getConcertSales()
                                          .stream()
@@ -84,12 +84,12 @@ public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEven
                                          .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::concertId,
                                                              Function.identity()));
 
-        log.info("Starting projection calculation...");
+        log.debug("Starting projection calculation...");
         ConcertSalesProjector.ProjectionResult result =
                 concertSalesProjector.project(salesSummaryMap,
                                               eventStream,
                                               concertSalesProjectionDbo.getLastEventSequenceSeen());
-        log.info("Projection calculation completed, mapping Sales Summary to DBOs...");
+        log.debug("Projection calculation completed, mapping Sales Summary to DBOs...");
 
         Set<ConcertSalesDbo> concertSalesDbos =
                 result.salesSummaries()
@@ -101,7 +101,7 @@ public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEven
                 result.lastEventSequenceSeen());
         concertSalesProjectionDbo.setConcertSales(concertSalesDbos);
 
-        log.info("Saving concert sales projection with {} summaries to Repository", concertSalesDbos.size());
+        log.debug("Saving concert sales projection with {} summaries to Repository", concertSalesDbos.size());
         concertSalesProjectionRepository.save(concertSalesProjectionDbo);
     }
 

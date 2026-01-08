@@ -1,3 +1,56 @@
+Thursday, January 8, 2026
+=========================
+Notes from obsolete tests in ConcertSalesProjectionMediatorTest:
+    * Different ways to do event-based tests:
+        (1) Granular:
+             create stores
+             create+save concert
+             create+save customer
+             concert.sellTicketsTo: customer, qty
+             save concert
+        (2) Setup using PurchaseTicketsUseCase
+             create stores
+             create (schedule) Concert
+             create (register) Customer
+             create PTUC
+             execute PTUC.purchaseTickets
+        (3) Use manually created events
+             create stores
+             store ConcertScheduled event
+             store CustomerRegistered event (optional)
+             store TicketsSold event (*required*)
+             store TicketsPurchased event (optional)
+
+    * Different assertion comparison methods:
+                   var actualMap = concertSalesProjector
+                           .allSalesSummaries()
+                           .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::artist, Function.identity()));
+                   var expectedMap = Map.of(expectedSummary1.artist(), expectedSummary1,
+                                            expectedSummary2.artist(), expectedSummary2);
+                   assertThat(actualMap)
+                           .usingRecursiveComparison()
+                           .isEqualTo(expectedMap);
+
+        List comparison highlights mismatched fields, but uses [0] and [1] to reference elements, which is potentially unhelpful with longer lists
+                   List<ConcertSalesProjector.ConcertSalesSummary> actualList =
+                           concertSalesProjector.allSalesSummaries()
+                                                .sorted(Comparator.comparing(summary -> summary.concertId().id()))
+                                                .toList();
+                   List<ConcertSalesProjector.ConcertSalesSummary> expectedList =
+                           Stream.of(expectedSummary2, expectedSummary1)
+                                 .sorted(Comparator.comparing(summary -> summary.concertId().id()))
+                                 .toList();
+
+                   assertThat(actualList)
+                           .usingRecursiveComparison()
+                           .isEqualTo(expectedList);
+
+        unhelpful assertion failure output
+                   assertThat(concertSalesProjector.allSalesSummaries())
+                           .usingRecursiveFieldByFieldElementComparator()
+                           .containsExactly(expectedSummary1, expectedSummary2);
+
+
 Monday, January 5, 2026
 =======================
 [Design Thinking]
