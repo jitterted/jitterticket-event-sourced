@@ -1,7 +1,8 @@
 package dev.ted.jitterticket;
 
 import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
-import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
+import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
+import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -26,17 +27,18 @@ public class SampleDataPopulator implements ApplicationRunner {
 
     static final ConcertId SONIC_WAVES_CONCERT_ID = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440001"));
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
-    private final RegisteredCustomersProjector registeredCustomersProjector;
+    private final ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
     private final ConcertSummaryProjector concertSummaryProjector;
 
     public SampleDataPopulator(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
                                EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-                               RegisteredCustomersProjector registeredCustomersProjector, ConcertSummaryProjector concertSummaryProjector) {
+                               ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection,
+                               ConcertSummaryProjector concertSummaryProjector) {
         this.customerStore = customerStore;
         this.concertStore = concertStore;
-        this.registeredCustomersProjector = registeredCustomersProjector;
         this.concertSummaryProjector = concertSummaryProjector;
+        this.registeredCustomersProjection = registeredCustomersProjection;
     }
 
     @Override
@@ -178,7 +180,7 @@ public class SampleDataPopulator implements ApplicationRunner {
 
     private void populateCustomerSampleData() {
         // don't add sample data if the store already has CUSTOMER data
-        if (registeredCustomersProjector.allCustomers().hasData()) {
+        if (registeredCustomersProjection.projection().hasData()) {
             return;
         }
 
