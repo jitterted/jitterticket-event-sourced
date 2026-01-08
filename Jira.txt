@@ -87,10 +87,13 @@
             [X] Don't forget to clean up the $OldStuff in ConcertSalesProjectionTest
 ==> CURRENT TASK ==>
         NEW BEHAVIOR->PERSISTING PROJECTION
-            [ ] Create ProjectionPort<STATE> interface
-            [ ] RegisteredCustomersPort implements ProjectionPort<RegisteredCustomers>
+            [X] Create ProjectionPort<STATE> interface with Snapshot record
+            [X] RegisteredCustomersPort implements ProjectionPort<RegisteredCustomers>
+            [ ] Test-drive Memory-based Port implementation
             [ ] Update ProjectionMediator constructor to accept the ProjectionPort<RegisteredCustomers>
             [ ] Update handle()/processEvents() implementation to flush updates
+
+    [ ] Make the `suigi-separate-global...` branch as `main` branch
 
     [ ] Convert Available Concerts projector to new design
         [ ] Rename to AvailableConcerts
