@@ -84,7 +84,7 @@
                 [X] Extract stateful code to ProjectionCoordinator
 ==> CURRENT TASK ==>
                 [X] Have Spring config use the new ProjectionCoordinator instead of RegisteredCustomersProjector
-                [ ] Remove obsolete code from RegisteredCustomersProjector
+                [X] Remove obsolete code from RegisteredCustomersProjector
             [ ] Don't forget to clean up the $OldStuff in ConcertSalesProjectionTest
         NEW BEHAVIOR->PERSISTING PROJECTION
             [ ] Create ProjectionPort<STATE> interface
