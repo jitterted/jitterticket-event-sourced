@@ -14,9 +14,18 @@ public class SnapshotAssert<STATE> extends AbstractAssert<SnapshotAssert<STATE>,
         return new SnapshotAssert<>(actual);
     }
 
-    public SnapshotAssert<STATE> hasCheckpointOf(long expectedCheckpoint) {
+    public SnapshotAssert<STATE> hasCheckpointValueOf(long expectedCheckpointValue) {
         isNotNull();
-        if (actual.checkpoint() != expectedCheckpoint) {
+        if (actual.checkpoint().value() != expectedCheckpointValue) {
+            failWithMessage("Expected snapshot to have checkpoint <%s> but was <%s>",
+                            expectedCheckpointValue, actual.checkpoint().value());
+        }
+        return this;
+    }
+
+    public SnapshotAssert<STATE> checkpointIsEqualTo(Checkpoint expectedCheckpoint) {
+        isNotNull();
+        if (!actual.checkpoint().equals(expectedCheckpoint)) {
             failWithMessage("Expected snapshot to have checkpoint <%s> but was <%s>",
                             expectedCheckpoint, actual.checkpoint());
         }

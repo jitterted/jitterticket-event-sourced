@@ -14,7 +14,7 @@ class ProjectionPortPersistenceTest {
         var snapshot = projectionPersistence.loadSnapshot();
 
         assertThat(snapshot)
-                .hasCheckpointOf(0)
+                .hasCheckpointValueOf(0)
                 .hasEmptyState();
     }
 
@@ -24,12 +24,12 @@ class ProjectionPortPersistenceTest {
         var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
 
         projectionPersistence.saveDelta(new RegisteredCustomers(),
-                                        1);
+                                        Checkpoint.of(1));
 
         var snapshot = projectionPersistence.loadSnapshot();
 
         assertThat(snapshot)
-                .hasCheckpointOf(1)
+                .hasCheckpointValueOf(1)
                 .hasEmptyState();
     }
 
@@ -39,12 +39,12 @@ class ProjectionPortPersistenceTest {
 
         RegisteredCustomers delta = createDeltaWith(CustomerId.createRandom());
         projectionPersistence.saveDelta(delta,
-                                        1);
+                                        Checkpoint.of(1));
 
         var snapshot = projectionPersistence.loadSnapshot();
 
         assertThat(snapshot)
-                .hasCheckpointOf(1)
+                .hasCheckpointValueOf(1)
                 .state()
                 .isEqualTo(delta);
     }
@@ -52,25 +52,20 @@ class ProjectionPortPersistenceTest {
     @Test
     void savedDeltaIsMergedWithExistingState() {
         var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
-        projectionPersistence.saveDelta(createDeltaWith("Existing Customer"), 1);
+        projectionPersistence.saveDelta(createDeltaWith("Existing Customer"), Checkpoint.of(1));
 
         RegisteredCustomers delta = createDeltaWith("New Customer");
-        projectionPersistence.saveDelta(delta, 2);
+        projectionPersistence.saveDelta(delta, Checkpoint.of(2));
 
         var snapshot = projectionPersistence.loadSnapshot();
 
         assertThat(snapshot)
-                .hasCheckpointOf(2);
+                .hasCheckpointValueOf(2);
 
         assertThat(snapshot.state().asList())
                 .extracting(RegisteredCustomers.RegisteredCustomer::name)
                 .contains("Existing Customer", "New Customer");
     }
-
-    // test to ensure saveDelta has valid newCheckpoint, i.e., must be:
-    // 1 or more, and
-    // greater than existing checkpoint
-
 
     static RegisteredCustomers createDeltaWith(CustomerId customerId) {
         return createDeltaWith(customerId, "Customer Name");
