@@ -83,7 +83,7 @@
                 [X] Define ProjectionCoordinator concrete class
                 [X] Extract stateful code to ProjectionCoordinator
 ==> CURRENT TASK ==>
-                [ ] Have Spring config use the new ProjectionCoordinator instead of RegisteredCustomersProjector
+                [X] Have Spring config use the new ProjectionCoordinator instead of RegisteredCustomersProjector
                 [ ] Remove obsolete code from RegisteredCustomersProjector
             [ ] Don't forget to clean up the $OldStuff in ConcertSalesProjectionTest
         NEW BEHAVIOR->PERSISTING PROJECTION

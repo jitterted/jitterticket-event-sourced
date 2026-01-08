@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
+import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
+import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
@@ -13,17 +14,20 @@ import java.util.stream.Collectors;
 
 public class CustomerProjectionChoice extends ProjectionChoice {
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
-    private final RegisteredCustomersProjector projector;
+    private final ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection;
 
-    public CustomerProjectionChoice(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
+    public CustomerProjectionChoice(
+            EventStore<CustomerId, CustomerEvent, Customer> customerStore,
+            ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection
+    ) {
         super("Customer", "customers");
         this.customerStore = customerStore;
-        this.projector = new RegisteredCustomersProjector(customerStore);
+        this.registeredCustomersProjection = registeredCustomersProjection;
     }
 
     @Override
     public List<AggregateSummaryView> aggregateSummaryViews() {
-        return projector.allCustomers().asStream()
+        return registeredCustomersProjection.projection().asStream()
                         .map(customerSummary -> new AggregateSummaryView(
                                 customerSummary.customerId().id().toString(),
                                 customerSummary.name()

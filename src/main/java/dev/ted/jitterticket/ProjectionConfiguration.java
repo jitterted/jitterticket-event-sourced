@@ -50,11 +50,12 @@ public class ProjectionConfiguration {
     @Bean
     ProjectionChoices projectionChoices(
             EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-            EventStore<CustomerId, CustomerEvent, Customer> customerStore
+            EventStore<CustomerId, CustomerEvent, Customer> customerStore,
+            ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection
     ) {
         return new ProjectionChoices(Map.of(
                 "concerts", new ConcertProjectionChoice(concertStore),
-                "customers", new CustomerProjectionChoice(customerStore)
+                "customers", new CustomerProjectionChoice(customerStore, registeredCustomersProjection)
         ));
     }
 
