@@ -69,6 +69,9 @@ public class RegisteredCustomers {
 
     @Override
     public String toString() {
+        if (registeredCustomers.isEmpty()) {
+            return RegisteredCustomers.class.getSimpleName() + "[empty]";
+        }
         return new StringJoiner(", ", RegisteredCustomers.class.getSimpleName() + "[", "]")
                 .add("registeredCustomers=" + registeredCustomers)
                 .toString();

@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProj
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjectionMediator;
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
+import dev.ted.jitterticket.eventsourced.application.MemoryRegisteredCustomersProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
@@ -34,6 +35,7 @@ public class ProjectionConfiguration {
     ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjectionCoordinator(
             EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
         return new ProjectionCoordinator<>(new RegisteredCustomersProjector(),
+                                           new MemoryRegisteredCustomersProjectionPersistence(),
                                            customerStore);
     }
 

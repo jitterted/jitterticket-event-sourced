@@ -9,12 +9,15 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
         implements EventConsumer<EVENT> {
 
     private final DomainProjector<EVENT, STATE> domainProjector;
+    private final ProjectionPersistencePort<STATE> projectionPersistencePort;
     private final EventStore<?, EVENT, ?> eventStore;
     private STATE cachedProjection;
 
     public ProjectionCoordinator(DomainProjector<EVENT, STATE> domainProjector,
+                                 ProjectionPersistencePort<STATE> projectionPersistencePort,
                                  EventStore<?, EVENT, ?> eventStore) {
         this.domainProjector = domainProjector;
+        this.projectionPersistencePort = projectionPersistencePort;
         this.eventStore = eventStore;
         eventStore.subscribe(this);
         cachedProjection = (STATE) new RegisteredCustomers();

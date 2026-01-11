@@ -4,19 +4,18 @@ import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static dev.ted.jitterticket.eventsourced.application.Assertions.assertThat;
 
 class ProjectionCoordinatorTest {
 
     private static final String IRRELEVANT_EMAIL = "existing@example.com";
 
     @Test
-    void allCustomersReturnsEmptyStreamWhenNoCustomersAreRegistered() {
-        var registeredCustomersProjector = new RegisteredCustomersProjector();
-        var customerStore = InMemoryEventStore.forCustomers();
+    void projectionIsEmptyWhenNoCustomersAreRegistered() {
         var projectionCoordinator = new ProjectionCoordinator<>(
-                registeredCustomersProjector,
-                customerStore
+                new RegisteredCustomersProjector(),
+                new MemoryRegisteredCustomersProjectionPersistence(),
+                InMemoryEventStore.forCustomers()
         );
 
         assertThat(projectionCoordinator.projection().asList())
@@ -24,7 +23,7 @@ class ProjectionCoordinatorTest {
     }
 
     @Test
-    void projectorCollectsExistingCustomerRegisteredEvents() {
+    void projectorCatchesUpForExistingCustomerRegisteredEvents() {
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId existingCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(existingCustomerId, "Existing Customer", IRRELEVANT_EMAIL));
@@ -32,6 +31,7 @@ class ProjectionCoordinatorTest {
 
         var projectionCoordinator = new ProjectionCoordinator<>(
                 registeredCustomersProjector,
+                new MemoryRegisteredCustomersProjectionPersistence(),
                 customerStore
         );
 
@@ -42,13 +42,14 @@ class ProjectionCoordinatorTest {
     }
 
     @Test
-    void newlySavedCustomersUpdatesProjector() {
+    void newlySavedCustomerEventsUpdatesProjector() {
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId firstCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(firstCustomerId, "First Customer", "first@example.com"));
         var registeredCustomersProjector = new RegisteredCustomersProjector();
         var projectionCoordinator = new ProjectionCoordinator<>(
                 registeredCustomersProjector,
+                new MemoryRegisteredCustomersProjectionPersistence(),
                 customerStore
         );
 
@@ -75,4 +76,26 @@ class ProjectionCoordinatorTest {
                 );
     }
 
+    @Test
+    void projectionLoadsNonEmptySnapshotUponCreation() {
+        MemoryRegisteredCustomersProjectionPersistence projectionPersistence =
+                new MemoryRegisteredCustomersProjectionPersistence();
+        RegisteredCustomers delta = new RegisteredCustomers(
+                new RegisteredCustomers.RegisteredCustomer(
+                        CustomerId.createRandom(),
+                        "Snapshotted Customer"));
+        projectionPersistence.saveDelta(
+                delta,
+                Checkpoint.of(1));
+        var registeredCustomersProjector = new RegisteredCustomersProjector();
+
+        var projectionCoordinator = new ProjectionCoordinator<>(
+                registeredCustomersProjector,
+                projectionPersistence,
+                InMemoryEventStore.forCustomers()
+        );
+
+        assertThat(projectionCoordinator.projection())
+                .isEqualTo(delta);
+    }
 }
