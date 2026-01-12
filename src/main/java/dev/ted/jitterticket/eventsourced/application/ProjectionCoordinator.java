@@ -3,6 +3,7 @@ package dev.ted.jitterticket.eventsourced.application;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public class ProjectionCoordinator<EVENT extends Event, STATE>
@@ -21,10 +22,19 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
         this.eventStore = eventStore;
         eventStore.subscribe(this);
         var snapshot = projectionPersistencePort.loadSnapshot();
+        AtomicReference<Long> lastEventSeen = new AtomicReference<>(snapshot.checkpoint().value());
+        Stream<EVENT> eventStream = eventStore
+                .allEventsAfter(snapshot.checkpoint())
+                .peek(event -> lastEventSeen.set(event.eventSequence()));
         var projectorResult = domainProjector.project(
                 snapshot.state(),
-                eventStore.allEventsAfter(snapshot.checkpoint()));
+                eventStream);
         cachedProjection = projectorResult.fullState();
+        projectionPersistencePort.saveDelta(
+                projectorResult.delta(),
+                lastEventSeen.get() == 0L
+                        ? Checkpoint.INITIAL
+                        : Checkpoint.of(lastEventSeen.get()));
     }
 
     @Override

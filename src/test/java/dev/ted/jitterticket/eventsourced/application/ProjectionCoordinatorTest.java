@@ -115,7 +115,7 @@ class ProjectionCoordinatorTest {
         var customerEventStore = InMemoryEventStore.forCustomers();
         customerEventStore.save(Customer.register(snapshottedCustomerId,
                                                   snapshottedCustomerName,
-                                                  "dontcare@example.com"));
+                                                  IRRELEVANT_EMAIL));
 
         var projectionCoordinator = new ProjectionCoordinator<>(
                 new RegisteredCustomersProjector(),
@@ -126,6 +126,35 @@ class ProjectionCoordinatorTest {
         assertThat(projectionCoordinator.projection().asList())
                 .as("Projection should only contain the data loaded from the snapshot persistence")
                 .hasSize(1);
+    }
+
+    @Test
+    void projectionPersistedAfterUpdatedAfterCatchUp() {
+        MemoryRegisteredCustomersProjectionPersistence projectionPersistence =
+                new MemoryRegisteredCustomersProjectionPersistence();
+        var customerEventStore = InMemoryEventStore.forCustomers();
+        CustomerId customerId = CustomerId.createRandom();
+        String customerName = "Catchup Customer";
+        customerEventStore.save(Customer.register(customerId,
+                                                  customerName,
+                                                  IRRELEVANT_EMAIL));
+
+        new ProjectionCoordinator<>(
+                new RegisteredCustomersProjector(),
+                projectionPersistence,
+                customerEventStore
+        );
+
+        assertThat(projectionPersistence.loadSnapshot().checkpoint())
+                .as("Checkpoint should be 1 after catching up on a single CustomerRegistered event in the event store")
+                .isEqualTo(Checkpoint.of(1L));
+        assertThat(projectionPersistence.loadSnapshot().state().asList())
+                .containsExactly(new RegisteredCustomers
+                        .RegisteredCustomer(customerId, customerName));
+    }
+
+    @Test
+    void projectionPersistedAfterUpdatedViaHandlingNewEvents() {
 
     }
 }
