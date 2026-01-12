@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store;
 
 import dev.ted.jitterticket.eventsourced.application.BaseEventStore;
+import dev.ted.jitterticket.eventsourced.application.Checkpoint;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
@@ -96,9 +97,9 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
     }
 
     @Override
-    public Stream<EVENT> allEventsAfter(long globalEventSequence) {
+    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint) {
         return allEventDtos()
-                .dropWhile(eventDto -> eventDto.getEventSequence() <= globalEventSequence)
+                .dropWhile(eventDto -> eventDto.getEventSequence() <= checkpoint.value())
                 .map(EventDto::toDomain);
 
     }

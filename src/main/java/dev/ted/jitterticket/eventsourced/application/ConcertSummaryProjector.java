@@ -19,7 +19,7 @@ public class ConcertSummaryProjector implements EventConsumer<ConcertEvent> {
     protected final Map<ConcertId, ConcertSummary> concertSummaryMap = new HashMap<>();
 
     public ConcertSummaryProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        concertStore.allEventsAfter(0L).forEach(this::apply);
+        concertStore.allEventsAfter(Checkpoint.INITIAL).forEach(this::apply);
         concertStore.subscribe(this);
     }
 

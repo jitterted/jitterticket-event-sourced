@@ -202,7 +202,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             );
 
             eventStoreSpy
-                    .assertSubscribedAndEventsAfterInvoked(0L);
+                    .assertSubscribedAndEventsAfterInvoked(Checkpoint.INITIAL);
         }
 
         @Test
@@ -217,7 +217,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             );
 
             eventStoreSpy
-                    .assertSubscribedAndEventsAfterInvoked(9L);
+                    .assertSubscribedAndEventsAfterInvoked(Checkpoint.of(9L));
         }
 
     }
@@ -295,6 +295,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             secondEvent = concertEventStore.save(secondEvent.concertId(), Stream.of(secondEvent)).findFirst().orElseThrow();
             mediator.handle(Stream.of(firstEvent, secondEvent));
 
+            // don't want to convert this to use the method that returns a checkpoint as we want it to throw if it's not there
             long eventSequenceBeforeSave = concertSalesProjectionRepository
                     .findLastEventSequenceSeenByProjectionName(ConcertSalesProjectionMediator.PROJECTION_NAME)
                     .orElseThrow();
@@ -348,7 +349,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
     static class EventStoreSpy implements EventStore {
 
         private boolean subscribeInvoked = false;
-        private long allEventsAfterGlobalEventSequence;
+        private Checkpoint allEventsAfterGlobalEventSequence;
 
         @Override
         public void save(EventSourcedAggregate aggregate) {
@@ -374,19 +375,19 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             subscribeInvoked = true;
         }
 
-        public void assertSubscribedAndEventsAfterInvoked(long expectedLastGlobalSequence) {
+        public void assertSubscribedAndEventsAfterInvoked(Checkpoint expectedCheckpoint) {
             assertThat(subscribeInvoked)
                     .as("Expected subscribe to be called")
                     .isTrue();
 
             assertThat(allEventsAfterGlobalEventSequence)
                     .as("Expected request for all events after the subscribed last global event sequence")
-                    .isEqualTo(expectedLastGlobalSequence);
+                    .isEqualTo(expectedCheckpoint);
         }
 
         @Override
-        public Stream allEventsAfter(long globalEventSequence) {
-            allEventsAfterGlobalEventSequence = globalEventSequence;
+        public Stream allEventsAfter(Checkpoint checkpoint) {
+            allEventsAfterGlobalEventSequence = checkpoint;
             return Stream.empty();
         }
     }

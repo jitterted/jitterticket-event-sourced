@@ -33,14 +33,13 @@ public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEven
         this.concertSalesProjectionRepository = concertSalesProjectionRepository;
 
         log.debug("Fetching last event sequence seen by the projection");
-        long lastEventSequenceSeen = concertSalesProjectionRepository
-                .findLastEventSequenceSeenByProjectionName(PROJECTION_NAME)
-                .orElse(0L);
+        Checkpoint checkpoint = concertSalesProjectionRepository
+                .findCheckpointByProjectionName(PROJECTION_NAME);
 
-        log.debug("Fetching all events after the last event sequence: {}...", lastEventSequenceSeen);
+        log.debug("Fetching all events after the last event sequence: {}...", checkpoint);
         Stream<ConcertEvent> concertEventStream =
-                this.concertEventStore.allEventsAfter(lastEventSequenceSeen);
-        log.debug("Fetched all events after last event sequence: {}", lastEventSequenceSeen);
+                this.concertEventStore.allEventsAfter(checkpoint);
+        log.debug("Fetched all events after last event sequence: {}", checkpoint);
 
         log.debug("Starting event handling for projection...");
         handle(concertEventStream);

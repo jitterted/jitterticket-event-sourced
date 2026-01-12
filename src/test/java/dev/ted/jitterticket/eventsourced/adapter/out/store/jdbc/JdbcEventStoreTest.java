@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 
+import dev.ted.jitterticket.eventsourced.application.Checkpoint;
 import dev.ted.jitterticket.eventsourced.application.EventStoreTest;
 import dev.ted.jitterticket.eventsourced.application.PurchaseTicketsUseCase;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
@@ -49,7 +50,7 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
             PurchaseTicketsUseCase purchaseTickets = PurchaseTicketsUseCase.createForTest(concertStore, customerStore, TicketOrderId.createRandom());
             purchaseTickets.purchaseTickets(concert.getId(), onlyCustomerId, 4);
 
-            assertThat(customerStore.allEventsAfter(0))
+            assertThat(customerStore.allEventsAfter(Checkpoint.INITIAL))
                     .as("Two Customer events should be in the store: registered and purchased tickets")
                     .hasSize(2)
                     .as("Both events belong to the only customer")

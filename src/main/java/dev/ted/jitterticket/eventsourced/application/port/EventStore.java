@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application.port;
 
+import dev.ted.jitterticket.eventsourced.application.Checkpoint;
 import dev.ted.jitterticket.eventsourced.application.EventConsumer;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
@@ -20,5 +21,5 @@ public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     void subscribe(EventConsumer<EVENT> eventConsumer);
 
-    Stream<EVENT> allEventsAfter(long globalEventSequence);
+    Stream<EVENT> allEventsAfter(Checkpoint checkpoint);
 }

@@ -87,15 +87,45 @@ class ProjectionCoordinatorTest {
         projectionPersistence.saveDelta(
                 delta,
                 Checkpoint.of(1));
-        var registeredCustomersProjector = new RegisteredCustomersProjector();
 
         var projectionCoordinator = new ProjectionCoordinator<>(
-                registeredCustomersProjector,
+                new RegisteredCustomersProjector(),
                 projectionPersistence,
                 InMemoryEventStore.forCustomers()
         );
 
         assertThat(projectionCoordinator.projection())
                 .isEqualTo(delta);
+    }
+
+    @Test
+    void projectionDoesNotApplyEventsAlreadyProcessedInSnapshot() {
+        MemoryRegisteredCustomersProjectionPersistence projectionPersistence =
+                new MemoryRegisteredCustomersProjectionPersistence();
+        CustomerId snapshottedCustomerId = CustomerId.createRandom();
+        String snapshottedCustomerName = "Snapshotted Customer";
+        RegisteredCustomers delta = new RegisteredCustomers(
+                new RegisteredCustomers.RegisteredCustomer(
+                        snapshottedCustomerId,
+                        snapshottedCustomerName));
+        projectionPersistence.saveDelta(
+                delta,
+                Checkpoint.of(1));
+
+        var customerEventStore = InMemoryEventStore.forCustomers();
+        customerEventStore.save(Customer.register(snapshottedCustomerId,
+                                                  snapshottedCustomerName,
+                                                  "dontcare@example.com"));
+
+        var projectionCoordinator = new ProjectionCoordinator<>(
+                new RegisteredCustomersProjector(),
+                projectionPersistence,
+                customerEventStore
+        );
+
+        assertThat(projectionCoordinator.projection().asList())
+                .as("Projection should only contain the data loaded from the snapshot persistence")
+                .hasSize(1);
+
     }
 }

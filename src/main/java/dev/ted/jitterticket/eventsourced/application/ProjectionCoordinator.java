@@ -20,9 +20,12 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
         this.projectionPersistencePort = projectionPersistencePort;
         this.eventStore = eventStore;
         eventStore.subscribe(this);
-        cachedProjection = (STATE) new RegisteredCustomers();
-        var projectorResult = domainProjector.project(cachedProjection,
-                                                      eventStore.allEventsAfter(0L));
+        var snapshot = projectionPersistencePort.loadSnapshot();
+        cachedProjection = snapshot.state();
+        Checkpoint checkpoint = snapshot.checkpoint();
+        var projectorResult = domainProjector.project(
+                cachedProjection,
+                eventStore.allEventsAfter(checkpoint));
         cachedProjection = projectorResult.fullState();
     }
 
@@ -31,6 +34,7 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
         var result = domainProjector.project(cachedProjection,
                                              eventStream);
         cachedProjection = result.fullState();
+        // persist the latest cache
     }
 
     public STATE projection() {

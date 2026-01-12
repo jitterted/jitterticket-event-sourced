@@ -71,9 +71,9 @@ public class InMemoryEventStore<
     }
 
     @Override
-    public Stream<EVENT> allEventsAfter(long globalEventSequence) {
+    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint) {
         return allEventsSortedByGlobalEventSequence()
-                              .dropWhile(eventDto -> eventDto.getEventSequence() <= globalEventSequence)
+                              .dropWhile(eventDto -> eventDto.getEventSequence() <= checkpoint.value())
                               .map(EventDto::toDomain);
     }
 

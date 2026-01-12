@@ -120,7 +120,7 @@ public class EventStoreTest {
             concertStore.save(rescheduledConcert);
 
             Stream<ConcertEvent> concertEventStream =
-                    concertStore.allEventsAfter(0L);
+                    concertStore.allEventsAfter(Checkpoint.INITIAL);
 
             assertThat(concertEventStream)
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields("eventSequence")
@@ -130,7 +130,7 @@ public class EventStoreTest {
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
         public void noEventsReturnedForAllEventsAfterWhenEventStoreIsEmpty(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(0L);
+            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(Checkpoint.INITIAL);
 
             assertThat(newEvents)
                     .as("Event Store is empty, so should not return any events")
@@ -146,7 +146,7 @@ public class EventStoreTest {
                                         .concertScheduled(concertId)
                                         .stream());
 
-            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(0L);
+            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(Checkpoint.INITIAL);
 
             assertThat(newEvents)
                     .as("Event Store has 1 ConcertScheduled event, so should return that event")
@@ -171,7 +171,7 @@ public class EventStoreTest {
                                         .concertScheduled(concertId2)
                                         .stream());
 
-            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(eventSequenceStoredForFirstEvent);
+            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(Checkpoint.of(eventSequenceStoredForFirstEvent));
 
             assertThat(newEvents)
                     .as("Event Store has 2 ConcertScheduled events, but should only return the second event")
@@ -182,7 +182,7 @@ public class EventStoreTest {
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
         public void noEventsReturnedForAllEventsAfterTheMaxEventSequence(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(2L);
+            Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(Checkpoint.of(2L));
 
             assertThat(newEvents)
                     .as("Max GES is 2, so asking for events AFTER 2 should not return any")

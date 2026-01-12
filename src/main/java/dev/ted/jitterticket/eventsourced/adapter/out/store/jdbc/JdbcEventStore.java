@@ -3,6 +3,7 @@ package dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc;
 import dev.ted.jitterticket.Gatherers;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.EventDto;
 import dev.ted.jitterticket.eventsourced.application.BaseEventStore;
+import dev.ted.jitterticket.eventsourced.application.Checkpoint;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
@@ -80,9 +81,9 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     }
 
     @Override
-    public Stream<EVENT> allEventsAfter(long eventSequence) {
-        log.info("Fetching List<EventDbo> after event sequence: {}", eventSequence);
-        List<EventDbo> eventsAfter = eventDboRepository.findEventsAfter(eventSequence, eventTypes);
+    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint) {
+        log.info("Fetching List<EventDbo> after event sequence: {}", checkpoint);
+        List<EventDbo> eventsAfter = eventDboRepository.findEventsAfter(checkpoint.value(), eventTypes);
         log.info("Fetched {} events, mapping to Domain events", eventsAfter.size());
         Stream<EVENT> domainEvents = mapToDomainEvents(eventsAfter.stream());
         log.info("Mapped all events to Domain events");
