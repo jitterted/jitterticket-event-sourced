@@ -44,6 +44,6 @@ public class Checkpoint {
 
     @Override
     public String toString() {
-        return "Checkpoint[value=" + value + "]";
+        return "Checkpoint(" + value + ")";
     }
 }
