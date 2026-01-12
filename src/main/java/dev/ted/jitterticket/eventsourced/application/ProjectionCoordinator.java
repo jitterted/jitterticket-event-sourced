@@ -21,11 +21,9 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
         this.eventStore = eventStore;
         eventStore.subscribe(this);
         var snapshot = projectionPersistencePort.loadSnapshot();
-        cachedProjection = snapshot.state();
-        Checkpoint checkpoint = snapshot.checkpoint();
         var projectorResult = domainProjector.project(
-                cachedProjection,
-                eventStore.allEventsAfter(checkpoint));
+                snapshot.state(),
+                eventStore.allEventsAfter(snapshot.checkpoint()));
         cachedProjection = projectorResult.fullState();
     }
 
