@@ -49,13 +49,15 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
 
         cachedProjection = projectorResult.fullState();
 
-        cachedCheckpoint = lastEventSeen.get() == 0L
+        Checkpoint updatedCheckpoint = lastEventSeen.get() == 0L
                 ? Checkpoint.INITIAL
                 : Checkpoint.of(lastEventSeen.get());
 
-        projectionPersistencePort.saveDelta(
-                projectorResult.delta(),
-                cachedCheckpoint);
+        if (updatedCheckpoint.newerThan(cachedCheckpoint)) {
+            projectionPersistencePort.saveDelta(
+                    projectorResult.delta(),
+                    updatedCheckpoint);
+        }
     }
 
     public STATE projection() {

@@ -90,9 +90,38 @@ class ProjectionCoordinatorTest {
                 .isEqualTo(Checkpoint.of(1L));
     }
 
-    // test that we don't unnecessarily update the persisted projection if it hasn't changed (i.e., delta is empty and cachedCheckpoint is what it was before)
+    @Test
+    void doesNotPersistIfNewProjectionWithCheckpointIsUnchanged() {
+        var customerStore = InMemoryEventStore.forCustomers();
+        CustomerId existingCustomerId = CustomerId.createRandom();
+        customerStore.save(Customer.register(existingCustomerId, "Existing Customer", IRRELEVANT_EMAIL));
+        ProjectionPersistencePort<RegisteredCustomers> projectionPersistence = new ProjectionPersistencePort<RegisteredCustomers>() {
+            @Override
+            public Snapshot<RegisteredCustomers> loadSnapshot() {
+                return new Snapshot<>(new RegisteredCustomers(
+                        new RegisteredCustomers.RegisteredCustomer(
+                                existingCustomerId, "Existing Customer")
+                ), Checkpoint.of(1));
+            }
 
-    // crash-test: saveDelta() blows up and we create a new projection coordinator, which should catch up and match what the projector had previously calculated
+            @Override
+            public void saveDelta(RegisteredCustomers delta, Checkpoint newCheckpoint) {
+                throw new IllegalStateException(
+                        "Should not have attempted to persist projection delta: "
+                        + delta.asList()
+                        + ", new checkpoint = "
+                        + newCheckpoint);
+            }
+        };
+        var projectionCoordinator = new ProjectionCoordinator<>(
+                new RegisteredCustomersProjector(),
+                projectionPersistence,
+                customerStore
+        );
+
+        assertThat(projectionCoordinator.projection().asList())
+                .hasSize(1);
+    }
 
     @Test
     void newlySavedCustomerEventsUpdatesProjector() {

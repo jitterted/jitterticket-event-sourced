@@ -85,15 +85,18 @@
                 [X] Have Spring config use the new ProjectionCoordinator instead of RegisteredCustomersProjector
                 [X] Remove obsolete code from RegisteredCustomersProjector
             [X] Don't forget to clean up the $OldStuff in ConcertSalesProjectionTest
-==> CURRENT TASK ==>
         NEW BEHAVIOR->PERSISTING PROJECTION
             [X] Create ProjectionPort<STATE> interface with Snapshot record
             [X] RegisteredCustomersPort implements ProjectionPort<RegisteredCustomers>
             [X] Test-drive Memory-based Port implementation
-            [ ] Update ProjectionCoordinator constructor to accept the ProjectionPort<RegisteredCustomers>
-            [ ] Update constructor and handle()/processEvents() implementation to flush updates
+            [X] Update ProjectionCoordinator constructor to accept the ProjectionPort<RegisteredCustomers>
+            [X] Update constructor and handle()/processEvents() implementation to flush updates
 
-    [ ] Make the `suigi-separate-global...` branch as `main` branch
+    [X] Make the `suigi-separate-global...` branch as `main` branch
+
+==> CURRENT TASK ==>
+
+    [ ] Convert ConcertSalesProjection+Mediator to Coordinator design
 
     [ ] Convert Available Concerts projector to new design
         [ ] Rename to AvailableConcerts

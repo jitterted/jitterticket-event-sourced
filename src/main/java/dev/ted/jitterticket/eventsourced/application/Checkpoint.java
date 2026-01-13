@@ -25,6 +25,10 @@ public class Checkpoint {
         return value;
     }
 
+    public boolean newerThan(Checkpoint otherCheckpoint) {
+        return value() > otherCheckpoint.value();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
