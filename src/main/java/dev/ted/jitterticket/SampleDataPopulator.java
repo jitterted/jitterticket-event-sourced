@@ -1,6 +1,6 @@
 package dev.ted.jitterticket;
 
-import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
@@ -29,15 +29,15 @@ public class SampleDataPopulator implements ApplicationRunner {
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
     private final ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
-    private final ConcertSummaryProjector concertSummaryProjector;
+    private final AvailableConcertsProjector availableConcertsProjector;
 
     public SampleDataPopulator(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
                                EventStore<ConcertId, ConcertEvent, Concert> concertStore,
                                ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection,
-                               ConcertSummaryProjector concertSummaryProjector) {
+                               AvailableConcertsProjector availableConcertsProjector) {
         this.customerStore = customerStore;
         this.concertStore = concertStore;
-        this.concertSummaryProjector = concertSummaryProjector;
+        this.availableConcertsProjector = availableConcertsProjector;
         this.registeredCustomersProjection = registeredCustomersProjection;
     }
 
@@ -57,7 +57,7 @@ public class SampleDataPopulator implements ApplicationRunner {
 
     void populateConcertSampleData() {
         // don't add sample data if sample concerts were already added
-        if (concertSummaryProjector.allConcertSummaries().findAny().isPresent()) {
+        if (availableConcertsProjector.availableConcerts().findAny().isPresent()) {
             return;
         }
 

@@ -1,9 +1,9 @@
 package dev.ted.jitterticket;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjectionMediator;
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
-import dev.ted.jitterticket.eventsourced.application.ConcertSummaryProjector;
 import dev.ted.jitterticket.eventsourced.application.MemoryRegisteredCustomersProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
@@ -27,8 +27,8 @@ import java.util.Map;
 public class ProjectionConfiguration {
 
     @Bean
-    ConcertSummaryProjector concertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new ConcertSummaryProjector(concertStore);
+    AvailableConcertsProjector concertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new AvailableConcertsProjector(concertStore);
     }
 
     @Bean

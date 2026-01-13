@@ -14,17 +14,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ConcertSummaryProjector implements EventConsumer<ConcertEvent> {
+public class AvailableConcertsProjector implements EventConsumer<ConcertEvent> {
 
-    protected final Map<ConcertId, ConcertSummary> concertSummaryMap = new HashMap<>();
+    protected final Map<ConcertId, ConcertSummary> availableConcertsMap = new HashMap<>();
 
-    public ConcertSummaryProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    public AvailableConcertsProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         concertStore.allEventsAfter(Checkpoint.INITIAL).forEach(this::apply);
         concertStore.subscribe(this);
     }
 
-    public Stream<ConcertSummary> allConcertSummaries() {
-        return concertSummaryMap.values().stream();
+    public Stream<ConcertSummary> availableConcerts() {
+        return availableConcertsMap.values().stream();
     }
 
     @Override
@@ -34,18 +34,18 @@ public class ConcertSummaryProjector implements EventConsumer<ConcertEvent> {
 
     private void apply(ConcertEvent concertEvent) {
         switch (concertEvent) {
-            case ConcertScheduled scheduled -> concertSummaryMap.put(scheduled.concertId(),
-                                                                     new ConcertSummary(scheduled.concertId(),
+            case ConcertScheduled scheduled -> availableConcertsMap.put(scheduled.concertId(),
+                                                                        new ConcertSummary(scheduled.concertId(),
                                                                                         scheduled.artist(),
                                                                                         scheduled.ticketPrice(),
                                                                                         scheduled.showDateTime(),
                                                                                         scheduled.doorsTime()));
             case ConcertRescheduled rescheduled -> {
-                ConcertSummary oldView = concertSummaryMap.get(rescheduled.concertId());
+                ConcertSummary oldView = availableConcertsMap.get(rescheduled.concertId());
                 ConcertSummary rescheduledView = rescheduleTo(rescheduled.newShowDateTime(),
                                                               rescheduled.newDoorsTime(),
                                                               oldView);
-                concertSummaryMap.put(rescheduled.concertId(), rescheduledView);
+                availableConcertsMap.put(rescheduled.concertId(), rescheduledView);
             }
             case TicketsSold ticketsSold -> {
                 // don't care about this event for this projector

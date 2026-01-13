@@ -11,13 +11,13 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
-class ConcertSummaryProjectorTest {
+class AvailableConcertsProjectorTest {
 
     @Test
     void noConcertsCreatedProjectorReturnsNoConcerts() {
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(InMemoryEventStore.forConcerts());
+        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector(InMemoryEventStore.forConcerts());
 
-        Stream<ConcertSummary> concertTicketViews = concertSummaryProjector.allConcertSummaries();
+        Stream<ConcertSummary> concertTicketViews = availableConcertsProjector.availableConcerts();
 
         assertThat(concertTicketViews)
                 .isEmpty();
@@ -38,9 +38,9 @@ class ConcertSummaryProjectorTest {
                                                              111,
                                                              LocalDateTime.of(2025, 4, 21, 21, 0),
                                                              LocalTime.of(19, 30)));
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
+        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector(concertStore);
 
-        Stream<ConcertSummary> allConcertTicketViews = concertSummaryProjector.allConcertSummaries();
+        Stream<ConcertSummary> allConcertTicketViews = availableConcertsProjector.availableConcerts();
 
         assertThat(allConcertTicketViews)
                 .containsExactlyInAnyOrder(
@@ -66,14 +66,14 @@ class ConcertSummaryProjectorTest {
                                                              35,
                                                              LocalDateTime.of(2025, 4, 22, 19, 0),
                                                              LocalTime.of(18, 0)));
-        ConcertSummaryProjector concertSummaryProjector = new ConcertSummaryProjector(concertStore);
+        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector(concertStore);
         Concert rescheduledConcert = concertStore.findById(concertId).orElseThrow();
         rescheduledConcert.rescheduleTo(LocalDateTime.of(2025, 7, 11, 20, 0),
                                         LocalTime.of(19, 0));
         concertStore.save(rescheduledConcert);
 
         Stream<ConcertSummary> allConcertTicketViews =
-                concertSummaryProjector.allConcertSummaries();
+                availableConcertsProjector.availableConcerts();
 
         assertThat(allConcertTicketViews)
                 .containsExactly(new ConcertSummary(
