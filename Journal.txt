@@ -1,3 +1,41 @@
+Tuesday, January 13, 2026
+=========================
+* Handling events that come in while the projection is catching-up:
+
+    1. Block (synchronize) with the handle() so that the event-store calling the handle() is blocked until we're done catching up.
+       Needs the event store to call each event consumer's handle() with its own (virtual) thread.
+    2. Subscribe immediately, any calls to handle() are buffered until the catch-up is complete, and then process the buffered events.
+    3. Don't make this server (service) available until all projections have caught up (reduces server availability).
+
+  For now, not worrying about this possibility, and subscribe once the projection is caught up.
+
+                 cachedCheckpoint | persisted checkpoint
+                 -----------------+---------------------
+handle(es = 1)   0                | 0 -> 1
+handle(es = 2)   0                | 1 -> 2
+handle(empty)    0                | 2 -> 0 (no events processed)
+or irrelevant event with sequence = 3:
+handle(es = 3)   0                | 2 -> 3 (we still "see" es=3)
+
+Monday, January 12, 2026
+========================
+* Notes about how we could "lose" an event if a transaction takes a bit longer than ones started later, as well as how we could get gaps in the sequence used for events:
+
+    [-99---X] rollback
+     [-100---------] Concert 1 scheduled
+      [-101--] Concert 2 scheduled
+       [-102--] Concert 1 rescheduled
+
+    handle(101) => checkpoint = 101
+    --5 ms-
+    handle(102) => huh? reschedule non-existent concert
+    --30 ms--
+    handle(100) => discard, lower than checkpoint(101)
+    --250 ms--
+    process buffered events
+
+    concertStore.load(Concert1): 100, 102
+
 Thursday, January 8, 2026
 =========================
 Notes from obsolete tests in ConcertSalesProjectionMediatorTest:

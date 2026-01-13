@@ -4,6 +4,8 @@ import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.Stream;
+
 import static dev.ted.jitterticket.eventsourced.application.Assertions.assertThat;
 
 class ProjectionCoordinatorTest {
@@ -27,10 +29,9 @@ class ProjectionCoordinatorTest {
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId existingCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(existingCustomerId, "Existing Customer", IRRELEVANT_EMAIL));
-        var registeredCustomersProjector = new RegisteredCustomersProjector();
 
         var projectionCoordinator = new ProjectionCoordinator<>(
-                registeredCustomersProjector,
+                new RegisteredCustomersProjector(),
                 new MemoryRegisteredCustomersProjectionPersistence(),
                 customerStore
         );
@@ -42,13 +43,64 @@ class ProjectionCoordinatorTest {
     }
 
     @Test
+    void projectorStateSameAfterCatchingUpForNoNewEvents() {
+        var customerStore = InMemoryEventStore.forCustomers();
+        CustomerId existingCustomerId = CustomerId.createRandom();
+        customerStore.save(Customer.register(
+                existingCustomerId, "Existing Customer", IRRELEVANT_EMAIL));
+        // catch up on new customer registered
+        MemoryRegisteredCustomersProjectionPersistence projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
+        new ProjectionCoordinator<>(
+                new RegisteredCustomersProjector(),
+                projectionPersistence,
+                customerStore
+        );
+
+        // this won't have any catching up to do, as no new events since last catch-up
+        var projectionCoordinator = new ProjectionCoordinator<>(
+                new RegisteredCustomersProjector(),
+                projectionPersistence,
+                customerStore
+        );
+
+        assertThat(projectionCoordinator.projection().asList())
+                .containsExactly(
+                        new RegisteredCustomers.RegisteredCustomer(existingCustomerId, "Existing Customer")
+                );
+        assertThat(projectionPersistence.loadSnapshot().checkpoint())
+                .isEqualTo(Checkpoint.of(1L));
+    }
+
+    @Test
+    void handleEmptyStreamPreservesPersistedCheckpoint() {
+        MemoryRegisteredCustomersProjectionPersistence projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
+        var customerStore = InMemoryEventStore.forCustomers();
+        CustomerId customerId = CustomerId.createRandom();
+        customerStore.save(Customer.register(customerId, "Existing Customer", IRRELEVANT_EMAIL));
+        var projectionCoordinator = new ProjectionCoordinator<>(
+                new RegisteredCustomersProjector(),
+                projectionPersistence,
+                customerStore
+        );
+
+        projectionCoordinator.handle(Stream.empty());
+
+        assertThat(projectionPersistence.loadSnapshot().checkpoint())
+                .as("Checkpoint should still be 1 (unchanged) after handling an empty stream")
+                .isEqualTo(Checkpoint.of(1L));
+    }
+
+    // test that we don't unnecessarily update the persisted projection if it hasn't changed (i.e., delta is empty and cachedCheckpoint is what it was before)
+
+    // crash-test: saveDelta() blows up and we create a new projection coordinator, which should catch up and match what the projector had previously calculated
+
+    @Test
     void newlySavedCustomerEventsUpdatesProjector() {
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId firstCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(firstCustomerId, "First Customer", "first@example.com"));
-        var registeredCustomersProjector = new RegisteredCustomersProjector();
         var projectionCoordinator = new ProjectionCoordinator<>(
-                registeredCustomersProjector,
+                new RegisteredCustomersProjector(),
                 new MemoryRegisteredCustomersProjectionPersistence(),
                 customerStore
         );
@@ -154,7 +206,57 @@ class ProjectionCoordinatorTest {
     }
 
     @Test
-    void projectionPersistedAfterUpdatedViaHandlingNewEvents() {
+    void projectionPersistedAfterUpdatedViaHandlingSingleNewEvent() {
+        Fixture fixture = createEmptyProjectionCoordinator();
 
+        RegisteredCustomers.RegisteredCustomer expectedRegisteredCustomer =
+                saveNewlyRegisteredCustomer(fixture, "New Customer");
+
+        assertThat(fixture.projectionPersistence.loadSnapshot().checkpoint())
+                .as("Checkpoint should be 1 after handling a single CustomerRegistered event from the event store")
+                .isEqualTo(Checkpoint.of(1L));
+        assertThat(fixture.projectionPersistence.loadSnapshot().state().asList())
+                .containsExactly(expectedRegisteredCustomer);
     }
+
+    @Test
+    void persistedProjectionUpdatedAfterHandlingMultipleNewEvents() {
+        Fixture fixture = createEmptyProjectionCoordinator();
+
+        RegisteredCustomers.RegisteredCustomer firstRegisteredCustomer =
+                saveNewlyRegisteredCustomer(fixture, "First New Customer");
+        RegisteredCustomers.RegisteredCustomer secondRegisteredCustomer =
+                saveNewlyRegisteredCustomer(fixture, "Second New Customer");
+
+        assertThat(fixture.projectionPersistence.loadSnapshot().checkpoint())
+                .as("Checkpoint should be 2 after handling two CustomerRegistered events from the event store")
+                .isEqualTo(Checkpoint.of(2L));
+        assertThat(fixture.projectionPersistence.loadSnapshot().state().asList())
+                .containsExactlyInAnyOrder(firstRegisteredCustomer,
+                                           secondRegisteredCustomer);
+    }
+
+    private static RegisteredCustomers.RegisteredCustomer saveNewlyRegisteredCustomer(Fixture fixture, String customerName) {
+        CustomerId customerId = CustomerId.createRandom();
+        fixture.customerEventStore.save(Customer.register(customerId,
+                                                          customerName,
+                                                          IRRELEVANT_EMAIL));
+        return new RegisteredCustomers.RegisteredCustomer(
+                customerId, customerName);
+    }
+
+    private static Fixture createEmptyProjectionCoordinator() {
+        var customerEventStore = InMemoryEventStore.forCustomers();
+        var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
+        new ProjectionCoordinator<>(
+                new RegisteredCustomersProjector(),
+                projectionPersistence,
+                customerEventStore
+        );
+        return new Fixture(customerEventStore, projectionPersistence);
+    }
+
+    private record Fixture(
+            dev.ted.jitterticket.eventsourced.application.port.EventStore<CustomerId, dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent, Customer> customerEventStore,
+            MemoryRegisteredCustomersProjectionPersistence projectionPersistence) {}
 }

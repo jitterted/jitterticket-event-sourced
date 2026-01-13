@@ -13,6 +13,7 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
     private final ProjectionPersistencePort<STATE> projectionPersistencePort;
     private final EventStore<?, EVENT, ?> eventStore;
     private STATE cachedProjection;
+    private Checkpoint cachedCheckpoint;
 
     public ProjectionCoordinator(DomainProjector<EVENT, STATE> domainProjector,
                                  ProjectionPersistencePort<STATE> projectionPersistencePort,
@@ -20,29 +21,41 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
         this.domainProjector = domainProjector;
         this.projectionPersistencePort = projectionPersistencePort;
         this.eventStore = eventStore;
-        eventStore.subscribe(this);
+
         var snapshot = projectionPersistencePort.loadSnapshot();
-        AtomicReference<Long> lastEventSeen = new AtomicReference<>(snapshot.checkpoint().value());
-        Stream<EVENT> eventStream = eventStore
-                .allEventsAfter(snapshot.checkpoint())
-                .peek(event -> lastEventSeen.set(event.eventSequence()));
-        var projectorResult = domainProjector.project(
-                snapshot.state(),
-                eventStream);
-        cachedProjection = projectorResult.fullState();
-        projectionPersistencePort.saveDelta(
-                projectorResult.delta(),
-                lastEventSeen.get() == 0L
-                        ? Checkpoint.INITIAL
-                        : Checkpoint.of(lastEventSeen.get()));
+        cachedProjection = snapshot.state();
+        cachedCheckpoint = snapshot.checkpoint();
+
+        Stream<EVENT> eventStream = eventStore.allEventsAfter(cachedCheckpoint);
+        updateProjection(eventStream);
+
+        eventStore.subscribe(this);
     }
 
     @Override
     public void handle(Stream<EVENT> eventStream) {
-        var result = domainProjector.project(cachedProjection,
-                                             eventStream);
-        cachedProjection = result.fullState();
-        // persist the latest cache
+        updateProjection(eventStream);
+    }
+
+    private void updateProjection(Stream<EVENT> eventStream) {
+        AtomicReference<Long> lastEventSeen =
+                new AtomicReference<>(cachedCheckpoint.value());
+        Stream<EVENT> checkpointTrackingEventStream = eventStream
+                .peek(event -> lastEventSeen.set(event.eventSequence()));
+
+        var projectorResult = domainProjector.project(
+                cachedProjection,
+                checkpointTrackingEventStream);
+
+        cachedProjection = projectorResult.fullState();
+
+        cachedCheckpoint = lastEventSeen.get() == 0L
+                ? Checkpoint.INITIAL
+                : Checkpoint.of(lastEventSeen.get());
+
+        projectionPersistencePort.saveDelta(
+                projectorResult.delta(),
+                cachedCheckpoint);
     }
 
     public STATE projection() {
