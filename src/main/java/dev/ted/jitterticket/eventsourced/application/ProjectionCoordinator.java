@@ -38,8 +38,7 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
     }
 
     private void updateProjection(Stream<EVENT> eventStream) {
-        AtomicReference<Long> lastEventSeen =
-                new AtomicReference<>(cachedCheckpoint.value());
+        AtomicReference<Long> lastEventSeen = new AtomicReference<>(0L);
         Stream<EVENT> checkpointTrackingEventStream = eventStream
                 .peek(event -> lastEventSeen.set(event.eventSequence()));
 
@@ -54,6 +53,7 @@ public class ProjectionCoordinator<EVENT extends Event, STATE>
                 : Checkpoint.of(lastEventSeen.get());
 
         if (updatedCheckpoint.newerThan(cachedCheckpoint)) {
+            cachedCheckpoint = updatedCheckpoint;
             projectionPersistencePort.saveDelta(
                     projectorResult.delta(),
                     updatedCheckpoint);

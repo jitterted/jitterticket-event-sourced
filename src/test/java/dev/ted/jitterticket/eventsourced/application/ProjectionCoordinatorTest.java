@@ -73,17 +73,20 @@ class ProjectionCoordinatorTest {
 
     @Test
     void handleEmptyStreamPreservesPersistedCheckpoint() {
-        MemoryRegisteredCustomersProjectionPersistence projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
+        var projectionPersistence = new ConfigurableCrashingProjectionPersistence(1);
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId customerId = CustomerId.createRandom();
-        customerStore.save(Customer.register(customerId, "Existing Customer", IRRELEVANT_EMAIL));
         var projectionCoordinator = new ProjectionCoordinator<>(
                 new RegisteredCustomersProjector(),
                 projectionPersistence,
                 customerStore
         );
+        // cachedCheckpoint = 0, persistedCheckpoint = 0
+        customerStore.save(Customer.register(customerId, "Existing Customer", IRRELEVANT_EMAIL));
+        // cachedCheckpoint = 0, persistedCheckpoint = 1
 
         projectionCoordinator.handle(Stream.empty());
+        // cachedCheckpoint = 0, persistedCheckpoint = 1
 
         assertThat(projectionPersistence.loadSnapshot().checkpoint())
                 .as("Checkpoint should still be 1 (unchanged) after handling an empty stream")
@@ -95,32 +98,40 @@ class ProjectionCoordinatorTest {
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId existingCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(existingCustomerId, "Existing Customer", IRRELEVANT_EMAIL));
-        ProjectionPersistencePort<RegisteredCustomers> projectionPersistence = new ProjectionPersistencePort<RegisteredCustomers>() {
-            @Override
-            public Snapshot<RegisteredCustomers> loadSnapshot() {
-                return new Snapshot<>(new RegisteredCustomers(
-                        new RegisteredCustomers.RegisteredCustomer(
-                                existingCustomerId, "Existing Customer")
-                ), Checkpoint.of(1));
-            }
-
-            @Override
-            public void saveDelta(RegisteredCustomers delta, Checkpoint newCheckpoint) {
-                throw new IllegalStateException(
-                        "Should not have attempted to persist projection delta: "
-                        + delta.asList()
-                        + ", new checkpoint = "
-                        + newCheckpoint);
-            }
-        };
         var projectionCoordinator = new ProjectionCoordinator<>(
                 new RegisteredCustomersProjector(),
-                projectionPersistence,
+                new MemoryRegisteredCustomersProjectionPersistence(),
                 customerStore
         );
 
         assertThat(projectionCoordinator.projection().asList())
                 .hasSize(1);
+    }
+
+    @Test
+    void inconsistentEventStreamsCauseCheckpointRegressionIfCachedCheckpointIsNotUpdated() {
+        var customerEventStore = InMemoryEventStore.forCustomers();
+        var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
+        var projectionCoordinator = new ProjectionCoordinator<>(
+                new RegisteredCustomersProjector(),
+                projectionPersistence,
+                customerEventStore
+        );
+
+        customerEventStore.save(Customer.register(
+                CustomerId.createRandom(), "First Customer", "first@example.com"));
+        customerEventStore.save(Customer.register(
+                CustomerId.createRandom(), "Second Customer", "second@example.com"));
+
+        // Simulate an "out of order" or "delayed" event with a "re-handle" of event 1
+        // grabbing it from the event store ensure it has the event sequence assigned
+        var event1 = customerEventStore.allEventsAfter(Checkpoint.INITIAL)
+                                       .findFirst().orElseThrow();
+        projectionCoordinator.handle(Stream.of(event1));
+
+        assertThat(projectionPersistence.loadSnapshot().checkpoint())
+                .as("Checkpoint should not regress to 1 after it has reached 2")
+                .isEqualTo(Checkpoint.of(2L));
     }
 
     @Test
@@ -288,4 +299,27 @@ class ProjectionCoordinatorTest {
     private record Fixture(
             dev.ted.jitterticket.eventsourced.application.port.EventStore<CustomerId, dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent, Customer> customerEventStore,
             MemoryRegisteredCustomersProjectionPersistence projectionPersistence) {}
+
+    private static class ConfigurableCrashingProjectionPersistence extends MemoryRegisteredCustomersProjectionPersistence {
+
+        private final int saveDeltaAttemptsBeforeCrash;
+        private int saveDeltaAttemptCount = 0;
+
+        public ConfigurableCrashingProjectionPersistence(int saveDeltaAttemptsBeforeCrash) {
+            this.saveDeltaAttemptsBeforeCrash = saveDeltaAttemptsBeforeCrash;
+        }
+
+        @Override
+        public void saveDelta(RegisteredCustomers delta, Checkpoint newCheckpoint) {
+            if (++saveDeltaAttemptCount > saveDeltaAttemptsBeforeCrash) {
+                throw new IllegalStateException(
+                        "Should not have attempted to persist projection delta: "
+                        + delta.asList()
+                        + ", new checkpoint = "
+                        + newCheckpoint);
+            } else {
+                super.saveDelta(delta, newCheckpoint);
+            }
+        }
+    }
 }
