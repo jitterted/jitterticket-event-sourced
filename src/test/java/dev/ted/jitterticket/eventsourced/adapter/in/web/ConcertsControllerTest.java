@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
+import dev.ted.jitterticket.eventsourced.application.ClockFactory;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.MemoryAvailableConcertsProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
@@ -23,13 +24,14 @@ class ConcertsControllerTest {
     void ticketableConcertsAddedToModel() {
         var concertStore = InMemoryEventStore.forConcerts();
         var concertId = ConcertId.createRandom();
-        concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
-                                                             "The Sonic Waves",
-                                                             45,
-                                                             LocalDateTime.of(2025, 7, 26, 20, 0),
-                                                             LocalTime.of(19, 0)));
+        concertStore.save(ConcertFactory.scheduleConcertWith(
+                concertId,
+                "The Sonic Waves",
+                45,
+                LocalDateTime.of(2025, 7, 26, 20, 0),
+                LocalTime.of(19, 0)));
         var projectionCoordinator = new ProjectionCoordinator<>(
-                new AvailableConcertsProjector(),
+                AvailableConcertsProjector.forTestWith(ClockFactory.fixedClockAt(2025, 7, 26)),
                 new MemoryAvailableConcertsProjectionPersistence(),
                 concertStore);
 

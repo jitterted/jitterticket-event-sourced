@@ -94,13 +94,11 @@
 
     [X] Make the `suigi-separate-global...` branch as `main` branch
 
-==> CURRENT TASK ==>
-
-    [ ] Convert ConcertSalesProjection+Mediator to Coordinator design
-
     [X] Convert Available Concerts projector to new design
         [X] Rename to AvailableConcerts
         [X] Repeat similar steps from Registered Customers conversion
+
+==> CURRENT TASK ==>
 
     [ ] Add new functionality to the AvailableConcertsProjection:
         [ ] Ignore concerts that are in the past
@@ -109,6 +107,11 @@
     [ ] Actually persist the projections in the database, i.e., implement the PersistencePort interface(s):
         [ ] AvailableConcerts
         [ ] RegisteredCustomers
+
+    [ ] Convert ConcertSalesProjection+Mediator to Coordinator design
+
+    [ ] Add the Concert Sales projection as a choice for viewing with the event viewer
+    [ ] Add the actual aggregates as choices for the event viewer in addition to the existing projections
 
     [ ] Add ability to delete customers, probably via a `CustomerDeleted` event
         [ ] Update how the projector handles deletions
@@ -121,6 +124,8 @@
 
     [ ] Implement the constraint that Customer email addresses must be unique: ? do we need a special read-model/projection for that ?
     [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion
+    [ ] Expand SnapshotAssert to also have assertions for the Delta
+
     [X] Do some performance/benchmarks for 100 concerts, where each concert sells tickets to 10,000 Customers, overall generating 1MM events
     [X] Configure TestContainer tests to reuse the same container to speed up tests
 

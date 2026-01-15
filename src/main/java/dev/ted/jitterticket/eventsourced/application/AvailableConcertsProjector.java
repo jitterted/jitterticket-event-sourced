@@ -6,6 +6,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -16,10 +17,25 @@ import java.util.stream.Stream;
 public class AvailableConcertsProjector implements
         DomainProjector<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> {
 
+    private final Clock clock;
+
+    public AvailableConcertsProjector() {
+        clock = Clock.systemDefaultZone();
+    }
+
+    private AvailableConcertsProjector(Clock fixedClock) {
+        this.clock = fixedClock;
+    }
+
+    public static AvailableConcertsProjector forTestWith(Clock fixedClock) {
+        return new AvailableConcertsProjector(fixedClock);
+    }
+
     @Override
     public ProjectorResult<AvailableConcerts, AvailableConcertsDelta>
         project(AvailableConcerts currentState,
                 Stream<ConcertEvent> concertEventStream) {
+
         Map<ConcertId, AvailableConcert> availableConcertsMap =
                 loadMapFrom(currentState);
 
@@ -28,15 +44,17 @@ public class AvailableConcertsProjector implements
         concertEventStream.forEach(concertEvent -> {
             switch (concertEvent) {
                 case ConcertScheduled scheduled -> {
-                    ConcertId concertId = scheduled.concertId();
-                    AvailableConcert availableConcert =
-                            new AvailableConcert(concertId,
-                                                 scheduled.artist(),
-                                                 scheduled.ticketPrice(),
-                                                 scheduled.showDateTime(),
-                                                 scheduled.doorsTime());
-                    availableConcertsMap.put(concertId, availableConcert);
-                    deltaMap.put(concertId, availableConcert);
+                    if (scheduled.showDateTime().isAfter(LocalDateTime.now(clock))) {
+                        ConcertId concertId = scheduled.concertId();
+                        AvailableConcert availableConcert =
+                                new AvailableConcert(concertId,
+                                                     scheduled.artist(),
+                                                     scheduled.ticketPrice(),
+                                                     scheduled.showDateTime(),
+                                                     scheduled.doorsTime());
+                        availableConcertsMap.put(concertId, availableConcert);
+                        deltaMap.put(concertId, availableConcert);
+                    }
                 }
                 case ConcertRescheduled rescheduled -> {
                     ConcertId concertId = rescheduled.concertId();

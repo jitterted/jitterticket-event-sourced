@@ -3,6 +3,7 @@ package dev.ted.jitterticket.eventviewer.adapter.in.web;
 import dev.ted.jitterticket.eventsourced.application.AvailableConcerts;
 import dev.ted.jitterticket.eventsourced.application.AvailableConcertsDelta;
 import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
+import dev.ted.jitterticket.eventsourced.application.ClockFactory;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.MemoryAvailableConcertsProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
@@ -18,6 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.ui.ConcurrentModel;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -62,14 +64,15 @@ class EventViewerControllerTest {
     }
 
     private static EventViewerController createEventViewerController(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        EventViewerController controller = new EventViewerController(
+        return new EventViewerController(
                 new ProjectionChoices(Map.of(
-                        "concerts", new ConcertProjectionChoice(concertStore, createConcertProjectionCoordinator(concertStore)))));
-        return controller;
+                        "concerts", new ConcertProjectionChoice(concertStore,
+                                                                createConcertProjectionCoordinator(concertStore)))));
     }
 
     private static ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> createConcertProjectionCoordinator(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new ProjectionCoordinator<>(new AvailableConcertsProjector(),
+        Clock fixedClockForWhichAllConcertsAreInTheFuture = ClockFactory.fixedClockAt(2000, 1, 1);
+        return new ProjectionCoordinator<>(AvailableConcertsProjector.forTestWith(fixedClockForWhichAllConcertsAreInTheFuture),
                                            new MemoryAvailableConcertsProjectionPersistence(),
                                            concertStore);
     }
