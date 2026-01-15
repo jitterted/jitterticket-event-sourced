@@ -98,14 +98,24 @@
 
     [ ] Convert ConcertSalesProjection+Mediator to Coordinator design
 
-    [ ] Convert Available Concerts projector to new design
-        [ ] Rename to AvailableConcerts
-        [ ] Repeat similar steps from Registered Customers conversion
+    [X] Convert Available Concerts projector to new design
+        [X] Rename to AvailableConcerts
+        [X] Repeat similar steps from Registered Customers conversion
 
     [ ] Add new functionality to the AvailableConcertsProjection:
         [ ] Ignore concerts that are in the past
         [ ] Add tickets available information
 
+    [ ] Actually persist the projections in the database, i.e., implement the PersistencePort interface(s):
+        [ ] AvailableConcerts
+        [ ] RegisteredCustomers
+
+    [ ] Add ability to delete customers, probably via a `CustomerDeleted` event
+        [ ] Update how the projector handles deletions
+    [ ] Add ability to cancel concerts, via `ConcertCanceled` event
+        [ ] Requires Tickets to be refunded (opposite of purchased)
+            [ ] Sales projector would need to handle this? or just drop the row from the projection when canceled?
+        [ ] Projector would need to be updated
 
 
 

@@ -97,6 +97,8 @@ Run these tests before submitting a pull request:
 8. **Ensure that code is formatted**: reformat the code files after you're done.
 9. **Value Object Validation**: when creating a value object that is implemented as a class, always do necessary validation in the public `of()` or similar method and keep the private constructor as simple as possible. Never add a parameter to a constructor to skip validation as it's not needed, since the existing constructor doesn't do any validation. In general, don't add parameters that aren't used in the method.
 10. **Guard Clauses**: for guard clauses, avoid nesting if statements unless absolutely necessary.
+11. **Avoid Fully-Qualified Names**: Avoid using fully-qualified names for classes, methods, and variables whenever possible. Use imports and static imports to reduce verbosity and improve readability.
+12. **Don't Generate Production Code for Tests**: Do not generate any production code needed only by tests. Instead, have the test use the existing production code.
 
 ### Naming Conventions
 

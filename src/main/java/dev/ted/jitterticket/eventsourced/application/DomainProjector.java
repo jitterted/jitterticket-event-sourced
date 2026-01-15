@@ -2,8 +2,8 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import java.util.stream.Stream;
 
-public interface DomainProjector<EVENT, STATE> {
-    ProjectorResult<STATE> project(STATE currentState, Stream<EVENT> eventStream);
+public interface DomainProjector<EVENT, STATE, DELTA> {
+    ProjectorResult<STATE, DELTA> project(STATE currentState, Stream<EVENT> eventStream);
 
-    record ProjectorResult<STATE>(STATE fullState, STATE delta) {}
+    record ProjectorResult<STATE, DELTA>(STATE fullState, DELTA delta) {}
 }

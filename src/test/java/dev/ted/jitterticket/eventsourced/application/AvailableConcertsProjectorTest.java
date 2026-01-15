@@ -1,87 +1,89 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
 class AvailableConcertsProjectorTest {
 
+    private static final AvailableConcerts EMPTY_AVAILABLE_CONCERTS = new AvailableConcerts(List.of());
+
     @Test
-    void noConcertsCreatedProjectorReturnsNoConcerts() {
-        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector(InMemoryEventStore.forConcerts());
+    void projectReturnsEmptyNewStateWhenNoConcertsAreScheduled() {
+        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector();
 
-        Stream<ConcertSummary> concertTicketViews = availableConcertsProjector.availableConcerts();
+        DomainProjector.ProjectorResult<AvailableConcerts, AvailableConcertsDelta> projection =
+                availableConcertsProjector.project(EMPTY_AVAILABLE_CONCERTS, Stream.empty());
 
-        assertThat(concertTicketViews)
+        assertThat(projection.fullState().availableConcerts())
                 .isEmpty();
+        AvailableConcertsDelta availableConcertsDelta = projection.delta();
+        assertThat(availableConcertsDelta.upsertedConcerts().isEmpty())
+                .isTrue();
+        assertThat(availableConcertsDelta.removedConcertIds().isEmpty())
+                .isTrue();
     }
 
     @Test
-    void projectorReturnsConcertsSavedInConcertStore() {
-        var concertStore = InMemoryEventStore.forConcerts();
-        ConcertId firstConcertId = ConcertId.createRandom();
-        concertStore.save(ConcertFactory.scheduleConcertWith(firstConcertId,
-                                                             "First Concert",
-                                                             99,
-                                                             LocalDateTime.of(2025, 4, 20, 20, 0),
-                                                             LocalTime.of(19, 0)));
-        ConcertId secondConcertId = ConcertId.createRandom();
-        concertStore.save(ConcertFactory.scheduleConcertWith(secondConcertId,
-                                                             "Second Concert",
-                                                             111,
-                                                             LocalDateTime.of(2025, 4, 21, 21, 0),
-                                                             LocalTime.of(19, 30)));
-        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector(concertStore);
-
-        Stream<ConcertSummary> allConcertTicketViews = availableConcertsProjector.availableConcerts();
-
-        assertThat(allConcertTicketViews)
-                .containsExactlyInAnyOrder(
-                        new ConcertSummary(firstConcertId,
-                                           "First Concert",
-                                           99,
-                                           LocalDateTime.of(2025, 4, 20, 20, 0),
-                                           LocalTime.of(19, 0))
-                        , new ConcertSummary(secondConcertId,
-                                             "Second Concert",
-                                             111,
-                                             LocalDateTime.of(2025, 4, 21, 21, 0),
-                                             LocalTime.of(19, 30))
-                );
-    }
-
-    @Test
-    void projectorReturnsSingleConcertForSavedAndRescheduledConcerts() {
-        var concertStore = InMemoryEventStore.forConcerts();
+    void projectReturnsConcertSummaryWhenConcertIsScheduled() {
+        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector();
         ConcertId concertId = ConcertId.createRandom();
-        concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
-                                                             "Desi Bells",
-                                                             35,
-                                                             LocalDateTime.of(2025, 4, 22, 19, 0),
-                                                             LocalTime.of(18, 0)));
-        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector(concertStore);
-        Concert rescheduledConcert = concertStore.findById(concertId).orElseThrow();
-        rescheduledConcert.rescheduleTo(LocalDateTime.of(2025, 7, 11, 20, 0),
-                                        LocalTime.of(19, 0));
-        concertStore.save(rescheduledConcert);
+        var concertScheduled = new ConcertScheduled(concertId,
+                                                    1L,
+                                                    "Concert Artist",
+                                                    99,
+                                                    LocalDateTime.of(2025, 4, 20, 20, 0),
+                                                    LocalTime.of(19, 0),
+                                                    100,
+                                                    4);
 
-        Stream<ConcertSummary> allConcertTicketViews =
-                availableConcertsProjector.availableConcerts();
+        var projection = availableConcertsProjector.project(EMPTY_AVAILABLE_CONCERTS, Stream.of(concertScheduled));
 
-        assertThat(allConcertTicketViews)
-                .containsExactly(new ConcertSummary(
-                        concertId,
-                        "Desi Bells",
-                        35,
-                        LocalDateTime.of(2025, 7, 11, 20, 0),
-                        LocalTime.of(19, 0)));
+        AvailableConcert expectedSummary = new AvailableConcert(concertId,
+                                                                "Concert Artist",
+                                                                99,
+                                                                LocalDateTime.of(2025, 4, 20, 20, 0),
+                                                                LocalTime.of(19, 0));
+        assertThat(projection.fullState().availableConcerts())
+                .containsExactly(expectedSummary);
+        assertThat(projection.delta().upsertedConcerts())
+                .containsExactly(expectedSummary);
+    }
+
+    @Test
+    void projectReturnsRescheduledConcertSummaryWhenConcertIsRescheduled() {
+        ConcertId concertId = ConcertId.createRandom();
+        AvailableConcert initialSummary = new AvailableConcert(concertId,
+                                                               "Artist",
+                                                               35,
+                                                               LocalDateTime.of(2025, 4, 22, 19, 0),
+                                                               LocalTime.of(18, 0));
+        AvailableConcerts initialState = new AvailableConcerts(List.of(initialSummary));
+        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector();
+        var concertRescheduled = new ConcertRescheduled(concertId,
+                                                         2L,
+                                                         LocalDateTime.of(2025, 7, 11, 20, 0),
+                                                         LocalTime.of(19, 0));
+
+        var projection = availableConcertsProjector.project(initialState, Stream.of(concertRescheduled));
+
+        AvailableConcert expectedSummary = new AvailableConcert(concertId,
+                                                                "Artist",
+                                                                35,
+                                                                LocalDateTime.of(2025, 7, 11, 20, 0),
+                                                                LocalTime.of(19, 0));
+        assertThat(projection.fullState().availableConcerts())
+                .containsExactly(expectedSummary);
+        assertThat(projection.delta().upsertedConcerts())
+                .containsExactly(expectedSummary);
     }
 
 }

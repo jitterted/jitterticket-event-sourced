@@ -19,7 +19,7 @@ class RegisteredCustomersProjectorTest {
         RegisteredCustomersProjector registeredCustomersProjector =
                 new RegisteredCustomersProjector();
 
-        DomainProjector.ProjectorResult<RegisteredCustomers> projection =
+        DomainProjector.ProjectorResult<RegisteredCustomers, RegisteredCustomers> projection =
                 registeredCustomersProjector.project(EMPTY_REGISTERED_CUSTOMERS_STATE,
                                                      Stream.empty());
 

@@ -2,6 +2,8 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
+import dev.ted.jitterticket.eventsourced.application.MemoryAvailableConcertsProjectionPersistence;
+import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.junit.jupiter.api.Test;
@@ -20,15 +22,18 @@ class ConcertsControllerTest {
     @Test
     void ticketableConcertsAddedToModel() {
         var concertStore = InMemoryEventStore.forConcerts();
-        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector(concertStore);
-        ConcertId concertId = ConcertId.createRandom();
+        var concertId = ConcertId.createRandom();
         concertStore.save(ConcertFactory.scheduleConcertWith(concertId,
                                                              "The Sonic Waves",
                                                              45,
                                                              LocalDateTime.of(2025, 7, 26, 20, 0),
                                                              LocalTime.of(19, 0)));
+        var projectionCoordinator = new ProjectionCoordinator<>(
+                new AvailableConcertsProjector(),
+                new MemoryAvailableConcertsProjectionPersistence(),
+                concertStore);
 
-        ConcertsController concertsController = new ConcertsController(availableConcertsProjector);
+        ConcertsController concertsController = new ConcertsController(projectionCoordinator);
 
         Model model = new ConcurrentModel();
         String viewName = concertsController.ticketableConcerts(model);

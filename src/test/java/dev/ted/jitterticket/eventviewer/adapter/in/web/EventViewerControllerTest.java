@@ -1,6 +1,11 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
+import dev.ted.jitterticket.eventsourced.application.AvailableConcerts;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcertsDelta;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
+import dev.ted.jitterticket.eventsourced.application.MemoryAvailableConcertsProjectionPersistence;
+import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -27,7 +32,7 @@ class EventViewerControllerTest {
     void listProjectionChoicesShowsAvailableProjections() {
         var concertStore = InMemoryEventStore.forConcerts();
         var customerStore = InMemoryEventStore.forCustomers();
-        ProjectionChoice projectionChoice = new ConcertProjectionChoice(concertStore);
+        ProjectionChoice projectionChoice = new ConcertProjectionChoice(concertStore, createConcertProjectionCoordinator(concertStore));
         EventViewerController controller = new EventViewerController(
                 new ProjectionChoices(Map.of("concerts", projectionChoice)));
         ConcurrentModel model = new ConcurrentModel();
@@ -59,8 +64,14 @@ class EventViewerControllerTest {
     private static EventViewerController createEventViewerController(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         EventViewerController controller = new EventViewerController(
                 new ProjectionChoices(Map.of(
-                        "concerts", new ConcertProjectionChoice(concertStore))));
+                        "concerts", new ConcertProjectionChoice(concertStore, createConcertProjectionCoordinator(concertStore)))));
         return controller;
+    }
+
+    private static ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> createConcertProjectionCoordinator(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new ProjectionCoordinator<>(new AvailableConcertsProjector(),
+                                           new MemoryAvailableConcertsProjectionPersistence(),
+                                           concertStore);
     }
 
     @Test

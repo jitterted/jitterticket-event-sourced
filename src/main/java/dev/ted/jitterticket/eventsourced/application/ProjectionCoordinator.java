@@ -6,17 +6,17 @@ import dev.ted.jitterticket.eventsourced.domain.Event;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-public class ProjectionCoordinator<EVENT extends Event, STATE>
+public class ProjectionCoordinator<EVENT extends Event, STATE, DELTA>
         implements EventConsumer<EVENT> {
 
-    private final DomainProjector<EVENT, STATE> domainProjector;
-    private final ProjectionPersistencePort<STATE> projectionPersistencePort;
+    private final DomainProjector<EVENT, STATE, DELTA> domainProjector;
+    private final ProjectionPersistencePort<STATE, DELTA> projectionPersistencePort;
     private final EventStore<?, EVENT, ?> eventStore;
     private STATE cachedProjection;
     private Checkpoint cachedCheckpoint;
 
-    public ProjectionCoordinator(DomainProjector<EVENT, STATE> domainProjector,
-                                 ProjectionPersistencePort<STATE> projectionPersistencePort,
+    public ProjectionCoordinator(DomainProjector<EVENT, STATE, DELTA> domainProjector,
+                                 ProjectionPersistencePort<STATE, DELTA> projectionPersistencePort,
                                  EventStore<?, EVENT, ?> eventStore) {
         this.domainProjector = domainProjector;
         this.projectionPersistencePort = projectionPersistencePort;

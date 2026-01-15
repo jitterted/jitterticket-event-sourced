@@ -1,6 +1,7 @@
 package dev.ted.jitterticket;
 
-import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcerts;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcertsDelta;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
@@ -27,17 +28,17 @@ public class SampleDataPopulator implements ApplicationRunner {
 
     static final ConcertId SONIC_WAVES_CONCERT_ID = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440001"));
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
-    private final ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection;
+    private final ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers> registeredCustomersProjection;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
-    private final AvailableConcertsProjector availableConcertsProjector;
+    private final ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> concertProjection;
 
     public SampleDataPopulator(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
                                EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-                               ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection,
-                               AvailableConcertsProjector availableConcertsProjector) {
+                               ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers> registeredCustomersProjection,
+                               ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> concertProjection) {
         this.customerStore = customerStore;
         this.concertStore = concertStore;
-        this.availableConcertsProjector = availableConcertsProjector;
+        this.concertProjection = concertProjection;
         this.registeredCustomersProjection = registeredCustomersProjection;
     }
 
@@ -57,7 +58,7 @@ public class SampleDataPopulator implements ApplicationRunner {
 
     void populateConcertSampleData() {
         // don't add sample data if sample concerts were already added
-        if (availableConcertsProjector.availableConcerts().findAny().isPresent()) {
+        if (!concertProjection.projection().availableConcerts().isEmpty()) {
             return;
         }
 

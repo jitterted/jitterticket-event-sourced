@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 
 public class CustomerProjectionChoice extends ProjectionChoice {
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
-    private final ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection;
+    private final ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers> registeredCustomersProjection;
 
     public CustomerProjectionChoice(
             EventStore<CustomerId, CustomerEvent, Customer> customerStore,
-            ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection
+            ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers> registeredCustomersProjection
     ) {
         super("Customer", "customers");
         this.customerStore = customerStore;

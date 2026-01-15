@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class RegisteredCustomersProjector implements
-        DomainProjector<CustomerEvent, RegisteredCustomers> {
+        DomainProjector<CustomerEvent, RegisteredCustomers, RegisteredCustomers> {
 
     @Override
-    public ProjectorResult<RegisteredCustomers> project(
+    public ProjectorResult<RegisteredCustomers, RegisteredCustomers> project(
             RegisteredCustomers currentState,
             Stream<CustomerEvent> customerEventStream) {
         List<RegisteredCustomers.RegisteredCustomer> newlyRegisteredCustomers =

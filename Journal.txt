@@ -1,3 +1,10 @@
+Thursday, January 15, 2026
+==========================
+[IntelliJ IDEA BUG]
+* Extract method disabled "make static" option and it's always on!!
+
+
+
 Tuesday, January 13, 2026
 =========================
 * Handling events that come in while the projection is catching-up:

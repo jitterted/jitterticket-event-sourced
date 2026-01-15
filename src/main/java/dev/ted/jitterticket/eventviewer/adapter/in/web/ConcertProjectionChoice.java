@@ -1,6 +1,8 @@
 package dev.ted.jitterticket.eventviewer.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcerts;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcertsDelta;
+import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -13,18 +15,23 @@ import java.util.UUID;
 public class ConcertProjectionChoice extends ProjectionChoice {
 
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
-    protected AvailableConcertsProjector availableConcertsProjector;
+    private final ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> availableConcertsProjection;
 
-    public ConcertProjectionChoice(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    public ConcertProjectionChoice(
+            EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+            ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> availableConcertsProjection
+    ) {
         super("Concert", "concerts");
         this.concertStore = concertStore;
-        this.availableConcertsProjector = new AvailableConcertsProjector(concertStore);
+        this.availableConcertsProjection = availableConcertsProjection;
     }
 
     @Override
     public List<AggregateSummaryView> aggregateSummaryViews() {
-        return availableConcertsProjector
+        return availableConcertsProjection
+                .projection()
                 .availableConcerts()
+                .stream()
                 .map(concertSummary -> new AggregateSummaryView(
                         concertSummary.concertId().id().toString(),
                         concertSummary.artist()

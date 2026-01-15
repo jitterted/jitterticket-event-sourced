@@ -1,9 +1,12 @@
 package dev.ted.jitterticket;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcerts;
+import dev.ted.jitterticket.eventsourced.application.AvailableConcertsDelta;
 import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjectionMediator;
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
+import dev.ted.jitterticket.eventsourced.application.MemoryAvailableConcertsProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.MemoryRegisteredCustomersProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
@@ -27,12 +30,14 @@ import java.util.Map;
 public class ProjectionConfiguration {
 
     @Bean
-    AvailableConcertsProjector concertProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        return new AvailableConcertsProjector(concertStore);
+    ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> concertProjectionCoordinator(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new ProjectionCoordinator<>(new AvailableConcertsProjector(),
+                                           new MemoryAvailableConcertsProjectionPersistence(),
+                                           concertStore);
     }
 
     @Bean
-    ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjectionCoordinator(
+    ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers> registeredCustomersProjectionCoordinator(
             EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
         return new ProjectionCoordinator<>(new RegisteredCustomersProjector(),
                                            new MemoryRegisteredCustomersProjectionPersistence(),
@@ -53,10 +58,11 @@ public class ProjectionConfiguration {
     ProjectionChoices projectionChoices(
             EventStore<ConcertId, ConcertEvent, Concert> concertStore,
             EventStore<CustomerId, CustomerEvent, Customer> customerStore,
-            ProjectionCoordinator<CustomerEvent, RegisteredCustomers> registeredCustomersProjection
+            ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> concertProjection,
+            ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers> registeredCustomersProjection
     ) {
         return new ProjectionChoices(Map.of(
-                "concerts", new ConcertProjectionChoice(concertStore),
+                "concerts", new ConcertProjectionChoice(concertStore, concertProjection),
                 "customers", new CustomerProjectionChoice(customerStore, registeredCustomersProjection)
         ));
     }

@@ -1,7 +1,5 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.application.port.EventStore;
-import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
@@ -11,53 +9,69 @@ import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class AvailableConcertsProjector implements EventConsumer<ConcertEvent> {
-
-    protected final Map<ConcertId, ConcertSummary> availableConcertsMap = new HashMap<>();
-
-    public AvailableConcertsProjector(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
-        concertStore.allEventsAfter(Checkpoint.INITIAL).forEach(this::apply);
-        concertStore.subscribe(this);
-    }
-
-    public Stream<ConcertSummary> availableConcerts() {
-        return availableConcertsMap.values().stream();
-    }
+public class AvailableConcertsProjector implements DomainProjector<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> {
 
     @Override
-    public void handle(Stream<ConcertEvent> concertEventStream) {
-        concertEventStream.forEach(this::apply);
+    public ProjectorResult<AvailableConcerts, AvailableConcertsDelta>
+        project(AvailableConcerts currentState,
+                Stream<ConcertEvent> concertEventStream) {
+        Map<ConcertId, AvailableConcert> availableConcertsMap =
+                loadMapFrom(currentState);
+
+        Map<ConcertId, AvailableConcert> deltaMap = new HashMap<>();
+
+        concertEventStream.forEach(concertEvent -> {
+            switch (concertEvent) {
+                case ConcertScheduled scheduled -> {
+                    ConcertId concertId = scheduled.concertId();
+                    AvailableConcert availableConcert =
+                            new AvailableConcert(concertId,
+                                                 scheduled.artist(),
+                                                 scheduled.ticketPrice(),
+                                                 scheduled.showDateTime(),
+                                                 scheduled.doorsTime());
+                    availableConcertsMap.put(concertId, availableConcert);
+                    deltaMap.put(concertId, availableConcert);
+                }
+                case ConcertRescheduled rescheduled -> {
+                    ConcertId concertId = rescheduled.concertId();
+                    AvailableConcert oldConcert = availableConcertsMap.get(concertId);
+                    AvailableConcert rescheduledView =
+                            rescheduleTo(rescheduled.newShowDateTime(),
+                                         rescheduled.newDoorsTime(),
+                                         oldConcert);
+                    availableConcertsMap.put(concertId, rescheduledView);
+                    deltaMap.put(concertId, rescheduledView);
+                }
+                case TicketsSold ticketsSold -> {
+                    // don't care about this event for this projector
+                }
+            }
+        });
+
+        return new ProjectorResult<>(
+                new AvailableConcerts(List.copyOf(availableConcertsMap.values())),
+                new AvailableConcertsDelta(List.copyOf(deltaMap.values()), List.of())
+        );
     }
 
-    private void apply(ConcertEvent concertEvent) {
-        switch (concertEvent) {
-            case ConcertScheduled scheduled -> availableConcertsMap.put(scheduled.concertId(),
-                                                                        new ConcertSummary(scheduled.concertId(),
-                                                                                        scheduled.artist(),
-                                                                                        scheduled.ticketPrice(),
-                                                                                        scheduled.showDateTime(),
-                                                                                        scheduled.doorsTime()));
-            case ConcertRescheduled rescheduled -> {
-                ConcertSummary oldView = availableConcertsMap.get(rescheduled.concertId());
-                ConcertSummary rescheduledView = rescheduleTo(rescheduled.newShowDateTime(),
-                                                              rescheduled.newDoorsTime(),
-                                                              oldView);
-                availableConcertsMap.put(rescheduled.concertId(), rescheduledView);
-            }
-            case TicketsSold ticketsSold -> {
-                // don't care about this event for this projector
-            }
-        }
+    private Map<ConcertId, AvailableConcert> loadMapFrom(AvailableConcerts currentState) {
+        Map<ConcertId, AvailableConcert> availableConcertsMap = new HashMap<>();
+        currentState.availableConcerts().forEach(concert -> availableConcertsMap.put(concert.concertId(), concert));
+        return availableConcertsMap;
     }
 
-    private ConcertSummary rescheduleTo(LocalDateTime newShowDateTime, LocalTime newDoorsTime, ConcertSummary oldView) {
-        return new ConcertSummary(
-                oldView.concertId(),
-                oldView.artist(),
-                oldView.ticketPrice(),
+    private AvailableConcert rescheduleTo(LocalDateTime newShowDateTime,
+                                          LocalTime newDoorsTime,
+                                          AvailableConcert oldConcert) {
+        return new AvailableConcert(
+                oldConcert.concertId(),
+                oldConcert.artist(),
+                oldConcert.ticketPrice(),
                 newShowDateTime,
                 newDoorsTime
         );
