@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 
-public class RegisteredCustomers {
+public class RegisteredCustomers implements ProjectionDelta {
     private final List<RegisteredCustomer> registeredCustomers = new ArrayList<>();
 
     public RegisteredCustomers() {
@@ -75,6 +75,11 @@ public class RegisteredCustomers {
         return new StringJoiner(", ", RegisteredCustomers.class.getSimpleName() + "[", "]")
                 .add("registeredCustomers=" + registeredCustomers)
                 .toString();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return registeredCustomers.isEmpty();
     }
 
     public record RegisteredCustomer(CustomerId customerId, String name) {}

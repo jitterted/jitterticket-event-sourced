@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class AvailableConcertsProjector implements DomainProjector<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> {
+public class AvailableConcertsProjector implements
+        DomainProjector<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> {
 
     @Override
     public ProjectorResult<AvailableConcerts, AvailableConcertsDelta>

@@ -6,7 +6,7 @@ import dev.ted.jitterticket.eventsourced.domain.Event;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-public class ProjectionCoordinator<EVENT extends Event, STATE, DELTA>
+public class ProjectionCoordinator<EVENT extends Event, STATE, DELTA extends ProjectionDelta>
         implements EventConsumer<EVENT> {
 
     private final DomainProjector<EVENT, STATE, DELTA> domainProjector;

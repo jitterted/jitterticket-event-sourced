@@ -25,10 +25,7 @@ class AvailableConcertsProjectorTest {
 
         assertThat(projection.fullState().availableConcerts())
                 .isEmpty();
-        AvailableConcertsDelta availableConcertsDelta = projection.delta();
-        assertThat(availableConcertsDelta.upsertedConcerts().isEmpty())
-                .isTrue();
-        assertThat(availableConcertsDelta.removedConcertIds().isEmpty())
+        assertThat(projection.delta().isEmpty())
                 .isTrue();
     }
 
