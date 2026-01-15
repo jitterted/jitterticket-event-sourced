@@ -3,6 +3,8 @@ Thursday, January 15, 2026
 [IntelliJ IDEA BUG]
 * Extract method disabled "make static" option and it's always on!!
 
+[Design Decision]
+* Instead of figuring out how to deal with time going by for the Available Concerts Projector (which has all sorts of implications, such as dealing with a concert that was scheduled to happen in the past, but was then rescheduled to a future date), we will rely on a "ConcertCompleted" event to "close the books" on that concert. We'll assume that the Venue Manager clicks a button on some UI to mark that concert as completed, and then we'll remove it from the projection.
 
 
 Tuesday, January 13, 2026

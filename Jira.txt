@@ -101,8 +101,10 @@
 ==> CURRENT TASK ==>
 
     [ ] Add new functionality to the AvailableConcertsProjection:
-        [ ] Ignore concerts that are in the past
-        [ ] Add tickets available information
+        [X] Ignore scheduled concerts that are in the past
+        [ ] Ignore rescheduled concerts that are in the past
+        [ ] Figure out how to deal with time going by in the world, but the projection isn't update just because another day went by, so what do we do?
+        [ ] Add tickets available information: if max tickets have been sold, the concert is no longer available
 
     [ ] Actually persist the projections in the database, i.e., implement the PersistencePort interface(s):
         [ ] AvailableConcerts

@@ -30,9 +30,8 @@ class AvailableConcertsProjectorTest {
     }
 
     @Test
-    void projectorReturnsAvailableConcertWhenConcertIsScheduledInTheFuture() {
-        AvailableConcertsProjector availableConcertsProjector =
-                AvailableConcertsProjector.forTestWith(ClockFactory.fixedClockAt(2025, 1, 1));
+    void projectReturnsConcertSummaryWhenConcertIsScheduled() {
+        AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector();
         ConcertId concertId = ConcertId.createRandom();
         var concertScheduled = new ConcertScheduled(concertId,
                                                     1L,
@@ -57,32 +56,7 @@ class AvailableConcertsProjectorTest {
     }
 
     @Test
-    void projectorReturnsEmptyWhenOnlyConcertIsScheduledInThePast() {
-        AvailableConcertsProjector availableConcertsProjector =
-                AvailableConcertsProjector.forTestWith(ClockFactory.fixedClockAt(2026, 1, 1));
-        ConcertId concertId = ConcertId.createRandom();
-        var concertScheduled = new ConcertScheduled(concertId,
-                                                    1L,
-                                                    "Concert Artist",
-                                                    99,
-                                                    LocalDateTime.of(2025, 4, 20, 20, 0),
-                                                    LocalTime.of(19, 0),
-                                                    100,
-                                                    4);
-
-        var projection = availableConcertsProjector.project(
-                EMPTY_AVAILABLE_CONCERTS, Stream.of(concertScheduled));
-
-        assertThat(projection.fullState().availableConcerts().isEmpty())
-                .as("Expected no Available Concerts when the only scheduled concert is in the past")
-                .isTrue();
-        assertThat(projection.delta().isEmpty())
-                .as("Expected no upserted nor removed concerts when the only scheduled concert is in the past and the incoming state did not have that concert.")
-                .isTrue();
-    }
-
-    @Test
-    void projectReturnsRescheduledAvailableConcertWhenConcertIsRescheduled() {
+    void projectReturnsRescheduledConcertSummaryWhenConcertIsRescheduled() {
         ConcertId concertId = ConcertId.createRandom();
         AvailableConcert initialSummary = new AvailableConcert(concertId,
                                                                "Artist",
