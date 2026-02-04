@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AvailableConcertsProjector implements
@@ -20,12 +22,13 @@ public class AvailableConcertsProjector implements
 
     @Override
     public ProjectorResult<AvailableConcerts, AvailableConcertsDelta>
-        project(AvailableConcerts currentState,
-                Stream<ConcertEvent> concertEventStream) {
+    project(AvailableConcerts currentState,
+            Stream<ConcertEvent> concertEventStream) {
         Map<ConcertId, AvailableConcert> availableConcertsMap =
                 loadMapFrom(currentState);
-        Map<ConcertId, AvailableConcert> upsertedConcertsMap = new HashMap<>();
         List<ConcertId> removedConcertIds = new ArrayList<>();
+        List<AvailableConcert> insertedConcerts = new ArrayList<>();
+        List<AvailableConcert> updatedConcerts = new ArrayList<>();
 
         concertEventStream.forEach(concertEvent -> {
             switch (concertEvent) {
@@ -38,7 +41,7 @@ public class AvailableConcertsProjector implements
                                                  scheduled.showDateTime(),
                                                  scheduled.doorsTime());
                     availableConcertsMap.put(concertId, availableConcert);
-                    upsertedConcertsMap.put(concertId, availableConcert);
+                    insertedConcerts.add(availableConcert);
                 }
                 case ConcertRescheduled rescheduled -> {
                     ConcertId concertId = rescheduled.concertId();
@@ -48,18 +51,31 @@ public class AvailableConcertsProjector implements
                                          rescheduled.newDoorsTime(),
                                          oldConcert);
                     availableConcertsMap.put(concertId, rescheduledView);
-                    upsertedConcertsMap.put(concertId, rescheduledView);
+                    updatedConcerts.add(rescheduledView);
                 }
                 case TicketsSold ticketsSold -> {
                     // don't care about this event for this projector
                 }
                 case TicketSalesStopped ticketSalesStopped -> {
                     availableConcertsMap.remove(ticketSalesStopped.concertId());
-                    removedConcertIds.add(ticketSalesStopped.concertId());
+                    if (insertedConcerts.stream().noneMatch(availableConcert -> availableConcert.concertId().equals(ticketSalesStopped.concertId()))) {
+                        removedConcertIds.add(ticketSalesStopped.concertId());
+                    }
+                    insertedConcerts.removeIf(availableConcert -> availableConcert.concertId().equals(ticketSalesStopped.concertId()));
+                    updatedConcerts.removeIf(availableConcert -> availableConcert.concertId().equals(ticketSalesStopped.concertId()));
                 }
             }
         });
 
+        Map<ConcertId, AvailableConcert> upsertedConcertsMap =
+                insertedConcerts.stream()
+                                .collect(Collectors.toMap(
+                                        AvailableConcert::concertId,
+                                        Function.identity()));
+        updatedConcerts.forEach(availableConcert ->
+                                        upsertedConcertsMap.put(
+                                                availableConcert.concertId(),
+                                                availableConcert));
         return new ProjectorResult<>(
                 new AvailableConcerts(List.copyOf(availableConcertsMap.values())),
                 new AvailableConcertsDelta(List.copyOf(upsertedConcertsMap.values()),

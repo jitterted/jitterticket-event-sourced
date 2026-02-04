@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
 import java.time.LocalDateTime;
@@ -86,6 +87,10 @@ public class MakeEvents {
                         qty,
                         qty * customizer.ticketPrice))
                 .forEach(events::add);
+        if (customizer.isTicketSalesStopped()) {
+            events.add(new TicketSalesStopped(
+                    concertId, eventSequenceIterator.next()));
+        }
         return this;
     }
 
@@ -126,6 +131,7 @@ public class MakeEvents {
         private final List<Integer> ticketsSoldQuantity = new ArrayList<>();
         private String artistName = "Don't Care Artist Name"; // default
         private LocalDateTime showDateTime = LocalDateTime.now();
+        private boolean ticketSalesStopped = false;
 
         public ConcertCustomizer ticketPrice(int ticketPrice) {
             this.ticketPrice = ticketPrice;
@@ -145,6 +151,15 @@ public class MakeEvents {
         public ConcertCustomizer showDate(LocalDateTime showDateTime) {
             this.showDateTime = showDateTime;
             return this;
+        }
+
+        public ConcertCustomizer ticketSalesStopped() {
+            ticketSalesStopped = true;
+            return this;
+        }
+
+        public boolean isTicketSalesStopped() {
+            return ticketSalesStopped;
         }
     }
 }
