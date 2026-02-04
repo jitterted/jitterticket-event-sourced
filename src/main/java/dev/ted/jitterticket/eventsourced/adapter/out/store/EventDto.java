@@ -29,6 +29,7 @@ import java.util.UUID;
 /**
  *  Represents an Event as JSON with some metadata for converting back to concrete Event object
  */
+@SuppressWarnings("ClassCanBeRecord")
 public class EventDto<EVENT extends Event> {
     private static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
 
@@ -183,6 +184,7 @@ abstract class ConcertEventMixin {
     public abstract ConcertId concertId();
 }
 
+@SuppressWarnings("unused")
 abstract class CustomerRegisteredMixin {
     @JsonCreator
     public CustomerRegisteredMixin(
@@ -199,6 +201,7 @@ abstract class CustomerRegisteredMixin {
     public abstract String email();
 }
 
+@SuppressWarnings("unused")
 abstract class ConcertRescheduledMixin {
     @JsonCreator
     public ConcertRescheduledMixin(
@@ -219,6 +222,7 @@ abstract class ConcertRescheduledMixin {
     public abstract LocalTime newDoorsTime();
 }
 
+@SuppressWarnings("unused")
 abstract class TicketsSoldMixin {
     @JsonCreator
     public TicketsSoldMixin(
@@ -239,6 +243,7 @@ abstract class TicketsSoldMixin {
     public abstract int totalPaid();
 }
 
+@SuppressWarnings("unused")
 abstract class TicketsPurchasedMixin {
     @JsonCreator
     public TicketsPurchasedMixin(
@@ -264,6 +269,7 @@ abstract class TicketsPurchasedMixin {
     public abstract int paidAmount();
 }
 
+@SuppressWarnings("unused")
 abstract class ConcertScheduledMixin {
     @JsonCreator
     public ConcertScheduledMixin(
@@ -300,6 +306,7 @@ abstract class ConcertScheduledMixin {
     public abstract int maxTicketsPerPurchase();
 }
 
+@SuppressWarnings("unused")
 abstract class TicketSalesStoppedMixin {
     @JsonCreator
     public TicketSalesStoppedMixin(

@@ -9,6 +9,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,16 +18,14 @@ import java.util.stream.Stream;
 public class AvailableConcertsProjector implements
         DomainProjector<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> {
 
-    private static final List<ConcertId> ALWAYS_EMPTY_CONCERT_IDS_TO_BE_REMOVED = List.of();
-
     @Override
     public ProjectorResult<AvailableConcerts, AvailableConcertsDelta>
         project(AvailableConcerts currentState,
                 Stream<ConcertEvent> concertEventStream) {
         Map<ConcertId, AvailableConcert> availableConcertsMap =
                 loadMapFrom(currentState);
-
-        Map<ConcertId, AvailableConcert> deltaMap = new HashMap<>();
+        Map<ConcertId, AvailableConcert> upsertedConcertsMap = new HashMap<>();
+        List<ConcertId> removedConcertIds = new ArrayList<>();
 
         concertEventStream.forEach(concertEvent -> {
             switch (concertEvent) {
@@ -39,7 +38,7 @@ public class AvailableConcertsProjector implements
                                                  scheduled.showDateTime(),
                                                  scheduled.doorsTime());
                     availableConcertsMap.put(concertId, availableConcert);
-                    deltaMap.put(concertId, availableConcert);
+                    upsertedConcertsMap.put(concertId, availableConcert);
                 }
                 case ConcertRescheduled rescheduled -> {
                     ConcertId concertId = rescheduled.concertId();
@@ -49,21 +48,22 @@ public class AvailableConcertsProjector implements
                                          rescheduled.newDoorsTime(),
                                          oldConcert);
                     availableConcertsMap.put(concertId, rescheduledView);
-                    deltaMap.put(concertId, rescheduledView);
+                    upsertedConcertsMap.put(concertId, rescheduledView);
                 }
                 case TicketsSold ticketsSold -> {
                     // don't care about this event for this projector
                 }
                 case TicketSalesStopped ticketSalesStopped -> {
-                    // TBD: remove this concert
+                    availableConcertsMap.remove(ticketSalesStopped.concertId());
+                    removedConcertIds.add(ticketSalesStopped.concertId());
                 }
             }
         });
 
         return new ProjectorResult<>(
                 new AvailableConcerts(List.copyOf(availableConcertsMap.values())),
-                new AvailableConcertsDelta(List.copyOf(deltaMap.values()),
-                                           ALWAYS_EMPTY_CONCERT_IDS_TO_BE_REMOVED)
+                new AvailableConcertsDelta(List.copyOf(upsertedConcertsMap.values()),
+                                           removedConcertIds)
         );
     }
 

@@ -9,6 +9,11 @@ Wednesday, February 4, 2026
 [Look Into]
 * Should the mixins used in EventDto.createObjectMapper() extend in a parallel hierarchy (e.g., TicketSalesStoppedMixin extends ConcertMixin)? Is that already handled by the ObjectMapper implicitly (e.g., because ConcertMixin is already defined)?
 
+[Create New Event Tool]
+* Use Junie to create a code-generator tool for adding new events, handling not just the creation of the event and adding it to the sealed-permits, but also updating the EventDto and EventDtoTest for the JSON round-trip conversion. Make sure to add @SuppressWarnings("unused") for the generated Mixin class.
+
+[IntelliJ IDEA]
+* Sticky lines don't help when the parameter list is across multiple lines (it only shows the first line)
 
 # Stream Wrap-up
 
