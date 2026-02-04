@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AvailableConcertsProjector implements
@@ -27,8 +25,8 @@ public class AvailableConcertsProjector implements
         Map<ConcertId, AvailableConcert> availableConcertsMap =
                 loadMapFrom(currentState);
         List<ConcertId> removedConcertIds = new ArrayList<>();
-        List<AvailableConcert> insertedConcerts = new ArrayList<>();
-        List<AvailableConcert> updatedConcerts = new ArrayList<>();
+        Map<ConcertId, AvailableConcert> insertedConcerts = new HashMap<>();
+        Map<ConcertId, AvailableConcert> updatedConcerts = new HashMap<>();
 
         concertEventStream.forEach(concertEvent -> {
             switch (concertEvent) {
@@ -41,7 +39,7 @@ public class AvailableConcertsProjector implements
                                                  scheduled.showDateTime(),
                                                  scheduled.doorsTime());
                     availableConcertsMap.put(concertId, availableConcert);
-                    insertedConcerts.add(availableConcert);
+                    insertedConcerts.put(concertId, availableConcert);
                 }
                 case ConcertRescheduled rescheduled -> {
                     ConcertId concertId = rescheduled.concertId();
@@ -51,36 +49,34 @@ public class AvailableConcertsProjector implements
                                          rescheduled.newDoorsTime(),
                                          oldConcert);
                     availableConcertsMap.put(concertId, rescheduledView);
-                    updatedConcerts.add(rescheduledView);
+                    updatedConcerts.put(concertId, rescheduledView);
                 }
                 case TicketsSold ticketsSold -> {
                     // don't care about this event for this projector
                 }
                 case TicketSalesStopped ticketSalesStopped -> {
-                    availableConcertsMap.remove(ticketSalesStopped.concertId());
-                    if (insertedConcerts.stream().noneMatch(availableConcert -> availableConcert.concertId().equals(ticketSalesStopped.concertId()))) {
-                        removedConcertIds.add(ticketSalesStopped.concertId());
+                    ConcertId concertId = ticketSalesStopped.concertId();
+                    availableConcertsMap.remove(concertId);
+                    if (shouldMarkAsRemoved(insertedConcerts, concertId)) {
+                        removedConcertIds.add(concertId);
                     }
-                    insertedConcerts.removeIf(availableConcert -> availableConcert.concertId().equals(ticketSalesStopped.concertId()));
-                    updatedConcerts.removeIf(availableConcert -> availableConcert.concertId().equals(ticketSalesStopped.concertId()));
+                    insertedConcerts.remove(concertId);
+                    updatedConcerts.remove(concertId);
                 }
             }
         });
 
-        Map<ConcertId, AvailableConcert> upsertedConcertsMap =
-                insertedConcerts.stream()
-                                .collect(Collectors.toMap(
-                                        AvailableConcert::concertId,
-                                        Function.identity()));
-        updatedConcerts.forEach(availableConcert ->
-                                        upsertedConcertsMap.put(
-                                                availableConcert.concertId(),
-                                                availableConcert));
+        Map<ConcertId, AvailableConcert> upsertedConcertsMap = new HashMap<>(insertedConcerts);
+        upsertedConcertsMap.putAll(updatedConcerts);
         return new ProjectorResult<>(
                 new AvailableConcerts(List.copyOf(availableConcertsMap.values())),
                 new AvailableConcertsDelta(List.copyOf(upsertedConcertsMap.values()),
                                            removedConcertIds)
         );
+    }
+
+    private boolean shouldMarkAsRemoved(Map<ConcertId, AvailableConcert> insertedConcerts, ConcertId concertId) {
+        return !insertedConcerts.containsKey(concertId);
     }
 
     private Map<ConcertId, AvailableConcert> loadMapFrom(AvailableConcerts currentState) {
