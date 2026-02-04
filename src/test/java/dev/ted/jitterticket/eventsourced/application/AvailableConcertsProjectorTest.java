@@ -144,7 +144,6 @@ class AvailableConcertsProjectorTest {
         AvailableConcerts initialState = new AvailableConcerts(List.of(initialSummary));
         AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector();
 
-        // when Reschedule and TicketSalesStopped are processed at once
         ConcertRescheduled concertRescheduled = new ConcertRescheduled(
                 concertId,
                 2L,

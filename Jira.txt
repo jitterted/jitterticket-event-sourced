@@ -100,9 +100,9 @@
 
 ==> CURRENT TASK ==>
 
-    [ ] Add new functionality to the AvailableConcertsProjection:
+    [X] Add new functionality to the AvailableConcertsProjection:
         [X] New event to stop ticket sales: TicketSalesStopped.
-        [ ] When TicketSalesStopped received, remove that Concert from the projection.
+        [X] When TicketSalesStopped received, remove that Concert from the projection.
 
     [ ] Concert Sold Out Processor
         [ ] Listens for tickets sold, when sales = capacity, emit TicketSalesStopped event

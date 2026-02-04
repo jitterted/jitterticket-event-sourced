@@ -51,7 +51,7 @@ public class AvailableConcertsProjector implements
                     availableConcertsMap.put(concertId, rescheduledView);
                     updatedConcerts.put(concertId, rescheduledView);
                 }
-                case TicketsSold ticketsSold -> {
+                case TicketsSold _ -> {
                     // don't care about this event for this projector
                 }
                 case TicketSalesStopped ticketSalesStopped -> {
