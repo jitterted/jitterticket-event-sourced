@@ -6,6 +6,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
@@ -122,6 +123,12 @@ class EventDtoTest {
                         null,
                         TicketOrderId.createRandom(),
                         ConcertId.createRandom(), 4, 100))
+                , Arguments.of(
+                        new TicketSalesStopped(
+                                ConcertId.createRandom(),
+                                null
+                        )
+                )
         );
     }
 

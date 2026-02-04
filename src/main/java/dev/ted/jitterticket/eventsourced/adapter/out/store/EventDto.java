@@ -13,6 +13,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
@@ -84,6 +85,7 @@ public class EventDto<EVENT extends Event> {
         objectMapper.addMixIn(ConcertRescheduled.class, ConcertRescheduledMixin.class);
         objectMapper.addMixIn(TicketsSold.class, TicketsSoldMixin.class);
         objectMapper.addMixIn(TicketsPurchased.class, TicketsPurchasedMixin.class);
+        objectMapper.addMixIn(TicketSalesStopped.class, TicketSalesStoppedMixin.class);
 
         return objectMapper;
     }
@@ -163,6 +165,7 @@ public class EventDto<EVENT extends Event> {
                 .add("json='" + json + "'")
                 .toString();
     }
+
 }
 
 abstract class EventMixin {
@@ -295,4 +298,16 @@ abstract class ConcertScheduledMixin {
 
     @JsonProperty("maxTicketsPerPurchase")
     public abstract int maxTicketsPerPurchase();
+}
+
+abstract class TicketSalesStoppedMixin {
+    @JsonCreator
+    public TicketSalesStoppedMixin(
+            @JsonProperty("concertId") ConcertId concertId,
+            @JsonProperty("eventSequence") Long eventSequence
+    ) {
+    }
+
+    @JsonProperty("concertId")
+    public abstract ConcertId concertId();
 }

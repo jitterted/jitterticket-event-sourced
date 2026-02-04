@@ -6,6 +6,10 @@ Wednesday, February 4, 2026
 [Concert Aggregate: Adding TicketSalesStopped]
 * Does the Concert aggregate hold state about tickets being available, which would be "updated" by application of the TicketSalesStopped event? For now, no. The aggregate doesn't make any decisions based on that information. HOWEVER, if ticket sales were stopped, then any attempt to execute the sellTicketsTo() method MUST fail. (And is this a boolean, or the start of a state machine cycle? Booleans tend to become multi-state choices and/or timestamps.)
 
+[Look Into]
+* Should the mixins used in EventDto.createObjectMapper() extend in a parallel hierarchy (e.g., TicketSalesStoppedMixin extends ConcertMixin)? Is that already handled by the ObjectMapper implicitly (e.g., because ConcertMixin is already defined)?
+
+
 # Stream Wrap-up
 
 (Confused, puzzled, problem)
