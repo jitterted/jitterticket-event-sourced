@@ -1,5 +1,7 @@
 Wednesday, February 4, 2026
 ===========================
+* Moving the constant for EMPTY_AVAILABLE_CONCERTS from the test to the record itself, so it becomes AvailableConcerts.EMPTY
+
 [IntelliJ IDEA]
 * Why didn't generate equals/hashcode reference superclass properties?
 
@@ -8,6 +10,13 @@ Wednesday, February 4, 2026
 
 [Look Into]
 * Should the mixins used in EventDto.createObjectMapper() extend in a parallel hierarchy (e.g., TicketSalesStoppedMixin extends ConcertMixin)? Is that already handled by the ObjectMapper implicitly (e.g., because ConcertMixin is already defined)?
+
+* Is there a way to create a custom postfix that does an un-arg, i.e., remove a method call leaving its parameter behind, e.g., remove the List.copyOf from:
+    List.copyOf(availableConcertsMap.values())
+
+    to
+
+    availableConcertsMap.values()
 
 [Create New Event Tool]
 * Use Junie to create a code-generator tool for adding new events, handling not just the creation of the event and adding it to the sealed-permits, but also updating the EventDto and EventDtoTest for the JSON round-trip conversion. Make sure to add @SuppressWarnings("unused") for the generated Mixin class.

@@ -15,14 +15,12 @@ import static org.assertj.core.api.Assertions.*;
 
 class AvailableConcertsProjectorTest {
 
-    private static final AvailableConcerts EMPTY_AVAILABLE_CONCERTS = new AvailableConcerts(List.of());
-
     @Test
     void projectReturnsEmptyNewStateWhenNoConcertsAreScheduled() {
         AvailableConcertsProjector availableConcertsProjector = new AvailableConcertsProjector();
 
         DomainProjector.ProjectorResult<AvailableConcerts, AvailableConcertsDelta> projection =
-                availableConcertsProjector.project(EMPTY_AVAILABLE_CONCERTS, Stream.empty());
+                availableConcertsProjector.project(AvailableConcerts.EMPTY, Stream.empty());
 
         assertThat(projection.fullState().availableConcerts())
                 .isEmpty();
@@ -43,7 +41,7 @@ class AvailableConcertsProjectorTest {
                                                     100,
                                                     4);
 
-        var projection = availableConcertsProjector.project(EMPTY_AVAILABLE_CONCERTS, Stream.of(concertScheduled));
+        var projection = availableConcertsProjector.project(AvailableConcerts.EMPTY, Stream.of(concertScheduled));
 
         AvailableConcert expectedSummary = new AvailableConcert(concertId,
                                                                 "Concert Artist",
@@ -109,5 +107,9 @@ class AvailableConcertsProjectorTest {
 
     // test: during a catch-up, we may see a ConcertScheduled and a
     // TicketSalesStopped, which means the project would ignore it and
-    // we'd never see it in a Delta
+    // we'd never see it in a Delta, nor in the full state
+    @Test
+    void projectIgnoresConcertScheduledAndTicketSalesStoppedInOneStream() {
+
+    }
 }
