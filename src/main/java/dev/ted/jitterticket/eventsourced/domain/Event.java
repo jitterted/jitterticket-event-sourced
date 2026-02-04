@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class Event {
-    private Long eventSequence;
+    protected Long eventSequence;
 
     protected Event(Long eventSequence) {
         this.eventSequence = eventSequence;

@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,8 @@ import java.util.stream.Stream;
 
 public class AvailableConcertsProjector implements
         DomainProjector<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> {
+
+    private static final List<ConcertId> ALWAYS_EMPTY_CONCERT_IDS_TO_BE_REMOVED = List.of();
 
     @Override
     public ProjectorResult<AvailableConcerts, AvailableConcertsDelta>
@@ -51,12 +54,16 @@ public class AvailableConcertsProjector implements
                 case TicketsSold ticketsSold -> {
                     // don't care about this event for this projector
                 }
+                case TicketSalesStopped ticketSalesStopped -> {
+                    // TBD: remove this concert
+                }
             }
         });
 
         return new ProjectorResult<>(
                 new AvailableConcerts(List.copyOf(availableConcertsMap.values())),
-                new AvailableConcertsDelta(List.copyOf(deltaMap.values()), List.of())
+                new AvailableConcertsDelta(List.copyOf(deltaMap.values()),
+                                           ALWAYS_EMPTY_CONCERT_IDS_TO_BE_REMOVED)
         );
     }
 

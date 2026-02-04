@@ -3,9 +3,11 @@ package dev.ted.jitterticket.eventsourced.domain.concert;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 
 public abstract sealed class ConcertEvent extends Event
-        permits ConcertRescheduled, ConcertScheduled, TicketsSold {
+        permits
+        ConcertRescheduled, ConcertScheduled,
+        TicketsSold, TicketSalesStopped {
 
-    private final ConcertId concertId;
+    protected final ConcertId concertId;
 
     protected ConcertEvent(ConcertId concertId, Long eventSequence) {
         super(eventSequence);

@@ -101,10 +101,20 @@
 ==> CURRENT TASK ==>
 
     [ ] Add new functionality to the AvailableConcertsProjection:
-        [X] Ignore scheduled concerts that are in the past
-        [ ] Ignore rescheduled concerts that are in the past
-        [ ] Figure out how to deal with time going by in the world, but the projection isn't update just because another day went by, so what do we do?
-        [ ] Add tickets available information: if max tickets have been sold, the concert is no longer available
+        [ ] New event to stop ticket sales: TicketSalesStopped.
+        [ ] When TicketSalesStopped received, remove that Concert from the projection.
+
+    [ ] Concert Sold Out Processor
+        [ ] Listens for tickets sold, when sales = capacity, emit TicketSalesStopped event
+
+    [ ] Concert sellTicketsTo() validation: must fail if ticketSalesStopped (via the TicketSalesStopped event) is true.
+
+    [ ] Concert Started Processor
+        [ ] Emits TicketSalesStopped event when a Concert's show time has passed: When ConcertScheduled event received, sets an "alarm" for the show time to "wake up" and emit the event
+
+    [ ] Auto-complete Concert Processor
+        [ ] Tracks when concerts should be marked as completed, and sets itself an alarm of some type (or externalizes it to some scheduler), and then generates a ConcertCompleted event.
+        [ ] Concert then can handle the ConcertCompleted event to do other work (to be defined)
 
     [ ] Actually persist the projections in the database, i.e., implement the PersistencePort interface(s):
         [ ] AvailableConcerts

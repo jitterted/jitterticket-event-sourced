@@ -1,3 +1,21 @@
+Wednesday, February 4, 2026
+===========================
+[IntelliJ IDEA]
+* Why didn't generate equals/hashcode reference superclass properties?
+
+[Concert Aggregate: Adding TicketSalesStopped]
+* Does the Concert aggregate hold state about tickets being available, which would be "updated" by application of the TicketSalesStopped event? For now, no. The aggregate doesn't make any decisions based on that information. HOWEVER, if ticket sales were stopped, then any attempt to execute the sellTicketsTo() method MUST fail. (And is this a boolean, or the start of a state machine cycle? Booleans tend to become multi-state choices and/or timestamps.)
+
+# Stream Wrap-up
+
+(Confused, puzzled, problem)
+*
+
+(Tried, what worked, what didn't)
+
+(Takeaways)
+
+
 Thursday, January 15, 2026
 ==========================
 [IntelliJ IDEA BUG]

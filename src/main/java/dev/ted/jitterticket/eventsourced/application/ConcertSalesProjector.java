@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,9 @@ public class ConcertSalesProjector {
                         case ConcertRescheduled concertRescheduled -> mutableMap.computeIfPresent(
                                 concertRescheduled.concertId(),
                                 (_, summary) -> summary.withNewShowDateTime(concertRescheduled.newShowDateTime()));
+                        case TicketSalesStopped ticketSalesStopped -> {
+                            // ignored: we don't care (unless we want to show this on the sales report screen)
+                        }
                     }
                     lastEventSequenceSeenRef.set(concertEvent.eventSequence());
                     eventSequenceCounter.incrementAndGet();

@@ -74,6 +74,9 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 this.doorsTime = rescheduled.newDoorsTime();
             }
             case TicketsSold sold -> this.availableTicketCount -= sold.quantity();
+            case TicketSalesStopped ticketSalesStopped -> {
+                // ignored until we hold onto this state as a boolean
+            }
         }
     }
 
