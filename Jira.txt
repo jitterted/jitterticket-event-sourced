@@ -105,7 +105,9 @@
         [X] When TicketSalesStopped received, remove that Concert from the projection.
 
     [ ] Concert Sold Out Processor
-        [ ] Listens for tickets sold, when sales = capacity, emit TicketSalesStopped event
+        [X] Add "stopTicketSales()" for Concert
+            [X] Add state for "canSellTickets", starts at "true", flips to "false" when TicketSalesStopped is applied
+        [ ] Listens for tickets sold, when sales = capacity, load the Concert aggregate and invoke "stopTicketSales()"
 
     [ ] Concert sellTicketsTo() validation: must fail if ticketSalesStopped (via the TicketSalesStopped event) is true.
 

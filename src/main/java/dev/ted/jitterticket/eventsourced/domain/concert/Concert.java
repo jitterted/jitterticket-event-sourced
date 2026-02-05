@@ -17,6 +17,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     private int capacity;
     private int maxTicketsPerPurchase;
     private int availableTicketCount;
+    private boolean canSellTickets = true;
 
     //region Creation Command
     public static Concert schedule(ConcertId concertId,
@@ -73,10 +74,8 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 this.showDateTime = rescheduled.newShowDateTime();
                 this.doorsTime = rescheduled.newDoorsTime();
             }
-            case TicketsSold sold -> this.availableTicketCount -= sold.quantity();
-            case TicketSalesStopped ticketSalesStopped -> {
-                // ignored until we hold onto this state as a boolean
-            }
+            case TicketsSold sold -> availableTicketCount -= sold.quantity();
+            case TicketSalesStopped _ -> canSellTickets = false;
         }
     }
 
@@ -112,6 +111,10 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
         return availableTicketCount;
     }
 
+    public boolean canSellTickets() {
+        return canSellTickets;
+    }
+
     //endregion Queries
 
     //region Commands
@@ -130,6 +133,10 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                                                   quantity,
                                                   quantity * ticketPrice);
         enqueue(ticketsSold);
+    }
+
+    public void stopTicketSales() {
+        enqueue(new TicketSalesStopped(getId(), null));
     }
 
     //endregion Commands

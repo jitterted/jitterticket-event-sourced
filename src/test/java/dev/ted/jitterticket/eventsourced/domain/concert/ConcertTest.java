@@ -77,6 +77,16 @@ public class ConcertTest {
                     );
         }
 
+        @Test
+        void stopTicketSalesGeneratesTicketSalesStopped() {
+            Concert concert = Concert.reconstitute(List.of(ConcertFactory.Events.scheduledConcert()));
+
+            concert.stopTicketSales();
+
+            assertThat(concert.uncommittedEvents())
+                    .containsExactly(
+                            new TicketSalesStopped(concert.getId(), null));
+        }
     }
 
     @Nested
@@ -113,6 +123,9 @@ public class ConcertTest {
                     .isEqualTo(maxTicketsPerPurchase);
             assertThat(concert.availableTicketCount())
                     .isEqualTo(capacity);
+            assertThat(concert.canSellTickets())
+                    .as("For newly scheduled concerts canSellTickets should be TRUE")
+                    .isTrue();
         }
 
         @Test
@@ -162,6 +175,20 @@ public class ConcertTest {
                     .isEqualTo(100 - quantitySold);
         }
 
+        @Test
+        void ticketSalesStoppedDisablesCanSellTickets() {
+            ConcertScheduled concertScheduled = ConcertFactory.Events.scheduledConcert();
+
+            TicketSalesStopped ticketSalesStopped = new TicketSalesStopped(
+                    concertScheduled.concertId(), 42L);
+            Concert concert = Concert.reconstitute(
+                    List.of(concertScheduled,
+                            ticketSalesStopped));
+
+            assertThat(concert.canSellTickets())
+                    .as("Applying TicketSalesStopped must change canSellTickets to be FALSE")
+                    .isFalse();
+        }
     }
 
 }
