@@ -132,7 +132,7 @@
             [ ] Sales projector would need to handle this? or just drop the row from the projection when canceled?
         [ ] Projector would need to be updated
 
-
+    [ ] Fix title containing <span> in list-aggregates.html
 
     [ ] Implement the constraint that Customer email addresses must be unique: ? do we need a special read-model/projection for that ?
     [ ] Reduce verbosity of tests by creating minimal DSL for setup AND for assertion

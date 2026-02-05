@@ -1,9 +1,13 @@
+Thursday, February 5, 2026
+==========================
+
+
 Wednesday, February 4, 2026
 ===========================
 * Moving the constant for EMPTY_AVAILABLE_CONCERTS from the test to the record itself, so it becomes AvailableConcerts.EMPTY
 
 [IntelliJ IDEA]
-* Why didn't generate equals/hashcode reference superclass properties?
+* Why didn't generate equals/hashcode reference superclass properties (concertId and eventSequence) for the new TicketSalesStopped event?
 
 [Concert Aggregate: Adding TicketSalesStopped]
 * Does the Concert aggregate hold state about tickets being available, which would be "updated" by application of the TicketSalesStopped event? For now, no. The aggregate doesn't make any decisions based on that information. HOWEVER, if ticket sales were stopped, then any attempt to execute the sellTicketsTo() method MUST fail. (And is this a boolean, or the start of a state machine cycle? Booleans tend to become multi-state choices and/or timestamps.)
