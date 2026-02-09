@@ -96,11 +96,8 @@ class ConcertStartedProcessorTest {
                 .containsEntry(concertId, rescheduledShowDateTime);
     }
 
-    // ignore events that are not Scheduled nor Rescheduled events
-
-
     @Test
-    void ignoreNonSchedulingEvents() {
+    void ignoreTicketsSoldEvents() {
         ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
         ConcertId concertId = ConcertId.createRandom();
         Stream<ConcertEvent> concertEventStream =
@@ -155,4 +152,22 @@ class ConcertStartedProcessorTest {
     }
 
     // handle TicketSalesStopped by removing it from the alarms
+
+    @Test
+    void alarmCanceledWhenTicketSalesStopped() {
+        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        Stream<ConcertEvent> concertScheduledStream =
+                MakeEvents.with()
+                          .concertScheduled(
+                                  ConcertId.createRandom(),
+                                  c -> c.showDateTime(oneMonthInTheFutureAtMidnight())
+                                        .ticketSalesStopped())
+                          .stream();
+
+        concertStartedProcessor.handle(concertScheduledStream);
+
+        assertThat(concertStartedProcessor.alarms())
+                .as("TicketSalesStopped should have removed (canceled) the alarm set by the ConcertScheduled event.")
+                .isEmpty();
+    }
 }

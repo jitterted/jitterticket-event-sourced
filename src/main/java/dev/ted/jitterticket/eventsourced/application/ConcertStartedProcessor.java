@@ -27,12 +27,14 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         concertEventStream.forEach(
                 concertEvent -> {
                     switch (concertEvent) {
-                        case ConcertScheduled cs -> setAlarm(cs.concertId(), cs.showDateTime());
+                        case ConcertScheduled cs ->
+                                scheduleAlarm(cs.concertId(), cs.showDateTime());
 
-                        case ConcertRescheduled cr -> setAlarm(cr.concertId(), cr.newShowDateTime());
+                        case ConcertRescheduled cr ->
+                                scheduleAlarm(cr.concertId(), cr.newShowDateTime());
 
-                        case TicketSalesStopped ticketSalesStopped -> {
-                        }
+                        case TicketSalesStopped ticketSalesStopped ->
+                                cancelAlarm(ticketSalesStopped.concertId());
 
                         case TicketsSold _ -> {
                             // ignore
@@ -41,7 +43,11 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
                 });
     }
 
-    private void setAlarm(ConcertId concertId, LocalDateTime showDateTime) {
+    private void cancelAlarm(ConcertId concertId) {
+        alarmMap.remove(concertId);
+    }
+
+    private void scheduleAlarm(ConcertId concertId, LocalDateTime showDateTime) {
         if (showDateTime.isAfter(LocalDateTime.now())) {
             alarmMap.put(concertId, showDateTime);
         }
