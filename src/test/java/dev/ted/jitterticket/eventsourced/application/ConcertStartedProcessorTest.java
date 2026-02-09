@@ -25,8 +25,7 @@ class ConcertStartedProcessorTest {
     void concertScheduledAddsAlarmForShowDateTime() {
         ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
 
-        LocalDateTime oneWeekInTheFutureAtMidnight = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(7);
-        LocalDateTime showDateTime = oneWeekInTheFutureAtMidnight.plusHours(20);
+        LocalDateTime showDateTime = oneWeekInTheFutureAtMidnight().plusHours(20);
         ConcertId concertId = ConcertId.createRandom();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with().concertScheduled(
@@ -42,7 +41,19 @@ class ConcertStartedProcessorTest {
         // And AlarmScheduler was invoked with show date+time for ConcertId
     }
 
+    private static LocalDateTime oneWeekInTheFutureAtMidnight() {
+        return LocalDateTime.now()
+                            .truncatedTo(ChronoUnit.DAYS)
+                            .plusWeeks(1);
+    }
+
     // handle schedule + reschedule
+
+    @Test
+    void concertRescheduledUpdatesAlarmToNewShowDateTime() {
+
+    }
+
 
     // handle two separate schedules
 
