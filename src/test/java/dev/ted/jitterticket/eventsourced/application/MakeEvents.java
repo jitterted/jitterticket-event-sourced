@@ -148,7 +148,7 @@ public class MakeEvents {
             return this;
         }
 
-        public ConcertCustomizer showDate(LocalDateTime showDateTime) {
+        public ConcertCustomizer showDateTime(LocalDateTime showDateTime) {
             this.showDateTime = showDateTime;
             return this;
         }

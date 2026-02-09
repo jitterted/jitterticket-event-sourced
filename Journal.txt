@@ -1,5 +1,12 @@
+Monday, February 9, 2026
+========================
+
+
+
 Thursday, February 5, 2026
 ==========================
+[Design Decision]
+* Initially thought the "Concert Sold Out" would be handled by a separate Processor. However, tracking ticket sales and comparing that against concert capacity inside the Processor feels redundant, since the Concert already knows precisely when it has sold out, i.e., when sellTicketsTo() is invoked, and therefore is in the best position to detect being sold out and emit (enqueue) the TicketSalesStopped event on its own.
 
 
 Wednesday, February 4, 2026

@@ -33,8 +33,8 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         // we need the events that were saved so we have their event sequences
         // convert to a list so we can pass a stream to each event consumer without worrying about being consumed
         List<EVENT> savedEvents = save(aggregateId, uncommittedEvents).toList();
-        eventConsumers.forEach(eventConsumer ->
-                                       eventConsumer.handle(savedEvents.stream()));
+        eventConsumers.forEach(
+                eventConsumer -> eventConsumer.handle(savedEvents.stream()));
     }
 
     protected abstract @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id);

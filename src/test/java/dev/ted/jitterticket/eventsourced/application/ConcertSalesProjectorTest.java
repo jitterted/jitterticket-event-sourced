@@ -166,7 +166,7 @@ class ConcertSalesProjectorTest {
                 MakeEvents.with()
                           .concertScheduled(concertId, (concert) -> concert
                                   .artistNamed("Artist Name")
-                                  .showDate(showDateTime)
+                                  .showDateTime(showDateTime)
                                   .ticketPrice(35)
                                   .ticketsSold(6))
                           .list();

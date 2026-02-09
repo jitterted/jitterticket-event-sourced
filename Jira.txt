@@ -98,21 +98,31 @@
         [X] Rename to AvailableConcerts
         [X] Repeat similar steps from Registered Customers conversion
 
-==> CURRENT TASK ==>
-
     [X] Add new functionality to the AvailableConcertsProjection:
         [X] New event to stop ticket sales: TicketSalesStopped.
         [X] When TicketSalesStopped received, remove that Concert from the projection.
 
-    [ ] Concert Sold Out Processor
+    [ ] Concert Sold Out scenario
         [X] Add "stopTicketSales()" for Concert
             [X] Add state for "canSellTickets", starts at "true", flips to "false" when TicketSalesStopped is applied
+            [ ] Concert sellTicketsTo() validation: must fail if canSellTickets is false.
         [ ] Listens for tickets sold, when sales = capacity, load the Concert aggregate and invoke "stopTicketSales()"
+            [ ] Implements EventConsumer<ConcertEvent>
+            [ ] Does the Processor separately track a Concert's ticket sales vs. capacity
+                vs.
+                Retrieve the Concert aggregate to find out whether ticket sales == max capacity
 
-    [ ] Concert sellTicketsTo() validation: must fail if ticketSalesStopped (via the TicketSalesStopped event) is true.
+==> CURRENT TASK ==>
 
     [ ] Concert Started Processor
-        [ ] Emits TicketSalesStopped event when a Concert's show time has passed: When ConcertScheduled event received, sets an "alarm" for the show time to "wake up" and emit the event
+        Emits TicketSalesStopped event when a Concert's show time has passed: When ConcertScheduled event received, sets an "alarm" for the show time to "wake up" and emit the event
+        [ ] Consume ConcertScheduled: schedule future task given a LocalDateTime (use now().until(event.ShowDateTime)), where the Runnable is: self-invoke (on Processor) a method (wakeUp()) that calls stopTicketSalesUseCase.stopSalesFor(event.ConcertId) and removes from internal Map
+        (Internally hold Map<ConcertId, ScheduledFuture<?>> so we can cancel and schedule upon ConcertRescheduled, or cancel if TicketSalesStopped, or cancel if we ever implement a ConcertCanceled event)
+            [ ] Given new Processor,
+                When ConcertScheduled event received by handle()
+                Then ScheduledAlarms contains only one task with the ConcertId key of the scheduled concert
+                And AlarmScheduler was invoked with show date+time for ConcertId
+
 
     [ ] Auto-complete Concert Processor
         [ ] Tracks when concerts should be marked as completed, and sets itself an alarm of some type (or externalizes it to some scheduler), and then generates a ConcertCompleted event.

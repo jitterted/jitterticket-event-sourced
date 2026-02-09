@@ -133,6 +133,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                                                   quantity,
                                                   quantity * ticketPrice);
         enqueue(ticketsSold);
+        // have we sold out? enqueue(TicketSalesStopped)
     }
 
     public void stopTicketSales() {
