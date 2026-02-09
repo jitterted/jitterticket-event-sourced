@@ -2,7 +2,6 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -102,8 +101,10 @@ class ConcertStartedProcessorTest {
         ConcertId concertId = ConcertId.createRandom();
         Stream<ConcertEvent> concertEventStream =
                 MakeEvents.with()
-                          .concertScheduled(concertId,
-                                            c -> c.ticketsSold(1))
+                          .concertScheduled(
+                                  concertId,
+                                  c -> c.showDateTime(oneWeekInTheFutureAtMidnight())
+                                        .ticketsSold(1))
                           .stream();
 
         concertStartedProcessor.handle(concertEventStream);
@@ -113,7 +114,6 @@ class ConcertStartedProcessorTest {
                 .isNotNull();
     }
 
-    @Disabled("Until we handle events to be ignored")
     @Test
     void ignoreConcertsScheduledInThePast() {
         ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();

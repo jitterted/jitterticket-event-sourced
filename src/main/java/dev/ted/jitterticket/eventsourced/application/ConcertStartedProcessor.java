@@ -29,7 +29,9 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
                     switch (concertEvent) {
                         case ConcertScheduled cs -> {
                             LocalDateTime showDateTime = cs.showDateTime();
-                            alarmMap.put(concertEvent.concertId(), showDateTime);
+                            if (showDateTime.isAfter(LocalDateTime.now())) {
+                                alarmMap.put(concertEvent.concertId(), showDateTime);
+                            }
                         }
 
                         case ConcertRescheduled cr -> {
