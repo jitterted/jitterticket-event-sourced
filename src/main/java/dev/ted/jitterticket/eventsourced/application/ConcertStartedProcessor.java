@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 
 import java.time.LocalDateTime;
@@ -21,9 +22,15 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
 
     @Override
     public void handle(Stream<ConcertEvent> concertEventStream) {
-        if (concertEventStream.toList().getFirst()
-                instanceof ConcertScheduled cs) {
-            alarmMap.put(cs.concertId(), cs.showDateTime());
-        }
+        concertEventStream.forEach(
+                concertEvent -> {
+                    LocalDateTime showDateTime = null;
+                    switch (concertEvent) {
+                        case ConcertScheduled cs -> showDateTime = cs.showDateTime();
+                        case ConcertRescheduled cr -> showDateTime = cr.newShowDateTime();
+                        default -> {}
+                    }
+                    alarmMap.put(concertEvent.concertId(), showDateTime);
+                });
     }
 }

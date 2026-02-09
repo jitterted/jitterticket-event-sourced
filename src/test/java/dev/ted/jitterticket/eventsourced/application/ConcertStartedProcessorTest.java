@@ -51,7 +51,24 @@ class ConcertStartedProcessorTest {
 
     @Test
     void concertRescheduledUpdatesAlarmToNewShowDateTime() {
+        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
 
+        LocalDateTime showDateTime = oneWeekInTheFutureAtMidnight().plusHours(20);
+        ConcertId concertId = ConcertId.createRandom();
+        LocalDateTime rescheduledShowDateTime = showDateTime.plusWeeks(2);
+        Stream<ConcertEvent> concertScheduledThenRescheduleStream =
+                MakeEvents.with().concertScheduled(
+                                  concertId,
+                                  c -> c.showDateTime(showDateTime))
+                          .reschedule(concertId,
+                                      rescheduledShowDateTime,
+                                      rescheduledShowDateTime.minusHours(1).toLocalTime())
+                          .stream();
+
+        concertStartedProcessor.handle(concertScheduledThenRescheduleStream);
+
+        assertThat(concertStartedProcessor.alarms())
+                .containsEntry(concertId, rescheduledShowDateTime);
     }
 
 
