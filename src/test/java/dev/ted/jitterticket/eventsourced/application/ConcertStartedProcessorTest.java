@@ -71,7 +71,6 @@ class ConcertStartedProcessorTest {
                 .containsEntry(concertId, rescheduledShowDateTime);
     }
 
-
     // handle two separate schedules
 
     // handle schedule in the past: ignore

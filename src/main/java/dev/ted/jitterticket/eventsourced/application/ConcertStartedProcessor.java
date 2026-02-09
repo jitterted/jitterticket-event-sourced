@@ -24,12 +24,12 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
     public void handle(Stream<ConcertEvent> concertEventStream) {
         concertEventStream.forEach(
                 concertEvent -> {
-                    LocalDateTime showDateTime = null;
-                    switch (concertEvent) {
-                        case ConcertScheduled cs -> showDateTime = cs.showDateTime();
-                        case ConcertRescheduled cr -> showDateTime = cr.newShowDateTime();
-                        default -> {}
-                    }
+                    LocalDateTime showDateTime =
+                            switch (concertEvent) {
+                                case ConcertScheduled cs -> cs.showDateTime();
+                                case ConcertRescheduled cr -> cr.newShowDateTime();
+                                default -> null;
+                            };
                     alarmMap.put(concertEvent.concertId(), showDateTime);
                 });
     }
