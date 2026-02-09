@@ -91,6 +91,10 @@ public class MakeEvents {
             events.add(new TicketSalesStopped(
                     concertId, eventSequenceIterator.next()));
         }
+        if (customizer.rescheduledShowDateTime != null) {
+            reschedule(concertId, customizer.rescheduledShowDateTime,
+                       customizer.rescheduledShowDateTime.minusHours(1).toLocalTime());
+        }
         return this;
     }
 
@@ -132,6 +136,7 @@ public class MakeEvents {
         private String artistName = "Don't Care Artist Name"; // default
         private LocalDateTime showDateTime = LocalDateTime.now();
         private boolean ticketSalesStopped = false;
+        private LocalDateTime rescheduledShowDateTime = null;
 
         public ConcertCustomizer ticketPrice(int ticketPrice) {
             this.ticketPrice = ticketPrice;
@@ -155,6 +160,11 @@ public class MakeEvents {
 
         public ConcertCustomizer ticketSalesStopped() {
             ticketSalesStopped = true;
+            return this;
+        }
+
+        public ConcertCustomizer rescheduleTo(LocalDateTime newShowDateTime) {
+            rescheduledShowDateTime = newShowDateTime;
             return this;
         }
 

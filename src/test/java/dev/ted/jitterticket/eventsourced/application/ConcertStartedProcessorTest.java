@@ -62,6 +62,12 @@ class ConcertStartedProcessorTest {
                             .minusWeeks(1);
     }
 
+    static LocalDateTime oneMonthInThePastAtMidnight() {
+        return LocalDateTime.now()
+                            .truncatedTo(ChronoUnit.DAYS)
+                            .minusMonths(1);
+    }
+
     static LocalDateTime oneMonthInTheFutureAtMidnight() {
         return LocalDateTime.now()
                             .truncatedTo(ChronoUnit.DAYS)
@@ -80,10 +86,8 @@ class ConcertStartedProcessorTest {
         Stream<ConcertEvent> concertScheduledThenRescheduleStream =
                 MakeEvents.with().concertScheduled(
                                   concertId,
-                                  c -> c.showDateTime(showDateTime))
-                          .reschedule(concertId,
-                                      rescheduledShowDateTime,
-                                      rescheduledShowDateTime.minusHours(1).toLocalTime())
+                                  c -> c.showDateTime(showDateTime)
+                                        .rescheduleTo(rescheduledShowDateTime))
                           .stream();
 
         concertStartedProcessor.handle(concertScheduledThenRescheduleStream);
@@ -117,13 +121,11 @@ class ConcertStartedProcessorTest {
     @Test
     void ignoreConcertsScheduledInThePast() {
         ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
-        LocalDateTime showDateTime = oneWeekInThePastAtMidnight().plusHours(20);
-        ConcertId concertId = ConcertId.createRandom();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
-                                  concertId,
-                                  c -> c.showDateTime(showDateTime))
+                                  ConcertId.createRandom(),
+                                  c -> c.showDateTime(oneWeekInThePastAtMidnight()))
                           .stream();
 
         concertStartedProcessor.handle(concertScheduledStream);
@@ -133,7 +135,24 @@ class ConcertStartedProcessorTest {
                 .isEmpty();
     }
 
-    // handle reschedule in the past: ignore
+    @Test
+    void ignoreConcertsRescheduledInThePast() {
+        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        Stream<ConcertEvent> concertScheduledStream =
+                MakeEvents.with()
+                          .concertScheduled(
+                                  ConcertId.createRandom(),
+                                  c -> c.showDateTime(oneMonthInThePastAtMidnight())
+                                        .rescheduleTo(oneWeekInThePastAtMidnight()))
+                          .stream();
+
+        concertStartedProcessor.handle(concertScheduledStream);
+
+        assertThat(concertStartedProcessor.alarms())
+                .as("Alarms should be empty as the only concert schedule event had a Show Date-Time in the past, so don't need to set an alarm.")
+                .isEmpty();
+
+    }
 
     // handle TicketSalesStopped by removing it from the alarms
 }

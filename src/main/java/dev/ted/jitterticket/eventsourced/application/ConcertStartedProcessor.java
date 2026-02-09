@@ -27,17 +27,9 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         concertEventStream.forEach(
                 concertEvent -> {
                     switch (concertEvent) {
-                        case ConcertScheduled cs -> {
-                            LocalDateTime showDateTime = cs.showDateTime();
-                            if (showDateTime.isAfter(LocalDateTime.now())) {
-                                alarmMap.put(concertEvent.concertId(), showDateTime);
-                            }
-                        }
+                        case ConcertScheduled cs -> setAlarm(cs.concertId(), cs.showDateTime());
 
-                        case ConcertRescheduled cr -> {
-                            LocalDateTime showDateTime = cr.newShowDateTime();
-                            alarmMap.put(concertEvent.concertId(), showDateTime);
-                        }
+                        case ConcertRescheduled cr -> setAlarm(cr.concertId(), cr.newShowDateTime());
 
                         case TicketSalesStopped ticketSalesStopped -> {
                         }
@@ -47,5 +39,11 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
                         }
                     }
                 });
+    }
+
+    private void setAlarm(ConcertId concertId, LocalDateTime showDateTime) {
+        if (showDateTime.isAfter(LocalDateTime.now())) {
+            alarmMap.put(concertId, showDateTime);
+        }
     }
 }
