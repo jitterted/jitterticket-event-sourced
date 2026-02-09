@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -22,29 +23,43 @@ class ConcertStartedProcessorTest {
     }
 
     @Test
-    void concertScheduledAddsAlarmForShowDateTime() {
+    void concertScheduledEventsAddsShowDateTimeAlarmsForEach() {
         ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
 
-        LocalDateTime showDateTime = oneWeekInTheFutureAtMidnight().plusHours(20);
-        ConcertId concertId = ConcertId.createRandom();
+        ConcertId firstConcertId = ConcertId.createRandom();
+        LocalDateTime firstShowDateTime = oneWeekInTheFutureAtMidnight().plusHours(20);
+        ConcertId secondConcertId = ConcertId.createRandom();
+        LocalDateTime secondShowDateTime = oneMonthInTheFutureAtMidnight().plusHours(20);
         Stream<ConcertEvent> concertScheduledStream =
-                MakeEvents.with().concertScheduled(
-                                  concertId,
-                                  c -> c.showDateTime(showDateTime))
+                MakeEvents.with()
+                          .concertScheduled(
+                                  firstConcertId,
+                                  c -> c.showDateTime(firstShowDateTime))
+                          .concertScheduled(
+                                  secondConcertId,
+                                  c -> c.showDateTime(secondShowDateTime))
                           .stream();
 
         concertStartedProcessor.handle(concertScheduledStream);
 
         assertThat(concertStartedProcessor.alarms())
-                .containsEntry(concertId, showDateTime);
+                .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(firstConcertId, firstShowDateTime,
+                               secondConcertId, secondShowDateTime));
 
         // And AlarmScheduler was invoked with show date+time for ConcertId
     }
 
-    private static LocalDateTime oneWeekInTheFutureAtMidnight() {
+    static LocalDateTime oneWeekInTheFutureAtMidnight() {
         return LocalDateTime.now()
                             .truncatedTo(ChronoUnit.DAYS)
                             .plusWeeks(1);
+    }
+
+    static LocalDateTime oneMonthInTheFutureAtMidnight() {
+        return LocalDateTime.now()
+                            .truncatedTo(ChronoUnit.DAYS)
+                            .plusMonths(1);
     }
 
     // handle schedule + reschedule
