@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -56,6 +57,12 @@ class ConcertStartedProcessorTest {
                             .plusWeeks(1);
     }
 
+    static LocalDateTime oneWeekInThePastAtMidnight() {
+        return LocalDateTime.now()
+                            .truncatedTo(ChronoUnit.DAYS)
+                            .minusWeeks(1);
+    }
+
     static LocalDateTime oneMonthInTheFutureAtMidnight() {
         return LocalDateTime.now()
                             .truncatedTo(ChronoUnit.DAYS)
@@ -86,9 +93,47 @@ class ConcertStartedProcessorTest {
                 .containsEntry(concertId, rescheduledShowDateTime);
     }
 
-    // handle two separate schedules
+    // ignore events that are not Scheduled nor Rescheduled events
 
-    // handle schedule in the past: ignore
+
+    @Test
+    void ignoreNonSchedulingEvents() {
+        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        ConcertId concertId = ConcertId.createRandom();
+        Stream<ConcertEvent> concertEventStream =
+                MakeEvents.with()
+                          .concertScheduled(concertId,
+                                            c -> c.ticketsSold(1))
+                          .stream();
+
+        concertStartedProcessor.handle(concertEventStream);
+
+        assertThat(concertStartedProcessor.alarms())
+                .extractingByKey(concertId)
+                .isNotNull();
+    }
+
+    @Disabled("Until we handle events to be ignored")
+    @Test
+    void ignoreConcertsScheduledInThePast() {
+        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        LocalDateTime showDateTime = oneWeekInThePastAtMidnight().plusHours(20);
+        ConcertId concertId = ConcertId.createRandom();
+        Stream<ConcertEvent> concertScheduledStream =
+                MakeEvents.with()
+                          .concertScheduled(
+                                  concertId,
+                                  c -> c.showDateTime(showDateTime))
+                          .stream();
+
+        concertStartedProcessor.handle(concertScheduledStream);
+
+        assertThat(concertStartedProcessor.alarms())
+                .as("Alarms should be empty as the only concert schedule event had a Show Date-Time in the past, so don't need to set an alarm.")
+                .isEmpty();
+    }
 
     // handle reschedule in the past: ignore
+
+    // handle TicketSalesStopped by removing it from the alarms
 }

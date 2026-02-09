@@ -4,6 +4,8 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -24,13 +26,24 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
     public void handle(Stream<ConcertEvent> concertEventStream) {
         concertEventStream.forEach(
                 concertEvent -> {
-                    LocalDateTime showDateTime =
-                            switch (concertEvent) {
-                                case ConcertScheduled cs -> cs.showDateTime();
-                                case ConcertRescheduled cr -> cr.newShowDateTime();
-                                default -> null;
-                            };
-                    alarmMap.put(concertEvent.concertId(), showDateTime);
+                    switch (concertEvent) {
+                        case ConcertScheduled cs -> {
+                            LocalDateTime showDateTime = cs.showDateTime();
+                            alarmMap.put(concertEvent.concertId(), showDateTime);
+                        }
+
+                        case ConcertRescheduled cr -> {
+                            LocalDateTime showDateTime = cr.newShowDateTime();
+                            alarmMap.put(concertEvent.concertId(), showDateTime);
+                        }
+
+                        case TicketSalesStopped ticketSalesStopped -> {
+                        }
+
+                        case TicketsSold _ -> {
+                            // ignore
+                        }
+                    }
                 });
     }
 }
