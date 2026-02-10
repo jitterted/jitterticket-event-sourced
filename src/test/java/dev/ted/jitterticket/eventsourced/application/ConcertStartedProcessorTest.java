@@ -14,9 +14,9 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static java.util.function.Predicate.not;
 import static org.assertj.core.api.Assertions.*;
 
 class ConcertStartedProcessorTest {
@@ -62,7 +62,7 @@ class ConcertStartedProcessorTest {
 
         assertThat(alarms.values())
                 .extracting(ConcertAlarm::scheduledFuture)
-                .allMatch(Predicate.not(Future::isCancelled));
+                .allMatch(not(Future::isCancelled));
 
         long firstConcertExpectedDelay = 7 * 24 * 60 + (20 * 60); // 1 week + 20 hours
         // can't calculate this next one without know how long "1 month" is, so will leave it as-is
@@ -113,7 +113,6 @@ class ConcertStartedProcessorTest {
                                               .isCancelled())
                 .as("Second scheduled command should NOT be cancelled because it's the new scheduled date-time")
                 .isFalse();
-
     }
 
     @Test
@@ -170,9 +169,34 @@ class ConcertStartedProcessorTest {
                 .isEmpty();
     }
 
-    // test: ConcertScheduled(past), ConcertRescheduled(future)
-    // should result in 1 scheduled command, where the future is NOT canceled
-    // and 1 entry in the alarms
+    @Test
+    void concertScheduledInThePastRescheduledInTheFutureResultsInSingleActiveAlarm() {
+        SpyScheduledExecutorService spyScheduledExecutorService = new SpyScheduledExecutorService();
+        ConcertStartedProcessor concertStartedProcessor =
+                ConcertStartedProcessor.create(spyScheduledExecutorService);
+        LocalDateTimeFactory now = LocalDateTimeFactory.withNow();
+        Stream<ConcertEvent> concertScheduledStream =
+                MakeEvents.with()
+                          .concertScheduled(
+                                  ConcertId.createRandom(),
+                                  c -> c.showDateTime(now.oneMonthInThePastAtMidnight())
+                                        .rescheduleTo(now.oneWeekInTheFutureAtMidnight()))
+                          .stream();
+
+        concertStartedProcessor.handle(concertScheduledStream);
+
+        assertThat(concertStartedProcessor.alarms())
+                .values()
+                .singleElement()
+                .extracting(ConcertAlarm::scheduledFuture)
+                .matches(not(Future::isCancelled));
+        assertThat(spyScheduledExecutorService.scheduledCommands())
+                .hasSize(1);
+    }
+
+    // test case:
+    // concert scheduled(future), rescheduled to (past)
+    // ensure rescheduling to the past cancels any alarms
 
     @Test
     void alarmCanceledWhenTicketSalesStopped() {
