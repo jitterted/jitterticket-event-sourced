@@ -5,7 +5,6 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -27,9 +26,9 @@ class ConcertStartedProcessorTest {
         ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
 
         ConcertId firstConcertId = ConcertId.createRandom();
-        LocalDateTime firstShowDateTime = oneWeekInTheFutureAtMidnight().plusHours(20);
+        LocalDateTime firstShowDateTime = LocalDateTimeFactory.oneWeekInTheFutureAtMidnight().plusHours(20);
         ConcertId secondConcertId = ConcertId.createRandom();
-        LocalDateTime secondShowDateTime = oneMonthInTheFutureAtMidnight().plusHours(20);
+        LocalDateTime secondShowDateTime = LocalDateTimeFactory.oneMonthInTheFutureAtMidnight().plusHours(20);
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
@@ -50,37 +49,11 @@ class ConcertStartedProcessorTest {
         // And AlarmScheduler was invoked with show date+time for ConcertId
     }
 
-    static LocalDateTime oneWeekInTheFutureAtMidnight() {
-        return LocalDateTime.now()
-                            .truncatedTo(ChronoUnit.DAYS)
-                            .plusWeeks(1);
-    }
-
-    static LocalDateTime oneWeekInThePastAtMidnight() {
-        return LocalDateTime.now()
-                            .truncatedTo(ChronoUnit.DAYS)
-                            .minusWeeks(1);
-    }
-
-    static LocalDateTime oneMonthInThePastAtMidnight() {
-        return LocalDateTime.now()
-                            .truncatedTo(ChronoUnit.DAYS)
-                            .minusMonths(1);
-    }
-
-    static LocalDateTime oneMonthInTheFutureAtMidnight() {
-        return LocalDateTime.now()
-                            .truncatedTo(ChronoUnit.DAYS)
-                            .plusMonths(1);
-    }
-
-    // handle schedule + reschedule
-
     @Test
     void concertRescheduledUpdatesAlarmToNewShowDateTime() {
         ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
 
-        LocalDateTime showDateTime = oneWeekInTheFutureAtMidnight().plusHours(20);
+        LocalDateTime showDateTime = LocalDateTimeFactory.oneWeekInTheFutureAtMidnight().plusHours(20);
         ConcertId concertId = ConcertId.createRandom();
         LocalDateTime rescheduledShowDateTime = showDateTime.plusWeeks(2);
         Stream<ConcertEvent> concertScheduledThenRescheduleStream =
@@ -104,7 +77,7 @@ class ConcertStartedProcessorTest {
                 MakeEvents.with()
                           .concertScheduled(
                                   concertId,
-                                  c -> c.showDateTime(oneWeekInTheFutureAtMidnight())
+                                  c -> c.showDateTime(LocalDateTimeFactory.oneWeekInTheFutureAtMidnight())
                                         .ticketsSold(1))
                           .stream();
 
@@ -122,7 +95,7 @@ class ConcertStartedProcessorTest {
                 MakeEvents.with()
                           .concertScheduled(
                                   ConcertId.createRandom(),
-                                  c -> c.showDateTime(oneWeekInThePastAtMidnight()))
+                                  c -> c.showDateTime(LocalDateTimeFactory.oneWeekInThePastAtMidnight()))
                           .stream();
 
         concertStartedProcessor.handle(concertScheduledStream);
@@ -139,8 +112,8 @@ class ConcertStartedProcessorTest {
                 MakeEvents.with()
                           .concertScheduled(
                                   ConcertId.createRandom(),
-                                  c -> c.showDateTime(oneMonthInThePastAtMidnight())
-                                        .rescheduleTo(oneWeekInThePastAtMidnight()))
+                                  c -> c.showDateTime(LocalDateTimeFactory.oneMonthInThePastAtMidnight())
+                                        .rescheduleTo(LocalDateTimeFactory.oneWeekInThePastAtMidnight()))
                           .stream();
 
         concertStartedProcessor.handle(concertScheduledStream);
@@ -151,8 +124,6 @@ class ConcertStartedProcessorTest {
 
     }
 
-    // handle TicketSalesStopped by removing it from the alarms
-
     @Test
     void alarmCanceledWhenTicketSalesStopped() {
         ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
@@ -160,7 +131,7 @@ class ConcertStartedProcessorTest {
                 MakeEvents.with()
                           .concertScheduled(
                                   ConcertId.createRandom(),
-                                  c -> c.showDateTime(oneMonthInTheFutureAtMidnight())
+                                  c -> c.showDateTime(LocalDateTimeFactory.oneMonthInTheFutureAtMidnight())
                                         .ticketSalesStopped())
                           .stream();
 

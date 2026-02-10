@@ -118,10 +118,15 @@
         Emits TicketSalesStopped event when a Concert's show time has passed: When ConcertScheduled event received, sets an "alarm" for the show time to "wake up" and emit the event
         [ ] Consume ConcertScheduled: schedule future task given a LocalDateTime (use now().until(event.ShowDateTime)), where the Runnable is: self-invoke (on Processor) a method (wakeUp()) that calls stopTicketSalesUseCase.stopSalesFor(event.ConcertId) and removes from internal Map
         (Internally hold Map<ConcertId, ScheduledFuture<?>> so we can cancel and schedule upon ConcertRescheduled, or cancel if TicketSalesStopped, or cancel if we ever implement a ConcertCanceled event)
-            [ ] Given new Processor,
-                When ConcertScheduled event received by handle()
-                Then ScheduledAlarms contains only one task with the ConcertId key of the scheduled concert
-                And AlarmScheduler was invoked with show date+time for ConcertId
+        [X] Given new Processor,
+            When ConcertScheduled event received by handle()
+            Then it's in the list of Alarms
+        [ ] Test that AlarmScheduler (some kind of interface for a ScheduledExecutorService, e.g., ForkJoinPool.commonPool() that we can replace with a Test Double) was invoked with show date+time for ConcertId
+            [ ] And that the scheduled future was canceled when the TicketSalesStopped event was handled
+            [ ] Create a Runnable (task) that invokes stopSales on the specified Concert
+                [ ] Requires a StopTicketSalesUseCase (aka Command) that does the infrastructure work of loading the Concert, executing .stopTicketSales() and saves the uncommitted events
+                    [ ] Create a composition-friendly class that takes a lambda to execute a method on an aggregate, e.g., new CommandExecuterFactory<Concert>(Runnable<Concert> doStuff), where the Factory already has the reference to the ConcertEventStore
+
 
 
     [ ] Auto-complete Concert Processor
