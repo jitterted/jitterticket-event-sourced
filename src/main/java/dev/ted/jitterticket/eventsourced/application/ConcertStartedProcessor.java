@@ -14,12 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
 
-    private final Map<ConcertId, LocalDateTime> alarmMap = new HashMap<>();
+    private final Map<ConcertId, ConcertAlarm> alarmMap = new HashMap<>();
     private final ScheduledExecutorService scheduledExecutorService;
     private final Clock clock;
 
@@ -46,11 +47,8 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         return new ConcertStartedProcessor(scheduledExecutorService, clock);
     }
 
-
-    // internally we probably store this as Map<ConcertId, ConcertAlarm>
-    // where ConcertAlarm is (LocalDateTime showDateTime, ScheduledFuture<?>)
-    public Map<ConcertId, LocalDateTime> alarms() {
-        return alarmMap;
+    public Map<ConcertId, ConcertAlarm> alarms() {
+        return Map.copyOf(alarmMap);
     }
 
     @Override
@@ -58,10 +56,11 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         concertEventStream.forEach(
                 concertEvent -> {
                     switch (concertEvent) {
-                        case ConcertScheduled cs -> scheduleAlarm(cs.concertId(), cs.showDateTime());
+                        case ConcertScheduled cs ->
+                                scheduleAlarm(cs.concertId(), cs.showDateTime());
 
                         case ConcertRescheduled cr ->
-                                scheduleAlarm(cr.concertId(), cr.newShowDateTime());
+                                rescheduleAlarm(cr.concertId(), cr.newShowDateTime());
 
                         case TicketSalesStopped ticketSalesStopped ->
                                 cancelAlarm(ticketSalesStopped.concertId());
@@ -73,24 +72,44 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
                 });
     }
 
+    private void rescheduleAlarm(ConcertId concertId, LocalDateTime newShowDateTime) {
+        if (inTheFuture(newShowDateTime)) {
+            cancelAlarm(concertId);
+            scheduleAlarm(concertId, newShowDateTime);
+        }
+    }
+
     private void cancelAlarm(ConcertId concertId) {
+        alarmMap.get(concertId)
+                .scheduledFuture()
+                .cancel(false);
         alarmMap.remove(concertId);
     }
 
     private void scheduleAlarm(ConcertId concertId,
                                LocalDateTime showDateTime) {
-        if (showDateTime.isAfter(LocalDateTime.now(clock))) {
-            scheduledExecutorService.schedule(() -> {},
-                                              delayFromNowInMinutes(showDateTime),
-                                              TimeUnit.MINUTES
-            );
-            alarmMap.put(concertId, showDateTime);
+        if (inTheFuture(showDateTime)) {
+            ScheduledFuture<?> scheduledFuture = scheduledExecutorService
+                    .schedule(
+                            () -> {},
+                            delayFromNowInMinutes(showDateTime),
+                            TimeUnit.MINUTES
+                    );
+            alarmMap.put(concertId, new ConcertAlarm(showDateTime, scheduledFuture));
         }
+    }
+
+    private boolean inTheFuture(LocalDateTime showDateTime) {
+        return showDateTime.isAfter(LocalDateTime.now(clock));
     }
 
     private long delayFromNowInMinutes(LocalDateTime showDateTime) {
         return LocalDateTime.now(clock)
                             .until(showDateTime, ChronoUnit.MINUTES);
     }
+
 }
+
+record ConcertAlarm(LocalDateTime showDateTime,
+                    ScheduledFuture<?> scheduledFuture) {}
 

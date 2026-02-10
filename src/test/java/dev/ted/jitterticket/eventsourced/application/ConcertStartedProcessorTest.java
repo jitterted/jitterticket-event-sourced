@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -27,7 +29,7 @@ class ConcertStartedProcessorTest {
                 .as("Alarms should be empty for a newly created processor")
                 .isEmpty();
     }
-    
+
     @Test
     void concertScheduledEventsAddsShowDateTimeAlarmsForEach() {
         LocalDateTimeFactory localDateTimeFactory = LocalDateTimeFactory.withFixedClockAtMidnightUtc();
@@ -53,10 +55,14 @@ class ConcertStartedProcessorTest {
 
         concertStartedProcessor.handle(concertScheduledStream);
 
-        assertThat(concertStartedProcessor.alarms())
-                .containsExactlyInAnyOrderEntriesOf(
-                        Map.of(firstConcertId, firstShowDateTime,
-                               secondConcertId, secondShowDateTime));
+        Map<ConcertId, ConcertAlarm> alarms = concertStartedProcessor.alarms();
+        assertThat(alarms.values())
+                .extracting(ConcertAlarm::showDateTime)
+                .containsExactlyInAnyOrder(firstShowDateTime, secondShowDateTime);
+
+        assertThat(alarms.values())
+                .extracting(ConcertAlarm::scheduledFuture)
+                .allMatch(Predicate.not(Future::isCancelled));
 
         long firstConcertExpectedDelay = 7 * 24 * 60 + (20 * 60); // 1 week + 20 hours
         // can't calculate this next one without know how long "1 month" is, so will leave it as-is
@@ -69,7 +75,9 @@ class ConcertStartedProcessorTest {
 
     @Test
     void concertRescheduledUpdatesAlarmToNewShowDateTime() {
-        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
+        SpyScheduledExecutorService spyScheduledExecutorService = new SpyScheduledExecutorService();
+        ConcertStartedProcessor concertStartedProcessor =
+                ConcertStartedProcessor.create(spyScheduledExecutorService);
 
         LocalDateTime showDateTime = LocalDateTimeFactory.withNow().oneWeekInTheFutureAtMidnight().plusHours(20);
         ConcertId concertId = ConcertId.createRandom();
@@ -83,8 +91,29 @@ class ConcertStartedProcessorTest {
 
         concertStartedProcessor.handle(concertScheduledThenRescheduleStream);
 
-        assertThat(concertStartedProcessor.alarms())
-                .containsEntry(concertId, rescheduledShowDateTime);
+        ConcertAlarm concertAlarm = concertStartedProcessor.alarms()
+                                                           .get(concertId);
+        assertThat(concertAlarm.showDateTime())
+                .isEqualTo(rescheduledShowDateTime);
+        assertThat(concertAlarm.scheduledFuture().isCancelled())
+                .as("Rescheduled alarm's future should not be cancelled")
+                .isFalse();
+
+        assertThat(spyScheduledExecutorService.scheduledCommands())
+                .hasSize(2);
+        assertThat(spyScheduledExecutorService.scheduledCommands()
+                                              .getFirst()
+                                              .scheduledFuture()
+                                              .isCancelled())
+                .as("First scheduled command should be cancelled because of the reschedule")
+                .isTrue();
+        assertThat(spyScheduledExecutorService.scheduledCommands()
+                                              .get(1) // 2nd command
+                                              .scheduledFuture()
+                                              .isCancelled())
+                .as("Second scheduled command should NOT be cancelled because it's the new scheduled date-time")
+                .isFalse();
+
     }
 
     @Test
@@ -139,12 +168,17 @@ class ConcertStartedProcessorTest {
         assertThat(concertStartedProcessor.alarms())
                 .as("Alarms should be empty as the only concert schedule event had a Show Date-Time in the past, so don't need to set an alarm.")
                 .isEmpty();
-
     }
+
+    // test: ConcertScheduled(past), ConcertRescheduled(future)
+    // should result in 1 scheduled command, where the future is NOT canceled
+    // and 1 entry in the alarms
 
     @Test
     void alarmCanceledWhenTicketSalesStopped() {
-        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
+        SpyScheduledExecutorService spyScheduledExecutorService = new SpyScheduledExecutorService();
+        ConcertStartedProcessor concertStartedProcessor =
+                ConcertStartedProcessor.create(spyScheduledExecutorService);
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
@@ -158,6 +192,10 @@ class ConcertStartedProcessorTest {
         assertThat(concertStartedProcessor.alarms())
                 .as("TicketSalesStopped should have removed (canceled) the alarm set by the ConcertScheduled event.")
                 .isEmpty();
+        assertThat(spyScheduledExecutorService.scheduledCommands())
+                .singleElement()
+                .extracting(ScheduledCommand::scheduledFuture)
+                .matches(Future::isCancelled, "Since ticket sales for the concert were stopped, the scheduled future must be canceled");
     }
 }
 
@@ -170,9 +208,11 @@ class SpyScheduledExecutorService extends ForkJoinPool {
 
     @Override
     public @NotNull ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-        scheduledCommands.add(new ScheduledCommand(command, delay, unit));
-        return super.schedule(command, delay, unit);
+        ScheduledFuture<?> scheduledFuture = super.schedule(command, delay, unit);
+        scheduledCommands.add(new ScheduledCommand(command, delay, unit, scheduledFuture));
+        return scheduledFuture;
     }
 }
 
-record ScheduledCommand(Runnable command, long delay, TimeUnit unit) {}
+record ScheduledCommand(Runnable command, long delay, TimeUnit unit,
+                        ScheduledFuture<?> scheduledFuture) {}
