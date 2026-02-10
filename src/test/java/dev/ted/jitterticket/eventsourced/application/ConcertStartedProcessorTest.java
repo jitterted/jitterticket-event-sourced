@@ -2,10 +2,17 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -14,21 +21,26 @@ class ConcertStartedProcessorTest {
 
     @Test
     void newProcessorHasNoAlarms() {
-        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
 
         assertThat(concertStartedProcessor.alarms())
                 .as("Alarms should be empty for a newly created processor")
                 .isEmpty();
     }
-
+    
     @Test
     void concertScheduledEventsAddsShowDateTimeAlarmsForEach() {
-        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        LocalDateTimeFactory localDateTimeFactory = LocalDateTimeFactory.withFixedClockAtMidnightUtc();
+        SpyScheduledExecutorService spyScheduledExecutorService =
+                new SpyScheduledExecutorService();
+        ConcertStartedProcessor concertStartedProcessor =
+                ConcertStartedProcessor.createForTest(spyScheduledExecutorService,
+                                                      localDateTimeFactory.clock());
 
         ConcertId firstConcertId = ConcertId.createRandom();
-        LocalDateTime firstShowDateTime = LocalDateTimeFactory.oneWeekInTheFutureAtMidnight().plusHours(20);
+        LocalDateTime firstShowDateTime = localDateTimeFactory.oneWeekInTheFutureAtMidnight().plusHours(20);
         ConcertId secondConcertId = ConcertId.createRandom();
-        LocalDateTime secondShowDateTime = LocalDateTimeFactory.oneMonthInTheFutureAtMidnight().plusHours(20);
+        LocalDateTime secondShowDateTime = localDateTimeFactory.oneMonthInTheFutureAtMidnight().plusHours(20);
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
@@ -46,14 +58,20 @@ class ConcertStartedProcessorTest {
                         Map.of(firstConcertId, firstShowDateTime,
                                secondConcertId, secondShowDateTime));
 
-        // And AlarmScheduler was invoked with show date+time for ConcertId
+        long firstConcertExpectedDelay = 7 * 24 * 60 + (20 * 60); // 1 week + 20 hours
+        // can't calculate this next one without know how long "1 month" is, so will leave it as-is
+        long secondConcertExpectedDelay = localDateTimeFactory.now().until(secondShowDateTime, ChronoUnit.MINUTES);
+        assertThat(spyScheduledExecutorService.scheduledCommands())
+                .extracting(ScheduledCommand::delay, ScheduledCommand::unit)
+                .containsExactly(tuple(firstConcertExpectedDelay, TimeUnit.MINUTES),
+                                 tuple(secondConcertExpectedDelay, TimeUnit.MINUTES));
     }
 
     @Test
     void concertRescheduledUpdatesAlarmToNewShowDateTime() {
-        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
 
-        LocalDateTime showDateTime = LocalDateTimeFactory.oneWeekInTheFutureAtMidnight().plusHours(20);
+        LocalDateTime showDateTime = LocalDateTimeFactory.withNow().oneWeekInTheFutureAtMidnight().plusHours(20);
         ConcertId concertId = ConcertId.createRandom();
         LocalDateTime rescheduledShowDateTime = showDateTime.plusWeeks(2);
         Stream<ConcertEvent> concertScheduledThenRescheduleStream =
@@ -71,13 +89,13 @@ class ConcertStartedProcessorTest {
 
     @Test
     void ignoreTicketsSoldEvents() {
-        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
         ConcertId concertId = ConcertId.createRandom();
         Stream<ConcertEvent> concertEventStream =
                 MakeEvents.with()
                           .concertScheduled(
                                   concertId,
-                                  c -> c.showDateTime(LocalDateTimeFactory.oneWeekInTheFutureAtMidnight())
+                                  c -> c.showDateTime(LocalDateTimeFactory.withNow().oneWeekInTheFutureAtMidnight())
                                         .ticketsSold(1))
                           .stream();
 
@@ -90,12 +108,12 @@ class ConcertStartedProcessorTest {
 
     @Test
     void ignoreConcertsScheduledInThePast() {
-        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
                                   ConcertId.createRandom(),
-                                  c -> c.showDateTime(LocalDateTimeFactory.oneWeekInThePastAtMidnight()))
+                                  c -> c.showDateTime(LocalDateTimeFactory.withNow().oneWeekInThePastAtMidnight()))
                           .stream();
 
         concertStartedProcessor.handle(concertScheduledStream);
@@ -107,13 +125,13 @@ class ConcertStartedProcessorTest {
 
     @Test
     void ignoreConcertsRescheduledInThePast() {
-        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
                                   ConcertId.createRandom(),
-                                  c -> c.showDateTime(LocalDateTimeFactory.oneMonthInThePastAtMidnight())
-                                        .rescheduleTo(LocalDateTimeFactory.oneWeekInThePastAtMidnight()))
+                                  c -> c.showDateTime(LocalDateTimeFactory.withNow().oneMonthInThePastAtMidnight())
+                                        .rescheduleTo(LocalDateTimeFactory.withNow().oneWeekInThePastAtMidnight()))
                           .stream();
 
         concertStartedProcessor.handle(concertScheduledStream);
@@ -126,12 +144,12 @@ class ConcertStartedProcessorTest {
 
     @Test
     void alarmCanceledWhenTicketSalesStopped() {
-        ConcertStartedProcessor concertStartedProcessor = new ConcertStartedProcessor();
+        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
                                   ConcertId.createRandom(),
-                                  c -> c.showDateTime(LocalDateTimeFactory.oneMonthInTheFutureAtMidnight())
+                                  c -> c.showDateTime(LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight())
                                         .ticketSalesStopped())
                           .stream();
 
@@ -142,3 +160,19 @@ class ConcertStartedProcessorTest {
                 .isEmpty();
     }
 }
+
+class SpyScheduledExecutorService extends ForkJoinPool {
+    private final List<ScheduledCommand> scheduledCommands = new ArrayList<>();
+
+    public List<ScheduledCommand> scheduledCommands() {
+        return scheduledCommands;
+    }
+
+    @Override
+    public @NotNull ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+        scheduledCommands.add(new ScheduledCommand(command, delay, unit));
+        return super.schedule(command, delay, unit);
+    }
+}
+
+record ScheduledCommand(Runnable command, long delay, TimeUnit unit) {}
