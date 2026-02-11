@@ -2,6 +2,8 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +31,37 @@ class ConcertStartedProcessorTest {
         assertThat(concertStartedProcessor.alarms())
                 .as("Alarms should be empty for a newly created processor")
                 .isEmpty();
+    }
+
+    @Test
+    void scheduledAlarmWrapsCommandInRunnableForExecutorService() {
+        SpyScheduledExecutorService spyScheduledExecutorService =
+                new SpyScheduledExecutorService();
+        var concertEventStore = InMemoryEventStore.forConcerts();
+        ConcertStartedProcessor concertStartedProcessor =
+                ConcertStartedProcessor.createForTest(
+                        spyScheduledExecutorService,
+                        concertEventStore);
+        ConcertId concertId = ConcertId.createRandom();
+        List<ConcertEvent> concertScheduledStream =
+                MakeEvents.with()
+                          .concertScheduled(
+                                  concertId,
+                                  c -> c.showDateTime(
+                                          LocalDateTimeFactory.withNow()
+                                                              .oneWeekInTheFutureAtMidnight()))
+                          .list();
+        concertEventStore.save(concertId, concertScheduledStream.stream());
+        concertStartedProcessor.handle(concertScheduledStream.stream());
+
+        Runnable command = spyScheduledExecutorService.scheduledCommands()
+                                                      .getFirst()
+                                                      .command();
+        command.run();
+
+        assertThat(concertEventStore.eventsForAggregate(concertId))
+                .hasExactlyElementsOfTypes(ConcertScheduled.class,
+                                           TicketSalesStopped.class);
     }
 
     @Test

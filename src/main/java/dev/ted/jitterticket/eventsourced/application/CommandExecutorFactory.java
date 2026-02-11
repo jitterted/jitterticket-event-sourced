@@ -18,9 +18,8 @@ public class CommandExecutorFactory {
         return new CommandExecutorFactory(concertEventStore);
     }
 
-    static CommandExecutorFactory createForTest() {
-        return create(
-                InMemoryEventStore.forConcerts());
+    public static CommandExecutorFactory createForTest() {
+        return create(InMemoryEventStore.forConcerts());
     }
 
     public Command<ConcertId> wrap(Command<Concert> concertCommand) {

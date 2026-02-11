@@ -1,5 +1,7 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+import dev.ted.jitterticket.eventsourced.application.port.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
@@ -61,6 +63,16 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         );
     }
 
+    public static ConcertStartedProcessor createForTest(
+            ScheduledExecutorService scheduledExecutorService,
+            EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
+        return new ConcertStartedProcessor(
+                scheduledExecutorService,
+                Clock.systemDefaultZone(),
+                CommandExecutorFactory.create(concertEventStore)
+        );
+    }
+
     public Map<ConcertId, ConcertAlarm> alarms() {
         return Map.copyOf(alarmMap);
     }
@@ -104,7 +116,9 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         if (inTheFuture(showDateTime)) {
             ScheduledFuture<?> scheduledFuture = scheduledExecutorService
                     .schedule(
-                            () -> {},
+                            () -> commandExecutorFactory
+                                    .wrap(Concert::stopTicketSales)
+                                    .execute(concertId),
                             delayFromNowInMinutes(showDateTime),
                             TimeUnit.MINUTES
                     );
