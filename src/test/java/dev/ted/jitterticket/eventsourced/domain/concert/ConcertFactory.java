@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.domain.concert;
 
+import dev.ted.jitterticket.eventsourced.application.LocalDateTimeFactory;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 
 import java.time.LocalDateTime;
@@ -20,11 +21,12 @@ public class ConcertFactory {
     }
 
     private static Concert createConcertWithIdAndArtist(ConcertId concertId, String artist) {
+        LocalDateTime showDateTime = LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight();
         return Concert.schedule(concertId,
                                 artist,
                                 99,
-                                LocalDateTime.now(),
-                                LocalTime.now().minusHours(1),
+                                showDateTime,
+                                showDateTime.toLocalTime().minusHours(1),
                                 100,
                                 4
         );

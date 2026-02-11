@@ -119,7 +119,7 @@
         [X] Given new Processor,
             When ConcertScheduled event received by handle()
             Then it's in the list of Alarms
-        [ ] Test that AlarmScheduler (some kind of interface for a ScheduledExecutorService, e.g., ForkJoinPool.commonPool() that we can replace with a Test Double) was invoked with show date+time for ConcertId
+        [X] Test that AlarmScheduler (some kind of interface for a ScheduledExecutorService, e.g., ForkJoinPool.commonPool() that we can replace with a Test Double) was invoked with show date+time for ConcertId
             [X] And that the scheduled future was canceled when the TicketSalesStopped event was handled
 
 ==> CURRENT TASK ==>
@@ -127,6 +127,7 @@
             [ ] Create a Runnable (task) that invokes stopSales on the specified Concert
                 [ ] Requires a StopTicketSalesUseCase (aka Command) that does the infrastructure work of loading the Concert, executing .stopTicketSales() and saves the uncommitted events
                     [ ] Create a composition-friendly class that takes a lambda to execute a method on an aggregate, e.g., new CommandExecuterFactory<Concert>(Runnable<Concert> doStuff), where the Factory already has the reference to the ConcertEventStore
+            [ ] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
 
 
 
