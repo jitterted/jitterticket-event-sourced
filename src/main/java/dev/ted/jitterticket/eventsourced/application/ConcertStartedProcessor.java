@@ -38,8 +38,7 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         return new ConcertStartedProcessor(
                 ForkJoinPool.commonPool(),
                 Clock.systemDefaultZone(),
-                CommandExecutorFactory.create(
-                        InMemoryEventStore.forConcerts())
+                CommandExecutorFactory.createForTest()
         );
     }
 
@@ -48,8 +47,7 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         return new ConcertStartedProcessor(
                 scheduledExecutorService,
                 Clock.systemDefaultZone(),
-                CommandExecutorFactory.create(
-                        InMemoryEventStore.forConcerts())
+                CommandExecutorFactory.createForTest()
         );
     }
 
@@ -59,8 +57,7 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         return new ConcertStartedProcessor(
                 scheduledExecutorService,
                 clock,
-                CommandExecutorFactory.create(
-                        InMemoryEventStore.forConcerts())
+                CommandExecutorFactory.createForTest()
         );
     }
 
