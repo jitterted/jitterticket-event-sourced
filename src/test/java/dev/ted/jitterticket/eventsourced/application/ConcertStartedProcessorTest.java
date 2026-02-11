@@ -194,9 +194,26 @@ class ConcertStartedProcessorTest {
                 .hasSize(1);
     }
 
-    // test case:
-    // concert scheduled(future), rescheduled to (past)
-    // ensure rescheduling to the past cancels any alarms
+    @Test
+    void concertScheduledInFutureRescheduledToPastMustCancelAlarm() {
+        SpyScheduledExecutorService spyScheduledExecutorService = new SpyScheduledExecutorService();
+        ConcertStartedProcessor concertStartedProcessor =
+                ConcertStartedProcessor.create(spyScheduledExecutorService);
+        LocalDateTimeFactory now = LocalDateTimeFactory.withNow();
+        Stream<ConcertEvent> concertScheduledStream =
+                MakeEvents.with()
+                          .concertScheduled(
+                                  ConcertId.createRandom(),
+                                  c -> c.showDateTime(now.oneMonthInTheFutureAtMidnight())
+                                        .rescheduleTo(now.oneWeekInThePastAtMidnight()))
+                          .stream();
+
+        concertStartedProcessor.handle(concertScheduledStream);
+
+        assertThat(concertStartedProcessor.alarms())
+                .as("Rescheduling to the past should cancel (remove) alarm originally scheduled")
+                .isEmpty();
+    }
 
     @Test
     void alarmCanceledWhenTicketSalesStopped() {

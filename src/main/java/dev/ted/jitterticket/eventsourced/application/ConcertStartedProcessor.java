@@ -56,7 +56,8 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         concertEventStream.forEach(
                 concertEvent -> {
                     switch (concertEvent) {
-                        case ConcertScheduled cs -> scheduleAlarm(cs.concertId(), cs.showDateTime());
+                        case ConcertScheduled cs ->
+                                scheduleAlarm(cs.concertId(), cs.showDateTime());
 
                         case ConcertRescheduled cr ->
                                 rescheduleAlarm(cr.concertId(), cr.newShowDateTime());
@@ -72,8 +73,8 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
     }
 
     private void rescheduleAlarm(ConcertId concertId, LocalDateTime newShowDateTime) {
+        cancelAlarm(concertId);
         if (inTheFuture(newShowDateTime)) {
-            cancelAlarm(concertId);
             scheduleAlarm(concertId, newShowDateTime);
         }
     }
@@ -83,14 +84,6 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         if (removedAlarm != null) {
             removedAlarm.cancel();
         }
-// Alternative (clever, but not as readable):
-//        alarmMap.computeIfPresent(
-//                concertId,
-//                (_, concertAlarm) -> {
-//                    concertAlarm.cancel();
-//                    return null;
-//                }
-//        );
     }
 
     private void scheduleAlarm(ConcertId concertId,
