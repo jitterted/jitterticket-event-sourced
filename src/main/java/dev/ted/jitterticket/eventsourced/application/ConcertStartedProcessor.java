@@ -115,12 +115,11 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
                                LocalDateTime showDateTime) {
         if (inTheFuture(showDateTime)) {
             ScheduledFuture<?> scheduledFuture = scheduledExecutorService
-                    .schedule(
-                            () -> commandExecutorFactory
-                                    .wrap(Concert::stopTicketSales)
-                                    .execute(concertId),
-                            delayFromNowInMinutes(showDateTime),
-                            TimeUnit.MINUTES
+                    .schedule(() -> commandExecutorFactory
+                                      .wrap(Concert::stopTicketSales)
+                                      .execute(concertId),
+                              delayFromNowInMinutes(showDateTime),
+                              TimeUnit.MINUTES
                     );
             alarmMap.put(concertId, new ConcertAlarm(showDateTime, scheduledFuture));
         }
