@@ -23,7 +23,8 @@ class ConcertStartedProcessorTest {
 
     @Test
     void newProcessorHasNoAlarms() {
-        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
+        ConcertStartedProcessor concertStartedProcessor =
+                ConcertStartedProcessor.createForTest();
 
         assertThat(concertStartedProcessor.alarms())
                 .as("Alarms should be empty for a newly created processor")
@@ -36,8 +37,9 @@ class ConcertStartedProcessorTest {
         SpyScheduledExecutorService spyScheduledExecutorService =
                 new SpyScheduledExecutorService();
         ConcertStartedProcessor concertStartedProcessor =
-                ConcertStartedProcessor.createForTest(spyScheduledExecutorService,
-                                                      localDateTimeFactory.clock());
+                ConcertStartedProcessor.createForTest(
+                        spyScheduledExecutorService,
+                        localDateTimeFactory.clock());
 
         ConcertId firstConcertId = ConcertId.createRandom();
         LocalDateTime firstShowDateTime = localDateTimeFactory.oneWeekInTheFutureAtMidnight().plusHours(20);
@@ -77,7 +79,7 @@ class ConcertStartedProcessorTest {
     void concertRescheduledUpdatesAlarmToNewShowDateTime() {
         SpyScheduledExecutorService spyScheduledExecutorService = new SpyScheduledExecutorService();
         ConcertStartedProcessor concertStartedProcessor =
-                ConcertStartedProcessor.create(spyScheduledExecutorService);
+                ConcertStartedProcessor.createForTest(spyScheduledExecutorService);
 
         LocalDateTime showDateTime = LocalDateTimeFactory.withNow().oneWeekInTheFutureAtMidnight().plusHours(20);
         ConcertId concertId = ConcertId.createRandom();
@@ -117,7 +119,7 @@ class ConcertStartedProcessorTest {
 
     @Test
     void ignoreTicketsSoldEvents() {
-        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
+        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.createForTest();
         ConcertId concertId = ConcertId.createRandom();
         Stream<ConcertEvent> concertEventStream =
                 MakeEvents.with()
@@ -136,7 +138,7 @@ class ConcertStartedProcessorTest {
 
     @Test
     void ignoreConcertsScheduledInThePast() {
-        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
+        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.createForTest();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
@@ -153,7 +155,7 @@ class ConcertStartedProcessorTest {
 
     @Test
     void ignoreConcertsRescheduledInThePast() {
-        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.create();
+        ConcertStartedProcessor concertStartedProcessor = ConcertStartedProcessor.createForTest();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
@@ -173,7 +175,7 @@ class ConcertStartedProcessorTest {
     void concertScheduledInThePastRescheduledInTheFutureResultsInSingleActiveAlarm() {
         SpyScheduledExecutorService spyScheduledExecutorService = new SpyScheduledExecutorService();
         ConcertStartedProcessor concertStartedProcessor =
-                ConcertStartedProcessor.create(spyScheduledExecutorService);
+                ConcertStartedProcessor.createForTest(spyScheduledExecutorService);
         LocalDateTimeFactory now = LocalDateTimeFactory.withNow();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
@@ -198,7 +200,7 @@ class ConcertStartedProcessorTest {
     void concertScheduledInFutureRescheduledToPastMustCancelAlarm() {
         SpyScheduledExecutorService spyScheduledExecutorService = new SpyScheduledExecutorService();
         ConcertStartedProcessor concertStartedProcessor =
-                ConcertStartedProcessor.create(spyScheduledExecutorService);
+                ConcertStartedProcessor.createForTest(spyScheduledExecutorService);
         LocalDateTimeFactory now = LocalDateTimeFactory.withNow();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
@@ -219,7 +221,7 @@ class ConcertStartedProcessorTest {
     void alarmCanceledWhenTicketSalesStopped() {
         SpyScheduledExecutorService spyScheduledExecutorService = new SpyScheduledExecutorService();
         ConcertStartedProcessor concertStartedProcessor =
-                ConcertStartedProcessor.create(spyScheduledExecutorService);
+                ConcertStartedProcessor.createForTest(spyScheduledExecutorService);
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(

@@ -23,28 +23,45 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
     private final Map<ConcertId, ConcertAlarm> alarmMap = new HashMap<>();
     private final ScheduledExecutorService scheduledExecutorService;
     private final Clock clock;
+    private final CommandExecutorFactory commandExecutorFactory;
 
     private ConcertStartedProcessor(
             ScheduledExecutorService scheduledExecutorService,
-            Clock clock) {
+            Clock clock,
+            CommandExecutorFactory commandExecutorFactory) {
         this.scheduledExecutorService = scheduledExecutorService;
         this.clock = clock;
+        this.commandExecutorFactory = commandExecutorFactory;
     }
 
-    public static ConcertStartedProcessor create() {
-        return new ConcertStartedProcessor(ForkJoinPool.commonPool(),
-                                           Clock.systemDefaultZone());
+    public static ConcertStartedProcessor createForTest() {
+        return new ConcertStartedProcessor(
+                ForkJoinPool.commonPool(),
+                Clock.systemDefaultZone(),
+                CommandExecutorFactory.create(
+                        InMemoryEventStore.forConcerts())
+        );
     }
 
-    public static ConcertStartedProcessor create(ScheduledExecutorService scheduledExecutorService) {
-        return new ConcertStartedProcessor(scheduledExecutorService,
-                                           Clock.systemDefaultZone());
+    public static ConcertStartedProcessor createForTest(
+            ScheduledExecutorService scheduledExecutorService) {
+        return new ConcertStartedProcessor(
+                scheduledExecutorService,
+                Clock.systemDefaultZone(),
+                CommandExecutorFactory.create(
+                        InMemoryEventStore.forConcerts())
+        );
     }
 
     public static ConcertStartedProcessor createForTest(
             ScheduledExecutorService scheduledExecutorService,
             Clock clock) {
-        return new ConcertStartedProcessor(scheduledExecutorService, clock);
+        return new ConcertStartedProcessor(
+                scheduledExecutorService,
+                clock,
+                CommandExecutorFactory.create(
+                        InMemoryEventStore.forConcerts())
+        );
     }
 
     public Map<ConcertId, ConcertAlarm> alarms() {
@@ -56,8 +73,7 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
         concertEventStream.forEach(
                 concertEvent -> {
                     switch (concertEvent) {
-                        case ConcertScheduled cs ->
-                                scheduleAlarm(cs.concertId(), cs.showDateTime());
+                        case ConcertScheduled cs -> scheduleAlarm(cs.concertId(), cs.showDateTime());
 
                         case ConcertRescheduled cr ->
                                 rescheduleAlarm(cr.concertId(), cr.newShowDateTime());
