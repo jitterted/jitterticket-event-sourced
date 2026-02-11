@@ -27,6 +27,14 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
     private final Clock clock;
     private final CommandExecutorFactory commandExecutorFactory;
 
+    // For (at least) Production use
+    public static ConcertStartedProcessor create(
+            ScheduledExecutorService scheduledExecutorService,
+            Clock clock,
+            CommandExecutorFactory commandExecutorFactory) {
+        return new ConcertStartedProcessor(scheduledExecutorService, clock, commandExecutorFactory);
+    }
+
     private ConcertStartedProcessor(
             ScheduledExecutorService scheduledExecutorService,
             Clock clock,
@@ -37,7 +45,7 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
     }
 
     public static ConcertStartedProcessor createForTest() {
-        return new ConcertStartedProcessor(
+        return create(
                 ForkJoinPool.commonPool(),
                 Clock.systemDefaultZone(),
                 CommandExecutorFactory.createForTest()
@@ -46,7 +54,7 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
 
     public static ConcertStartedProcessor createForTest(
             ScheduledExecutorService scheduledExecutorService) {
-        return new ConcertStartedProcessor(
+        return create(
                 scheduledExecutorService,
                 Clock.systemDefaultZone(),
                 CommandExecutorFactory.createForTest()
@@ -56,7 +64,7 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
     public static ConcertStartedProcessor createForTest(
             ScheduledExecutorService scheduledExecutorService,
             Clock clock) {
-        return new ConcertStartedProcessor(
+        return create(
                 scheduledExecutorService,
                 clock,
                 CommandExecutorFactory.createForTest()
@@ -66,7 +74,7 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
     public static ConcertStartedProcessor createForTest(
             ScheduledExecutorService scheduledExecutorService,
             EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
-        return new ConcertStartedProcessor(
+        return create(
                 scheduledExecutorService,
                 Clock.systemDefaultZone(),
                 CommandExecutorFactory.create(concertEventStore)

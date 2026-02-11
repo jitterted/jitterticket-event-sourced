@@ -69,7 +69,7 @@ public class SampleDataPopulator implements ApplicationRunner {
                 ConcertId.createRandom(),
                 "Midnight Rebels",
                 55,
-                daysFromNowAt(15, 21, 0),
+                LocalDateTime.now().plusSeconds(10),
                 LocalTime.of(20, 0),
                 150,
                 4));
