@@ -125,9 +125,10 @@
 ==> CURRENT TASK ==>
 
             [ ] Create a Runnable (task) that invokes stopSales on the specified Concert
-                [ ] Requires a StopTicketSalesUseCase (aka Command) that does the infrastructure work of loading the Concert, executing .stopTicketSales() and saves the uncommitted events
-                    [ ] Create a composition-friendly class that takes a lambda to execute a method on an aggregate, e.g., new CommandExecuterFactory<Concert>(Runnable<Concert> doStuff), where the Factory already has the reference to the ConcertEventStore
+                [X] Requires a StopTicketSalesUseCase (aka Command) that does the infrastructure work of loading the Concert, executing .stopTicketSales() and saves the uncommitted events
+                    [X] Create a composition-friendly class that takes a lambda to execute a method on an aggregate, e.g., new CommandExecuterFactory<Concert>(Runnable<Concert> doStuff), where the Factory already has the reference to the ConcertEventStore
             [ ] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
+            [ ] Generify CommandExecutorFactory to handle other aggregates (Customer)
 
 
 
