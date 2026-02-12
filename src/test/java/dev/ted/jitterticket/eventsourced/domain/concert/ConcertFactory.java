@@ -65,6 +65,16 @@ public class ConcertFactory {
         );
     }
 
+    static Concert createConcertWithShowDateTimeOf(ConcertId concertId, LocalDateTime showDateTime) {
+        return Concert.schedule(concertId,
+                                "DON'T CARE ARTIST",
+                                42,
+                                showDateTime,
+                                LocalTime.of(20, 0),
+                                42,
+                                1);
+    }
+
     public static class Store {
         public static ConcertId saveScheduledConcertIn(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             int ticketPrice = 35;

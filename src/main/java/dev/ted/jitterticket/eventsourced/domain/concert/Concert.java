@@ -47,6 +47,10 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
 
     // only invoked by EventStore (and tests)
     public static Concert reconstitute(List<ConcertEvent> concertEvents) {
+        // concertEvents must not be empty!
+        if (concertEvents.isEmpty()) {
+            throw new IllegalArgumentException("Can not reconstitute from an empty list of ConcertEvents.");
+        }
         return new Concert(concertEvents);
     }
 

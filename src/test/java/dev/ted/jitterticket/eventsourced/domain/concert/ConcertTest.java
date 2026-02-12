@@ -1,5 +1,10 @@
 package dev.ted.jitterticket.eventsourced.domain.concert;
 
+import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
+import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
+import dev.ted.jitterticket.eventsourced.application.LocalDateTimeFactory;
+import dev.ted.jitterticket.eventsourced.application.Reschedule;
+import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,6 +39,33 @@ public class ConcertTest {
                             concertId, null, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
                     ));
         }
+
+        @Test
+        void wrappedRescheduleCommandReschedulesConcertWhenExecutedWithParams() {
+            EventStore<ConcertId, ConcertEvent, Concert> concertEventStore = InMemoryEventStore.forConcerts();
+            ConcertId concertId = ConcertId.createRandom();
+            concertEventStore.save(ConcertFactory.createConcertWithShowDateTimeOf(concertId, LocalDateTimeFactory.withNow().oneWeekInTheFutureAtMidnight()));
+            CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
+
+            var command = commandExecutorFactory.wrapWithParams(
+                    (concert, reschedule) ->
+                            concert.rescheduleTo(
+                                    reschedule.showDateTime(),
+                                    reschedule.doorsTime()));
+
+            LocalDateTime newShowDateTime = LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight();
+            Reschedule rescheduleParams = new Reschedule(
+                    newShowDateTime,
+                    LocalTime.of(20, 0));
+
+            command.execute(concertId, rescheduleParams);
+
+            assertThat(concertEventStore.findById(concertId))
+                    .get()
+                    .extracting(Concert::showDateTime)
+                    .isEqualTo(newShowDateTime);
+        }
+
 
         @Test
         void rescheduleConcertGeneratesConcertRescheduled() {

@@ -121,29 +121,36 @@
             Then it's in the list of Alarms
         [X] Test that AlarmScheduler (some kind of interface for a ScheduledExecutorService, e.g., ForkJoinPool.commonPool() that we can replace with a Test Double) was invoked with show date+time for ConcertId
             [X] And that the scheduled future was canceled when the TicketSalesStopped event was handled
-
-==> CURRENT TASK ==>
-
             [X] Create a Runnable (task) that invokes stopSales on the specified Concert
                 [X] Requires a StopTicketSalesUseCase (aka Command) that does the infrastructure work of loading the Concert, executing .stopTicketSales() and saves the uncommitted events
                     [X] Create a composition-friendly class that takes a lambda to execute a method on an aggregate, e.g., new CommandExecuterFactory<Concert>(Runnable<Concert> doStuff), where the Factory already has the reference to the ConcertEventStore
-            [ ] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
-            [ ] Generify CommandExecutorFactory to handle other aggregates (Customer)
 
+==> CURRENT TASK ==>
+
+            [ ] Add Reschedule command support to the CommandExecutorFactory so that we can send in data and then hook it up to a UI
+            [ ] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
+                [ ] Create a wrapForCreation() that doesn't execute the "before" or "load" code, only the "after" or "save"
 
     [ ] Event Viewer for Concerts needs to use a complete list of Concert aggregates, and NOT the Available Concerts projection, because of the TicketSalesStopped event (which drops concerts where ticket sales stopped).
         [ ] Create a new AllConcertAggregates projection.
         [ ] Event Viewer uses this new projection
 
-    [ ] Have an easier way to recreate the sample data, instead of having to delete the Postgres container
+    [ ] Have an easier way to recreate the sample data, instead of having to delete the Postgres container (maybe a button?)
 
     [ ] Auto-complete Concert Processor
+        [ ] Extract a ProcessorCoordinator, or refactor the ProjectionCoordinator to work with any Event Consumer (and therefore becomes an EventConsumerCoordinator?)
         [ ] Tracks when concerts should be marked as completed, and sets itself an alarm of some type (or externalizes it to some scheduler), and then generates a ConcertCompleted event.
         [ ] Concert then can handle the ConcertCompleted event to do other work (to be defined)
 
     [ ] Actually persist the projections in the database, i.e., implement the PersistencePort interface(s):
         [ ] AvailableConcerts
         [ ] RegisteredCustomers
+
+    [ ] Upgrade to Spring Boot 4.0.x
+
+    [ ] Create a targeted "Decider" for ticket sales, that validates that the ticket sales have not been stopped and we have enough to fulfill the requested ticket quantity. Ticket sales are currently stopped as a result of the ConcertStartedProcessor, and ticket sales should be stopped when we sell the last ticket.
+
+    [ ] (Later) Generify CommandExecutorFactory to handle other aggregates (Customer)
 
     [ ] Convert ConcertSalesProjection+Mediator to Coordinator design
 

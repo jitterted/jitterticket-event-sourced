@@ -31,4 +31,16 @@ public class CommandExecutorFactory {
             concertEventStore.save(concert);
         };
     }
+
+    public CommandWithParams<ConcertId, Reschedule> wrapWithParams(
+            CommandWithParams<Concert, Reschedule> command) {
+        return (concertId, reschedule) -> {
+            Concert concert = concertEventStore
+                    .findById(concertId)
+                    .orElseThrow(() -> new IllegalArgumentException("Could not find Concert with ID " + concertId));
+            command.execute(concert, reschedule);
+            concertEventStore.save(concert);
+        };
+    }
 }
+
