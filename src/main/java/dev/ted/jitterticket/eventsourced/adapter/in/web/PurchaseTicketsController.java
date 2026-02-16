@@ -33,7 +33,7 @@ public class PurchaseTicketsController {
     @GetMapping("/concerts/{concertId}")
     public String purchaseTicketsView(Model model,
                                       @PathVariable("concertId") String concertId) {
-        model.addAttribute("concert", concertViewFor(concertId));
+        model.addAttribute("concert", ConcertView.concertViewFor(concertStore, concertId));
         String customerUuidString = "68f5b2c2-d70d-4992-ad78-c94809ae9a6a";
         model.addAttribute("ticketOrderForm", new TicketOrderForm(
                 customerUuidString, 2));
@@ -56,13 +56,6 @@ public class PurchaseTicketsController {
     }
 
     // @GetMapping("/confirmations/{ticketOrderId}?customerId={customerId}
-
-    private ConcertView concertViewFor(String concertId) {
-        return concertStore.findById(
-                                   new ConcertId(UUID.fromString(concertId)))
-                           .map(ConcertView::from)
-                           .orElseThrow(() -> new RuntimeException("Could not find concert with id: " + concertId));
-    }
 
 }
 

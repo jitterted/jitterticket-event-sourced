@@ -24,7 +24,9 @@
         <td th:text="${concert.showDate}">August 3, 2025</td>
         <td th:text="${concert.showTime}">8:00 PM</td>
         <td th:text="${concert.ticketPrice}">$38</td>
-        <td><a th:href="@{/concerts/{id}(id=${concert.concertId})}">Buy Tickets</a></td>
+        <td><a href="#" th:href="@{/concerts/{id}(id=${concert.concertId})}">Buy Tickets</a>
+            <br/>
+            <a href="#" th:href="@{/reschedule/{id}(id=${concert.concertId})}">Reschedule Concert</a></td>
     </tr>
     </tbody>
 </table>

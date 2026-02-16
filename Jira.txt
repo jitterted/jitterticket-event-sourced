@@ -127,7 +127,8 @@
 
 ==> CURRENT TASK ==>
 
-            [ ] Add Reschedule command support to the CommandExecutorFactory so that we can send in data and then hook it up to a UI
+            [X] Add Reschedule command support to the CommandExecutorFactory so that we can send in data and then hook it up to a UI
+                [ ] Create UI for this: Controller and HTML
             [ ] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
                 [ ] Create a wrapForCreation() that doesn't execute the "before" or "load" code, only the "after" or "save"
 

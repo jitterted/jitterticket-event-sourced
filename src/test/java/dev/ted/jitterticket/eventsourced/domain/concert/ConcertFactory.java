@@ -65,12 +65,18 @@ public class ConcertFactory {
         );
     }
 
-    static Concert createConcertWithShowDateTimeOf(ConcertId concertId, LocalDateTime showDateTime) {
+    public static Concert createConcertWithShowDateTimeOf(ConcertId concertId, LocalDateTime showDateTime) {
+        return createConcertWithShowAndDoors(concertId,
+                                             showDateTime,
+                                             LocalTime.of(20, 0));
+    }
+
+    public static Concert createConcertWithShowAndDoors(ConcertId concertId, LocalDateTime showDateTime, LocalTime doorsTime) {
         return Concert.schedule(concertId,
                                 "DON'T CARE ARTIST",
                                 42,
                                 showDateTime,
-                                LocalTime.of(20, 0),
+                                doorsTime,
                                 42,
                                 1);
     }
