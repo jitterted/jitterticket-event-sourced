@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
+import dev.ted.jitterticket.eventsourced.application.Reschedule;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -42,11 +43,11 @@ public class RescheduleConcertController {
                         concert.rescheduleTo(
                                 reschedule.showDateTime(),
                                 reschedule.doorsTime()));
-//        Reschedule rescheduleParams = new Reschedule(
-//                rescheduleForm.newShowLocalDateTime(),
-//                rescheduleForm.newDoorsLocalTime());
-//        command.execute(new ConcertId(UUID.fromString(concertId)),
-//                        rescheduleParams);
+        Reschedule rescheduleParams = new Reschedule(
+                rescheduleForm.newShowLocalDateTime(),
+                rescheduleForm.newDoorsLocalTime());
+        command.execute(new ConcertId(UUID.fromString(concertId)),
+                        rescheduleParams);
 
         return "redirect:/rescheduled/" + concertId;
     }

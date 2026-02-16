@@ -57,8 +57,9 @@ class RescheduleConcertControllerTest {
         RescheduleConcertController rescheduleConcertController = new RescheduleConcertController(concertStore);
         String concertIdString = concertId.id().toString();
 
-        String redirect = rescheduleConcertController.rescheduleConcert(concertIdString,
-                                                                        null);
+        String redirect = rescheduleConcertController
+                .rescheduleConcert(concertIdString, rescheduleFormOf(
+                        "2026-03-14", "21:00", "20:00"));
 
         assertThat(redirect)
                 .isEqualTo("redirect:/rescheduled/" + concertIdString);
@@ -88,14 +89,18 @@ class RescheduleConcertControllerTest {
 
     @Test
     void formConvertsStringsToLocalDateTimeAndLocalTime() {
-        var rescheduleForm = new RescheduleConcertController.RescheduleForm(
-                "2026-03-14",
-                "21:00",
-                "20:00");
+        var rescheduleForm = rescheduleFormOf("2026-03-14", "21:00", "20:00");
 
         assertThat(rescheduleForm.newDoorsLocalTime())
                 .isEqualTo(LocalTime.of(20, 0));
         assertThat(rescheduleForm.newShowLocalDateTime())
                 .isEqualTo(LocalDateTime.of(2026, 3, 14, 21, 0));
+    }
+
+    private static RescheduleConcertController.RescheduleForm rescheduleFormOf(String newShowDate, String newShowTime, String newDoorsTime) {
+        return new RescheduleConcertController.RescheduleForm(
+                newShowDate,
+                newShowTime,
+                newDoorsTime);
     }
 }
