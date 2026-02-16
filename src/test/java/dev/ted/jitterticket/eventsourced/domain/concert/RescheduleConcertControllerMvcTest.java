@@ -28,4 +28,14 @@ class RescheduleConcertControllerMvcTest extends BaseMvcTest {
            .hasStatus2xxSuccessful();
     }
 
+    @Test
+    void postToRescheduleEndpointReturns3xxRedirect() {
+        ConcertId concertId = ConcertFactory.Store
+                .saveScheduledConcertIn(concertStore);
+
+        mvc.post()
+           .uri("/reschedule/" + concertId.id().toString())
+           .assertThat()
+           .hasStatus3xxRedirection();
+    }
 }

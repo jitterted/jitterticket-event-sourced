@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.UUID;
 
@@ -21,13 +22,19 @@ public class RescheduleConcertController {
     }
 
     @GetMapping("/reschedule/{concertId}")
-    public String rescheduleConcertView(@PathVariable String concertId,
+    public String rescheduleConcertView(@PathVariable("concertId") String concertId,
                                         Model model) {
         Concert concert = concertEventStore.findById(new ConcertId(UUID.fromString(concertId)))
                                            .orElseThrow(() -> new RuntimeException("Could not find concert with id: " + concertId));
         model.addAttribute("concert", ConcertView.from(concert));
         model.addAttribute("rescheduleForm", RescheduleForm.from(concert));
         return "reschedule-concert";
+    }
+
+    @PostMapping("/reschedule/{concertId}")
+    public String rescheduleConcert(@PathVariable("concertId") String concertId,
+                                    RescheduleForm rescheduleForm) {
+        return "redirect:/";
     }
 
     public record RescheduleForm(
