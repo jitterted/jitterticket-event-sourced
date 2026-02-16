@@ -62,7 +62,7 @@ class RescheduleConcertControllerTest {
                         "2026-03-14", "21:00", "20:00"));
 
         assertThat(redirect)
-                .isEqualTo("redirect:/rescheduled/" + concertIdString);
+                .isEqualTo("redirect:/reschedule/" + concertIdString);
         assertThat(concertStore.findById(concertId))
                 .get()
                 .extracting(Concert::showDateTime, Concert::doorsTime)

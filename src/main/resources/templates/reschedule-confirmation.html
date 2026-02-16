@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rescheduled Concert Confirmation</title>
+    <link rel="stylesheet" th:href="@{/site.css}">
+</head>
+<body class="confirmation-page">
+    <div>
+        <div>
+            <h1>Concert Rescheduled</h1>
+
+            <div class="container">
+                <div class="concert-header">
+                    <h2 class="concert-title" th:text="${concert.artist}">Jittery Pigs</h2>
+                    <span class="concert-id" th:text="${concert.concertId}">af05fc05-2de1-46d8-9568-01381029feb7</span>
+                </div>
+
+                <div class="concert-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Date</div>
+                        <div class="detail-value" th:text="${concert.showDate}">August 3, 2025</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Time</div>
+                        <div class="detail-value" th:text="${concert.showTime}">8:00PM</div>
+                    </div>
+                </div>
+
+                <div class="ticket-price">
+                    <span class="price-tag" th:text="${concert.ticketPrice}">$38</span>
+                </div>
+            </div>
+
+            <div>
+                <a href="/concerts">Back to Concerts Page</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -35,6 +35,9 @@ class RescheduleConcertControllerMvcTest extends BaseMvcTest {
 
         mvc.post()
            .uri("/reschedule/" + concertId.id().toString())
+           .param("newShowDate", "2026-03-15")
+           .param("newShowTime", "19:00")
+           .param("newDoorsTime", "18:00")
            .assertThat()
            .hasStatus3xxRedirection();
     }

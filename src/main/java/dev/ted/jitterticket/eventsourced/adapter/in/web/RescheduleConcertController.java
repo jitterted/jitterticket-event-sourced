@@ -49,7 +49,7 @@ public class RescheduleConcertController {
         command.execute(new ConcertId(UUID.fromString(concertId)),
                         rescheduleParams);
 
-        return "redirect:/rescheduled/" + concertId;
+        return "redirect:/reschedule/" + concertId;
     }
 
     private Concert concertOrThrow(ConcertId concertId1) {
