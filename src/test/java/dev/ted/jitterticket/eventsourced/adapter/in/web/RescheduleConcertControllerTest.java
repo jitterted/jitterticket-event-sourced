@@ -26,12 +26,10 @@ class RescheduleConcertControllerTest {
         LocalTime doorsTime = LocalTime.of(19, 0);
         concertStore.save(ConcertFactory.createConcertWithShowAndDoors(
                 concertId, showDateTime, doorsTime));
-        String concertIdString = concertId.id().toString();
-
         RescheduleConcertController rescheduleConcertController = new RescheduleConcertController(concertStore);
 
         Model model = new ConcurrentModel();
-        String viewName = rescheduleConcertController.rescheduleConcertView(concertIdString, model);
+        String viewName = rescheduleConcertController.rescheduleConcertView(concertId.id().toString(), model);
 
         assertThat(viewName)
                 .isEqualTo("reschedule-concert");
@@ -46,6 +44,29 @@ class RescheduleConcertControllerTest {
                 .as("Expected the RescheduleForm to be in the model named 'rescheduleForm'")
                 .extracting("newShowDate", InstanceOfAssertFactories.STRING)
                 .isNotBlank();
+    }
+
+    @Test
+    void postToRescheduleConcertDoesRescheduleAndRedirectsToRescheduledView() {
+        var concertStore = InMemoryEventStore.forConcerts();
+        ConcertId concertId = ConcertId.createRandom();
+        LocalDateTime showDateTime = LocalDateTime.of(2026, 2, 16, 21, 30);
+        LocalTime doorsTime = LocalTime.of(20, 30);
+        concertStore.save(ConcertFactory.createConcertWithShowAndDoors(
+                concertId, showDateTime, doorsTime));
+        RescheduleConcertController rescheduleConcertController = new RescheduleConcertController(concertStore);
+        String concertIdString = concertId.id().toString();
+
+        String redirect = rescheduleConcertController.rescheduleConcert(concertIdString,
+                                                                        null);
+
+        assertThat(redirect)
+                .isEqualTo("redirect:/rescheduled/" + concertIdString);
+        assertThat(concertStore.findById(concertId))
+                .get()
+                .extracting(Concert::showDateTime, Concert::doorsTime)
+                .containsExactly(LocalDateTime.of(2026, 3, 14, 21, 0),
+                                 LocalTime.of(20, 0));
     }
 
     @Test
@@ -65,4 +86,16 @@ class RescheduleConcertControllerTest {
                         "19:00"));
     }
 
+    @Test
+    void formConvertsStringsToLocalDateTimeAndLocalTime() {
+        var rescheduleForm = new RescheduleConcertController.RescheduleForm(
+                "2026-03-14",
+                "21:00",
+                "20:00");
+
+        assertThat(rescheduleForm.newDoorsLocalTime())
+                .isEqualTo(LocalTime.of(20, 0));
+        assertThat(rescheduleForm.newShowLocalDateTime())
+                .isEqualTo(LocalDateTime.of(2026, 3, 14, 21, 0));
+    }
 }

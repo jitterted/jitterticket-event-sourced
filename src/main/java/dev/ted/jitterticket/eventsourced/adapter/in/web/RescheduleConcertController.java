@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
+import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Controller
@@ -24,8 +27,7 @@ public class RescheduleConcertController {
     @GetMapping("/reschedule/{concertId}")
     public String rescheduleConcertView(@PathVariable("concertId") String concertId,
                                         Model model) {
-        Concert concert = concertEventStore.findById(new ConcertId(UUID.fromString(concertId)))
-                                           .orElseThrow(() -> new RuntimeException("Could not find concert with id: " + concertId));
+        Concert concert = concertOrThrow(new ConcertId(UUID.fromString(concertId)));
         model.addAttribute("concert", ConcertView.from(concert));
         model.addAttribute("rescheduleForm", RescheduleForm.from(concert));
         return "reschedule-concert";
@@ -34,7 +36,24 @@ public class RescheduleConcertController {
     @PostMapping("/reschedule/{concertId}")
     public String rescheduleConcert(@PathVariable("concertId") String concertId,
                                     RescheduleForm rescheduleForm) {
-        return "redirect:/";
+        CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
+        var command = commandExecutorFactory.wrapWithParams(
+                (concert, reschedule) ->
+                        concert.rescheduleTo(
+                                reschedule.showDateTime(),
+                                reschedule.doorsTime()));
+//        Reschedule rescheduleParams = new Reschedule(
+//                rescheduleForm.newShowLocalDateTime(),
+//                rescheduleForm.newDoorsLocalTime());
+//        command.execute(new ConcertId(UUID.fromString(concertId)),
+//                        rescheduleParams);
+
+        return "redirect:/rescheduled/" + concertId;
+    }
+
+    private Concert concertOrThrow(ConcertId concertId1) {
+        return concertEventStore.findById(concertId1)
+                                .orElseThrow(() -> new RuntimeException("Could not find concert with id: " + concertId1.id()));
     }
 
     public record RescheduleForm(
@@ -48,6 +67,16 @@ public class RescheduleConcertController {
                     LocalDateTimeFormatting.extractFormattedTimeFrom(concert.showDateTime()),
                     LocalDateTimeFormatting.formatAsTimeFrom(concert.doorsTime())
             );
+        }
+
+        public LocalDateTime newShowLocalDateTime() {
+            return LocalDateTimeFormatting.fromBrowserDateAndTime(
+                    newShowDate, newShowTime);
+        }
+
+        public LocalTime newDoorsLocalTime() {
+            return LocalTime.parse(newDoorsTime,
+                    LocalDateTimeFormatting.HH_MM);
         }
     }
 }
