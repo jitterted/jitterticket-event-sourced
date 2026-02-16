@@ -36,8 +36,8 @@ class JitterTicketEventSourcedApplicationTests {
 				.as("Should be two choices of projections: Concerts and Customers")
 				.hasSize(2);
 		assertThat(projectionChoices.choiceFor("concerts").aggregateSummaryViews())
-				.as("Should be 10 sample concerts from the EventStoreConfiguration")
-				.hasSize(10);
+				.as("Should be 9 sample concerts from the EventStoreConfiguration, because 1 of the 10 is now in the past and therefore is unavailable in the projection.")
+				.hasSize(9);
 		assertThat(projectionChoices.choiceFor("customers").aggregateSummaryViews())
 				.as("Should be two sample customers from the EventStoreConfiguration")
 				.hasSize(2);
