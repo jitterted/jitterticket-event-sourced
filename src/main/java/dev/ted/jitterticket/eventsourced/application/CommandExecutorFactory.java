@@ -5,8 +5,6 @@ import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
-import java.util.List;
-
 public class CommandExecutorFactory {
     private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
 
@@ -24,9 +22,9 @@ public class CommandExecutorFactory {
 
     public Command<ConcertId> wrap(Command<Concert> concertCommand) {
         return concertId -> {
-            List<ConcertEvent> concertEvents = concertEventStore
-                    .eventsForAggregate(concertId);
-            Concert concert = Concert.reconstitute(concertEvents);
+            Concert concert = concertEventStore
+                    .findById(concertId)
+                    .orElseThrow(() -> new IllegalArgumentException("Could not find Concert with ID " + concertId));
             concertCommand.execute(concert);
             concertEventStore.save(concert);
         };
