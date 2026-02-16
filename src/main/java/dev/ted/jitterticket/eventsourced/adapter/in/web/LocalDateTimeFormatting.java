@@ -1,6 +1,7 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class LocalDateTimeFormatting {
@@ -28,6 +29,10 @@ public class LocalDateTimeFormatting {
 
     public static String extractFormattedTimeFrom(LocalDateTime localDateTime) {
         return localDateTime.format(HH_MM);
+    }
+
+    public static String formatAsTimeFrom(LocalTime localTime) {
+        return localTime.format(HH_MM);
     }
 
     public static String extractFormattedDateFrom(LocalDateTime localDateTime) {

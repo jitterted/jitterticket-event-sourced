@@ -26,7 +26,7 @@ public class RescheduleConcertController {
         Concert concert = concertEventStore.findById(new ConcertId(UUID.fromString(concertId)))
                                            .orElseThrow(() -> new RuntimeException("Could not find concert with id: " + concertId));
         model.addAttribute("concert", ConcertView.from(concert));
-        model.addAttribute("rescheduleForm", new RescheduleForm("", "", ""));
+        model.addAttribute("rescheduleForm", RescheduleForm.from(concert));
         return "reschedule-concert";
     }
 
@@ -35,5 +35,12 @@ public class RescheduleConcertController {
             String newShowTime,
             String newDoorsTime
     ) {
+        public static RescheduleForm from(Concert concert) {
+            return new RescheduleForm(
+                    LocalDateTimeFormatting.extractFormattedDateFrom(concert.showDateTime()),
+                    LocalDateTimeFormatting.extractFormattedTimeFrom(concert.showDateTime()),
+                    LocalDateTimeFormatting.formatAsTimeFrom(concert.doorsTime())
+            );
+        }
     }
 }

@@ -132,6 +132,8 @@
             [ ] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
                 [ ] Create a wrapForCreation() that doesn't execute the "before" or "load" code, only the "after" or "save"
 
+    [ ] Convert ConcertFactory to test data builder
+
     [ ] Event Viewer for Concerts needs to use a complete list of Concert aggregates, and NOT the Available Concerts projection, because of the TicketSalesStopped event (which drops concerts where ticket sales stopped).
         [ ] Create a new AllConcertAggregates projection.
         [ ] Event Viewer uses this new projection

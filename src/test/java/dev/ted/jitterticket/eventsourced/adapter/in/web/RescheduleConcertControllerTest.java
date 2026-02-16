@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.LocalDateTimeFactory;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -39,13 +40,29 @@ class RescheduleConcertControllerTest {
                 .as("Expected the 'concert' to be in the model of type ConcertView")
                 .isExactlyInstanceOf(ConcertView.class);
 
-        Object rescheduleForm = model.getAttribute("rescheduleForm");
+        RescheduleConcertController.RescheduleForm rescheduleForm = (RescheduleConcertController.RescheduleForm)
+                model.getAttribute("rescheduleForm");
         assertThat(rescheduleForm)
                 .as("Expected the RescheduleForm to be in the model named 'rescheduleForm'")
-                .isExactlyInstanceOf(RescheduleConcertController.RescheduleForm.class)
-                .asInstanceOf(InstanceOfAssertFactories.type(
-                              RescheduleConcertController.RescheduleForm.class))
-                .extracting("newShowDate", "newShowTime", "newDoorsTime")
-                .isNotNull();
+                .extracting("newShowDate", InstanceOfAssertFactories.STRING)
+                .isNotBlank();
     }
+
+    @Test
+    void rescheduleFormFromConcertPrefillsPropertiesAsStrings() {
+        LocalDateTime showDateTime = LocalDateTime.of(
+                2026, 2, 16, 20, 0, 10, 10
+        );
+        LocalTime doorsTime = LocalTime.of(19, 0, 12, 12);
+        Concert concert = ConcertFactory.createConcertWithShowAndDoors(showDateTime, doorsTime);
+
+        var rescheduleForm = RescheduleConcertController.RescheduleForm.from(concert);
+
+        assertThat(rescheduleForm)
+                .isEqualTo(new RescheduleConcertController.RescheduleForm(
+                        "2026-02-16",
+                        "20:00",
+                        "19:00"));
+    }
+
 }

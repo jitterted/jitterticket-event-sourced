@@ -71,6 +71,11 @@ public class ConcertFactory {
                                              LocalTime.of(20, 0));
     }
 
+    public static Concert createConcertWithShowAndDoors(LocalDateTime showDateTime, LocalTime doorsTime) {
+        return createConcertWithShowAndDoors(
+                ConcertId.createRandom(), showDateTime, doorsTime);
+    }
+
     public static Concert createConcertWithShowAndDoors(ConcertId concertId, LocalDateTime showDateTime, LocalTime doorsTime) {
         return Concert.schedule(concertId,
                                 "DON'T CARE ARTIST",
