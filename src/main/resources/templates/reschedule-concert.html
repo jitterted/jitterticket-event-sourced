@@ -206,15 +206,15 @@
                   method="post">
                 <div class="form-group">
                     <label th:for="${#ids.next('newShowDate')}">New Show Date:</label>
-                    <input type="text" th:field="*{newShowDate}">
+                    <input type="date" th:field="*{newShowDate}">
                 </div>
                 <div class="form-group">
                     <label th:for="${#ids.next('newShowTime')}">New Show Time:</label>
-                    <input type="text" th:field="*{newShowTime}">
+                    <input type="time" th:field="*{newShowTime}">
                 </div>
                 <div class="form-group">
                     <label th:for="${#ids.next('newDoorsTime')}">New Doors Time:</label>
-                    <input type="number" th:field="*{newDoorsTime}">
+                    <input type="time" th:field="*{newDoorsTime}">
                 </div>
                 <button type="submit">Reschedule It</button>
                 <a href="/concerts">Never Mind, Go Home</a>
