@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
+import dev.ted.jitterticket.CommandAndQueryConfiguration;
 import dev.ted.jitterticket.ProjectionConfiguration;
 import dev.ted.jitterticket.UseCaseConfiguration;
 import dev.ted.jitterticket.eventsourced.adapter.TestEventStoreConfiguration;
@@ -17,7 +18,8 @@ import java.nio.file.Path;
 @Import({
         TestEventStoreConfiguration.class,
         ProjectionConfiguration.class,
-        UseCaseConfiguration.class
+        UseCaseConfiguration.class,
+        CommandAndQueryConfiguration.class
 })
 public class BaseMvcTest {
     @TempDir

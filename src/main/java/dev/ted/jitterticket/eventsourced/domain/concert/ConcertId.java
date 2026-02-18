@@ -8,4 +8,8 @@ public record ConcertId(UUID id) implements Id {
     public static ConcertId createRandom() {
         return new ConcertId(UUID.randomUUID());
     }
+
+    public static ConcertId from(String uuid) {
+        return new ConcertId(UUID.fromString(uuid));
+    }
 }

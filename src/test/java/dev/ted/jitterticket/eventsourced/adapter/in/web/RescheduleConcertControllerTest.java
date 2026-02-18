@@ -1,5 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
+import dev.ted.jitterticket.eventsourced.application.ConcertQuery;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.LocalDateTimeFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -26,7 +27,7 @@ class RescheduleConcertControllerTest {
         LocalTime doorsTime = LocalTime.of(19, 0);
         concertStore.save(ConcertFactory.createConcertWithShowAndDoors(
                 concertId, showDateTime, doorsTime));
-        RescheduleConcertController rescheduleConcertController = new RescheduleConcertController(concertStore);
+        RescheduleConcertController rescheduleConcertController = new RescheduleConcertController(concertStore, new ConcertQuery(concertStore));
 
         Model model = new ConcurrentModel();
         String viewName = rescheduleConcertController.rescheduleConcertView(concertId.id().toString(), model);
@@ -54,7 +55,7 @@ class RescheduleConcertControllerTest {
         LocalTime doorsTime = LocalTime.of(20, 30);
         concertStore.save(ConcertFactory.createConcertWithShowAndDoors(
                 concertId, showDateTime, doorsTime));
-        RescheduleConcertController rescheduleConcertController = new RescheduleConcertController(concertStore);
+        RescheduleConcertController rescheduleConcertController = new RescheduleConcertController(concertStore, new ConcertQuery(concertStore));
         String concertIdString = concertId.id().toString();
 
         String redirect = rescheduleConcertController
