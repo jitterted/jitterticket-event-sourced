@@ -112,9 +112,9 @@
                 vs.
                 Retrieve the Concert aggregate to find out whether ticket sales == max capacity
 
-    [ ] Concert Started Processor
+    [X] Concert Started Processor
         Emits TicketSalesStopped event when a Concert's show time has passed: When ConcertScheduled event received, sets an "alarm" for the show time to "wake up" and emit the event
-        [ ] Consume ConcertScheduled: schedule future task given a LocalDateTime (use now().until(event.ShowDateTime)), where the Runnable is: self-invoke (on Processor) a method (wakeUp()) that calls stopTicketSalesUseCase.stopSalesFor(event.ConcertId) and removes from internal Map
+        [X] Consume ConcertScheduled: schedule future task given a LocalDateTime (use now().until(event.ShowDateTime)), where the Runnable is: self-invoke (on Processor) a method (wakeUp()) that calls stopTicketSalesUseCase.stopSalesFor(event.ConcertId) and removes from internal Map
         (Internally hold Map<ConcertId, ScheduledFuture<?>> so we can cancel and schedule upon ConcertRescheduled, or cancel if TicketSalesStopped, or cancel if we ever implement a ConcertCanceled event)
         [X] Given new Processor,
             When ConcertScheduled event received by handle()
@@ -137,8 +137,8 @@
     [ ] Convert ConcertFactory to test data builder
 
     [ ] Event Viewer for Concerts needs to use a complete list of Concert aggregates, and NOT the Available Concerts projection, because of the TicketSalesStopped event (which drops concerts where ticket sales stopped).
-        [ ] Create a new AllConcertAggregates projection.
-        [ ] Event Viewer uses this new projection
+        [X] Create a new AllConcertAggregates projection.
+        [X] Event Viewer uses this new projection
 
     [ ] Have an easier way to recreate the sample data, instead of having to delete the Postgres container (maybe a button?)
 
