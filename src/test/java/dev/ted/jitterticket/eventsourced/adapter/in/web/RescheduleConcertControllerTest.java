@@ -1,9 +1,13 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
+import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
+import dev.ted.jitterticket.eventsourced.application.Commands;
 import dev.ted.jitterticket.eventsourced.application.ConcertQuery;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.LocalDateTimeFactory;
+import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -27,7 +31,7 @@ class RescheduleConcertControllerTest {
         LocalTime doorsTime = LocalTime.of(19, 0);
         concertStore.save(ConcertFactory.createConcertWithShowAndDoors(
                 concertId, showDateTime, doorsTime));
-        RescheduleConcertController rescheduleConcertController = new RescheduleConcertController(concertStore, new ConcertQuery(concertStore));
+        RescheduleConcertController rescheduleConcertController = createController(concertStore);
 
         Model model = new ConcurrentModel();
         String viewName = rescheduleConcertController.rescheduleConcertView(concertId.id().toString(), model);
@@ -47,6 +51,12 @@ class RescheduleConcertControllerTest {
                 .isNotBlank();
     }
 
+    private static RescheduleConcertController createController(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new RescheduleConcertController(
+                new ConcertQuery(concertStore),
+                new Commands(CommandExecutorFactory.create(concertStore)).createRescheduleCommand());
+    }
+
     @Test
     void postToRescheduleConcertDoesRescheduleAndRedirectsToRescheduledView() {
         var concertStore = InMemoryEventStore.forConcerts();
@@ -55,7 +65,7 @@ class RescheduleConcertControllerTest {
         LocalTime doorsTime = LocalTime.of(20, 30);
         concertStore.save(ConcertFactory.createConcertWithShowAndDoors(
                 concertId, showDateTime, doorsTime));
-        RescheduleConcertController rescheduleConcertController = new RescheduleConcertController(concertStore, new ConcertQuery(concertStore));
+        RescheduleConcertController rescheduleConcertController = createController(concertStore);
         String concertIdString = concertId.id().toString();
 
         String redirect = rescheduleConcertController

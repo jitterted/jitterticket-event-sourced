@@ -1,12 +1,9 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
 import dev.ted.jitterticket.eventsourced.application.CommandWithParams;
 import dev.ted.jitterticket.eventsourced.application.ConcertQuery;
 import dev.ted.jitterticket.eventsourced.application.Reschedule;
-import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,13 +17,14 @@ import java.time.LocalTime;
 @Controller
 public class RescheduleConcertController {
 
-    private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
     private final ConcertQuery concertQuery;
+    private final CommandWithParams<ConcertId, Reschedule> rescheduleCommand;
 
-    public RescheduleConcertController(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
-                                       ConcertQuery concertQuery) {
-        this.concertEventStore = concertEventStore;
+    public RescheduleConcertController(
+            ConcertQuery concertQuery,
+            CommandWithParams<ConcertId, Reschedule> rescheduleCommand) {
         this.concertQuery = concertQuery;
+        this.rescheduleCommand = rescheduleCommand;
     }
 
     @GetMapping("/reschedule/{concertId}")
@@ -42,17 +40,9 @@ public class RescheduleConcertController {
     @PostMapping("/reschedule/{concertId}")
     public String rescheduleConcert(@PathVariable("concertId") String concertId,
                                     RescheduleForm rescheduleForm) {
-        CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
-        CommandWithParams<ConcertId, Reschedule> command = commandExecutorFactory.wrapWithParams(
-                (concert, reschedule) ->
-                        concert.rescheduleTo(
-                                reschedule.showDateTime(),
-                                reschedule.doorsTime()));
-        Reschedule rescheduleParams = new Reschedule(
-                rescheduleForm.newShowLocalDateTime(),
-                rescheduleForm.newDoorsLocalTime());
-        command.execute(ConcertId.from(concertId),
-                        rescheduleParams);
+
+        rescheduleCommand.execute(ConcertId.from(concertId),
+                                  rescheduleForm.asCommandParams());
 
         return "redirect:/reschedule/" + concertId;
     }
@@ -68,6 +58,10 @@ public class RescheduleConcertController {
                     LocalDateTimeFormatting.extractFormattedTimeFrom(concert.showDateTime()),
                     LocalDateTimeFormatting.formatAsTimeFrom(concert.doorsTime())
             );
+        }
+
+        public Reschedule asCommandParams() {
+            return new Reschedule(newShowLocalDateTime(), newDoorsLocalTime());
         }
 
         public LocalDateTime newShowLocalDateTime() {
