@@ -132,7 +132,7 @@
             [ ] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
                 [ ] Create a wrapForCreation() that doesn't execute the "before" or "load" code, only the "after" or "save"
 
-    [ ] Figure out where the code to create an executable command object (e.g., what's currently in the RescheduleConcertController.rescheduleConcert() method) goes and how that gets injected into the controller
+    [X] Figure out where the code to create an executable command object (e.g., what's currently in the RescheduleConcertController.rescheduleConcert() method) goes and how that gets injected into the controller
 
     [ ] Convert ConcertFactory to test data builder
 
