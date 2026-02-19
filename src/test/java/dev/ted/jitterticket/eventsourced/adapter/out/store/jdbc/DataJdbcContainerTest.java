@@ -4,11 +4,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jdbc.test.autoconfigure.DataJdbcTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @Tag("db")
 @DataJdbcTest
@@ -17,13 +17,13 @@ public abstract class DataJdbcContainerTest {
 
     protected static final int DB_EVENT_SEQUENCE_START = 42;
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres;
+    static PostgreSQLContainer postgres;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
     static {
-        postgres = new PostgreSQLContainer<>("postgres:17.6")
+        postgres = new PostgreSQLContainer("postgres:17.6")
                 .withReuse(true);
         // manually start instead of using @Container
         postgres.start();

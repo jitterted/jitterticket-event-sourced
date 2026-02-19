@@ -3,10 +3,6 @@ package dev.ted.jitterticket.eventsourced.adapter.out.store;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -19,6 +15,9 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -27,11 +26,11 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 /**
- *  Represents an Event as JSON with some metadata for converting back to concrete Event object
+ * Represents an Event as JSON with some metadata for converting back to concrete Event object
  */
 @SuppressWarnings("ClassCanBeRecord")
 public class EventDto<EVENT extends Event> {
-    private static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
+    private static final JsonMapper JSON_MAPPER = createJsonMapper();
 
     private final UUID aggregateRootId; // ID for the Aggregate Root
     private final Long eventSequence;
@@ -71,24 +70,19 @@ public class EventDto<EVENT extends Event> {
         this.json = json;
     }
 
-    private static ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        objectMapper.enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION.mappedFeature());
-
-        objectMapper.registerModule(new JavaTimeModule());
-
-        objectMapper.addMixIn(Event.class, EventMixin.class);
-        objectMapper.addMixIn(CustomerEvent.class, CustomerEventMixin.class);
-        objectMapper.addMixIn(ConcertEvent.class, ConcertEventMixin.class);
-        objectMapper.addMixIn(CustomerRegistered.class, CustomerRegisteredMixin.class);
-        objectMapper.addMixIn(ConcertScheduled.class, ConcertScheduledMixin.class);
-        objectMapper.addMixIn(ConcertRescheduled.class, ConcertRescheduledMixin.class);
-        objectMapper.addMixIn(TicketsSold.class, TicketsSoldMixin.class);
-        objectMapper.addMixIn(TicketsPurchased.class, TicketsPurchasedMixin.class);
-        objectMapper.addMixIn(TicketSalesStopped.class, TicketSalesStoppedMixin.class);
-
-        return objectMapper;
+    private static JsonMapper createJsonMapper() {
+        return JsonMapper.builder()
+                         .enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+                         .addMixIn(Event.class, EventMixin.class)
+                         .addMixIn(CustomerEvent.class, CustomerEventMixin.class)
+                         .addMixIn(ConcertEvent.class, ConcertEventMixin.class)
+                         .addMixIn(CustomerRegistered.class, CustomerRegisteredMixin.class)
+                         .addMixIn(ConcertScheduled.class, ConcertScheduledMixin.class)
+                         .addMixIn(ConcertRescheduled.class, ConcertRescheduledMixin.class)
+                         .addMixIn(TicketsSold.class, TicketsSoldMixin.class)
+                         .addMixIn(TicketsPurchased.class, TicketsPurchasedMixin.class)
+                         .addMixIn(TicketSalesStopped.class, TicketSalesStoppedMixin.class)
+                         .build();
     }
 
     public static <EVENT extends Event> EventDto<EVENT> from(
@@ -96,13 +90,13 @@ public class EventDto<EVENT extends Event> {
             Long eventSequence,
             EVENT event) {
         try {
-            String json = OBJECT_MAPPER.writeValueAsString(event);
+            String json = JSON_MAPPER.writeValueAsString(event);
             String fullyQualifiedClassName = event.getClass().getName();
             return new EventDto<>(aggregateRootId,
                                   eventSequence,
                                   fullyQualifiedClassName,
                                   json);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -112,10 +106,10 @@ public class EventDto<EVENT extends Event> {
 
         try {
             Class<EVENT> valueType = (Class<EVENT>) Class.forName(eventType);
-            EVENT event = OBJECT_MAPPER.readValue(json, valueType);
+            EVENT event = JSON_MAPPER.readValue(json, valueType);
             event.setEventSequence(this.eventSequence);
             return event;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Problem converting JSON: " + json + " to " + eventType, e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);

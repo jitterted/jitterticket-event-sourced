@@ -42,8 +42,8 @@ class CsvStringsEventStoreTest {
 
         assertThat(stringsReaderAppender.readAllLines())
                 .hasSize(2)
-                .containsExactly("a087bb99-b920-41d9-a25b-d96ac779be0b,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
-                                 "a087bb99-b920-41d9-a25b-d96ac779be0b,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}");
+                .containsExactly("a087bb99-b920-41d9-a25b-d96ac779be0b,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":\"2025-10-10T20:00:00\",\"doorsTime\":\"19:00:00\",\"capacity\":100,\"maxTicketsPerPurchase\":4}",
+                                 "a087bb99-b920-41d9-a25b-d96ac779be0b,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"newShowDateTime\":\"2025-11-10T20:00:00\",\"newDoorsTime\":\"19:00:00\"}");
     }
 
     @Test
@@ -74,8 +74,8 @@ class CsvStringsEventStoreTest {
 
         assertThat(stringsReaderAppender.readAllLines())
                 .hasSize(2)
-                .containsExactly("a087bb99-b920-41d9-a25b-d96ac779be0b,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":[2025,10,10,20,0],\"doorsTime\":[19,0],\"capacity\":100,\"maxTicketsPerPurchase\":4}",
-                                 "a087bb99-b920-41d9-a25b-d96ac779be0b,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"newShowDateTime\":[2025,11,10,20,0],\"newDoorsTime\":[19,0]}");
+                .containsExactly("a087bb99-b920-41d9-a25b-d96ac779be0b,1,dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"artist\":\"Name of Artist\",\"ticketPrice\":99,\"showDateTime\":\"2025-10-10T20:00:00\",\"doorsTime\":\"19:00:00\",\"capacity\":100,\"maxTicketsPerPurchase\":4}",
+                                 "a087bb99-b920-41d9-a25b-d96ac779be0b,2,dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled,{\"concertId\":{\"id\":\"a087bb99-b920-41d9-a25b-d96ac779be0b\"},\"newShowDateTime\":\"2025-11-10T20:00:00\",\"newDoorsTime\":\"19:00:00\"}");
 
     }
 

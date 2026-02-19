@@ -70,13 +70,13 @@ class EventDtoTest {
                                                   null, 6, 150);
 
         EventDto<TicketsSold> eventDto = EventDto.from(concertId.id(),
-                                                   null,
-                                                   ticketsSold);
+                                                       null,
+                                                       ticketsSold);
 
         assertThat(eventDto.getJson())
                 .isEqualTo(
-                """
-                {"concertId":{"id":"18a5ae4c-ecdb-429a-b3fe-2c1853fb37d2"},"quantity":6,"totalPaid":150}""");
+                        """
+                        {"concertId":{"id":"18a5ae4c-ecdb-429a-b3fe-2c1853fb37d2"},"quantity":6,"totalPaid":150}""");
     }
 
     @ParameterizedTest
@@ -96,6 +96,30 @@ class EventDtoTest {
         assertThat(actual.eventSequence())
                 .as("Expected the eventSequence to be taken from the 'column' and not from the JSON")
                 .isEqualTo(eventSequence);
+    }
+
+    @Test
+    void ensureDateAndTimeSerializedToJsonUsingIso8601() {
+        ConcertScheduled concertScheduled = new ConcertScheduled(
+                ConcertId.from("2387fbc8-e880-4507-8e9e-8fcb2e3b077f"),
+                null,
+                "artist",
+                99,
+                LocalDateTime.of(2026, 2, 19, 20, 0),
+                LocalTime.of(19, 0),
+                100,
+                4);
+
+        EventDto<ConcertEvent> eventDto = EventDto.from(
+                concertScheduled.concertId().id(),
+                42L,
+                concertScheduled);
+
+        assertThat(eventDto.getJson())
+                .isEqualTo(
+                        """
+                        {"concertId":{"id":"2387fbc8-e880-4507-8e9e-8fcb2e3b077f"},"artist":"artist","ticketPrice":99,"showDateTime":"2026-02-19T20:00:00","doorsTime":"19:00:00","capacity":100,"maxTicketsPerPurchase":4}
+                        """.trim());
     }
 
     public static Stream<Arguments> events() {

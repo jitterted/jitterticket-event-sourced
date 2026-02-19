@@ -150,6 +150,9 @@
         [ ] Projection for scheduled concerts to prevent booking conflicts
             [ ] List of ConcertId, ShowDate
 
+    [ ] Add business date and time (datetime) properties to events when command is executed
+        [ ] Surface the created_at column into the event?
+
     [ ] Convert ConcertFactory to test data builder
 
     [X] Figure out where the code to create an executable command object (e.g., what's currently in the RescheduleConcertController.rescheduleConcert() method) goes and how that gets injected into the controller
