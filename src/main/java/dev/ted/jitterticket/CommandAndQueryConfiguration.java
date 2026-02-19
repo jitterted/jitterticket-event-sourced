@@ -4,7 +4,7 @@ import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
 import dev.ted.jitterticket.eventsourced.application.CommandWithParams;
 import dev.ted.jitterticket.eventsourced.application.Commands;
 import dev.ted.jitterticket.eventsourced.application.ConcertQuery;
-import dev.ted.jitterticket.eventsourced.application.Reschedule;
+import dev.ted.jitterticket.eventsourced.application.RescheduleParams;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -34,7 +34,7 @@ public class CommandAndQueryConfiguration {
     }
 
     @Bean
-    CommandWithParams<ConcertId, Reschedule> rescheduleCommand(Commands commands) {
+    CommandWithParams<ConcertId, RescheduleParams> rescheduleCommand(Commands commands) {
         return commands.createRescheduleCommand();
     }
     

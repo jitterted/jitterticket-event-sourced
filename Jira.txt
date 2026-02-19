@@ -130,16 +130,9 @@
 
 ==> CURRENT TASK ==>
 
-            [ ] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
-                [ ] Create a wrapForCreation() that doesn't execute the "before" or "load" code, only the "after" or "save"
-
-            // SKETCH
-            public CreateWithParams<AggType?, Schedule> wrapForCreation(
-                    CreateWithParams<Schedule> create) {
-
-            }
-
-            record Schedule(String artist) {}
+            [X] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
+                [X] Create a wrapForCreation() that doesn't execute the "before" or "load" code, only the "after" or "save"
+                [X] Add creating the schedule command in Commands
 
 
     [ ] Schedule Concert UI

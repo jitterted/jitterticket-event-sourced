@@ -1,9 +1,11 @@
 package dev.ted.jitterticket.eventsourced.domain.concert;
 
 import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
+import dev.ted.jitterticket.eventsourced.application.Commands;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.LocalDateTimeFactory;
-import dev.ted.jitterticket.eventsourced.application.Reschedule;
+import dev.ted.jitterticket.eventsourced.application.RescheduleParams;
+import dev.ted.jitterticket.eventsourced.application.ScheduleParams;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Nested;
@@ -54,7 +56,7 @@ public class ConcertTest {
                                     reschedule.doorsTime()));
 
             LocalDateTime newShowDateTime = LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight();
-            Reschedule rescheduleParams = new Reschedule(
+            RescheduleParams rescheduleParams = new RescheduleParams(
                     newShowDateTime,
                     LocalTime.of(20, 0));
 
@@ -66,6 +68,31 @@ public class ConcertTest {
                     .isEqualTo(newShowDateTime);
         }
 
+        @Test
+        void wrappedScheduleCommandCreatesConcertWithParams() {
+            EventStore<ConcertId, ConcertEvent, Concert> concertEventStore = InMemoryEventStore.forConcerts();
+            CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
+            Commands commands = new Commands(commandExecutorFactory);
+
+            ScheduleParams scheduleParams = new ScheduleParams(
+                    "Headliner", 35, LocalDateTime.of(2025, 11, 11, 20, 0),
+                    LocalTime.of(19, 0), 100, 4);
+            ConcertId createdConcertId = commands.createScheduleCommand().execute(scheduleParams);
+
+            assertThat(createdConcertId)
+                    .isNotNull();
+            assertThat(concertEventStore.findById(createdConcertId))
+                    .isPresent()
+                    .get()
+                    .usingRecursiveComparison()
+                    .ignoringFields("id", "uncommittedEvents")
+                    .isEqualTo(Concert.schedule(
+                            null, "Headliner", 35,
+                            LocalDateTime.of(2025, 11, 11, 20, 0),
+                            LocalTime.of(19, 0),
+                            100, 4));
+
+        }
 
         @Test
         void rescheduleConcertGeneratesConcertRescheduled() {

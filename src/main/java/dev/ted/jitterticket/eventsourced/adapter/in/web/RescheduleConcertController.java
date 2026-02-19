@@ -2,7 +2,7 @@ package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
 import dev.ted.jitterticket.eventsourced.application.CommandWithParams;
 import dev.ted.jitterticket.eventsourced.application.ConcertQuery;
-import dev.ted.jitterticket.eventsourced.application.Reschedule;
+import dev.ted.jitterticket.eventsourced.application.RescheduleParams;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.springframework.stereotype.Controller;
@@ -18,11 +18,11 @@ import java.time.LocalTime;
 public class RescheduleConcertController {
 
     private final ConcertQuery concertQuery;
-    private final CommandWithParams<ConcertId, Reschedule> rescheduleCommand;
+    private final CommandWithParams<ConcertId, RescheduleParams> rescheduleCommand;
 
     public RescheduleConcertController(
             ConcertQuery concertQuery,
-            CommandWithParams<ConcertId, Reschedule> rescheduleCommand) {
+            CommandWithParams<ConcertId, RescheduleParams> rescheduleCommand) {
         this.concertQuery = concertQuery;
         this.rescheduleCommand = rescheduleCommand;
     }
@@ -60,8 +60,8 @@ public class RescheduleConcertController {
             );
         }
 
-        public Reschedule asCommandParams() {
-            return new Reschedule(newShowLocalDateTime(), newDoorsLocalTime());
+        public RescheduleParams asCommandParams() {
+            return new RescheduleParams(newShowLocalDateTime(), newDoorsLocalTime());
         }
 
         public LocalDateTime newShowLocalDateTime() {

@@ -30,13 +30,23 @@ public class CommandExecutorFactory {
         };
     }
 
-    public CommandWithParams<ConcertId, Reschedule> wrapWithParams(
-            CommandWithParams<Concert, Reschedule> command) {
+    public CommandWithParams<ConcertId, RescheduleParams> wrapWithParams(
+            CommandWithParams<Concert, RescheduleParams> command) {
         return (concertId, reschedule) -> {
             Concert concert = concertQuery.find(concertId);
             command.execute(concert, reschedule);
             concertEventStore.save(concert);
         };
     }
+
+    public CreateWithParams<ConcertId, ScheduleParams> wrapForCreation(
+            CreateWithParams<Concert, ScheduleParams> command) {
+        return scheduleParams -> {
+            Concert concert = command.execute(scheduleParams);
+            concertEventStore.save(concert);
+            return concert.getId();
+        };
+    }
+
 }
 
