@@ -136,6 +136,7 @@
 
 
     [ ] Schedule Concert UI
+        [X] Thymeleaf page and Controller
         [ ] Rules
             [ ] Must not conflict with already scheduled concert, information comes from a FutureScheduledConcerts projection
                 [ ] Add this validation to Reschedule

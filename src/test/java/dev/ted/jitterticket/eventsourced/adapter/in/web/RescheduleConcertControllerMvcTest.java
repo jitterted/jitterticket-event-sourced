@@ -1,8 +1,10 @@
-package dev.ted.jitterticket.eventsourced.domain.concert;
+package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.adapter.in.web.BaseMvcTest;
-import dev.ted.jitterticket.eventsourced.adapter.in.web.RescheduleConcertController;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;

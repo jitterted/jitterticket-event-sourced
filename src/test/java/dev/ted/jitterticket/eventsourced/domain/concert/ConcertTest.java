@@ -91,7 +91,6 @@ public class ConcertTest {
                             LocalDateTime.of(2025, 11, 11, 20, 0),
                             LocalTime.of(19, 0),
                             100, 4));
-
         }
 
         @Test

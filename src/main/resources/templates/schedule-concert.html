@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule New Concert</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: green;
+            --background-color: #f9f9f9;
+            --text-color: #333;
+            --light-gray: #ecf0f1;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+
+        .schedule-form {
+            background-color: var(--light-gray);
+            padding: 30px;
+            border-radius: var(--border-radius);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="schedule-form">
+        <h2 class="form-title">Schedule New Concert</h2>
+        <form th:action="@{/schedule}"
+              th:object="${scheduleForm}"
+              method="post">
+
+            <div class="form-group">
+                <label th:for="${#ids.next('artist')}">Artist:</label>
+                <input type="text" th:field="*{artist}">
+            </div>
+            <div class="form-group">
+                <label th:for="${#ids.next('ticketPrice')}">Ticket Price: $</label>
+                <input type="number" th:field="*{ticketPrice}">
+            </div>
+            <div class="form-group">
+                <label th:for="${#ids.next('maxCapacity')}">Max Capacity: </label>
+                <input type="number" th:field="*{maxCapacity}">
+            </div>
+            <div class="form-group">
+                <label th:for="${#ids.next('maxPerPurchase')}">Max Tickets Per Purchase: </label>
+                <input type="number" th:field="*{maxPerPurchase}">
+            </div>
+            <div class="form-group">
+                <label th:for="${#ids.next('showDate')}">Show Date:</label>
+                <input type="date" th:field="*{showDate}">
+            </div>
+            <div class="form-group">
+                <label th:for="${#ids.next('showTime')}">Show Time:</label>
+                <input type="time" th:field="*{showTime}">
+            </div>
+            <div class="form-group">
+                <label th:for="${#ids.next('doorsTime')}">Doors Time:</label>
+                <input type="time" th:field="*{doorsTime}">
+            </div>
+            <button type="submit">Schedule It</button>
+            <a href="/concerts">Never Mind, Go Home</a>
+        </form>
+    </div>
+</body>
+</html>
