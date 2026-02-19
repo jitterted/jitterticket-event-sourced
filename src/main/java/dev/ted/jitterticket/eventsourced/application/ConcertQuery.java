@@ -12,7 +12,7 @@ public class ConcertQuery {
         this.concertEventStore = concertEventStore;
     }
 
-    public Concert concertQueryFind(ConcertId id) {
+    public Concert find(ConcertId id) {
         return concertEventStore
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("Could not find concert with id: " + id.id()));

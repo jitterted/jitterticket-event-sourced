@@ -31,7 +31,7 @@ public class RescheduleConcertController {
     public String rescheduleConcertView(@PathVariable("concertId") String concertId,
                                         Model model) {
         ConcertId id = ConcertId.from(concertId);
-        Concert concert = concertQuery.concertQueryFind(id);
+        Concert concert = concertQuery.find(id);
         model.addAttribute("concert", ConcertView.from(concert));
         model.addAttribute("rescheduleForm", RescheduleForm.from(concert));
         return "reschedule-concert";

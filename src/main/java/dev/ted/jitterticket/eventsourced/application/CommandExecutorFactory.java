@@ -7,9 +7,11 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
 public class CommandExecutorFactory {
     private final EventStore<ConcertId, ConcertEvent, Concert> concertEventStore;
+    private final ConcertQuery concertQuery;
 
     private CommandExecutorFactory(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
         this.concertEventStore = concertEventStore;
+        concertQuery = new ConcertQuery(concertEventStore);
     }
 
     public static CommandExecutorFactory create(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
@@ -22,9 +24,7 @@ public class CommandExecutorFactory {
 
     public Command<ConcertId> wrap(Command<Concert> concertCommand) {
         return concertId -> {
-            Concert concert = concertEventStore
-                    .findById(concertId)
-                    .orElseThrow(() -> new IllegalArgumentException("Could not find Concert with ID " + concertId));
+            Concert concert = concertQuery.find(concertId);
             concertCommand.execute(concert);
             concertEventStore.save(concert);
         };
@@ -33,9 +33,7 @@ public class CommandExecutorFactory {
     public CommandWithParams<ConcertId, Reschedule> wrapWithParams(
             CommandWithParams<Concert, Reschedule> command) {
         return (concertId, reschedule) -> {
-            Concert concert = concertEventStore
-                    .findById(concertId)
-                    .orElseThrow(() -> new IllegalArgumentException("Could not find Concert with ID " + concertId));
+            Concert concert = concertQuery.find(concertId);
             command.execute(concert, reschedule);
             concertEventStore.save(concert);
         };

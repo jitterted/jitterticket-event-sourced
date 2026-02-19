@@ -125,20 +125,34 @@
                 [X] Requires a StopTicketSalesUseCase (aka Command) that does the infrastructure work of loading the Concert, executing .stopTicketSales() and saves the uncommitted events
                     [X] Create a composition-friendly class that takes a lambda to execute a method on an aggregate, e.g., new CommandExecuterFactory<Concert>(Runnable<Concert> doStuff), where the Factory already has the reference to the ConcertEventStore
 
-==> CURRENT TASK ==>
-
             [X] Add Reschedule command support to the CommandExecutorFactory so that we can send in data and then hook it up to a UI
                 [X] Create UI for this: Controller and HTML
+
+==> CURRENT TASK ==>
+
             [ ] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
                 [ ] Create a wrapForCreation() that doesn't execute the "before" or "load" code, only the "after" or "save"
 
-    [X] Figure out where the code to create an executable command object (e.g., what's currently in the RescheduleConcertController.rescheduleConcert() method) goes and how that gets injected into the controller
+            // SKETCH
+            public CreateWithParams<AggType?, Schedule> wrapForCreation(
+                    CreateWithParams<Schedule> create) {
+
+            }
+
+            record Schedule(String artist) {}
+
+
+    [ ] Schedule Concert UI
+        [ ] Rules
+            [ ] Must not conflict with already scheduled concert, information comes from a FutureScheduledConcerts projection
+                [ ] Add this validation to Reschedule
+            [ ] Must be in the future by at least N days (14?)
+        [ ] Projection for scheduled concerts to prevent booking conflicts
+            [ ] List of ConcertId, ShowDate
 
     [ ] Convert ConcertFactory to test data builder
 
-    [ ] Event Viewer for Concerts needs to use a complete list of Concert aggregates, and NOT the Available Concerts projection, because of the TicketSalesStopped event (which drops concerts where ticket sales stopped).
-        [X] Create a new AllConcertAggregates projection.
-        [X] Event Viewer uses this new projection
+    [X] Figure out where the code to create an executable command object (e.g., what's currently in the RescheduleConcertController.rescheduleConcert() method) goes and how that gets injected into the controller
 
     [ ] Have an easier way to recreate the sample data, instead of having to delete the Postgres container (maybe a button?)
 
@@ -151,7 +165,12 @@
         [ ] AvailableConcerts
         [ ] RegisteredCustomers
 
-    [ ] Upgrade to Spring Boot 4.0.x
+    [X] Event Viewer for Concerts needs to use a complete list of Concert aggregates, and NOT the Available Concerts projection, because of the TicketSalesStopped event (which drops concerts where ticket sales stopped).
+        [X] Create a new AllConcertAggregates projection.
+        [X] Event Viewer uses this new projection
+
+
+    [ ] Upgrade to Spring Boot 4.0.3
 
     [ ] Create a targeted "Decider" for ticket sales, that validates that the ticket sales have not been stopped and we have enough to fulfill the requested ticket quantity. Ticket sales are currently stopped as a result of the ConcertStartedProcessor, and ticket sales should be stopped when we sell the last ticket.
 
@@ -160,7 +179,6 @@
     [ ] Convert ConcertSalesProjection+Mediator to Coordinator design
 
     [ ] Add the Concert Sales projection as a choice for viewing with the event viewer
-    [ ] Add the actual aggregates as choices for the event viewer in addition to the existing projections
 
     [ ] Add ability to delete customers, probably via a `CustomerDeleted` event
         [ ] Update how the projector handles deletions
