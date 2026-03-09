@@ -1,11 +1,6 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
+import dev.ted.jitterticket.eventsourced.domain.concert.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,11 +31,9 @@ public class AllConcertsProjector implements
                     insertedConcerts.put(concertId, availableConcert);
                 }
 
-                case ConcertRescheduled concertRescheduled -> {
-                }
-                case TicketSalesStopped ticketSalesStopped -> {
-                }
-                case TicketsSold ticketsSold -> {
+                case ConcertRescheduled _,
+                     TicketSalesStopped _,
+                     TicketsSold _ -> {
                 }
             }
         });

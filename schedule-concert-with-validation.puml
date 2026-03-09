@@ -1,0 +1,60 @@
+@startuml Schedule Concert with Conflict Validation
+
+actor Browser
+participant ScheduleConcertController
+participant "scheduleCommand\n: CreateWithParams" as CreateWithParams
+participant ConcertScheduleProjection
+participant "innerCommand\n: CreateWithParams" as InnerCommand
+participant "Concert" as Concert
+participant EventStore
+
+Browser -> ScheduleConcertController : POST /schedule\n(ScheduleForm)
+activate ScheduleConcertController
+
+ScheduleConcertController -> ScheduleConcertController : scheduleForm.toParams()
+ScheduleConcertController -> CreateWithParams : execute(scheduleParams)
+activate CreateWithParams
+
+CreateWithParams -> ConcertScheduleProjection : assertNoConflictOn(\nscheduleParams.showDateTime()\n.toLocalDate())
+activate ConcertScheduleProjection
+
+alt no conflict
+    ConcertScheduleProjection --> CreateWithParams
+    deactivate ConcertScheduleProjection
+
+    CreateWithParams -> InnerCommand : execute(scheduleParams)
+    activate InnerCommand
+
+    InnerCommand -> Concert : schedule(concertId, artist,\nticketPrice, showDateTime, ...)
+    activate Concert
+    Concert -> Concert : enqueue(ConcertScheduled)
+    Concert --> InnerCommand : concert
+    deactivate Concert
+
+    InnerCommand -> EventStore : save(concert)
+    activate EventStore
+    EventStore --> InnerCommand
+    deactivate EventStore
+
+    InnerCommand --> CreateWithParams : concertId
+    deactivate InnerCommand
+
+    CreateWithParams --> ScheduleConcertController : concertId
+    deactivate CreateWithParams
+
+    ScheduleConcertController --> Browser : redirect /concerts
+
+else conflict exists
+    ConcertScheduleProjection --> CreateWithParams : throw IllegalStateException
+    activate ConcertScheduleProjection
+    deactivate ConcertScheduleProjection
+
+    CreateWithParams --> ScheduleConcertController : exception propagates
+    deactivate CreateWithParams
+
+    ScheduleConcertController --> Browser : error response
+end
+
+deactivate ScheduleConcertController
+
+@enduml

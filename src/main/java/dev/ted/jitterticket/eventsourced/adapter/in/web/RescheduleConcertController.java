@@ -28,23 +28,23 @@ public class RescheduleConcertController {
     }
 
     @GetMapping("/reschedule/{concertId}")
-    public String rescheduleConcertView(@PathVariable("concertId") String concertId,
+    public String rescheduleConcertView(@PathVariable("concertId") String concertIdStr,
                                         Model model) {
-        ConcertId id = ConcertId.from(concertId);
-        Concert concert = concertQuery.find(id);
+        ConcertId concertId = ConcertId.from(concertIdStr);
+        Concert concert = concertQuery.find(concertId);
         model.addAttribute("concert", ConcertView.from(concert));
         model.addAttribute("rescheduleForm", RescheduleForm.from(concert));
         return "reschedule-concert";
     }
 
     @PostMapping("/reschedule/{concertId}")
-    public String rescheduleConcert(@PathVariable("concertId") String concertId,
+    public String rescheduleConcert(@PathVariable("concertId") String concertIdStr,
                                     RescheduleForm rescheduleForm) {
 
-        rescheduleCommand.execute(ConcertId.from(concertId),
+        rescheduleCommand.execute(ConcertId.from(concertIdStr),
                                   rescheduleForm.asCommandParams());
 
-        return "redirect:/reschedule/" + concertId;
+        return "redirect:/reschedule/" + concertIdStr;
     }
 
     public record RescheduleForm(
