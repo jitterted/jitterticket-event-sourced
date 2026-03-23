@@ -7,6 +7,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,22 +24,24 @@ public class ScheduledConcertsProjector implements
     project(ScheduledConcerts currentState,
             Stream<ConcertEvent> concertEventStream) {
 
-        Map<ConcertId, ScheduledConcert> scheduledConcertsMap = new HashMap<>();
-//                loadMapFrom(currentState);
-        Map<ConcertId, ScheduledConcert> insertedConcerts = new HashMap<>();
-        Map<ConcertId, ScheduledConcert> updatedConcerts = new HashMap<>();
+        Map<ConcertId, ScheduledConcert> scheduledConcertsMap =
+                loadMapFrom(currentState);
+        Map<ConcertId, ScheduledConcert> upsertedConcertsMap = new HashMap<>();
 
         concertEventStream.forEach(
                 concertEvent -> {
                     switch (concertEvent) {
                         case ConcertScheduled scheduled -> {
-                            ConcertId concertId = scheduled.concertId();
-                            ScheduledConcert scheduledConcert = new ScheduledConcert(
-                                    concertId, scheduled.showDateTime().toLocalDate());
-                            scheduledConcertsMap.put(concertId, scheduledConcert);
-                            insertedConcerts.put(concertId, scheduledConcert);
+                            addToMaps(scheduled.concertId(),
+                                      scheduled.showDateTime(),
+                                      scheduledConcertsMap,
+                                      upsertedConcertsMap);
                         }
-                        case ConcertRescheduled concertRescheduled -> {
+                        case ConcertRescheduled rescheduled -> {
+                            addToMaps(rescheduled.concertId(),
+                                      rescheduled.newShowDateTime(),
+                                      scheduledConcertsMap,
+                                      upsertedConcertsMap);
                         }
                         case TicketSalesStopped _, TicketsSold _ -> {
                         }
@@ -46,21 +49,25 @@ public class ScheduledConcertsProjector implements
                 }
         );
 
-        Map<ConcertId, ScheduledConcert> upsertedConcertsMap = new HashMap<>(insertedConcerts);
-        upsertedConcertsMap.putAll(updatedConcerts);
         return new ProjectorResult<>(
-                new ScheduledConcerts(
-                        List.copyOf(scheduledConcertsMap.values())),
+                new ScheduledConcerts(List.copyOf(scheduledConcertsMap.values())),
                 new ScheduledConcertsDelta(
                         List.copyOf(upsertedConcertsMap.values()),
                         ALWAYS_EMPTY_REMOVED_CONCERT_IDS
                 ));
     }
 
-//    private Map<ConcertId, AvailableConcert> loadMapFrom(AvailableConcerts currentState) {
-//        Map<ConcertId, AvailableConcert> availableConcertsMap = new HashMap<>();
-//        currentState.availableConcerts().forEach(concert -> availableConcertsMap.put(concert.concertId(), concert));
-//        return availableConcertsMap;
-//    }
+    private void addToMaps(ConcertId concertId, LocalDateTime showDateTime, Map<ConcertId, ScheduledConcert> scheduledConcertsMap, Map<ConcertId, ScheduledConcert> upsertedConcertsMap) {
+        ScheduledConcert scheduledConcert = new ScheduledConcert(
+                concertId, showDateTime.toLocalDate());
+        scheduledConcertsMap.put(concertId, scheduledConcert);
+        upsertedConcertsMap.put(concertId, scheduledConcert);
+    }
+
+    private Map<ConcertId, ScheduledConcert> loadMapFrom(ScheduledConcerts currentState) {
+        Map<ConcertId, ScheduledConcert> availableConcertsMap = new HashMap<>();
+        currentState.scheduledConcerts().forEach(concert -> availableConcertsMap.put(concert.concertId(), concert));
+        return availableConcertsMap;
+    }
 
 }
