@@ -17,31 +17,26 @@ import java.util.stream.Stream;
 public class ScheduledConcertsProjector implements
         DomainProjector<ConcertEvent, ScheduledConcerts, ScheduledConcertsDelta> {
 
-    private static final List<ConcertId> ALWAYS_EMPTY_REMOVED_CONCERT_IDS = Collections.emptyList();
 
     @Override
     public ProjectorResult<ScheduledConcerts, ScheduledConcertsDelta>
     project(ScheduledConcerts currentState,
             Stream<ConcertEvent> concertEventStream) {
 
-        Map<ConcertId, ScheduledConcert> scheduledConcertsMap =
-                loadMapFrom(currentState);
-        Map<ConcertId, ScheduledConcert> upsertedConcertsMap = new HashMap<>();
+        ProjectorMaps projectorMaps = ProjectorMaps.from(currentState);
 
         concertEventStream.forEach(
                 concertEvent -> {
                     switch (concertEvent) {
                         case ConcertScheduled scheduled -> {
-                            addToMaps(scheduled.concertId(),
-                                      scheduled.showDateTime(),
-                                      scheduledConcertsMap,
-                                      upsertedConcertsMap);
+                            projectorMaps.put(scheduled.concertId(),
+                                              scheduled.showDateTime()
+                            );
                         }
                         case ConcertRescheduled rescheduled -> {
-                            addToMaps(rescheduled.concertId(),
-                                      rescheduled.newShowDateTime(),
-                                      scheduledConcertsMap,
-                                      upsertedConcertsMap);
+                            projectorMaps.put(rescheduled.concertId(),
+                                              rescheduled.newShowDateTime()
+                            );
                         }
                         case TicketSalesStopped _, TicketsSold _ -> {
                         }
@@ -49,25 +44,39 @@ public class ScheduledConcertsProjector implements
                 }
         );
 
-        return new ProjectorResult<>(
-                new ScheduledConcerts(List.copyOf(scheduledConcertsMap.values())),
-                new ScheduledConcertsDelta(
-                        List.copyOf(upsertedConcertsMap.values()),
-                        ALWAYS_EMPTY_REMOVED_CONCERT_IDS
-                ));
+        return projectorMaps.result();
     }
 
-    private void addToMaps(ConcertId concertId, LocalDateTime showDateTime, Map<ConcertId, ScheduledConcert> scheduledConcertsMap, Map<ConcertId, ScheduledConcert> upsertedConcertsMap) {
-        ScheduledConcert scheduledConcert = new ScheduledConcert(
-                concertId, showDateTime.toLocalDate());
-        scheduledConcertsMap.put(concertId, scheduledConcert);
-        upsertedConcertsMap.put(concertId, scheduledConcert);
-    }
+    static class ProjectorMaps {
+        private static final List<ConcertId> ALWAYS_EMPTY_REMOVED_CONCERT_IDS = Collections.emptyList();
+        private final Map<ConcertId, ScheduledConcert> scheduledConcertsMap = new HashMap<>();
+        private final Map<ConcertId, ScheduledConcert> upsertedConcertsMap = new HashMap<>();
 
-    private Map<ConcertId, ScheduledConcert> loadMapFrom(ScheduledConcerts currentState) {
-        Map<ConcertId, ScheduledConcert> availableConcertsMap = new HashMap<>();
-        currentState.scheduledConcerts().forEach(concert -> availableConcertsMap.put(concert.concertId(), concert));
-        return availableConcertsMap;
-    }
+        static ProjectorMaps from(ScheduledConcerts currentState) {
+            ProjectorMaps projectorMaps = new ProjectorMaps();
+            projectorMaps.loadMapFrom(currentState);
+            return projectorMaps;
+        }
 
+        void put(ConcertId concertId, LocalDateTime showDateTime) {
+            ScheduledConcert scheduledConcert = new ScheduledConcert(
+                    concertId, showDateTime.toLocalDate());
+            scheduledConcertsMap.put(concertId, scheduledConcert);
+            upsertedConcertsMap.put(concertId, scheduledConcert);
+        }
+
+        void loadMapFrom(ScheduledConcerts currentState) {
+            currentState.scheduledConcerts()
+                        .forEach(concert -> scheduledConcertsMap.put(concert.concertId(), concert));
+        }
+
+        ProjectorResult<ScheduledConcerts, ScheduledConcertsDelta> result() {
+            return new ProjectorResult<>(
+                    new ScheduledConcerts(List.copyOf(scheduledConcertsMap.values())),
+                    new ScheduledConcertsDelta(
+                            List.copyOf(upsertedConcertsMap.values()),
+                            ProjectorMaps.ALWAYS_EMPTY_REMOVED_CONCERT_IDS
+                    ));
+        }
+    }
 }
