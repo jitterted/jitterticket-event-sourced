@@ -137,12 +137,13 @@
 
     [ ] Schedule Concert UI
         [X] Thymeleaf page and Controller
+        [ ] Projection for scheduled concerts to prevent booking conflicts
+            [ ] List of ConcertId, ShowDate (no Time needed)
+            [ ] There's a missing ConcertCompleted event that would have this projection remove concerts that have already taken place (i.e., are now in the past)
         [ ] Rules
             [ ] Must not conflict with already scheduled concert, information comes from a FutureScheduledConcerts projection
                 [ ] Add this validation to Reschedule
             [ ] Must be in the future by at least N days (14?)
-        [ ] Projection for scheduled concerts to prevent booking conflicts
-            [ ] List of ConcertId, ShowDate
 
     [ ] Add business date and time (datetime) properties to events when command is executed
         [ ] Surface the created_at column into the event?

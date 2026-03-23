@@ -126,6 +126,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     public void rescheduleTo(LocalDateTime newShowDateTime,
                              LocalTime newDoorsTime) {
         // validation: new times must be X amount of time in the future
+        // validation: can't reschedule if >0 tickets sold
         ConcertRescheduled concertRescheduled =
                 new ConcertRescheduled(getId(), null, newShowDateTime, newDoorsTime);
         enqueue(concertRescheduled);
