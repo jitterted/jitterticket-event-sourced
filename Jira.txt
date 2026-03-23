@@ -138,7 +138,7 @@
     [ ] Schedule Concert UI
         [X] Thymeleaf page and Controller
         [ ] Projection for scheduled concerts to prevent booking conflicts
-            [ ] List of ConcertId, ShowDate (no Time needed)
+            [X] List of ConcertId, ShowDate (no Time needed)
             [ ] There's a missing ConcertCompleted event that would have this projection remove concerts that have already taken place (i.e., are now in the past)
         [ ] Rules
             [ ] Must not conflict with already scheduled concert, information comes from a FutureScheduledConcerts projection

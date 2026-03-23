@@ -6,19 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MemoryAvailableConcertsProjectionPersistence
-        implements ProjectionPersistencePort<AvailableConcerts, AvailableConcertsDelta> {
+public class MemoryScheduledConcertsProjectionPersistence
+        implements ProjectionPersistencePort<ScheduledConcerts, ScheduledConcertsDelta> {
 
     private Checkpoint checkpoint = Checkpoint.INITIAL;
-    private final Map<ConcertId, AvailableConcert> state = new HashMap<>();
+    private final Map<ConcertId, ScheduledConcert> state = new HashMap<>();
 
     @Override
-    public Snapshot<AvailableConcerts> loadSnapshot() {
-        return new Snapshot<>(new AvailableConcerts(List.copyOf(state.values())), checkpoint);
+    public Snapshot<ScheduledConcerts> loadSnapshot() {
+        return new Snapshot<>(new ScheduledConcerts(List.copyOf(state.values())), checkpoint);
     }
 
     @Override
-    public void saveDelta(AvailableConcertsDelta delta, Checkpoint newCheckpoint) {
+    public void saveDelta(ScheduledConcertsDelta delta, Checkpoint newCheckpoint) {
         delta.upsertedConcerts().forEach(concert -> state.put(concert.concertId(), concert));
         delta.removedConcertIds().forEach(state::remove);
         checkpoint = newCheckpoint;

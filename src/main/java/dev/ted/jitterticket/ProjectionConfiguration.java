@@ -9,9 +9,13 @@ import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjectionMedia
 import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.application.MemoryAvailableConcertsProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.MemoryRegisteredCustomersProjectionPersistence;
+import dev.ted.jitterticket.eventsourced.application.MemoryScheduledConcertsProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
+import dev.ted.jitterticket.eventsourced.application.ScheduledConcerts;
+import dev.ted.jitterticket.eventsourced.application.ScheduledConcertsDelta;
+import dev.ted.jitterticket.eventsourced.application.ScheduledConcertsProjector;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -44,6 +48,15 @@ public class ProjectionConfiguration {
         return new ProjectionCoordinator<>(new RegisteredCustomersProjector(),
                                            new MemoryRegisteredCustomersProjectionPersistence(),
                                            customerStore);
+    }
+
+    @Bean
+    ProjectionCoordinator<ConcertEvent, ScheduledConcerts, ScheduledConcertsDelta>
+    scheduledConcertsProjectionCoordinator(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        return new ProjectionCoordinator<>(new ScheduledConcertsProjector(),
+                                           new MemoryScheduledConcertsProjectionPersistence(),
+                                           concertStore);
+
     }
 
     @Bean
