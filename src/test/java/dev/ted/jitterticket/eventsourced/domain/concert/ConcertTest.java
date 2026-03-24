@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -45,87 +46,6 @@ public class ConcertTest {
                     .containsExactly(new ConcertScheduled(
                             concertId, null, artist, ticketPrice, showDateTime, doorsTime, capacity, maxTicketsPerPurchase
                     ));
-        }
-
-        @Test
-        void wrappedRescheduleCommandReschedulesConcertWhenExecutedWithParams() {
-            EventStore<ConcertId, ConcertEvent, Concert> concertEventStore = InMemoryEventStore.forConcerts();
-            ConcertId concertId = ConcertId.createRandom();
-            concertEventStore.save(ConcertFactory.createConcertWithShowDateTimeOf(concertId, LocalDateTimeFactory.withNow().oneWeekInTheFutureAtMidnight()));
-            CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
-
-            var command = commandExecutorFactory.wrapWithParams(
-                    (concert, reschedule) ->
-                            concert.rescheduleTo(
-                                    reschedule.showDateTime(),
-                                    reschedule.doorsTime()));
-
-            LocalDateTime newShowDateTime = LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight();
-            RescheduleParams rescheduleParams = new RescheduleParams(
-                    newShowDateTime,
-                    LocalTime.of(20, 0));
-
-            command.execute(concertId, rescheduleParams);
-
-            assertThat(concertEventStore.findById(concertId))
-                    .get()
-                    .extracting(Concert::showDateTime)
-                    .isEqualTo(newShowDateTime);
-        }
-
-        @Test
-        void wrappedScheduleCommandCreatesConcertWithParams() {
-            var concertEventStore = InMemoryEventStore.forConcerts();
-            var projectionCoordinator = new ProjectionCoordinator<>(new ScheduledConcertsProjector(),
-                                                                    new MemoryScheduledConcertsProjectionPersistence(),
-                                                                    concertEventStore);
-            CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
-            Commands commands = new Commands(commandExecutorFactory, projectionCoordinator);
-
-            ScheduleParams scheduleParams = new ScheduleParams(
-                    "Headliner", 35, LocalDateTime.of(2025, 11, 11, 20, 0),
-                    LocalTime.of(19, 0), 100, 4);
-            ConcertId createdConcertId = commands.createScheduleCommand().execute(scheduleParams);
-
-            assertThat(createdConcertId)
-                    .isNotNull();
-            assertThat(concertEventStore.findById(createdConcertId))
-                    .isPresent()
-                    .get()
-                    .usingRecursiveComparison()
-                    .ignoringFields("id", "uncommittedEvents")
-                    .isEqualTo(Concert.schedule(
-                            null, "Headliner", 35,
-                            LocalDateTime.of(2025, 11, 11, 20, 0),
-                            LocalTime.of(19, 0),
-                            100, 4));
-        }
-
-        @Test
-        void scheduleCommandFailsIfConflictsWithExistingConcertShowDate() {
-            var concertEventStore = InMemoryEventStore.forConcerts();
-            LocalDateTime scheduledDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
-            ConcertId concertId = ConcertId.createRandom();
-            Stream<ConcertEvent> stream = MakeEvents.with()
-                                                    .concertScheduled(concertId,
-                                                                      concertCustomizer -> concertCustomizer.showDateTime(scheduledDateTime))
-                                                    .stream();
-            concertEventStore.save(concertId, stream);
-            var projectionCoordinator = new ProjectionCoordinator<>(new ScheduledConcertsProjector(),
-                                                                    new MemoryScheduledConcertsProjectionPersistence(),
-                                                                    concertEventStore);
-            CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
-            Commands commands = new Commands(commandExecutorFactory, projectionCoordinator);
-
-            ScheduleParams scheduleParams = new ScheduleParams(
-                    "Headliner", 35, scheduledDateTime,
-                    LocalTime.of(19, 0), 100, 4);
-            var scheduleCommand = commands.createScheduleCommand();
-
-            assertThatExceptionOfType(SchedulingConflictException.class)
-                    .as("Expected exception thrown due to conflicting schedule")
-                    .isThrownBy(() -> scheduleCommand.execute(scheduleParams))
-                    .withMessage("Scheduling Conflict: a concert is already scheduled for 2025-11-11");
         }
 
         @Test
@@ -180,6 +100,108 @@ public class ConcertTest {
                     .containsExactly(
                             new TicketSalesStopped(concert.getId(), null));
         }
+    }
+
+    @Nested
+    class WrappedCommandObjects {
+
+        @Test
+        void scheduleCommandCreatesConcertWithParams() {
+            var concertEventStore = InMemoryEventStore.forConcerts();
+            Commands commands = commandsWith(concertEventStore);
+
+            ScheduleParams scheduleParams = new ScheduleParams(
+                    "Headliner", 35, LocalDateTime.of(2025, 11, 11, 20, 0),
+                    LocalTime.of(19, 0), 100, 4);
+            ConcertId createdConcertId = commands.createScheduleCommand()
+                                                 .execute(scheduleParams);
+
+            assertThat(createdConcertId)
+                    .isNotNull();
+            assertThat(concertEventStore.findById(createdConcertId))
+                    .isPresent()
+                    .get()
+                    .usingRecursiveComparison()
+                    .ignoringFields("id", "uncommittedEvents")
+                    .isEqualTo(Concert.schedule(
+                            null, "Headliner", 35,
+                            LocalDateTime.of(2025, 11, 11, 20, 0),
+                            LocalTime.of(19, 0),
+                            100, 4));
+        }
+
+        @Test
+        void scheduleCommandFailsIfConflictsWithExistingConcertShowDate() {
+            var concertEventStore = InMemoryEventStore.forConcerts();
+            LocalDateTime scheduledDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
+            ConcertId concertId = ConcertId.createRandom();
+            Stream<ConcertEvent> stream = MakeEvents.with()
+                                                    .concertScheduled(concertId,
+                                                                      concertCustomizer -> concertCustomizer.showDateTime(scheduledDateTime))
+                                                    .stream();
+            concertEventStore.save(concertId, stream);
+            Commands commands = commandsWith(concertEventStore);
+            var scheduleCommand = commands.createScheduleCommand();
+
+            ScheduleParams scheduleParams = new ScheduleParams(
+                    "Headliner", 35, scheduledDateTime,
+                    LocalTime.of(19, 0), 100, 4);
+
+            assertThatExceptionOfType(SchedulingConflictException.class)
+                    .as("Expected exception thrown due to conflicting schedule")
+                    .isThrownBy(() -> scheduleCommand.execute(scheduleParams))
+                    .withMessage("Scheduling Conflict: a concert is already scheduled for 2025-11-11");
+        }
+
+        @Test
+        void rescheduleCommandReschedulesConcertWhenExecutedWithParams() {
+            var concertEventStore = InMemoryEventStore.forConcerts();
+            ConcertId concertId = ConcertId.createRandom();
+            concertEventStore.save(ConcertFactory.createConcertWithShowDateTimeOf(concertId, LocalDateTimeFactory.withNow().oneWeekInTheFutureAtMidnight()));
+            Commands commands = commandsWith(concertEventStore);
+
+            LocalDateTime newShowDateTime = LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight();
+            RescheduleParams rescheduleParams = new RescheduleParams(
+                    newShowDateTime,
+                    LocalTime.of(20, 0));
+
+            commands.createRescheduleCommand()
+                    .execute(concertId, rescheduleParams);
+
+            assertThat(concertEventStore.findById(concertId))
+                    .get()
+                    .extracting(Concert::showDateTime)
+                    .isEqualTo(newShowDateTime);
+        }
+
+        @Test
+        void rescheduleCommandFailsForNewShowDateTimeConflictWithExistingConcert() {
+            var concertEventStore = InMemoryEventStore.forConcerts();
+            LocalDateTime alreadyExistingShowDateTime = LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight().plusHours(19);
+            concertEventStore.save(ConcertFactory.createConcertWithShowDateTimeOf(ConcertId.createRandom(), alreadyExistingShowDateTime));
+            ConcertId concertId = ConcertId.createRandom();
+            concertEventStore.save(ConcertFactory.createConcertWithShowDateTimeOf(concertId, LocalDateTimeFactory.withNow().oneWeekInTheFutureAtMidnight()));
+            Commands commands = commandsWith(concertEventStore);
+            var rescheduleCommand = commands.createRescheduleCommand();
+
+            RescheduleParams rescheduleParams = new RescheduleParams(
+                    alreadyExistingShowDateTime,
+                    LocalTime.of(20, 0));
+
+            assertThatExceptionOfType(SchedulingConflictException.class)
+                    .as("Expected exception thrown due to conflicting reschedule")
+                    .isThrownBy(() -> rescheduleCommand.execute(concertId, rescheduleParams))
+                    .withMessage("Scheduling Conflict: a concert is already scheduled for " + alreadyExistingShowDateTime.format(DateTimeFormatter.ISO_DATE));
+        }
+    }
+
+    private Commands commandsWith(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
+        var projectionCoordinator = new ProjectionCoordinator<>(
+                new ScheduledConcertsProjector(),
+                new MemoryScheduledConcertsProjectionPersistence(),
+                concertEventStore);
+        CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
+        return new Commands(commandExecutorFactory, projectionCoordinator);
     }
 
     @Nested

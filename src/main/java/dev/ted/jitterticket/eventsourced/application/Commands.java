@@ -21,10 +21,14 @@ public class Commands {
     public CommandWithParams<ConcertId, RescheduleParams> createRescheduleCommand() {
         CommandWithParams<ConcertId, RescheduleParams> command =
                 commandExecutorFactory.wrapWithParams(
-                        (concert, reschedule) ->
-                                concert.rescheduleTo(
-                                        reschedule.showDateTime(),
-                                        reschedule.doorsTime()));
+                        (concert, reschedule) -> {
+                            LocalDateTime showDateTime = reschedule.showDateTime();
+                            ensureNoConflictFor(showDateTime);
+                            // call "internal" (aggregate) command method
+                            concert.rescheduleTo(
+                                    showDateTime,
+                                    reschedule.doorsTime());
+                        });
         return command;
     }
 
@@ -38,11 +42,8 @@ public class Commands {
                             //   capacity is within some range
                             //   etc.
                             // external prerequisite/validation:
-                            if (scheduledConcertsProjectionCoordinator
-                                    .projection()
-                                    .conflictsWith(showDateTime)) {
-                                throw new SchedulingConflictException("Scheduling Conflict: a concert is already scheduled for " + showDateTime.format(DateTimeFormatter.ISO_DATE));
-                            }
+                            ensureNoConflictFor(showDateTime);
+                            // call "internal" (aggregate) command method
                             return Concert.schedule(
                                     ConcertId.createRandom(),
                                     scheduleParams.artist(),
@@ -53,6 +54,14 @@ public class Commands {
                                     scheduleParams.maxTicketsPerPurchase());
                         });
         return command;
+    }
+
+    private void ensureNoConflictFor(LocalDateTime showDateTime) {
+        if (scheduledConcertsProjectionCoordinator
+                .projection()
+                .conflictsWith(showDateTime)) {
+            throw new SchedulingConflictException("Scheduling Conflict: a concert is already scheduled for " + showDateTime.format(DateTimeFormatter.ISO_DATE));
+        }
     }
 
 }
