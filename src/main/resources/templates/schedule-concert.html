@@ -30,6 +30,17 @@
             padding: 20px;
         }
 
+        .global-error-message {
+            background-color: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-left: 4px solid #ef4444;
+            color: #b91c1c;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
         .schedule-form {
             background-color: var(--light-gray);
             padding: 30px;
@@ -89,6 +100,8 @@
 <body>
     <div class="schedule-form">
         <h2 class="form-title">Schedule New Concert</h2>
+        <div th:if="${errorMessage}" class="global-error-message"
+             th:text="${errorMessage}">Scheduling Conflict!</div>
         <form th:action="@{/schedule}"
               th:object="${scheduleForm}"
               method="post">

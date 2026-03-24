@@ -142,8 +142,8 @@
             [ ] There's a missing ConcertCompleted event that would have this projection remove concerts that have already taken place (i.e., are now in the past)
         [ ] Rules
             [X] Must not conflict with already scheduled concert, information comes from a [Future]ScheduledConcerts projection
-                [ ] Add this validation to Reschedule
-            [ ] Must be in the future by at least N days (14?)
+                [X] Add this validation to Reschedule
+            [ ] Must be in the future by at least N days (14?), or "doors time must be between 30 minutes and two hours prior to show time)
 
     [ ] Add business date and time (datetime) properties to events when command is executed
         [ ] Surface the created_at column into the event?
