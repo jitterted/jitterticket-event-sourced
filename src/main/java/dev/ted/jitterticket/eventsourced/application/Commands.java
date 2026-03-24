@@ -24,14 +24,19 @@ public class Commands {
     public CreateWithParams<ConcertId, ScheduleParams> createScheduleCommand() {
         CreateWithParams<ConcertId, ScheduleParams> command =
                 commandExecutorFactory.wrapForCreation(
-                        scheduleParams -> Concert.schedule(
-                                ConcertId.createRandom(),
-                                scheduleParams.artist(),
-                                scheduleParams.ticketPrice(),
-                                scheduleParams.showDateTime(),
-                                scheduleParams.doorsTime(),
-                                scheduleParams.capacity(),
-                                scheduleParams.maxTicketsPerPurchase()));
+                        scheduleParams -> {
+    // check for schedule conflict:
+    //  if (ProjCoor.projection().conflictsWith(scheduleParams.showDateTime())) {
+    //     throw new SchedulingConflictException(...)
+                            return Concert.schedule(
+                                    ConcertId.createRandom(),
+                                    scheduleParams.artist(),
+                                    scheduleParams.ticketPrice(),
+                                    scheduleParams.showDateTime(),
+                                    scheduleParams.doorsTime(),
+                                    scheduleParams.capacity(),
+                                    scheduleParams.maxTicketsPerPurchase());
+                        });
         return command;
     }
 
