@@ -141,7 +141,7 @@
             [X] List of ConcertId, ShowDate (no Time needed)
             [ ] There's a missing ConcertCompleted event that would have this projection remove concerts that have already taken place (i.e., are now in the past)
         [ ] Rules
-            [ ] Must not conflict with already scheduled concert, information comes from a FutureScheduledConcerts projection
+            [X] Must not conflict with already scheduled concert, information comes from a [Future]ScheduledConcerts projection
                 [ ] Add this validation to Reschedule
             [ ] Must be in the future by at least N days (14?)
 

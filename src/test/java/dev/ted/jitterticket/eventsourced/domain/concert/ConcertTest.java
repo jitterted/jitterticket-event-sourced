@@ -4,8 +4,13 @@ import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
 import dev.ted.jitterticket.eventsourced.application.Commands;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.LocalDateTimeFactory;
+import dev.ted.jitterticket.eventsourced.application.MakeEvents;
+import dev.ted.jitterticket.eventsourced.application.MemoryScheduledConcertsProjectionPersistence;
+import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RescheduleParams;
 import dev.ted.jitterticket.eventsourced.application.ScheduleParams;
+import dev.ted.jitterticket.eventsourced.application.ScheduledConcertsProjector;
+import dev.ted.jitterticket.eventsourced.application.SchedulingConflictException;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Nested;
@@ -70,9 +75,12 @@ public class ConcertTest {
 
         @Test
         void wrappedScheduleCommandCreatesConcertWithParams() {
-            EventStore<ConcertId, ConcertEvent, Concert> concertEventStore = InMemoryEventStore.forConcerts();
+            var concertEventStore = InMemoryEventStore.forConcerts();
+            var projectionCoordinator = new ProjectionCoordinator<>(new ScheduledConcertsProjector(),
+                                                                    new MemoryScheduledConcertsProjectionPersistence(),
+                                                                    concertEventStore);
             CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
-            Commands commands = new Commands(commandExecutorFactory);
+            Commands commands = new Commands(commandExecutorFactory, projectionCoordinator);
 
             ScheduleParams scheduleParams = new ScheduleParams(
                     "Headliner", 35, LocalDateTime.of(2025, 11, 11, 20, 0),
@@ -91,6 +99,33 @@ public class ConcertTest {
                             LocalDateTime.of(2025, 11, 11, 20, 0),
                             LocalTime.of(19, 0),
                             100, 4));
+        }
+
+        @Test
+        void scheduleCommandFailsIfConflictsWithExistingConcertShowDate() {
+            var concertEventStore = InMemoryEventStore.forConcerts();
+            LocalDateTime scheduledDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
+            ConcertId concertId = ConcertId.createRandom();
+            Stream<ConcertEvent> stream = MakeEvents.with()
+                                                    .concertScheduled(concertId,
+                                                                      concertCustomizer -> concertCustomizer.showDateTime(scheduledDateTime))
+                                                    .stream();
+            concertEventStore.save(concertId, stream);
+            var projectionCoordinator = new ProjectionCoordinator<>(new ScheduledConcertsProjector(),
+                                                                    new MemoryScheduledConcertsProjectionPersistence(),
+                                                                    concertEventStore);
+            CommandExecutorFactory commandExecutorFactory = CommandExecutorFactory.create(concertEventStore);
+            Commands commands = new Commands(commandExecutorFactory, projectionCoordinator);
+
+            ScheduleParams scheduleParams = new ScheduleParams(
+                    "Headliner", 35, scheduledDateTime,
+                    LocalTime.of(19, 0), 100, 4);
+            var scheduleCommand = commands.createScheduleCommand();
+
+            assertThatExceptionOfType(SchedulingConflictException.class)
+                    .as("Expected exception thrown due to conflicting schedule")
+                    .isThrownBy(() -> scheduleCommand.execute(scheduleParams))
+                    .withMessage("Scheduling Conflict: a concert is already scheduled for 2025-11-11");
         }
 
         @Test

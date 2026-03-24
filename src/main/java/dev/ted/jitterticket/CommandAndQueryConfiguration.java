@@ -5,8 +5,11 @@ import dev.ted.jitterticket.eventsourced.application.CommandWithParams;
 import dev.ted.jitterticket.eventsourced.application.Commands;
 import dev.ted.jitterticket.eventsourced.application.ConcertQuery;
 import dev.ted.jitterticket.eventsourced.application.CreateWithParams;
+import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RescheduleParams;
 import dev.ted.jitterticket.eventsourced.application.ScheduleParams;
+import dev.ted.jitterticket.eventsourced.application.ScheduledConcerts;
+import dev.ted.jitterticket.eventsourced.application.ScheduledConcertsDelta;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -31,8 +34,9 @@ public class CommandAndQueryConfiguration {
     }
 
     @Bean
-    Commands commands(CommandExecutorFactory commandExecutorFactory) {
-        return new Commands(commandExecutorFactory);
+    Commands commands(CommandExecutorFactory commandExecutorFactory,
+                      ProjectionCoordinator<ConcertEvent, ScheduledConcerts, ScheduledConcertsDelta> projectionCoordinator) {
+        return new Commands(commandExecutorFactory, projectionCoordinator);
     }
 
     @Bean

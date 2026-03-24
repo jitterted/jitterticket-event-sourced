@@ -5,6 +5,9 @@ import dev.ted.jitterticket.eventsourced.application.Commands;
 import dev.ted.jitterticket.eventsourced.application.ConcertQuery;
 import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
 import dev.ted.jitterticket.eventsourced.application.LocalDateTimeFactory;
+import dev.ted.jitterticket.eventsourced.application.MemoryScheduledConcertsProjectionPersistence;
+import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
+import dev.ted.jitterticket.eventsourced.application.ScheduledConcertsProjector;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -51,10 +54,14 @@ class RescheduleConcertControllerTest {
                 .isNotBlank();
     }
 
-    private static RescheduleConcertController createController(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+    private static RescheduleConcertController createController(EventStore<ConcertId, ConcertEvent, Concert> concertEventStore) {
+        var projectionCoordinator = new ProjectionCoordinator<>(new ScheduledConcertsProjector(),
+                                                                new MemoryScheduledConcertsProjectionPersistence(),
+                                                                concertEventStore);
+        Commands commands = new Commands(CommandExecutorFactory.create(concertEventStore), projectionCoordinator);
         return new RescheduleConcertController(
-                new ConcertQuery(concertStore),
-                new Commands(CommandExecutorFactory.create(concertStore)).createRescheduleCommand());
+                new ConcertQuery(concertEventStore),
+                commands.createRescheduleCommand());
     }
 
     @Test

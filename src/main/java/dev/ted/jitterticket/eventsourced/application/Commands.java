@@ -1,14 +1,21 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Commands {
 
     private final CommandExecutorFactory commandExecutorFactory;
+    private final ProjectionCoordinator<ConcertEvent, ScheduledConcerts, ScheduledConcertsDelta> scheduledConcertsProjectionCoordinator;
 
-    public Commands(CommandExecutorFactory commandExecutorFactory) {
+    public Commands(CommandExecutorFactory commandExecutorFactory,
+                    ProjectionCoordinator<ConcertEvent, ScheduledConcerts, ScheduledConcertsDelta> scheduledConcertsProjectionCoordinator) {
         this.commandExecutorFactory = commandExecutorFactory;
+        this.scheduledConcertsProjectionCoordinator = scheduledConcertsProjectionCoordinator;
     }
 
     public CommandWithParams<ConcertId, RescheduleParams> createRescheduleCommand() {
@@ -25,14 +32,22 @@ public class Commands {
         CreateWithParams<ConcertId, ScheduleParams> command =
                 commandExecutorFactory.wrapForCreation(
                         scheduleParams -> {
-    // check for schedule conflict:
-    //  if (ProjCoor.projection().conflictsWith(scheduleParams.showDateTime())) {
-    //     throw new SchedulingConflictException(...)
+                            LocalDateTime showDateTime = scheduleParams.showDateTime();
+                            // parameter validation would go here, e.g., showDateTime is in the future
+                            //   and doorsTime is within N hours of the show's Time
+                            //   capacity is within some range
+                            //   etc.
+                            // external prerequisite/validation:
+                            if (scheduledConcertsProjectionCoordinator
+                                    .projection()
+                                    .conflictsWith(showDateTime)) {
+                                throw new SchedulingConflictException("Scheduling Conflict: a concert is already scheduled for " + showDateTime.format(DateTimeFormatter.ISO_DATE));
+                            }
                             return Concert.schedule(
                                     ConcertId.createRandom(),
                                     scheduleParams.artist(),
                                     scheduleParams.ticketPrice(),
-                                    scheduleParams.showDateTime(),
+                                    showDateTime,
                                     scheduleParams.doorsTime(),
                                     scheduleParams.capacity(),
                                     scheduleParams.maxTicketsPerPurchase());
