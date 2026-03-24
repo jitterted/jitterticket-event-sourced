@@ -143,7 +143,8 @@
         [ ] Rules
             [X] Must not conflict with already scheduled concert, information comes from a [Future]ScheduledConcerts projection
                 [X] Add this validation to Reschedule
-            [ ] Must be in the future by at least N days (14?), or "doors time must be between 30 minutes and two hours prior to show time)
+            [X] Doors time must be between 30 minutes and two hours prior to show time
+                [ ] Optional: Must be in the future by at least N days (14?)
 
     [ ] Add business date and time (datetime) properties to events when command is executed
         [ ] Surface the created_at column into the event?

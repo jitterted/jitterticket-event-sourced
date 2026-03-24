@@ -63,7 +63,7 @@ class ScheduleConcertControllerTest {
         String showDate = existingShowDateTime.toLocalDate().format(DateTimeFormatter.ISO_DATE);
         ScheduleConcertController.ScheduleForm scheduleForm = createScheduleFormWith(
                 showDate,
-                existingShowDateTime.toLocalTime().format(DateTimeFormatter.ofPattern("hh:mm")));
+                existingShowDateTime.toLocalTime().minusHours(1).format(LocalDateTimeFormatting.HH_MM_24_HOUR_FORMAT));
         RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
         String redirect = fixture.controller()
                                  .scheduleNewConcert(scheduleForm, redirectAttributes);

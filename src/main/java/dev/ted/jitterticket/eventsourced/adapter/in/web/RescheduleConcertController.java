@@ -71,7 +71,7 @@ public class RescheduleConcertController {
 
         public LocalTime newDoorsLocalTime() {
             return LocalTime.parse(newDoorsTime,
-                                   LocalDateTimeFormatting.HH_MM);
+                                   LocalDateTimeFormatting.HH_MM_24_HOUR_FORMAT);
         }
     }
 

@@ -68,7 +68,7 @@ public class ConcertFactory {
     public static Concert createConcertWithShowDateTimeOf(ConcertId concertId, LocalDateTime showDateTime) {
         return createConcertWithShowAndDoors(concertId,
                                              showDateTime,
-                                             LocalTime.of(20, 0));
+                                             showDateTime.toLocalTime().minusHours(1));
     }
 
     public static Concert createConcertWithShowAndDoors(LocalDateTime showDateTime, LocalTime doorsTime) {

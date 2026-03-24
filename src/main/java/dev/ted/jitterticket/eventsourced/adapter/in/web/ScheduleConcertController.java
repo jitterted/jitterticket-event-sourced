@@ -86,7 +86,7 @@ class ScheduleConcertController {
                     artist,
                     ticketPrice,
                     LocalDateTimeFormatting.fromBrowserDateAndTime(showDate, showTime),
-                    LocalTime.parse(doorsTime, LocalDateTimeFormatting.HH_MM),
+                    LocalTime.parse(doorsTime, LocalDateTimeFormatting.HH_MM_24_HOUR_FORMAT),
                     maxCapacity,
                     maxPerPurchase);
         }

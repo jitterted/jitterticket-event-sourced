@@ -10,7 +10,7 @@ public class LocalDateTimeFormatting {
     // Time format for the browser's <input type="time"> tag is HH:MM in 24 hour format
     public static final DateTimeFormatter YYYY_MM_DD_HH_MM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     public static final DateTimeFormatter YYYY_MM_DD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static final DateTimeFormatter HH_MM = DateTimeFormatter.ofPattern("HH:mm");
+    public static final DateTimeFormatter HH_MM_24_HOUR_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
     public static LocalDateTime fromBrowserDateAndTime(String rawDate, String rawTime) {
         return LocalDateTime.parse(rawDate + " " + rawTime, YYYY_MM_DD_HH_MM_FORMATTER);
@@ -28,11 +28,11 @@ public class LocalDateTimeFormatting {
     }
 
     public static String extractFormattedTimeFrom(LocalDateTime localDateTime) {
-        return localDateTime.format(HH_MM);
+        return localDateTime.format(HH_MM_24_HOUR_FORMAT);
     }
 
     public static String formatAsTimeFrom(LocalTime localTime) {
-        return localTime.format(HH_MM);
+        return localTime.format(HH_MM_24_HOUR_FORMAT);
     }
 
     public static String extractFormattedDateFrom(LocalDateTime localDateTime) {

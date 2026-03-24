@@ -5,6 +5,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class Commands {
@@ -19,41 +20,38 @@ public class Commands {
     }
 
     public CommandWithParams<ConcertId, RescheduleParams> createRescheduleCommand() {
-        CommandWithParams<ConcertId, RescheduleParams> command =
-                commandExecutorFactory.wrapWithParams(
-                        (concert, reschedule) -> {
-                            LocalDateTime showDateTime = reschedule.showDateTime();
-                            ensureNoConflictFor(showDateTime);
-                            // call "internal" (aggregate) command method
-                            concert.rescheduleTo(
-                                    showDateTime,
-                                    reschedule.doorsTime());
-                        });
-        return command;
+        return commandExecutorFactory.wrapWithParams(
+                (concert, reschedule) -> {
+                    LocalDateTime showDateTime = reschedule.showDateTime();
+                    ensureNoConflictFor(showDateTime);
+                    // call "internal" (aggregate) command method
+                    concert.rescheduleTo(
+                            showDateTime,
+                            reschedule.doorsTime());
+                });
     }
 
     public CreateWithParams<ConcertId, ScheduleParams> createScheduleCommand() {
-        CreateWithParams<ConcertId, ScheduleParams> command =
-                commandExecutorFactory.wrapForCreation(
-                        scheduleParams -> {
-                            LocalDateTime showDateTime = scheduleParams.showDateTime();
-                            // parameter validation would go here, e.g., showDateTime is in the future
-                            //   and doorsTime is within N hours of the show's Time
-                            //   capacity is within some range
-                            //   etc.
-                            // external prerequisite/validation:
-                            ensureNoConflictFor(showDateTime);
-                            // call "internal" (aggregate) command method
-                            return Concert.schedule(
-                                    ConcertId.createRandom(),
-                                    scheduleParams.artist(),
-                                    scheduleParams.ticketPrice(),
-                                    showDateTime,
-                                    scheduleParams.doorsTime(),
-                                    scheduleParams.capacity(),
-                                    scheduleParams.maxTicketsPerPurchase());
-                        });
-        return command;
+        return commandExecutorFactory.wrapForCreation(
+                scheduleParams -> {
+                    LocalDateTime showDateTime = scheduleParams.showDateTime();
+                    // parameter validation would go here, e.g., showDateTime is in the future
+                    //   and doorsTime is within N hours of the show's Time
+                    LocalTime doorsTime = scheduleParams.doorsTime();
+                    //   capacity is within some range
+                    //   etc.
+                    // external prerequisite/validation:
+                    ensureNoConflictFor(showDateTime);
+                    // call "internal" (aggregate) command method
+                    return Concert.schedule(
+                            ConcertId.createRandom(),
+                            scheduleParams.artist(),
+                            scheduleParams.ticketPrice(),
+                            showDateTime,
+                            doorsTime,
+                            scheduleParams.capacity(),
+                            scheduleParams.maxTicketsPerPurchase());
+                });
     }
 
     private void ensureNoConflictFor(LocalDateTime showDateTime) {
