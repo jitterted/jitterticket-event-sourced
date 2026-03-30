@@ -15,7 +15,6 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -23,7 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-@Component
+//@Component
 public class SampleDataPopulator implements ApplicationRunner {
 
     static final ConcertId SONIC_WAVES_CONCERT_ID = new ConcertId(UUID.fromString("123e4567-e89b-42d3-a456-556642440001"));

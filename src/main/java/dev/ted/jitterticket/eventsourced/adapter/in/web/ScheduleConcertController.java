@@ -44,6 +44,11 @@ class ScheduleConcertController {
         return new Fixture(concertEventStore, scheduleConcertController);
     }
 
+    record Fixture(
+            EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
+            ScheduleConcertController controller) {}
+
+
     @GetMapping("/schedule")
     public String showScheduleForm(Model model) {
         if (!model.containsAttribute("scheduleForm")) {
@@ -94,7 +99,4 @@ class ScheduleConcertController {
     }
 
 
-    record Fixture(
-            EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
-            ScheduleConcertController controller) {}
 }

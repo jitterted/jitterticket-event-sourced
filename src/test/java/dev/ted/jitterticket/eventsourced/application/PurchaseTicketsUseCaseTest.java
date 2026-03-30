@@ -7,14 +7,15 @@ import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerFactory;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
 
 class PurchaseTicketsUseCaseTest {
 
@@ -99,7 +100,12 @@ class PurchaseTicketsUseCaseTest {
         return new Fixture(customer, concertStore, concertId, customerStore);
     }
 
-    private record Fixture(Customer customer, EventStore<ConcertId, ConcertEvent, Concert> concertStore, ConcertId concertId, EventStore<dev.ted.jitterticket.eventsourced.domain.customer.CustomerId,dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent, Customer> customerStore) {}
+    private record Fixture(
+            Customer customer,
+            EventStore<ConcertId, ConcertEvent, Concert> concertStore,
+            ConcertId concertId,
+            EventStore<CustomerId, CustomerEvent, Customer> customerStore
+    ) {}
 
     private static Fixture createForPurchaseTickets() {
         return createForPurchaseTicketsWithCapacityOf(42);

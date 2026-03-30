@@ -128,8 +128,6 @@
             [X] Add Reschedule command support to the CommandExecutorFactory so that we can send in data and then hook it up to a UI
                 [X] Create UI for this: Controller and HTML
 
-==> CURRENT TASK ==>
-
             [X] Extend the CommandExecutorFactory to a "creator" command for use with scheduling a new concert
                 [X] Create a wrapForCreation() that doesn't execute the "before" or "load" code, only the "after" or "save"
                 [X] Add creating the schedule command in Commands
@@ -137,14 +135,30 @@
 
     [ ] Schedule Concert UI
         [X] Thymeleaf page and Controller
-        [ ] Projection for scheduled concerts to prevent booking conflicts
+        [X] Projection for scheduled concerts to prevent booking conflicts
             [X] List of ConcertId, ShowDate (no Time needed)
-            [ ] There's a missing ConcertCompleted event that would have this projection remove concerts that have already taken place (i.e., are now in the past)
-        [ ] Rules
+            [no] There's a missing ConcertCompleted event that would have this projection remove concerts that have already taken place (i.e., are now in the past)
+
+            -- Evicting Concerts from ScheduledConcertsProjection --
+            1. Processor that generates a "close concert" alarm for midnight after the concert is scheduled (like ConcertStartedProcessor), and the alarm triggers the "concert.close()" command method
+            2. Automation that at midnight executes a query+command: query for concerts scheduled "yesterday" (since midnight is the beginning of a new day) and for each concert scheduled (either 0 or 1), calls concert.close() <-- automating what a user could do manually
+            3. "External" clock event every midnight that we somehow handle and that does the query+command from #2
+            4. When a new "ConcertScheduled" event is handled by the ScheduledConcertsProjection, it evicts any concert in the projection that are older than the current date (Clock would need to be injected, or could "cheat" and look at the execution date in the ConcertScheduled event)
+            5. (Manually) rebuild the projection if/when it gets too large
+
+            [never-mind] Create a __Generator automation that generates ConcertCalendarDayEnded events at midnight
+                [ ] while (thread not interrupted): {
+                    sleep_until_midnight
+                    concertStore.save(
+                [ ] ScheduledConcerts projection will drop any concerts that are older than the date from that event:
+                    e.g., if a concert's show date was 2024-03-30, and we receive a ConcertCalendarDayEnded event with 2024-03-30, then that concert would be removed from the projection (so less-than-or-equal-to ended-day)
+        [X] Rules
             [X] Must not conflict with already scheduled concert, information comes from a [Future]ScheduledConcerts projection
                 [X] Add this validation to Reschedule
             [X] Doors time must be between 30 minutes and two hours prior to show time
                 [ ] Optional: Must be in the future by at least N days (14?)
+        [ ] New feature: schedule when tickets go on sale
+            [ ] This means AvailableConcerts (Projection: rename to ConcertsOnSale) would no longer have scheduled concerts until their tickets go on sale, while scheduled concerts WOULD be listed in the ScheduledConcertsProjection since that projection is for scheduling conflicts (only)
 
     [ ] Add business date and time (datetime) properties to events when command is executed
         [ ] Surface the created_at column into the event?
@@ -169,7 +183,7 @@
         [X] Event Viewer uses this new projection
 
 
-    [ ] Upgrade to Spring Boot 4.0.3
+    [X] Upgrade to Spring Boot 4.0.3
 
     [ ] Create a targeted "Decider" for ticket sales, that validates that the ticket sales have not been stopped and we have enough to fulfill the requested ticket quantity. Ticket sales are currently stopped as a result of the ConcertStartedProcessor, and ticket sales should be stopped when we sell the last ticket.
 
@@ -194,6 +208,13 @@
 
     [X] Do some performance/benchmarks for 100 concerts, where each concert sells tickets to 10,000 Customers, overall generating 1MM events
     [X] Configure TestContainer tests to reuse the same container to speed up tests
+
+==> CURRENT TASK ==>
+
+    [ ] Try out Avro (vs. JSON) for encoding event payloads in the Events table in Postgres. Faster?
+        [ ] New database table + schema (Avro as binary column)
+        [ ] New EventDto to represent the table row
+        [ ] BaseEventStore implementation (similar to JdbcEventStore)
 
 
     [ ] ArchUnit rule to ensure that only test code calls `createForTest...` methods

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -22,10 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-//@Component
+@Component
 public class LargeSampleDataPopulator implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LargeSampleDataPopulator.class);
+    private static final int CUSTOMERS_TO_CREATE = 1_000;
+    private static final int CONCERTS_TO_CREATE = 100;
 
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
@@ -66,9 +69,9 @@ public class LargeSampleDataPopulator implements ApplicationRunner {
         concertSalesProjectionRepository.deleteAll();
         log.info("Cleared existing data, starting population of large sample dataset");
 
-        List<Customer> customers = createCustomerObjects(10_000);
+        List<Customer> customers = createCustomerObjects(CUSTOMERS_TO_CREATE);
         log.info("Created {} customer objects", customers.size());
-        List<Concert> concerts = createConcertObjects(100);
+        List<Concert> concerts = createConcertObjects(CONCERTS_TO_CREATE);
         log.info("Created {} concert objects", concerts.size());
         log.info("Saving concerts and customers to event store");
         concerts.forEach(concertStore::save);
@@ -84,6 +87,7 @@ public class LargeSampleDataPopulator implements ApplicationRunner {
             }
             concertStore.save(concert);
             customers.forEach(customerStore::save);
+            log.info("Sold tickets for concert: {}", concert.artist());
         }
         log.info("Completed ticket sales processing after {}ms", System.currentTimeMillis() - start);
 
@@ -112,7 +116,7 @@ public class LargeSampleDataPopulator implements ApplicationRunner {
                     ConcertId.createRandom(),
                     artist,
                     price,
-                    daysFromNowAt(10 + random.nextInt(100), 19, 0),
+                    daysFromNowAt(10 + random.nextInt(CONCERTS_TO_CREATE), 19, 0),
                     LocalTime.of(18, 0),
                     capacity,
                     10

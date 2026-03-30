@@ -116,9 +116,11 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             ConcertId concertId = ConcertId.createRandom();
             Stream<ConcertEvent> concertEventStream =
                     MakeEvents.with()
-                              .concertScheduled(concertId, (concert) -> concert
-                                      .ticketPrice(35)
-                                      .ticketsSold(6))
+                              .concertScheduled(
+                                      concertId,
+                                      concert -> concert
+                                              .ticketPrice(35)
+                                              .ticketsSold(6))
                               .stream();
             concertEventStore.save(concertId, concertEventStream);
             ConcertSalesProjectionMediator mediator = createProjectionMediator();

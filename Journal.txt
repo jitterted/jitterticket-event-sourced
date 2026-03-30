@@ -1,6 +1,10 @@
-Monday, February 9, 2026
-========================
-
+Monday, March 30, 2026
+======================
+[Design]
+* Optimizing catch-up event retrieval for specific events when starting up.
+    * Need a new method on EventStore that accepts one or more event types to filter
+        Stream<EVENT> allEventsAfter(Checkpoint checkpoint, EVENT... events);
+    * NOTE: we might want to optimize for not sending irrelevant events to Processors/Projections, but since ignored events don't cost us much time, we can do this at some later point.
 
 
 Thursday, February 5, 2026

@@ -71,7 +71,9 @@ public class MakeEvents {
         return this;
     }
 
-    public MakeEvents concertScheduled(ConcertId concertId, Function<ConcertCustomizer, ConcertCustomizer> concertCustomizer) {
+    public MakeEvents concertScheduled(
+            ConcertId concertId,
+            Function<ConcertCustomizer, ConcertCustomizer> concertCustomizer) {
         ConcertCustomizer customizer = concertCustomizer.apply(new ConcertCustomizer());
         ConcertScheduled concertScheduled =
                 createConcertScheduled(concertId,

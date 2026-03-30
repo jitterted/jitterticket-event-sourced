@@ -255,11 +255,13 @@ class ConcertStartedProcessorTest {
         SpyScheduledExecutorService spyScheduledExecutorService = new SpyScheduledExecutorService();
         ConcertStartedProcessor concertStartedProcessor =
                 ConcertStartedProcessor.createForTest(spyScheduledExecutorService);
+        ConcertId concertId = ConcertId.createRandom();
+        LocalDateTime showDateTime = LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight();
         Stream<ConcertEvent> concertScheduledStream =
                 MakeEvents.with()
                           .concertScheduled(
-                                  ConcertId.createRandom(),
-                                  c -> c.showDateTime(LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight())
+                                  concertId,
+                                  c -> c.showDateTime(showDateTime)
                                         .ticketSalesStopped())
                           .stream();
 
