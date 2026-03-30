@@ -14,6 +14,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -65,16 +66,18 @@ public class InMemoryEventStore<
     @Override
     protected @Nonnull List<EventDto<EVENT>> eventDtosFor(ID id) {
         return idToEventDtoMap.getOrDefault(id, List.of())
-                .stream()
-                .sorted(Comparator.comparingLong(EventDto::getEventSequence))
-                .toList();
+                              .stream()
+                              .sorted(Comparator.comparingLong(EventDto::getEventSequence))
+                              .toList();
     }
 
     @Override
-    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint) {
+    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<? extends EVENT>... eventTypes) {
+        List<String> desiredEvents = Arrays.stream(eventTypes).map(Class::getName).toList();
         return allEventsSortedByGlobalEventSequence()
-                              .dropWhile(eventDto -> eventDto.getEventSequence() <= checkpoint.value())
-                              .map(EventDto::toDomain);
+                .dropWhile(eventDto -> eventDto.getEventSequence() <= checkpoint.value())
+                .filter(eventDto -> desiredEvents.contains(eventDto.getEventType()))
+                .map(EventDto::toDomain);
     }
 
     private Stream<EventDto<EVENT>> allEventsSortedByGlobalEventSequence() {

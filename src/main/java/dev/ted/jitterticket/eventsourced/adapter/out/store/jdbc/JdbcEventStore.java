@@ -18,6 +18,7 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -29,7 +30,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     private final EventDboRepository eventDboRepository;
     private final Class<EVENT> baseEventClass;
-    private final List<String> eventTypes;
+    private final List<String> defaultEventTypes;
 
     private JdbcEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate,
                            EventDboRepository eventDboRepository,
@@ -37,7 +38,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
         super(eventsToAggregate);
         this.eventDboRepository = eventDboRepository;
         this.baseEventClass = baseEventClass;
-        this.eventTypes = Event.allConcreteImplementationsOf(baseEventClass).stream().map(Class::getName).toList();
+        this.defaultEventTypes = Event.allConcreteImplementationsOf(baseEventClass).stream().map(Class::getName).toList();
     }
 
 
@@ -80,9 +81,14 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
         return mapToDomainEvents(StreamSupport.stream(savedEventDbos.spliterator(), false));
     }
 
+    @SafeVarargs
     @Override
-    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint) {
-        log.info("Fetching List<EventDbo> after event sequence: {}", checkpoint);
+    public final Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<? extends EVENT>... onlyEventTypes) {
+        List<String> eventTypes = new ArrayList<>(defaultEventTypes);
+//        eventTypes.addAll(Arrays.stream(onlyEventTypes)
+//                                .map(event -> event.getClass().getName())
+//                                .toList());
+        log.info("Fetching List<EventDbo> from repository with event types = {}, after event sequence: {}", eventTypes, checkpoint);
         List<EventDbo> eventsAfter = eventDboRepository.findEventsAfter(checkpoint.value(), eventTypes);
         log.info("Fetched {} events, mapping to Domain events", eventsAfter.size());
         Stream<EVENT> domainEvents = mapToDomainEvents(eventsAfter.stream());

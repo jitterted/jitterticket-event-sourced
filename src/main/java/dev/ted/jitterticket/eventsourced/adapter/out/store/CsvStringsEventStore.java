@@ -14,6 +14,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import jakarta.annotation.Nonnull;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -97,11 +98,12 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
     }
 
     @Override
-    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint) {
+    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<? extends EVENT>... eventTypes) {
+        List<String> desiredEvents = Arrays.stream(eventTypes).map(Class::getName).toList();
         return allEventDtos()
                 .dropWhile(eventDto -> eventDto.getEventSequence() <= checkpoint.value())
+                .filter(eventDto -> desiredEvents.contains(eventDto.getEventType()))
                 .map(EventDto::toDomain);
-
     }
 
     /**

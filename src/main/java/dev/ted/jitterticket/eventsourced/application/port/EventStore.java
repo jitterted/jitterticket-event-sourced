@@ -21,5 +21,5 @@ public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     void subscribe(EventConsumer<EVENT> eventConsumer);
 
-    Stream<EVENT> allEventsAfter(Checkpoint checkpoint);
+    Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<? extends EVENT>... eventTypes);
 }

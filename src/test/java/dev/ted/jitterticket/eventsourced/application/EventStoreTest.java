@@ -9,6 +9,7 @@ import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
@@ -129,6 +130,32 @@ public class EventStoreTest {
 
         @ParameterizedTest(name = "Using {0} Storage")
         @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
+        public void allEventsAfterReturnsOnlySpecifiedEventTypes(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+            // given event store has 4 events: ConcertScheduled, ConcertRescheduled, TicketsSold, TicketSalesStopped
+            ConcertId concertId = ConcertId.createRandom();
+            Stream<ConcertEvent> concertEventStream =
+                    MakeEvents.with()
+                              .concertScheduled(
+                                      concertId,
+                                      c -> c.rescheduleTo(LocalDateTimeFactory.withNow().oneMonthInTheFutureAtMidnight().minusHours(4))
+                                            .ticketsSold(2)
+                                            .ticketSalesStopped()
+                              )
+                              .stream();
+            concertStore.save(concertId, concertEventStream);
+
+            // when we ask for only events after INITIAL of type ConcertScheduled
+            Stream<ConcertEvent> eventStream = concertStore.allEventsAfter(Checkpoint.INITIAL, ConcertScheduled.class);
+
+            // then we get only one event: the ConcertScheduled event
+            assertThat(eventStream)
+                    .hasSize(1)
+                    .first()
+                    .isExactlyInstanceOf(ConcertScheduled.class);
+        }
+
+        @ParameterizedTest(name = "Using {0} Storage")
+        @MethodSource("dev.ted.jitterticket.eventsourced.application.EventStoreTest#concertEventStoreSupplier")
         public void noEventsReturnedForAllEventsAfterWhenEventStoreIsEmpty(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             Stream<ConcertEvent> newEvents = concertStore.allEventsAfter(Checkpoint.INITIAL);
 
@@ -233,8 +260,8 @@ public class EventStoreTest {
         public void eventSequenceAssignedWhenReturnedFromSave(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
             ConcertId concertId = ConcertId.createRandom();
             List<ConcertEvent> oneEvent = MakeEvents.withNullEventSequences()
-                                                      .concertScheduled(concertId)
-                                                      .list();
+                                                    .concertScheduled(concertId)
+                                                    .list();
 
             Stream<ConcertEvent> savedEvents = concertStore.save(concertId, oneEvent.stream());
 

@@ -388,7 +388,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         }
 
         @Override
-        public Stream allEventsAfter(Checkpoint checkpoint) {
+        public Stream allEventsAfter(Checkpoint checkpoint, Class... eventTypes) {
             allEventsAfterGlobalEventSequence = checkpoint;
             return Stream.empty();
         }
