@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class InMemoryEventStore<
@@ -74,9 +75,15 @@ public class InMemoryEventStore<
     @Override
     public Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<? extends EVENT>... eventTypes) {
         List<String> desiredEvents = Arrays.stream(eventTypes).map(Class::getName).toList();
+        Predicate<EventDto<EVENT>> keepEventsPredicate;
+        if (desiredEvents.isEmpty()) {
+            keepEventsPredicate = _ -> true;
+        } else {
+            keepEventsPredicate = eventDto -> desiredEvents.contains(eventDto.getEventType());
+        }
         return allEventsSortedByGlobalEventSequence()
                 .dropWhile(eventDto -> eventDto.getEventSequence() <= checkpoint.value())
-                .filter(eventDto -> desiredEvents.contains(eventDto.getEventType()))
+                .filter(keepEventsPredicate)
                 .map(EventDto::toDomain);
     }
 

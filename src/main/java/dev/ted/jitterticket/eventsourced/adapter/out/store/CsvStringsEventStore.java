@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -100,9 +101,15 @@ public class CsvStringsEventStore<ID extends Id, EVENT extends Event, AGGREGATE 
     @Override
     public Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<? extends EVENT>... eventTypes) {
         List<String> desiredEvents = Arrays.stream(eventTypes).map(Class::getName).toList();
+        Predicate<EventDto<EVENT>> keepEventsPredicate;
+        if (desiredEvents.isEmpty()) {
+            keepEventsPredicate = _ -> true;
+        } else {
+            keepEventsPredicate = eventDto -> desiredEvents.contains(eventDto.getEventType());
+        }
         return allEventDtos()
                 .dropWhile(eventDto -> eventDto.getEventSequence() <= checkpoint.value())
-                .filter(eventDto -> desiredEvents.contains(eventDto.getEventType()))
+                .filter(keepEventsPredicate)
                 .map(EventDto::toDomain);
     }
 

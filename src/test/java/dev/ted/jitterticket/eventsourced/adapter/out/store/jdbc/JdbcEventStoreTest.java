@@ -104,6 +104,12 @@ class JdbcEventStoreTest extends DataJdbcContainerTest {
         }
 
         @Test
+        void allEventsAfterReturnsOnlySpecifiedEventTypes() {
+            delegatedConcertEventStoreAllEvents
+                    .allEventsAfterReturnsOnlySpecifiedEventTypes(concertStore);
+        }
+
+        @Test
         void noEventsReturnedForAllEventsAfterWhenEventStoreIsEmpty() {
             delegatedConcertEventStoreAllEvents
                     .noEventsReturnedForAllEventsAfterWhenEventStoreIsEmpty(concertStore);

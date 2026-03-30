@@ -18,7 +18,7 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -84,10 +84,14 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
     @SafeVarargs
     @Override
     public final Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<? extends EVENT>... onlyEventTypes) {
-        List<String> eventTypes = new ArrayList<>(defaultEventTypes);
-//        eventTypes.addAll(Arrays.stream(onlyEventTypes)
-//                                .map(event -> event.getClass().getName())
-//                                .toList());
+        List<String> eventTypes;
+        if (onlyEventTypes.length == 0) {
+            eventTypes = defaultEventTypes;
+        } else {
+            eventTypes = Arrays.stream(onlyEventTypes)
+                               .map(Class::getName)
+                               .toList();
+        }
         log.info("Fetching List<EventDbo> from repository with event types = {}, after event sequence: {}", eventTypes, checkpoint);
         List<EventDbo> eventsAfter = eventDboRepository.findEventsAfter(checkpoint.value(), eventTypes);
         log.info("Fetched {} events, mapping to Domain events", eventsAfter.size());
