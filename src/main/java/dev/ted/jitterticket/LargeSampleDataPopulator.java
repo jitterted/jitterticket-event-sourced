@@ -26,7 +26,7 @@ import java.util.Random;
 public class LargeSampleDataPopulator implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LargeSampleDataPopulator.class);
-    private static final int CUSTOMERS_TO_CREATE = 1_000;
+    private static final int CUSTOMERS_TO_CREATE = 1_000; // 100_000
     private static final int CONCERTS_TO_CREATE = 100;
 
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
