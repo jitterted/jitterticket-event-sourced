@@ -1,10 +1,28 @@
 Monday, March 30, 2026
 ======================
 [Design]
-* Optimizing catch-up event retrieval for specific events when starting up.
+* Optimizing catch-up event retrieval for specific events when starting up, because projections and processors may be bogged down by retrieving lots of events that they then ignore. For example, the ConcertStartedProcessor always has to catch-up during start-up (because the alarm settings are not persisted), but does not care about TicketsSold events (which would be the majority of events when the application is running).
     * Need a new method on EventStore that accepts one or more event types to filter
         Stream<EVENT> allEventsAfter(Checkpoint checkpoint, EVENT... events);
-    * NOTE: we might want to optimize for not sending irrelevant events to Processors/Projections, but since ignored events don't cost us much time, we can do this at some later point.
+        * NOTE: we might want to optimize for not sending irrelevant events to Processors/Projections, but since ignored events don't cost us much time, we can do this at some later point.
+    * ProjectionCoordinator needs a way to find out which event(s) the DomainProjector is interested in, so adding a query method to the DomainProjector asking it for those events is one way
+
+* New EventConsumer design
+    * [X] handle events (does this)
+    * [ ] subscribe to the event store for specific events it handles
+    * [ ] catch-up on events by asking the event store for specific events after the checkpoint
+    therefore, need a CatchUpEventConsumer where given an EventStore:
+        * Does catch-up via EventStore.allEventsAfter()
+        * Subscribes via EventStore.subscribe()
+    then
+        * DomainProjector gets the initial cache loaded by the ProjectionCoordinator, is responsible for maintaining that cache (including the Checkpoint/LastEventSequenceSeen for the cache, i.e., the last event processed and stored in the cache)
+            - the ProjectionCoordinator can call projector.handle() and then projector.changes() either returns changes since the last handle, or returns empty
+            => OR, the ProjectionCoordinator simply goes away and we inject the EventStore and PersistencePort into the Projector itself,
+              with the abstract base class CatchUpEventConsumer deals with catching up on persisted events and subscribing to the EventStore for new events
+        * Processor: needs catch-up and then subscribe
+
+* Open Question: is it better to have a "persistence wrapper" (like ProjectionCoordinator) to deal with persisting the projection, allowing the Projector to just do the event-based calculations, or have a ProjectionPersister that is injected into the Projector and the projector reads/writes to persistence as needed.
+
 
 
 Thursday, February 5, 2026

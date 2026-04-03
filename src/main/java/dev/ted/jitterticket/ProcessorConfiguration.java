@@ -7,6 +7,8 @@ import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,6 +19,8 @@ import java.util.stream.Stream;
 @Configuration
 public class ProcessorConfiguration {
 
+    private static final Logger log = LoggerFactory.getLogger(ProcessorConfiguration.class);
+
     @Bean
     public ConcertStartedProcessor concertStartedProcessor(
             EventStore<ConcertId, ConcertEvent, Concert> concertStore
@@ -26,7 +30,10 @@ public class ProcessorConfiguration {
                         ForkJoinPool.commonPool(),
                         Clock.systemDefaultZone(),
                         CommandExecutorFactory.create(concertStore));
-        Stream<ConcertEvent> catchUpEventStream = concertStore.allEventsAfter(Checkpoint.INITIAL);
+        log.info("Concert Started Processor: catching up on all events");
+        Stream<ConcertEvent> catchUpEventStream =
+                concertStore.allEventsAfter(Checkpoint.INITIAL);
+        log.info("Handling the events...");
         concertStartedProcessor.handle(catchUpEventStream);
         concertStore.subscribe(concertStartedProcessor);
         return concertStartedProcessor;

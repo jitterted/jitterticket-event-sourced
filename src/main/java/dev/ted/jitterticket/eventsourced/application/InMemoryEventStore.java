@@ -73,7 +73,7 @@ public class InMemoryEventStore<
     }
 
     @Override
-    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<? extends EVENT>... eventTypes) {
+    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<EVENT>... eventTypes) {
         List<String> desiredEvents = Arrays.stream(eventTypes).map(Class::getName).toList();
         Predicate<EventDto<EVENT>> keepEventsPredicate;
         if (desiredEvents.isEmpty()) {

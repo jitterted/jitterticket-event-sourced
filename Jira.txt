@@ -157,8 +157,18 @@
                 [X] Add this validation to Reschedule
             [X] Doors time must be between 30 minutes and two hours prior to show time
                 [ ] Optional: Must be in the future by at least N days (14?)
+
+==> CURRENT TASK ==>
+
         [ ] New feature: schedule when tickets go on sale
+            [ ] Optimize projections to only retrieve relevant events
+                [X] EventStore supports specifying events of interest
+                [ ] Processor
+                [ ] DomainProjector needs to "advertise" which events it needs to handle
+                    [ ] FUTURE: drop the 'EVENT' generic from the DomainProjector definition
+
             [ ] This means AvailableConcerts (Projection: rename to ConcertsOnSale) would no longer have scheduled concerts until their tickets go on sale, while scheduled concerts WOULD be listed in the ScheduledConcertsProjection since that projection is for scheduling conflicts (only)
+
 
     [ ] Add business date and time (datetime) properties to events when command is executed
         [ ] Surface the created_at column into the event?
@@ -209,9 +219,7 @@
     [X] Do some performance/benchmarks for 100 concerts, where each concert sells tickets to 10,000 Customers, overall generating 1MM events
     [X] Configure TestContainer tests to reuse the same container to speed up tests
 
-==> CURRENT TASK ==>
-
-    [ ] Try out Avro (vs. JSON) for encoding event payloads in the Events table in Postgres. Faster?
+    [no] Try out Avro (vs. JSON) for encoding event payloads in the Events table in Postgres. Faster?
         [ ] New database table + schema (Avro as binary column)
         [ ] New EventDto to represent the table row
         [ ] BaseEventStore implementation (similar to JdbcEventStore)

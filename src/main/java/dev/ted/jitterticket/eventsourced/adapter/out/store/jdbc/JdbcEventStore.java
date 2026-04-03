@@ -83,7 +83,7 @@ public class JdbcEventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     @SafeVarargs
     @Override
-    public final Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<? extends EVENT>... onlyEventTypes) {
+    public final Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<EVENT>... onlyEventTypes) {
         List<String> eventTypes;
         if (onlyEventTypes.length == 0) {
             eventTypes = defaultEventTypes;
