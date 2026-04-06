@@ -14,11 +14,11 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
-class EventConsumerHandlerTest {
+class EventHandlerTest {
 
     @Test
     void newEventConsumerDetectsHandledEventTypes() {
-        EventConsumerHandler handler = new EventConsumerHandler();
+        SpyEventHandler handler = new SpyEventHandler();
 
         Set<Class<? extends Event>> handled = handler.handledEventTypes();
 
@@ -29,7 +29,7 @@ class EventConsumerHandlerTest {
 
     @Test
     void eventConsumerInvokesHandleMethodsPerEventType() {
-        EventConsumerHandler handler = new EventConsumerHandler();
+        SpyEventHandler handler = new SpyEventHandler();
         Stream<ConcertEvent> stream =
                 MakeEvents.with()
                           .concertScheduled(
@@ -49,7 +49,7 @@ class EventConsumerHandlerTest {
 
     @Test
     void exceptionThrownIfHandleStreamContainsUnwantedEvents() {
-        EventConsumerHandler handler = new EventConsumerHandler();
+        SpyEventHandler handler = new SpyEventHandler();
         Stream<ConcertEvent> streamWithUnwantedEvents =
                 MakeEvents.with()
                           .concertScheduled(ConcertId.createRandom(),
@@ -67,7 +67,7 @@ class EventConsumerHandlerTest {
     }
 }
 
-class EventConsumerHandler extends NewEventConsumer {
+class SpyEventHandler extends EventHandler {
 
     private final List<String> handled = new ArrayList<>();
 

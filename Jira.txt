@@ -160,12 +160,15 @@
 
 ==> CURRENT TASK ==>
 
+        [X] NewEventConsumer needs to "advertise" which events it needs to handle
+            [X] Drop 'EVENT' generic from the DomainProjector definition
+            [ ] Reimplement Registered Customers using NewDomainProjector and NewEventConsumer
+            [ ] Add BaseEventStore.subscribe(NewEventConsumer consumer)
+
         [ ] New feature: schedule when tickets go on sale
             [ ] Optimize projections to only retrieve relevant events
                 [X] EventStore supports specifying events of interest
                 [ ] Processor
-                [ ] DomainProjector needs to "advertise" which events it needs to handle
-                    [ ] FUTURE: drop the 'EVENT' generic from the DomainProjector definition
 
             [ ] This means AvailableConcerts (Projection: rename to ConcertsOnSale) would no longer have scheduled concerts until their tickets go on sale, while scheduled concerts WOULD be listed in the ScheduledConcertsProjection since that projection is for scheduling conflicts (only)
 

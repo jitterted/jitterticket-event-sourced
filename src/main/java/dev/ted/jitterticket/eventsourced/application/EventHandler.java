@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public abstract class NewEventConsumer {
+public abstract class EventHandler {
 
-    private final Map<Class<? extends Event>, MethodHandle> eventToHandleMethod = new HashMap<>();
+    private final Map<Class<? extends Event>, MethodHandle> eventToHandlerMethod = new HashMap<>();
 
-    public NewEventConsumer() {
+    public EventHandler() {
         Method[] declaredMethods = this.getClass().getDeclaredMethods();
         for (Method declaredMethod : declaredMethods) {
             if (declaredMethod.getName().equals("handle")) {
@@ -24,7 +24,7 @@ public abstract class NewEventConsumer {
                     if (Event.class.isAssignableFrom(handleParameterType)) {
                         try {
                             MethodHandle methodHandle = MethodHandles.lookup().unreflect(declaredMethod);
-                            eventToHandleMethod.put((Class<? extends Event>) handleParameterType, methodHandle);
+                            eventToHandlerMethod.put((Class<? extends Event>) handleParameterType, methodHandle);
                         } catch (IllegalAccessException e) {
                             throw new RuntimeException(e);
                         }
@@ -39,19 +39,19 @@ public abstract class NewEventConsumer {
     }
 
     private void invokeForEvent(Event event) {
-        if (eventToHandleMethod.containsKey(event.getClass())) {
-            MethodHandle methodHandle = eventToHandleMethod.get(event.getClass());
+        if (eventToHandlerMethod.containsKey(event.getClass())) {
+            MethodHandle methodHandle = eventToHandlerMethod.get(event.getClass());
             try {
                 methodHandle.invoke(this, event);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         } else {
-            throw new UnwantedEventException(event, eventToHandleMethod.keySet());
+            throw new UnwantedEventException(event, eventToHandlerMethod.keySet());
         }
     }
 
     public Set<Class<? extends Event>> handledEventTypes() {
-        return eventToHandleMethod.keySet();
+        return Set.copyOf(eventToHandlerMethod.keySet());
     }
 }

@@ -1,3 +1,20 @@
+Monday, April 6, 2026
+
+Problem: we want Projectors to be Event Consumers, and therefore implement one or more `handle(SpecificEvent event)` methods to advertise the events that it's interested in handling.
+
+However: we currently wrap Domain Projectors with the ProjectionCoordinator, and the coordinator implements Event Consumer, but that means the ProjectionCoordinator has to implement the `handle()` methods in order to advertise the events the Domain Projector is interested in, but that defeats the entire purpose of the coordinator being a generic infrastructure-based wrapper.
+
+1. ProjectionCoordinator goes away, the Domain Projector becomes just Projector, where infra stuff gets injected, and implements the Event Consumer and any handle() methods
+2. NewEventConsumer becomes EventHandler, which DomainProjector implements and exposes desired events via handle() methods.
+   AND
+   EventConsumer handles a Stream<? extends Event>
+   AND
+   When the ProjectionCoordinator subscribes to the EventStore, it asks the DomainProjector for `handledEventTypes` and passes that to the EventStore
+   SO
+   We can register an EventHandler directly with the EventStore, which will request the handledEventTypes()
+   OR
+   Register an EventConsumer, which requires a separate parameter for the handled (desired) events
+
 Monday, March 30, 2026
 ======================
 [Design]
