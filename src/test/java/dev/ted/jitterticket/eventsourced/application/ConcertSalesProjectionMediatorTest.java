@@ -353,7 +353,7 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         private Checkpoint allEventsAfterGlobalEventSequence;
 
         @Override
-        public void subscribe(EventConsumer<ConcertEvent> eventConsumer) {
+        public void subscribe(EventStreamConsumer eventStreamConsumer) {
             subscribeInvoked = true;
         }
 

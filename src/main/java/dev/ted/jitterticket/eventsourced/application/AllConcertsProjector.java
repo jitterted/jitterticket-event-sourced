@@ -1,6 +1,8 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.domain.concert.*;
+import dev.ted.jitterticket.eventsourced.domain.Event;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,11 +11,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class AllConcertsProjector implements
-        DomainProjector<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> {
+        DomainProjector<AvailableConcerts, AvailableConcertsDelta> {
 
     @Override
     public ProjectorResult<AvailableConcerts, AvailableConcertsDelta>
-    project(AvailableConcerts currentState, Stream<ConcertEvent> concertEventStream) {
+    project(AvailableConcerts currentState, Stream<? extends Event> concertEventStream) {
         Map<ConcertId, AvailableConcert> availableConcertsMap = loadMapFrom(currentState);
         Map<ConcertId, AvailableConcert> insertedConcerts = new HashMap<>();
 
@@ -31,10 +33,7 @@ public class AllConcertsProjector implements
                     insertedConcerts.put(concertId, availableConcert);
                 }
 
-                case ConcertRescheduled _,
-                     TicketSalesStopped _,
-                     TicketsSold _ -> {
-                }
+                default -> {}
             }
         });
 

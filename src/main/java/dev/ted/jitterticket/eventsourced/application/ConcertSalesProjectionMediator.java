@@ -4,6 +4,7 @@ import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesDbo;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionDbo;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
@@ -16,7 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEvent> {
+public class ConcertSalesProjectionMediator implements EventStreamConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(ConcertSalesProjectionMediator.class);
 
@@ -69,7 +70,7 @@ public class ConcertSalesProjectionMediator implements EventConsumer<ConcertEven
     }
 
     @Override
-    public void handle(Stream<ConcertEvent> eventStream) {
+    public void handle(Stream<? extends Event> eventStream) {
         ConcertSalesProjectionDbo concertSalesProjectionDbo =
                 concertSalesProjectionRepository
                         .findById(PROJECTION_NAME)

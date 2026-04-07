@@ -7,15 +7,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public class ProjectionCoordinator<EVENT extends Event, STATE, DELTA extends ProjectionDelta>
-        implements EventConsumer<EVENT> {
+        implements EventStreamConsumer {
 
-    private final DomainProjector<EVENT, STATE, DELTA> domainProjector;
+    private final DomainProjector<STATE, DELTA> domainProjector;
     private final ProjectionPersistencePort<STATE, DELTA> projectionPersistencePort;
     private final EventStore<?, EVENT, ?> eventStore;
     private STATE cachedProjection;
     private Checkpoint cachedCheckpoint;
 
-    public ProjectionCoordinator(DomainProjector<EVENT, STATE, DELTA> domainProjector,
+    public ProjectionCoordinator(DomainProjector<STATE, DELTA> domainProjector,
                                  ProjectionPersistencePort<STATE, DELTA> projectionPersistencePort,
                                  EventStore<?, EVENT, ?> eventStore) {
         this.domainProjector = domainProjector;
@@ -33,13 +33,13 @@ public class ProjectionCoordinator<EVENT extends Event, STATE, DELTA extends Pro
     }
 
     @Override
-    public void handle(Stream<EVENT> eventStream) {
+    public void handle(Stream<? extends Event> eventStream) {
         updateProjection(eventStream);
     }
 
-    private void updateProjection(Stream<EVENT> eventStream) {
+    private void updateProjection(Stream<? extends Event> eventStream) {
         AtomicReference<Long> lastEventSeen = new AtomicReference<>(0L);
-        Stream<EVENT> checkpointTrackingEventStream = eventStream
+        Stream<? extends Event> checkpointTrackingEventStream = eventStream
                 .peek(event -> lastEventSeen.set(event.eventSequence()));
 
         var projectorResult = domainProjector.project(

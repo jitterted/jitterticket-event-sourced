@@ -17,14 +17,14 @@ class BaseEventStoreTest {
     void saveSendsEventsToMultipleSubscribedEventConsumers() {
         EventStore<ConcertId, ConcertEvent, Concert> concertEventStore = InMemoryEventStore.forConcerts();
         AtomicInteger counter = new AtomicInteger(0);
-        EventConsumer<ConcertEvent> eventConsumerCountingSpy =
+        EventStreamConsumer eventStreamConsumerCountingSpy =
                 concertEventStream -> {
                     //noinspection ResultOfMethodCallIgnored
                     concertEventStream.toList(); // consume the event stream to emulate what a real event consumer does
                     counter.incrementAndGet();
                 };
-        concertEventStore.subscribe(eventConsumerCountingSpy);
-        concertEventStore.subscribe(eventConsumerCountingSpy);
+        concertEventStore.subscribe(eventStreamConsumerCountingSpy);
+        concertEventStore.subscribe(eventStreamConsumerCountingSpy);
 
         concertEventStore.save(ConcertFactory.createConcert());
 

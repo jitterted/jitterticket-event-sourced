@@ -17,7 +17,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         implements EventStore<ID, EVENT, AGGREGATE> {
 
     protected final Function<List<EVENT>, AGGREGATE> eventsToAggregate;
-    private final List<EventConsumer<EVENT>> eventConsumers = new ArrayList<>();
+    private final List<EventStreamConsumer> eventStreamConsumers = new ArrayList<>();
 
     public BaseEventStore(Function<List<EVENT>, AGGREGATE> eventsToAggregate) {
         this.eventsToAggregate = eventsToAggregate;
@@ -33,7 +33,7 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         // we need the events that were saved so we have their event sequences
         // convert to a list so we can pass a stream to each event consumer without worrying about being consumed
         List<EVENT> savedEvents = save(aggregateId, uncommittedEvents).toList();
-        eventConsumers.forEach(
+        eventStreamConsumers.forEach(
                 eventConsumer -> eventConsumer.handle(savedEvents.stream()));
     }
 
@@ -48,8 +48,8 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
     }
 
     @Override
-    public void subscribe(EventConsumer<EVENT> eventConsumer) {
-        eventConsumers.add(eventConsumer);
+    public void subscribe(EventStreamConsumer eventStreamConsumer) {
+        eventStreamConsumers.add(eventStreamConsumer);
     }
 
     @Override

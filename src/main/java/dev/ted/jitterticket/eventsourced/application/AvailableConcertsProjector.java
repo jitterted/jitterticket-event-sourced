@@ -1,11 +1,10 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -16,12 +15,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class AvailableConcertsProjector implements
-        DomainProjector<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> {
+        DomainProjector<AvailableConcerts, AvailableConcertsDelta> {
 
     @Override
     public ProjectorResult<AvailableConcerts, AvailableConcertsDelta>
     project(AvailableConcerts currentState,
-            Stream<ConcertEvent> concertEventStream) {
+            Stream<? extends Event> concertEventStream) {
         Map<ConcertId, AvailableConcert> availableConcertsMap =
                 loadMapFrom(currentState);
         List<ConcertId> removedConcertIds = new ArrayList<>();
@@ -51,9 +50,6 @@ public class AvailableConcertsProjector implements
                     availableConcertsMap.put(concertId, rescheduledView);
                     updatedConcerts.put(concertId, rescheduledView);
                 }
-                case TicketsSold _ -> {
-                    // don't care about this event for this projector
-                }
                 case TicketSalesStopped ticketSalesStopped -> {
                     ConcertId concertId = ticketSalesStopped.concertId();
                     availableConcertsMap.remove(concertId);
@@ -63,6 +59,7 @@ public class AvailableConcertsProjector implements
                     insertedConcerts.remove(concertId);
                     updatedConcerts.remove(concertId);
                 }
+                default -> {}
             }
         });
 

@@ -1,13 +1,13 @@
 package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
+import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
+public class ConcertStartedProcessor implements EventStreamConsumer {
 
     private final Map<ConcertId, ConcertAlarm> alarmMap = new HashMap<>();
     private final ScheduledExecutorService scheduledExecutorService;
@@ -86,11 +86,12 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
     }
 
     @Override
-    public void handle(Stream<ConcertEvent> concertEventStream) {
+    public void handle(Stream<? extends Event> concertEventStream) {
         concertEventStream.forEach(
                 concertEvent -> {
                     switch (concertEvent) {
-                        case ConcertScheduled cs -> scheduleAlarm(cs.concertId(), cs.showDateTime());
+                        case ConcertScheduled cs ->
+                                scheduleAlarm(cs.concertId(), cs.showDateTime());
 
                         case ConcertRescheduled cr ->
                                 rescheduleAlarm(cr.concertId(), cr.newShowDateTime());
@@ -98,9 +99,7 @@ public class ConcertStartedProcessor implements EventConsumer<ConcertEvent> {
                         case TicketSalesStopped ticketSalesStopped ->
                                 cancelAlarm(ticketSalesStopped.concertId());
 
-                        case TicketsSold _ -> {
-                            // ignore
-                        }
+                        default -> {}
                     }
                 });
     }

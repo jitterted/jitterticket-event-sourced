@@ -1,7 +1,7 @@
 package dev.ted.jitterticket.eventsourced.application.port;
 
 import dev.ted.jitterticket.eventsourced.application.Checkpoint;
-import dev.ted.jitterticket.eventsourced.application.EventConsumer;
+import dev.ted.jitterticket.eventsourced.application.EventStreamConsumer;
 import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
 import dev.ted.jitterticket.eventsourced.domain.Id;
@@ -20,7 +20,7 @@ public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     List<EVENT> eventsForAggregate(ID id);
 
-    void subscribe(EventConsumer<EVENT> eventConsumer);
+    void subscribe(EventStreamConsumer eventStreamConsumer);
 
     @Deprecated // not sure anyone should ever do an unrestricted query like this
     Stream<EVENT> allEventsAfter(Checkpoint checkpoint);

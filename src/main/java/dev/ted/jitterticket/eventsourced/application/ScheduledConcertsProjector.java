@@ -1,11 +1,9 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -15,30 +13,28 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class ScheduledConcertsProjector implements
-        DomainProjector<ConcertEvent, ScheduledConcerts, ScheduledConcertsDelta> {
+        DomainProjector<ScheduledConcerts, ScheduledConcertsDelta> {
 
 
     @Override
     public ProjectorResult<ScheduledConcerts, ScheduledConcertsDelta>
     project(ScheduledConcerts currentState,
-            Stream<ConcertEvent> concertEventStream) {
+            Stream<? extends Event> concertEventStream) {
 
         ProjectorMaps projectorMaps = ProjectorMaps.from(currentState);
 
         concertEventStream.forEach(
                 concertEvent -> {
                     switch (concertEvent) {
-                        case ConcertScheduled scheduled -> {
-                            projectorMaps.put(scheduled.concertId(),
-                                              scheduled.showDateTime()
-                            );
-                        }
-                        case ConcertRescheduled rescheduled -> {
-                            projectorMaps.put(rescheduled.concertId(),
-                                              rescheduled.newShowDateTime()
-                            );
-                        }
-                        case TicketSalesStopped _, TicketsSold _ -> {
+                        case ConcertScheduled scheduled ->
+                                projectorMaps.put(scheduled.concertId(),
+                                                  scheduled.showDateTime()
+                                );
+                        case ConcertRescheduled rescheduled ->
+                                projectorMaps.put(rescheduled.concertId(),
+                                                  rescheduled.newShowDateTime()
+                                );
+                        default -> {
                         }
                     }
                 }

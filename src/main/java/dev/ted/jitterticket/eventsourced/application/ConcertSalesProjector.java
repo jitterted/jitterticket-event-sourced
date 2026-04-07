@@ -1,10 +1,9 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
+import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
-import dev.ted.jitterticket.eventsourced.domain.concert.TicketSalesStopped;
 import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ public class ConcertSalesProjector {
     private static final Logger log = LoggerFactory.getLogger(ConcertSalesProjector.class);
 
     ProjectionResult project(Map<ConcertId, ConcertSalesSummary> salesSummaryMap,
-                             Stream<ConcertEvent> concertEvents,
+                             Stream<? extends Event> concertEvents,
                              long lastEventSequenceSeen) {
         Map<ConcertId, ConcertSalesSummary> mutableMap = new HashMap<>(salesSummaryMap);
 
@@ -43,8 +42,8 @@ public class ConcertSalesProjector {
                         case ConcertRescheduled concertRescheduled -> mutableMap.computeIfPresent(
                                 concertRescheduled.concertId(),
                                 (_, summary) -> summary.withNewShowDateTime(concertRescheduled.newShowDateTime()));
-                        case TicketSalesStopped ticketSalesStopped -> {
-                            // ignored: we don't care (unless we want to show this on the sales report screen)
+                        default -> {
+                            // ignored
                         }
                     }
                     lastEventSequenceSeenRef.set(concertEvent.eventSequence());
