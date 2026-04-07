@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.*;
 class EventHandlerTest {
 
     @Test
-    void newEventConsumerDetectsHandledEventTypes() {
+    void eventHandlerDetectsHandledEventTypes() {
         SpyEventHandler handler = new SpyEventHandler();
 
         Set<Class<? extends Event>> handled = handler.handledEventTypes();
@@ -28,7 +28,7 @@ class EventHandlerTest {
     }
 
     @Test
-    void eventConsumerInvokesHandleMethodsPerEventType() {
+    void eventHandlerInvokesHandleMethodsPerEventType() {
         SpyEventHandler handler = new SpyEventHandler();
         Stream<ConcertEvent> stream =
                 MakeEvents.with()
@@ -64,6 +64,13 @@ class EventHandlerTest {
         assertThatExceptionOfType(UnwantedEventException.class)
                 .isThrownBy(() -> handler.handle(streamWithUnwantedEvents))
                 .withMessage("Unwanted event class dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold received, this class only accepts: ConcertRescheduled,ConcertScheduled");
+    }
+
+    @Test
+    void exceptionThrownIfNoHandleEventMethodsImplemented() {
+        assertThatExceptionOfType(NoHandleMethodsFoundException.class)
+                .isThrownBy(() -> new EventHandler() {})
+                .withMessage("No handler methods were found, requires methods named 'handle' that take an Event");
     }
 }
 

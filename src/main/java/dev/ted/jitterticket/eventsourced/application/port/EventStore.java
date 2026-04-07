@@ -8,6 +8,7 @@ import dev.ted.jitterticket.eventsourced.domain.Id;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extends EventSourcedAggregate<EVENT, ID>> {
@@ -21,5 +22,8 @@ public interface EventStore<ID extends Id, EVENT extends Event, AGGREGATE extend
 
     void subscribe(EventConsumer<EVENT> eventConsumer);
 
-    Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<EVENT>... eventTypes);
+    @Deprecated // not sure anyone should ever do an unrestricted query like this
+    Stream<EVENT> allEventsAfter(Checkpoint checkpoint);
+
+    Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Set<Class<? extends Event>> desiredEventTypes);
 }

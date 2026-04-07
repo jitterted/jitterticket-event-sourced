@@ -31,6 +31,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -145,7 +146,7 @@ public class EventStoreTest {
             concertStore.save(concertId, concertEventStream);
 
             // when we ask for only events after INITIAL of type ConcertScheduled
-            Stream<ConcertEvent> eventStream = concertStore.allEventsAfter(Checkpoint.INITIAL, ConcertScheduled.class);
+            Stream<ConcertEvent> eventStream = concertStore.allEventsAfter(Checkpoint.INITIAL, Set.of(ConcertScheduled.class));
 
             // then we get only one event: the ConcertScheduled event
             assertThat(eventStream)

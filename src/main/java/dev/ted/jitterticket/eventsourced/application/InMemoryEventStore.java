@@ -14,14 +14,16 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class InMemoryEventStore<
@@ -73,13 +75,18 @@ public class InMemoryEventStore<
     }
 
     @Override
-    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Class<EVENT>... eventTypes) {
-        List<String> desiredEvents = Arrays.stream(eventTypes).map(Class::getName).toList();
+    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint) {
+        return allEventsAfter(checkpoint, Collections.emptySet());
+    }
+
+    @Override
+    public Stream<EVENT> allEventsAfter(Checkpoint checkpoint, Set<Class<? extends Event>> desiredEventTypes) {
+        Set<String> desiredEventNames = desiredEventTypes.stream().map(Class::getName).collect(Collectors.toSet());
         Predicate<EventDto<EVENT>> keepEventsPredicate;
-        if (desiredEvents.isEmpty()) {
+        if (desiredEventNames.isEmpty()) {
             keepEventsPredicate = _ -> true;
         } else {
-            keepEventsPredicate = eventDto -> desiredEvents.contains(eventDto.getEventType());
+            keepEventsPredicate = eventDto -> desiredEventNames.contains(eventDto.getEventType());
         }
         return allEventsSortedByGlobalEventSequence()
                 .dropWhile(eventDto -> eventDto.getEventSequence() <= checkpoint.value())

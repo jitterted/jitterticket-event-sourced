@@ -158,12 +158,17 @@
             [X] Doors time must be between 30 minutes and two hours prior to show time
                 [ ] Optional: Must be in the future by at least N days (14?)
 
-==> CURRENT TASK ==>
-
         [X] NewEventConsumer needs to "advertise" which events it needs to handle
             [X] Drop 'EVENT' generic from the DomainProjector definition
-            [ ] Reimplement Registered Customers using NewDomainProjector and NewEventConsumer
-            [ ] Add BaseEventStore.subscribe(NewEventConsumer consumer)
+            [X] Reimplement Registered Customers using NewDomainProjector and EventHandler
+            [X] in EventStore: Fix generics + varargs issue by using Set<Class<? extends Event>> instead of Class<? extends Event>...
+
+==> CURRENT TASK ==>
+
+            [ ] Add BaseEventStore.subscribe(EventConsumer, Set<Event> desiredEvents)
+                e.g.: eventStore.subscribe(this, projector.handledEventTypes());
+            [ ] Add BaseEventStore.subscribe(EventHandler)
+                The event store can ask the EventHandler which methods it's interested in.
 
         [ ] New feature: schedule when tickets go on sale
             [ ] Optimize projections to only retrieve relevant events

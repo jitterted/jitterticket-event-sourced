@@ -32,6 +32,9 @@ public abstract class EventHandler {
                 }
             }
         }
+        if (eventToHandlerMethod.isEmpty()) {
+            throw new NoHandleMethodsFoundException("No handler methods were found, requires methods named 'handle' that take an Event");
+        }
     }
 
     public void handle(Stream<? extends Event> stream) {

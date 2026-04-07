@@ -22,6 +22,10 @@ public class RegisteredCustomers implements ProjectionDelta {
         add(registeredCustomers);
     }
 
+    static RegisteredCustomers copyOf(RegisteredCustomers initialState) {
+        return new RegisteredCustomers(initialState.asList());
+    }
+
     RegisteredCustomers withNew(List<RegisteredCustomer> newlyRegisteredCustomers) {
         RegisteredCustomers newState = new RegisteredCustomers(asList());
         newState.add(newlyRegisteredCustomers);

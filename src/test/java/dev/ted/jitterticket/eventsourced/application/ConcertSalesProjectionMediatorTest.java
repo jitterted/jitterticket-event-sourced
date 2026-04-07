@@ -8,8 +8,7 @@ import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.DataJdbcContaine
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.EventDboRepository;
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.JdbcEventStore;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
-import dev.ted.jitterticket.eventsourced.domain.EventSourcedAggregate;
-import dev.ted.jitterticket.eventsourced.domain.Id;
+import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertFactory;
@@ -24,6 +23,7 @@ import org.springframework.context.annotation.Import;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -347,33 +347,13 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
 
 
     //region Test Doubles
-    @SuppressWarnings("rawtypes")
-    static class EventStoreSpy implements EventStore {
+    static class EventStoreSpy implements EventStore<ConcertId, ConcertEvent, Concert> {
 
         private boolean subscribeInvoked = false;
         private Checkpoint allEventsAfterGlobalEventSequence;
 
         @Override
-        public void save(EventSourcedAggregate aggregate) {
-        }
-
-        @Override
-        public Stream save(Id aggregateId, Stream uncommittedEvents) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Optional findById(Id id) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List eventsForAggregate(Id id) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void subscribe(EventConsumer eventConsumer) {
+        public void subscribe(EventConsumer<ConcertEvent> eventConsumer) {
             subscribeInvoked = true;
         }
 
@@ -388,9 +368,34 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
         }
 
         @Override
-        public Stream allEventsAfter(Checkpoint checkpoint, Class... eventTypes) {
+        public Stream<ConcertEvent> allEventsAfter(Checkpoint checkpoint) {
+            return allEventsAfter(checkpoint, Collections.emptySet());
+        }
+
+        @Override
+        public Stream<ConcertEvent> allEventsAfter(Checkpoint checkpoint, Set<Class<? extends Event>> desiredEventTypes) {
             allEventsAfterGlobalEventSequence = checkpoint;
             return Stream.empty();
+        }
+
+        @Override
+        public void save(Concert aggregate) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Stream<ConcertEvent> save(ConcertId aggregateId, Stream<ConcertEvent> uncommittedEvents) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Optional<Concert> findById(ConcertId id) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<ConcertEvent> eventsForAggregate(ConcertId id) {
+            throw new UnsupportedOperationException();
         }
     }
     //endregion Test Doubles
