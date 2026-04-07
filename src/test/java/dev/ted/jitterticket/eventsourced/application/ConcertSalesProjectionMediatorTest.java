@@ -357,6 +357,11 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
             subscribeInvoked = true;
         }
 
+        @Override
+        public void subscribe(EventStreamConsumer eventStreamConsumer, Set<Class<? extends Event>> desiredEvents) {
+
+        }
+
         public void assertSubscribedAndEventsAfterInvoked(Checkpoint expectedCheckpoint) {
             assertThat(subscribeInvoked)
                     .as("Expected subscribe to be called")
