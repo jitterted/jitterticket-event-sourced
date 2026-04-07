@@ -177,6 +177,7 @@
 
             [ ] This means AvailableConcerts (Projection: rename to ConcertsOnSale) would no longer have scheduled concerts until their tickets go on sale, while scheduled concerts WOULD be listed in the ScheduledConcertsProjection since that projection is for scheduling conflicts (only)
 
+    [ ] Convert ConcertStartedProcessor to use the EventHandler so desired events can be detected for configuration in the ProcessorConfiguration class instead of manually configuring them as I do at ProcessorConfiguration.java:39
 
     [ ] Add business date and time (datetime) properties to events when command is executed
         [ ] Surface the created_at column into the event?
