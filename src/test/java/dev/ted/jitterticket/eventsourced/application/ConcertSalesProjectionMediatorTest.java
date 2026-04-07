@@ -354,12 +354,11 @@ public class ConcertSalesProjectionMediatorTest extends DataJdbcContainerTest {
 
         @Override
         public void subscribe(EventStreamConsumer eventStreamConsumer) {
-            subscribeInvoked = true;
         }
 
         @Override
         public void subscribe(EventStreamConsumer eventStreamConsumer, Set<Class<? extends Event>> desiredEvents) {
-
+            subscribeInvoked = true;
         }
 
         public void assertSubscribedAndEventsAfterInvoked(Checkpoint expectedCheckpoint) {

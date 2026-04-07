@@ -8,6 +8,9 @@ import dev.ted.jitterticket.eventsourced.domain.Event;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertId;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertRescheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.ConcertScheduled;
+import dev.ted.jitterticket.eventsourced.domain.concert.TicketsSold;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +41,18 @@ public class ConcertSalesProjectionMediator implements EventStreamConsumer {
                 .findCheckpointByProjectionName(PROJECTION_NAME);
 
         log.debug("Fetching all events after the last event sequence: {}...", checkpoint);
+        Set<Class<? extends Event>> desiredEvents = Set.of(ConcertScheduled.class,
+                                                           ConcertRescheduled.class,
+                                                           TicketsSold.class);
         Stream<ConcertEvent> concertEventStream =
-                this.concertEventStore.allEventsAfter(checkpoint);
+                this.concertEventStore.allEventsAfter(checkpoint, desiredEvents);
         log.debug("Fetched all events after last event sequence: {}", checkpoint);
 
         log.debug("Starting event handling for projection...");
         handle(concertEventStream);
         log.debug("Completed event handling for projection");
 
-        concertEventStore.subscribe(this);
+        concertEventStore.subscribe(this, desiredEvents);
     }
 
     static ConcertSalesProjector.ConcertSalesSummary dboToSummary(ConcertSalesDbo concertSalesDbo) {
@@ -82,7 +88,7 @@ public class ConcertSalesProjectionMediator implements EventStreamConsumer {
                                          .stream()
                                          .map(ConcertSalesProjectionMediator::dboToSummary)
                                          .collect(Collectors.toMap(ConcertSalesProjector.ConcertSalesSummary::concertId,
-                                                             Function.identity()));
+                                                                   Function.identity()));
 
         log.debug("Starting projection calculation...");
         ConcertSalesProjector.ProjectionResult result =
