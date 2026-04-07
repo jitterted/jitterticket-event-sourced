@@ -11,29 +11,29 @@ import static org.assertj.core.api.Assertions.*;
 
 class NewRegisteredCustomersProjectorTest {
 
-    private static final RegisteredCustomers EMPTY_REGISTERED_CUSTOMERS_STATE = new RegisteredCustomers();
     private static final String IRRELEVANT_EMAIL = "customer@example.com";
 
     @Test
-    void currentStateIsUnchangedWhenNoEventsAreHandled() {
+    void emptyStateAndCheckpointUnchangedWhenNoEventsAreHandled() {
         NewRegisteredCustomersProjector registeredCustomersProjector =
-                new NewRegisteredCustomersProjector(
-                        EMPTY_REGISTERED_CUSTOMERS_STATE);
+                NewRegisteredCustomersProjector.createEmpty();
 
         assertThat(registeredCustomersProjector.currentState().asList())
                 .isEmpty();
         assertThat(registeredCustomersProjector.flush().asList())
                 .isEmpty();
+        assertThat(registeredCustomersProjector.checkpoint())
+                .isEqualTo(Checkpoint.INITIAL);
     }
 
     @Test
     void fromEmptyStateUpdatesStateAfterHandlingRegisteredCustomer() {
         NewRegisteredCustomersProjector registeredCustomersProjector =
-                new NewRegisteredCustomersProjector(
-                        EMPTY_REGISTERED_CUSTOMERS_STATE);
+                NewRegisteredCustomersProjector.createEmpty();
         CustomerId customerId = CustomerId.createRandom();
+        long eventSequence = 1L;
         CustomerEvent customerRegistered = new CustomerRegistered(
-                customerId, 1L, "Customer Name", IRRELEVANT_EMAIL);
+                customerId, eventSequence, "Customer Name", IRRELEVANT_EMAIL);
         registeredCustomersProjector.handle(Stream.of(customerRegistered));
 
         var registeredCustomer = new RegisteredCustomers.RegisteredCustomer(
@@ -44,14 +44,17 @@ class NewRegisteredCustomersProjectorTest {
         assertThat(registeredCustomersProjector.flush().asList())
                 .as("Expected the Projection DELTA State to have only the newly registered customer")
                 .containsExactly(registeredCustomer);
+        assertThat(registeredCustomersProjector.checkpoint())
+                .isEqualTo(Checkpoint.of(eventSequence));
     }
 
     @Test
     void nonEmptyPreviousFullStateWithNewCustomerRegisteredReturnsFullStateAndDeltaWithNewRegistration() {
         Fixture fixture = createStateWithCustomerRegistered();
         CustomerId newCustomerId = CustomerId.createRandom();
+        long eventSequence = 2L;
         CustomerRegistered customerRegistered = new CustomerRegistered(
-                newCustomerId, 2L, "Second Customer", IRRELEVANT_EMAIL);
+                newCustomerId, eventSequence, "Second Customer", IRRELEVANT_EMAIL);
         NewRegisteredCustomersProjector registeredCustomersProjector =
                 new NewRegisteredCustomersProjector(
                         fixture.nonEmptyCurrentProjectionState);
@@ -66,6 +69,8 @@ class NewRegisteredCustomersProjectorTest {
                 .as("Expecting Delta to have 1 New Customer")
                 .extracting(RegisteredCustomers.RegisteredCustomer::customerId)
                 .containsExactly(newCustomerId);
+        assertThat(registeredCustomersProjector.checkpoint())
+                .isEqualTo(Checkpoint.of(eventSequence));
     }
 
     @Test

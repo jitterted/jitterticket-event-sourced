@@ -1,4 +1,13 @@
+Tuesday, April 7, 2026
+======================
+The NewProjectionCoordinator's responsibility is to deal with persistence: loading any existing projection state and persisting any changes after executing the NewDomainProjector.
+
+Since the NewDomainProjector _is_ stateful, it is an in-memory cache of the projection, so NewProjectionCoordinator should _not_ cache the projection separately.
+The cached checkpoint is now also the responsibility of the NewDomainProjector, and it updates the checkpoint at the end of each individual handle() method.
+Alas, it means duplicate code to update that checkpoint in each granular handle() method.
+
 Monday, April 6, 2026
+=====================
 
 Problem: we want Projectors to be Event Consumers, and therefore implement one or more `handle(SpecificEvent event)` methods to advertise the events that it's interested in handling.
 

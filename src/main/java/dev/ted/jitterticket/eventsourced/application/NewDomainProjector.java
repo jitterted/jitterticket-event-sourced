@@ -14,4 +14,10 @@ public abstract class NewDomainProjector<STATE, DELTA extends ProjectionDelta>
      */
     public abstract DELTA flush();
 
+    /**
+     * Checkpoint for the most recent event sequence processed by this projector.
+     *
+     * @return the last event sequence processed, or Checkpoint.INITIAL if none have been processed
+     */
+    public abstract Checkpoint checkpoint();
 }
