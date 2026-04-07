@@ -7,7 +7,6 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@SuppressWarnings("SpringDataJdbcAssociatedDbElementsInspection")
 @Table("events")
 public class EventDbo {
 

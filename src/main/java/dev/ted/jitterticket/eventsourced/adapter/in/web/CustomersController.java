@@ -18,8 +18,8 @@ import java.util.UUID;
 @Controller
 public class CustomersController {
 
-    private EventStore<CustomerId, CustomerEvent, Customer> customerStore;
-    private EventStore<ConcertId, ConcertEvent, Concert> concertStore;
+    private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
+    private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
 
     public CustomersController(EventStore<CustomerId, CustomerEvent, Customer> customerStore, EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
         this.customerStore = customerStore;
