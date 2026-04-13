@@ -63,7 +63,7 @@ class ProjectionPortPersistenceTest {
                 .hasCheckpointValueOf(2);
 
         assertThat(snapshot.state().asList())
-                .extracting(RegisteredCustomers.RegisteredCustomer::name)
+                .extracting(RegisteredCustomer::name)
                 .contains("Existing Customer", "New Customer");
     }
 
@@ -77,7 +77,7 @@ class ProjectionPortPersistenceTest {
 
     static RegisteredCustomers createDeltaWith(CustomerId customerId, String customerName) {
         return RegisteredCustomers.createForTestWith(
-                new RegisteredCustomers.RegisteredCustomer(
+                new RegisteredCustomer(
                         customerId,
                         customerName
                 ));

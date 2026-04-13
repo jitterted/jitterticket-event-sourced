@@ -14,10 +14,10 @@ public class RegisteredCustomersProjector implements
     public ProjectorResult<RegisteredCustomers, RegisteredCustomers> project(
             RegisteredCustomers currentState,
             Stream<? extends Event> customerEventStream) {
-        List<RegisteredCustomers.RegisteredCustomer> newlyRegisteredCustomers =
+        List<RegisteredCustomer> newlyRegisteredCustomers =
                 customerEventStream
                         .gather(Gatherers.filterAndCastTo(CustomerRegistered.class))
-                        .map(registered -> new RegisteredCustomers.RegisteredCustomer(
+                        .map(registered -> new RegisteredCustomer(
                                 registered.customerId(),
                                 registered.customerName()))
                         .toList();

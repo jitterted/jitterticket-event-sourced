@@ -40,7 +40,7 @@ class RegisteredCustomersProjectorTest {
                 EMPTY_REGISTERED_CUSTOMERS_STATE,
                 Stream.of(customerRegistered));
 
-        var registeredCustomer = new RegisteredCustomers.RegisteredCustomer(
+        var registeredCustomer = new RegisteredCustomer(
                 customerId, "Customer Name");
         assertThat(projection.fullState().asList())
                 .as("Expected the Projection Full State to have only the newly registered customer")
@@ -54,7 +54,7 @@ class RegisteredCustomersProjectorTest {
     void nonEmptyProjectionNoNewEventsReturnsSameFullStateAndEmptyDelta() {
         RegisteredCustomers nonEmptyCurrentProjectionState = new RegisteredCustomers();
         CustomerId existingCustomerId = CustomerId.createRandom();
-        nonEmptyCurrentProjectionState.add(new RegisteredCustomers.RegisteredCustomer(
+        nonEmptyCurrentProjectionState.add(new RegisteredCustomer(
                 existingCustomerId, "Existing Customer"));
         RegisteredCustomersProjector registeredCustomersProjector =
                 new RegisteredCustomersProjector();
@@ -74,7 +74,7 @@ class RegisteredCustomersProjectorTest {
     void nonEmptyPreviousFullStateWithNewCustomerRegisteredReturnsFullStateAndDeltaWithNewRegistration() {
         RegisteredCustomers nonEmptyCurrentProjectionState = new RegisteredCustomers();
         CustomerId existingCustomerId = CustomerId.createRandom();
-        nonEmptyCurrentProjectionState.add(new RegisteredCustomers.RegisteredCustomer(
+        nonEmptyCurrentProjectionState.add(new RegisteredCustomer(
                 existingCustomerId, "Existing Customer"));
         CustomerId newCustomerId = CustomerId.createRandom();
         CustomerEvent customerRegistered = new CustomerRegistered(
@@ -87,10 +87,10 @@ class RegisteredCustomersProjectorTest {
                 Stream.of(customerRegistered));
 
         assertThat(projection.fullState().asList())
-                .extracting(RegisteredCustomers.RegisteredCustomer::customerId)
+                .extracting(RegisteredCustomer::customerId)
                 .containsExactly(existingCustomerId, newCustomerId);
         assertThat(projection.delta().asList())
-                .extracting(RegisteredCustomers.RegisteredCustomer::customerId)
+                .extracting(RegisteredCustomer::customerId)
                 .containsExactly(newCustomerId);
     }
 

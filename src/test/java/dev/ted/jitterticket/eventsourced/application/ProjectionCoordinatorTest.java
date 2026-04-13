@@ -38,7 +38,7 @@ class ProjectionCoordinatorTest {
 
         assertThat(projectionCoordinator.projection().asList())
                 .containsExactly(
-                        new RegisteredCustomers.RegisteredCustomer(existingCustomerId, "Existing Customer")
+                        new RegisteredCustomer(existingCustomerId, "Existing Customer")
                 );
     }
 
@@ -65,7 +65,7 @@ class ProjectionCoordinatorTest {
 
         assertThat(projectionCoordinator.projection().asList())
                 .containsExactly(
-                        new RegisteredCustomers.RegisteredCustomer(existingCustomerId, "Existing Customer")
+                        new RegisteredCustomer(existingCustomerId, "Existing Customer")
                 );
         assertThat(projectionPersistence.loadSnapshot().checkpoint())
                 .isEqualTo(Checkpoint.of(1L));
@@ -148,8 +148,8 @@ class ProjectionCoordinatorTest {
         CustomerId secondCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(secondCustomerId, "Second Customer", "second@example.com"));
 
-        RegisteredCustomers.RegisteredCustomer firstRegisteredCustomer = new RegisteredCustomers.RegisteredCustomer(firstCustomerId, "First Customer");
-        RegisteredCustomers.RegisteredCustomer secondRegisteredCustomer = new RegisteredCustomers.RegisteredCustomer(secondCustomerId, "Second Customer");
+        RegisteredCustomer firstRegisteredCustomer = new RegisteredCustomer(firstCustomerId, "First Customer");
+        RegisteredCustomer secondRegisteredCustomer = new RegisteredCustomer(secondCustomerId, "Second Customer");
         assertThat(projectionCoordinator.projection().asList())
                 .containsExactlyInAnyOrder(
                         firstRegisteredCustomer,
@@ -159,7 +159,7 @@ class ProjectionCoordinatorTest {
         CustomerId thirdCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(thirdCustomerId, "Third Customer", "third@example.com"));
 
-        RegisteredCustomers.RegisteredCustomer thirdRegisteredCustomer = new RegisteredCustomers.RegisteredCustomer(thirdCustomerId, "Third Customer");
+        RegisteredCustomer thirdRegisteredCustomer = new RegisteredCustomer(thirdCustomerId, "Third Customer");
         assertThat(projectionCoordinator.projection().asList())
                 .containsExactlyInAnyOrder(
                         firstRegisteredCustomer,
@@ -173,7 +173,7 @@ class ProjectionCoordinatorTest {
         MemoryRegisteredCustomersProjectionPersistence projectionPersistence =
                 new MemoryRegisteredCustomersProjectionPersistence();
         RegisteredCustomers delta = RegisteredCustomers.createForTestWith(
-                new RegisteredCustomers.RegisteredCustomer(
+                new RegisteredCustomer(
                         CustomerId.createRandom(),
                         "Snapshotted Customer"));
         projectionPersistence.saveDelta(
@@ -197,7 +197,7 @@ class ProjectionCoordinatorTest {
         CustomerId snapshottedCustomerId = CustomerId.createRandom();
         String snapshottedCustomerName = "Snapshotted Customer";
         RegisteredCustomers delta = RegisteredCustomers.createForTestWith(
-                new RegisteredCustomers.RegisteredCustomer(
+                new RegisteredCustomer(
                         snapshottedCustomerId,
                         snapshottedCustomerName));
         projectionPersistence.saveDelta(
@@ -241,15 +241,14 @@ class ProjectionCoordinatorTest {
                 .as("Checkpoint should be 1 after catching up on a single CustomerRegistered event in the event store")
                 .isEqualTo(Checkpoint.of(1L));
         assertThat(projectionPersistence.loadSnapshot().state().asList())
-                .containsExactly(new RegisteredCustomers
-                        .RegisteredCustomer(customerId, customerName));
+                .containsExactly(new RegisteredCustomer(customerId, customerName));
     }
 
     @Test
     void projectionPersistedAfterUpdatedViaHandlingSingleNewEvent() {
         Fixture fixture = createEmptyProjectionCoordinator();
 
-        RegisteredCustomers.RegisteredCustomer expectedRegisteredCustomer =
+        RegisteredCustomer expectedRegisteredCustomer =
                 saveNewlyRegisteredCustomer(fixture, "New Customer");
 
         assertThat(fixture.projectionPersistence.loadSnapshot().checkpoint())
@@ -263,9 +262,9 @@ class ProjectionCoordinatorTest {
     void persistedProjectionUpdatedAfterHandlingMultipleNewEvents() {
         Fixture fixture = createEmptyProjectionCoordinator();
 
-        RegisteredCustomers.RegisteredCustomer firstRegisteredCustomer =
+        RegisteredCustomer firstRegisteredCustomer =
                 saveNewlyRegisteredCustomer(fixture, "First New Customer");
-        RegisteredCustomers.RegisteredCustomer secondRegisteredCustomer =
+        RegisteredCustomer secondRegisteredCustomer =
                 saveNewlyRegisteredCustomer(fixture, "Second New Customer");
 
         assertThat(fixture.projectionPersistence.loadSnapshot().checkpoint())
@@ -276,12 +275,12 @@ class ProjectionCoordinatorTest {
                                            secondRegisteredCustomer);
     }
 
-    private static RegisteredCustomers.RegisteredCustomer saveNewlyRegisteredCustomer(Fixture fixture, String customerName) {
+    private static RegisteredCustomer saveNewlyRegisteredCustomer(Fixture fixture, String customerName) {
         CustomerId customerId = CustomerId.createRandom();
         fixture.customerEventStore.save(Customer.register(customerId,
                                                           customerName,
                                                           IRRELEVANT_EMAIL));
-        return new RegisteredCustomers.RegisteredCustomer(
+        return new RegisteredCustomer(
                 customerId, customerName);
     }
 

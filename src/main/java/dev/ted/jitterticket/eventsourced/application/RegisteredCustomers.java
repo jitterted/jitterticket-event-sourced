@@ -1,7 +1,5 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -107,5 +105,4 @@ public class RegisteredCustomers implements ProjectionDelta {
                 .toString();
     }
 
-    public record RegisteredCustomer(CustomerId customerId, String name) {}
 }

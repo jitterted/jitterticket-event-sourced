@@ -38,12 +38,12 @@ class NewRegisteredCustomersProjectorTest {
                 customerId, eventSequence, "Customer Name", IRRELEVANT_EMAIL);
         registeredCustomersProjector.handle(Stream.of(customerRegistered));
 
-        var registeredCustomer = new RegisteredCustomers.RegisteredCustomer(
+        var registeredCustomer = new RegisteredCustomer(
                 customerId, "Customer Name");
         assertThat(registeredCustomersProjector.currentState().asList())
                 .as("Expected the Projection Full State to have only the newly registered customer")
                 .containsExactly(registeredCustomer);
-        RegisteredCustomers registeredCustomers = registeredCustomersProjector.flush();
+        NewlyRegisteredCustomers registeredCustomers = registeredCustomersProjector.flush();
         assertThat(registeredCustomers.asList())
                 .as("Expected the Projection DELTA State to have only the newly registered customer")
                 .containsExactly(registeredCustomer);
@@ -68,12 +68,12 @@ class NewRegisteredCustomersProjectorTest {
 
         assertThat(registeredCustomersProjector.currentState().asList())
                 .as("Expected Full Current State to have 2 Customers")
-                .extracting(RegisteredCustomers.RegisteredCustomer::customerId)
+                .extracting(RegisteredCustomer::customerId)
                 .containsExactly(fixture.existingCustomerId(), newCustomerId);
-        RegisteredCustomers registeredCustomersDelta = registeredCustomersProjector.flush();
+        NewlyRegisteredCustomers registeredCustomersDelta = registeredCustomersProjector.flush();
         assertThat(registeredCustomersDelta.asList())
                 .as("Expecting Delta to have 1 New Customer")
-                .extracting(RegisteredCustomers.RegisteredCustomer::customerId)
+                .extracting(RegisteredCustomer::customerId)
                 .containsExactly(newCustomerId);
         assertThat(registeredCustomersProjector.checkpoint())
                 .isEqualTo(Checkpoint.of(eventSequence));
@@ -94,15 +94,15 @@ class NewRegisteredCustomersProjectorTest {
         registeredCustomersProjector.handle(new CustomerRegistered(CustomerId.createRandom(), lastEventSequenceProcessed,
                                                                    "Third Customer", IRRELEVANT_EMAIL));
 
-        RegisteredCustomers registeredCustomersDelta1 = registeredCustomersProjector.flush();
+        NewlyRegisteredCustomers registeredCustomersDelta1 = registeredCustomersProjector.flush();
         assertThat(registeredCustomersDelta1.asList())
-                .extracting(RegisteredCustomers.RegisteredCustomer::name)
+                .extracting(RegisteredCustomer::name)
                 .containsExactly("First Customer", "Second Customer", "Third Customer");
         assertThat(registeredCustomersDelta1.checkpoint())
                 .as("From first flush(), Checkpoint should be 3 after processing through event sequence #3")
                 .isEqualTo(Checkpoint.of(lastEventSequenceProcessed));
 
-        RegisteredCustomers registeredCustomersDelta2 = registeredCustomersProjector.flush();
+        NewlyRegisteredCustomers registeredCustomersDelta2 = registeredCustomersProjector.flush();
         assertThat(registeredCustomersDelta2.isEmpty())
                 .as("Flush should have emptied the uncommitted changes")
                 .isTrue();
@@ -112,14 +112,16 @@ class NewRegisteredCustomersProjectorTest {
     }
 
     private static Fixture createStateWithCustomerRegistered() {
-        RegisteredCustomers nonEmptyCurrentProjectionState =
-                new RegisteredCustomers();
+        AllRegisteredCustomers nonEmptyCurrentProjectionState =
+                new AllRegisteredCustomers();
         CustomerId existingCustomerId = CustomerId.createRandom();
-        nonEmptyCurrentProjectionState.add(new RegisteredCustomers.RegisteredCustomer(
-                existingCustomerId, "Existing Customer"));
+        nonEmptyCurrentProjectionState.add(
+                new RegisteredCustomer(existingCustomerId, "Existing Customer"),
+                Checkpoint.of(1L));
         return new Fixture(nonEmptyCurrentProjectionState, existingCustomerId);
     }
 
-    private record Fixture(RegisteredCustomers nonEmptyCurrentProjectionState, CustomerId existingCustomerId) {}
+    private record Fixture(AllRegisteredCustomers nonEmptyCurrentProjectionState,
+                           CustomerId existingCustomerId) {}
 
 }

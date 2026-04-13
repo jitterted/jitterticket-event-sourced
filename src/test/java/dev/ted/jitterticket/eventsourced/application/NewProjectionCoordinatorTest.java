@@ -18,7 +18,7 @@ class NewProjectionCoordinatorTest {
     void projectionIsEmptyWhenNoCustomersAreRegistered() {
         var projectionCoordinator = new NewProjectionCoordinator<>(
                 NewRegisteredCustomersProjector.createEmpty(),
-                new MemoryRegisteredCustomersProjectionPersistence(),
+                new NewMemoryRegisteredCustomersProjectionPersistence(),
                 InMemoryEventStore.forCustomers()
         );
 
@@ -28,24 +28,28 @@ class NewProjectionCoordinatorTest {
 
     @Test
     void projectionLoadsNonEmptySnapshotUponCreation() {
-        MemoryRegisteredCustomersProjectionPersistence projectionPersistence =
-                new MemoryRegisteredCustomersProjectionPersistence();
-        RegisteredCustomers delta = RegisteredCustomers.createForTestWith(
-                new RegisteredCustomers.RegisteredCustomer(
+        NewMemoryRegisteredCustomersProjectionPersistence projectionPersistence =
+                new NewMemoryRegisteredCustomersProjectionPersistence();
+        NewlyRegisteredCustomers delta = NewlyRegisteredCustomers.createForTestWith(
+                Checkpoint.of(1),
+                new RegisteredCustomer(
                         CustomerId.createRandom(),
-                        "Snapshotted Customer"));
+                        "Snapshotted Customer")
+                );
         projectionPersistence.saveDelta(
                 delta,
                 Checkpoint.of(1));
 
-        var projectionCoordinator = new NewProjectionCoordinator<>(
+        NewProjectionCoordinator<CustomerEvent, AllRegisteredCustomers, NewlyRegisteredCustomers> projectionCoordinator = new NewProjectionCoordinator<>(
                 NewRegisteredCustomersProjector.createEmpty(),
                 projectionPersistence,
                 InMemoryEventStore.forCustomers()
         );
 
-        assertThat(projectionCoordinator.projection())
-                .isEqualTo(delta);
+        assertThat(projectionCoordinator.projection().asList())
+                .isEqualTo(delta.asList());
+        assertThat(projectionCoordinator.projection().checkpoint())
+                .isEqualTo(delta.checkpoint());
     }
 
     @Nested
@@ -56,7 +60,7 @@ class NewProjectionCoordinatorTest {
         void projectionPersistedAfterUpdatedViaHandlingSingleNewEvent() {
             Fixture fixture = createEmptyProjectionCoordinator();
 
-            RegisteredCustomers.RegisteredCustomer expectedRegisteredCustomer =
+            RegisteredCustomer expectedRegisteredCustomer =
                     saveNewlyRegisteredCustomer(fixture, "New Customer");
 
             var registeredCustomersSnapshot = fixture.projectionPersistence.loadSnapshot();
@@ -71,9 +75,9 @@ class NewProjectionCoordinatorTest {
         void persistedProjectionUpdatedAfterHandlingMultipleNewEvents() {
             Fixture fixture = createEmptyProjectionCoordinator();
 
-            RegisteredCustomers.RegisteredCustomer firstRegisteredCustomer =
+            RegisteredCustomer firstRegisteredCustomer =
                     saveNewlyRegisteredCustomer(fixture, "First New Customer");
-            RegisteredCustomers.RegisteredCustomer secondRegisteredCustomer =
+            RegisteredCustomer secondRegisteredCustomer =
                     saveNewlyRegisteredCustomer(fixture, "Second New Customer");
 
             assertThat(fixture.projectionPersistence.loadSnapshot().checkpoint())
@@ -93,13 +97,13 @@ class NewProjectionCoordinatorTest {
 
         var projectionCoordinator = new NewProjectionCoordinator<>(
                 NewRegisteredCustomersProjector.createEmpty(),
-                new MemoryRegisteredCustomersProjectionPersistence(),
+                new NewMemoryRegisteredCustomersProjectionPersistence(),
                 customerStore
         );
 
         assertThat(projectionCoordinator.projection().asList())
                 .containsExactly(
-                        new RegisteredCustomers.RegisteredCustomer(existingCustomerId, "Existing Customer")
+                        new RegisteredCustomer(existingCustomerId, "Existing Customer")
                 );
     }
 
@@ -286,18 +290,18 @@ class NewProjectionCoordinatorTest {
 
 
 
-    private static RegisteredCustomers.RegisteredCustomer saveNewlyRegisteredCustomer(Fixture fixture, String customerName) {
+    private static RegisteredCustomer saveNewlyRegisteredCustomer(Fixture fixture, String customerName) {
         CustomerId customerId = CustomerId.createRandom();
         fixture.customerEventStore.save(Customer.register(customerId,
                                                           customerName,
                                                           IRRELEVANT_EMAIL));
-        return new RegisteredCustomers.RegisteredCustomer(
+        return new RegisteredCustomer(
                 customerId, customerName);
     }
 
     private static Fixture createEmptyProjectionCoordinator() {
         var customerEventStore = InMemoryEventStore.forCustomers();
-        var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
+        var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
         new NewProjectionCoordinator<>(
                 NewRegisteredCustomersProjector.createEmpty(),
                 projectionPersistence,
@@ -308,7 +312,7 @@ class NewProjectionCoordinatorTest {
 
     private record Fixture(
             EventStore<CustomerId, CustomerEvent, Customer> customerEventStore,
-            MemoryRegisteredCustomersProjectionPersistence projectionPersistence) {}
+            NewMemoryRegisteredCustomersProjectionPersistence projectionPersistence) {}
 
     private static class ConfigurableCrashingProjectionPersistence extends MemoryRegisteredCustomersProjectionPersistence {
 
