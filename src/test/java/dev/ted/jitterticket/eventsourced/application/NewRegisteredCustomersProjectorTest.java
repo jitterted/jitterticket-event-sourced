@@ -24,6 +24,8 @@ class NewRegisteredCustomersProjectorTest {
                 .isEmpty();
         assertThat(registeredCustomersProjector.checkpoint())
                 .isEqualTo(Checkpoint.INITIAL);
+        assertThat(registeredCustomersProjector.flush().checkpoint())
+                .isEqualTo(Checkpoint.INITIAL);
     }
 
     @Test
@@ -41,10 +43,13 @@ class NewRegisteredCustomersProjectorTest {
         assertThat(registeredCustomersProjector.currentState().asList())
                 .as("Expected the Projection Full State to have only the newly registered customer")
                 .containsExactly(registeredCustomer);
-        assertThat(registeredCustomersProjector.flush().asList())
+        RegisteredCustomers registeredCustomers = registeredCustomersProjector.flush();
+        assertThat(registeredCustomers.asList())
                 .as("Expected the Projection DELTA State to have only the newly registered customer")
                 .containsExactly(registeredCustomer);
         assertThat(registeredCustomersProjector.checkpoint())
+                .isEqualTo(Checkpoint.of(eventSequence));
+        assertThat(registeredCustomers.checkpoint())
                 .isEqualTo(Checkpoint.of(eventSequence));
     }
 
@@ -65,11 +70,14 @@ class NewRegisteredCustomersProjectorTest {
                 .as("Expected Full Current State to have 2 Customers")
                 .extracting(RegisteredCustomers.RegisteredCustomer::customerId)
                 .containsExactly(fixture.existingCustomerId(), newCustomerId);
-        assertThat(registeredCustomersProjector.flush().asList())
+        RegisteredCustomers registeredCustomersDelta = registeredCustomersProjector.flush();
+        assertThat(registeredCustomersDelta.asList())
                 .as("Expecting Delta to have 1 New Customer")
                 .extracting(RegisteredCustomers.RegisteredCustomer::customerId)
                 .containsExactly(newCustomerId);
         assertThat(registeredCustomersProjector.checkpoint())
+                .isEqualTo(Checkpoint.of(eventSequence));
+        assertThat(registeredCustomersDelta.checkpoint())
                 .isEqualTo(Checkpoint.of(eventSequence));
     }
 
@@ -82,16 +90,25 @@ class NewRegisteredCustomersProjectorTest {
                                                                    "First Customer", IRRELEVANT_EMAIL));
         registeredCustomersProjector.handle(new CustomerRegistered(CustomerId.createRandom(), 2L,
                                                                    "Second Customer", IRRELEVANT_EMAIL));
-        registeredCustomersProjector.handle(new CustomerRegistered(CustomerId.createRandom(), 3L,
+        long lastEventSequenceProcessed = 3L;
+        registeredCustomersProjector.handle(new CustomerRegistered(CustomerId.createRandom(), lastEventSequenceProcessed,
                                                                    "Third Customer", IRRELEVANT_EMAIL));
 
-        assertThat(registeredCustomersProjector.flush().asList())
+        RegisteredCustomers registeredCustomersDelta1 = registeredCustomersProjector.flush();
+        assertThat(registeredCustomersDelta1.asList())
                 .extracting(RegisteredCustomers.RegisteredCustomer::name)
                 .containsExactly("First Customer", "Second Customer", "Third Customer");
+        assertThat(registeredCustomersDelta1.checkpoint())
+                .as("From first flush(), Checkpoint should be 3 after processing through event sequence #3")
+                .isEqualTo(Checkpoint.of(lastEventSequenceProcessed));
 
-        assertThat(registeredCustomersProjector.flush().isEmpty())
+        RegisteredCustomers registeredCustomersDelta2 = registeredCustomersProjector.flush();
+        assertThat(registeredCustomersDelta2.isEmpty())
                 .as("Flush should have emptied the uncommitted changes")
                 .isTrue();
+        assertThat(registeredCustomersDelta2.checkpoint())
+                .as("No new events processed since previous flush(), so Checkpoint should still be 3")
+                .isEqualTo(Checkpoint.of(lastEventSequenceProcessed));
     }
 
     private static Fixture createStateWithCustomerRegistered() {

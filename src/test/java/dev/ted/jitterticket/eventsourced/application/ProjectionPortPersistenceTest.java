@@ -76,7 +76,7 @@ class ProjectionPortPersistenceTest {
     }
 
     static RegisteredCustomers createDeltaWith(CustomerId customerId, String customerName) {
-        return new RegisteredCustomers(
+        return RegisteredCustomers.createForTestWith(
                 new RegisteredCustomers.RegisteredCustomer(
                         customerId,
                         customerName

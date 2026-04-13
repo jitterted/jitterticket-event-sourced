@@ -10,34 +10,51 @@ import java.util.stream.Stream;
 
 public class RegisteredCustomers implements ProjectionDelta {
     private final List<RegisteredCustomer> registeredCustomers = new ArrayList<>();
+    private Checkpoint checkpoint = Checkpoint.INITIAL;
 
     public RegisteredCustomers() {
     }
 
-    public RegisteredCustomers(RegisteredCustomer... registeredCustomers) {
+    private RegisteredCustomers(RegisteredCustomer... registeredCustomers) {
         add(registeredCustomers);
     }
 
-    public RegisteredCustomers(List<RegisteredCustomer> registeredCustomers) {
+    @Deprecated // need to add Checkpoint as a parameter
+    public static RegisteredCustomers createForTestWith(RegisteredCustomer... registeredCustomers) {
+        return new RegisteredCustomers(registeredCustomers);
+    }
+
+    private RegisteredCustomers(List<RegisteredCustomer> registeredCustomers) {
         add(registeredCustomers);
+    }
+
+    @Deprecated // need to add Checkpoint as a parameter
+    public static RegisteredCustomers createForTestWith(List<RegisteredCustomer> registeredCustomers) {
+        return new RegisteredCustomers(registeredCustomers);
     }
 
     static RegisteredCustomers copyOf(RegisteredCustomers initialState) {
-        return new RegisteredCustomers(initialState.asList());
+        return createForTestWith(initialState.asList());
     }
 
+    @Deprecated // need to add a Checkpoint parameter
     RegisteredCustomers withNew(List<RegisteredCustomer> newlyRegisteredCustomers) {
-        RegisteredCustomers newState = new RegisteredCustomers(asList());
+        RegisteredCustomers newState = createForTestWith(asList());
         newState.add(newlyRegisteredCustomers);
         return newState;
     }
 
+    @Deprecated // need to add a Checkpoint parameter
     public RegisteredCustomers withNew(RegisteredCustomers delta) {
         return withNew(delta.asList());
     }
 
     void add(List<RegisteredCustomer> newlyRegisteredCustomers) {
         registeredCustomers.addAll(newlyRegisteredCustomers);
+    }
+
+    public void add(RegisteredCustomer... newlyRegisteredCustomers) {
+        registeredCustomers.addAll(Arrays.asList(newlyRegisteredCustomers));
     }
 
     public boolean hasData() {
@@ -52,8 +69,17 @@ public class RegisteredCustomers implements ProjectionDelta {
         return List.copyOf(registeredCustomers);
     }
 
-    public void add(RegisteredCustomer... newlyRegisteredCustomers) {
-        registeredCustomers.addAll(Arrays.asList(newlyRegisteredCustomers));
+    @Override
+    public boolean isEmpty() {
+        return registeredCustomers.isEmpty();
+    }
+
+    public void updateCheckpointTo(Checkpoint checkpoint) {
+        this.checkpoint = checkpoint;
+    }
+
+    public Checkpoint checkpoint() {
+        return checkpoint;
     }
 
     @Override
@@ -79,11 +105,6 @@ public class RegisteredCustomers implements ProjectionDelta {
         return new StringJoiner(", ", RegisteredCustomers.class.getSimpleName() + "[", "]")
                 .add("registeredCustomers=" + registeredCustomers)
                 .toString();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return registeredCustomers.isEmpty();
     }
 
     public record RegisteredCustomer(CustomerId customerId, String name) {}

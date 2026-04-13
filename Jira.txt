@@ -306,3 +306,4 @@
     [X] Redirect (after POST to purchase tickets) to new endpoint:
     [X] New endpoint for /customers/{customerId}/confirmations/{ticketOrderId}
         [X] Load Customer, Load Concert => TicketOrderView
+

@@ -23,8 +23,8 @@ public class RegisteredCustomersProjector implements
                         .toList();
 
         RegisteredCustomers newState = currentState.withNew(newlyRegisteredCustomers);
-        RegisteredCustomers deltaSTate = new RegisteredCustomers(newlyRegisteredCustomers);
-        return new ProjectorResult<>(newState, deltaSTate);
+        RegisteredCustomers deltaState = RegisteredCustomers.createForTestWith(newlyRegisteredCustomers);
+        return new ProjectorResult<>(newState, deltaState);
     }
 
 }

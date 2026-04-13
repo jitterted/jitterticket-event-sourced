@@ -172,7 +172,7 @@ class ProjectionCoordinatorTest {
     void projectionLoadsNonEmptySnapshotUponCreation() {
         MemoryRegisteredCustomersProjectionPersistence projectionPersistence =
                 new MemoryRegisteredCustomersProjectionPersistence();
-        RegisteredCustomers delta = new RegisteredCustomers(
+        RegisteredCustomers delta = RegisteredCustomers.createForTestWith(
                 new RegisteredCustomers.RegisteredCustomer(
                         CustomerId.createRandom(),
                         "Snapshotted Customer"));
@@ -196,7 +196,7 @@ class ProjectionCoordinatorTest {
                 new MemoryRegisteredCustomersProjectionPersistence();
         CustomerId snapshottedCustomerId = CustomerId.createRandom();
         String snapshottedCustomerName = "Snapshotted Customer";
-        RegisteredCustomers delta = new RegisteredCustomers(
+        RegisteredCustomers delta = RegisteredCustomers.createForTestWith(
                 new RegisteredCustomers.RegisteredCustomer(
                         snapshottedCustomerId,
                         snapshottedCustomerName));

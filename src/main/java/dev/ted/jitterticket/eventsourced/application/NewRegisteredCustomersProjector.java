@@ -27,6 +27,7 @@ public class NewRegisteredCustomersProjector
         currentState.add(registeredCustomer);
         deltaState.add(registeredCustomer);
         checkpoint = Checkpoint.of(customerRegistered.eventSequence());
+        deltaState.updateCheckpointTo(Checkpoint.of(customerRegistered.eventSequence()));
     }
 
    @Override
@@ -38,6 +39,7 @@ public class NewRegisteredCustomersProjector
     public RegisteredCustomers flush() {
         RegisteredCustomers uncommittedDelta = deltaState;
         deltaState = new RegisteredCustomers();
+        deltaState.updateCheckpointTo(checkpoint);
         return uncommittedDelta;
     }
 
