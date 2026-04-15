@@ -7,10 +7,11 @@ public class NewRegisteredCustomersProjector
 
     private final AllRegisteredCustomers currentState;
     private NewlyRegisteredCustomers deltaState;
+    private Checkpoint checkpoint = Checkpoint.INITIAL;
 
     public NewRegisteredCustomersProjector(AllRegisteredCustomers initialState) {
         this.currentState = AllRegisteredCustomers.copyOf(initialState);
-        deltaState = new NewlyRegisteredCustomers(Checkpoint.INITIAL);
+        deltaState = new NewlyRegisteredCustomers();
     }
 
     public static NewRegisteredCustomersProjector createEmpty() {
@@ -22,10 +23,9 @@ public class NewRegisteredCustomersProjector
         var registeredCustomer = new RegisteredCustomer(
                 customerRegistered.customerId(),
                 customerRegistered.customerName());
-        Checkpoint checkpoint = Checkpoint.of(customerRegistered.eventSequence());
-        currentState.add(registeredCustomer, checkpoint);
+        checkpoint = Checkpoint.of(customerRegistered.eventSequence());
+        currentState.add(registeredCustomer);
         deltaState.add(registeredCustomer);
-        deltaState.updateCheckpointTo(Checkpoint.of(customerRegistered.eventSequence()));
     }
 
     @Override
@@ -34,15 +34,10 @@ public class NewRegisteredCustomersProjector
     }
 
     @Override
-    public NewlyRegisteredCustomers flush() {
+    public CheckpointedState<NewlyRegisteredCustomers> flush() {
         NewlyRegisteredCustomers uncommittedDelta = deltaState;
-        deltaState = new NewlyRegisteredCustomers(deltaState.checkpoint());
-        return uncommittedDelta;
-    }
-
-    @Override
-    public Checkpoint checkpoint() {
-        return currentState.checkpoint();
+        deltaState = new NewlyRegisteredCustomers();
+        return new CheckpointedState<>(uncommittedDelta, checkpoint);
     }
 
 }

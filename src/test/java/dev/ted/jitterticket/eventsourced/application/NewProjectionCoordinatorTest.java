@@ -48,8 +48,6 @@ class NewProjectionCoordinatorTest {
 
         assertThat(projectionCoordinator.projection().asList())
                 .isEqualTo(delta.asList());
-        assertThat(projectionCoordinator.projection().checkpoint())
-                .isEqualTo(delta.checkpoint());
     }
 
     @Nested

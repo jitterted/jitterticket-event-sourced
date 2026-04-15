@@ -14,7 +14,7 @@ public class NewMemoryRegisteredCustomersProjectionPersistence
     @Override
     public void saveDelta(NewlyRegisteredCustomers delta,
                           Checkpoint newCheckpoint) {
-        state.add(delta.asList(), newCheckpoint);
+        state.add(delta.asList());
         checkpoint = newCheckpoint;
     }
 }

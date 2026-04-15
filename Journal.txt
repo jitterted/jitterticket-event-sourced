@@ -1,3 +1,10 @@
+Wednesday, April 15, 2026
+=========================
+
+With the responsibility of the "checkpoint" moved into the Domain Projector (checkpoint is the last event sequence processed by the projector), then the Projection Coordinator's remaining responsibility at runtime (vs. startup) is persistence.
+And since persistence is just a method on a PersistencePort, there's not much left for the Coordinator to do at runtime, meaning that it's not useful as a separate class.
+
+
 Tuesday, April 7, 2026
 ======================
 The NewProjectionCoordinator's responsibility is to deal with persistence: loading any existing projection state and persisting any changes after executing the NewDomainProjector.
@@ -5,6 +12,7 @@ The NewProjectionCoordinator's responsibility is to deal with persistence: loadi
 Since the NewDomainProjector _is_ stateful, it is an in-memory cache of the projection, so NewProjectionCoordinator should _not_ cache the projection separately.
 The cached checkpoint is now also the responsibility of the NewDomainProjector, and it updates the checkpoint at the end of each individual handle() method.
 Alas, it means duplicate code to update that checkpoint in each granular handle() method.
+
 
 Monday, April 6, 2026
 =====================

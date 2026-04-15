@@ -7,29 +7,24 @@ import java.util.stream.Stream;
 
 public class AllRegisteredCustomers {
     private final List<RegisteredCustomer> registeredCustomers = new ArrayList<>();
-    private Checkpoint checkpoint;
 
     public AllRegisteredCustomers() {
-        checkpoint = Checkpoint.INITIAL;
     }
 
-    private AllRegisteredCustomers(List<RegisteredCustomer> registeredCustomers, Checkpoint checkpoint) {
+    private AllRegisteredCustomers(List<RegisteredCustomer> registeredCustomers) {
         this.registeredCustomers.addAll(registeredCustomers);
-        this.checkpoint = checkpoint;
     }
 
     static AllRegisteredCustomers copyOf(AllRegisteredCustomers initialState) {
-        return new AllRegisteredCustomers(initialState.asList(), initialState.checkpoint);
+        return new AllRegisteredCustomers(initialState.asList());
     }
 
-    void add(List<RegisteredCustomer> newlyRegisteredCustomers, Checkpoint checkpoint) {
+    public void add(List<RegisteredCustomer> newlyRegisteredCustomers) {
         registeredCustomers.addAll(newlyRegisteredCustomers);
-        this.checkpoint = checkpoint;
     }
 
-    public void add(RegisteredCustomer registeredCustomer, Checkpoint checkpoint) {
+    public void add(RegisteredCustomer registeredCustomer) {
         registeredCustomers.add(registeredCustomer);
-        this.checkpoint = checkpoint;
     }
 
     public boolean hasData() {
@@ -42,10 +37,6 @@ public class AllRegisteredCustomers {
 
     public List<RegisteredCustomer> asList() {
         return List.copyOf(registeredCustomers);
-    }
-
-    public Checkpoint checkpoint() {
-        return checkpoint;
     }
 
     @Override
@@ -70,7 +61,6 @@ public class AllRegisteredCustomers {
         }
         return new StringJoiner(", ", AllRegisteredCustomers.class.getSimpleName() + "[", "]")
                 .add("registeredCustomers=" + registeredCustomers)
-                .add("checkpoint=" + checkpoint)
                 .toString();
     }
 }

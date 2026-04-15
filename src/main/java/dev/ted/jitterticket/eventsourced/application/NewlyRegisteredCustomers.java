@@ -10,12 +10,10 @@ public class NewlyRegisteredCustomers implements ProjectionDelta {
     private final List<RegisteredCustomer> registeredCustomers = new ArrayList<>();
     private Checkpoint checkpoint;
 
-    public NewlyRegisteredCustomers(Checkpoint checkpoint) {
-        this.checkpoint = checkpoint;
+    public NewlyRegisteredCustomers() {
     }
 
     private NewlyRegisteredCustomers(Checkpoint checkpoint, RegisteredCustomer... registeredCustomers) {
-        this(checkpoint);
         add(registeredCustomers);
     }
 
