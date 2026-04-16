@@ -13,6 +13,11 @@ public class MemoryRegisteredCustomersProjectionPersistence
     }
 
     @Override
+    public NewDomainProjector<RegisteredCustomers, RegisteredCustomers> loadProjector() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void saveDelta(RegisteredCustomers delta, Checkpoint newCheckpoint) {
         state = state.withNew(delta);
         checkpoint = newCheckpoint;

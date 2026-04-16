@@ -18,6 +18,11 @@ public class MemoryAvailableConcertsProjectionPersistence
     }
 
     @Override
+    public NewDomainProjector<AvailableConcerts, AvailableConcertsDelta> loadProjector() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void saveDelta(AvailableConcertsDelta delta, Checkpoint newCheckpoint) {
         delta.upsertedConcerts().forEach(concert -> state.put(concert.concertId(), concert));
         delta.removedConcertIds().forEach(state::remove);

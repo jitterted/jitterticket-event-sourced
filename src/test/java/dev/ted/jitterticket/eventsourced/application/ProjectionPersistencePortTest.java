@@ -8,12 +8,12 @@ import static dev.ted.jitterticket.eventsourced.application.Assertions.assertTha
 class ProjectionPersistencePortTest {
 
     @Test
-    void emptyPersistenceLoadsEmptySnapshotWithCheckpointAtZero() {
-        var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
+    void emptyPersistenceLoadsProjectorWithEmptyStateAndCheckpointAtInitial() {
+        var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
 
-        var snapshot = projectionPersistence.loadSnapshot();
+        var projector = projectionPersistence.loadProjector();
 
-        assertThat(snapshot)
+        assertThat(projector.projection())
                 .hasCheckpointValueOf(0)
                 .hasEmptyState();
     }
@@ -21,65 +21,67 @@ class ProjectionPersistencePortTest {
     @Test
     void savedDeltaWithEmptyDeltaBumpsCheckpoint() {
         // this is the situation where a projector saw new events, but its state didn't change (non-relevant events)
-        var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
+        var projectionPersistence =
+                new NewMemoryRegisteredCustomersProjectionPersistence();
 
-        projectionPersistence.saveDelta(new RegisteredCustomers(),
+        projectionPersistence.saveDelta(new NewlyRegisteredCustomers(),
                                         Checkpoint.of(1));
 
-        var snapshot = projectionPersistence.loadSnapshot();
+        var projector = projectionPersistence.loadProjector();
 
-        assertThat(snapshot)
+        assertThat(projector.projection())
                 .hasCheckpointValueOf(1)
                 .hasEmptyState();
     }
 
     @Test
-    void savedDeltaWithNewDataToEmptyPersistenceIsReturnedInSnapshot() {
-        var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
+    void deltaWithNewDataSavedToEmptyPersistenceIsReturnedInProjector() {
+        var projectionPersistence =
+                new NewMemoryRegisteredCustomersProjectionPersistence();
 
-        RegisteredCustomers delta = createDeltaWith(CustomerId.createRandom());
-        projectionPersistence.saveDelta(delta,
-                                        Checkpoint.of(1));
+        RegisteredCustomer registeredCustomer = new RegisteredCustomer(CustomerId.createRandom(), "Customer Name");
+        NewlyRegisteredCustomers delta = NewlyRegisteredCustomers
+                .createForTestWith(Checkpoint.of(1), registeredCustomer);
+        projectionPersistence.saveDelta(delta, Checkpoint.of(1));
 
-        var snapshot = projectionPersistence.loadSnapshot();
+        var projector = projectionPersistence.loadProjector();
 
-        assertThat(snapshot)
+        assertThat(projector.projection())
                 .hasCheckpointValueOf(1)
                 .state()
-                .isEqualTo(delta);
+                .isEqualTo(AllRegisteredCustomers.of(registeredCustomer));
     }
 
     @Test
     void savedDeltaIsMergedWithExistingState() {
-        var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();
-        projectionPersistence.saveDelta(createDeltaWith("Existing Customer"), Checkpoint.of(1));
+        var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
+        Checkpoint checkpoint = Checkpoint.of(1);
+        projectionPersistence.saveDelta(createDeltaWith("Existing Customer",
+                                                        checkpoint),
+                                        checkpoint);
 
-        RegisteredCustomers delta = createDeltaWith("New Customer");
-        projectionPersistence.saveDelta(delta, Checkpoint.of(2));
+        Checkpoint deltaCheckpoint = Checkpoint.of(2);
+        NewlyRegisteredCustomers delta = createDeltaWith("New Customer",
+                                                         deltaCheckpoint);
+        projectionPersistence.saveDelta(delta, deltaCheckpoint);
 
-        var snapshot = projectionPersistence.loadSnapshot();
+        var projector = projectionPersistence.loadProjector();
 
-        assertThat(snapshot)
+        assertThat(projector.projection())
                 .hasCheckpointValueOf(2);
 
-        assertThat(snapshot.state().asList())
+        assertThat(projector.projection().state().asList())
                 .extracting(RegisteredCustomer::name)
                 .contains("Existing Customer", "New Customer");
     }
 
-    static RegisteredCustomers createDeltaWith(CustomerId customerId) {
-        return createDeltaWith(customerId, "Customer Name");
-    }
-
-    static RegisteredCustomers createDeltaWith(String customerName) {
-        return createDeltaWith(CustomerId.createRandom(), customerName);
-    }
-
-    static RegisteredCustomers createDeltaWith(CustomerId customerId, String customerName) {
-        return RegisteredCustomers.createForTestWith(
+    static NewlyRegisteredCustomers createDeltaWith(String customerName, Checkpoint deltaCheckpoint) {
+        return NewlyRegisteredCustomers.createForTestWith(
+                deltaCheckpoint,
                 new RegisteredCustomer(
-                        customerId,
+                        CustomerId.createRandom(),
                         customerName
                 ));
     }
+
 }

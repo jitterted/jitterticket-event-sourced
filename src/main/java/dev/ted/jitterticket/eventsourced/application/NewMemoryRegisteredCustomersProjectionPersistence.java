@@ -13,6 +13,12 @@ public class NewMemoryRegisteredCustomersProjectionPersistence
     }
 
     @Override
+    public NewDomainProjector<AllRegisteredCustomers, NewlyRegisteredCustomers> loadProjector() {
+        Checkpointed<AllRegisteredCustomers> snapshot = loadSnapshot();
+        return new NewRegisteredCustomersProjector(snapshot);
+    }
+
+    @Override
     public void saveDelta(NewlyRegisteredCustomers delta,
                           Checkpoint newCheckpoint) {
         state.add(delta.asList());

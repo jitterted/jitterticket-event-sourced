@@ -7,11 +7,17 @@ public class NewRegisteredCustomersProjector
 
     private final AllRegisteredCustomers currentState;
     private NewlyRegisteredCustomers deltaState;
-    private Checkpoint checkpoint = Checkpoint.INITIAL;
+    private Checkpoint checkpoint;
 
     public NewRegisteredCustomersProjector(AllRegisteredCustomers initialState) {
         this.currentState = AllRegisteredCustomers.copyOf(initialState);
         deltaState = new NewlyRegisteredCustomers();
+        checkpoint = Checkpoint.INITIAL;
+    }
+
+    public NewRegisteredCustomersProjector(Checkpointed<AllRegisteredCustomers> snapshot) {
+        this.currentState = AllRegisteredCustomers.copyOf(snapshot.state());
+        this.checkpoint = snapshot.checkpoint();
     }
 
     public static NewRegisteredCustomersProjector createEmpty() {
@@ -34,16 +40,15 @@ public class NewRegisteredCustomersProjector
     }
 
     @Override
-    protected Checkpoint checkpoint() {
-        return checkpoint;
-    }
-
-    @Override
-    // Snapshot
     public Checkpointed<NewlyRegisteredCustomers> flush() {
         NewlyRegisteredCustomers uncommittedDelta = deltaState;
         deltaState = new NewlyRegisteredCustomers();
         return new Checkpointed<>(uncommittedDelta, checkpoint);
+    }
+
+    @Override
+    protected Checkpoint checkpoint() {
+        return checkpoint;
     }
 
 }

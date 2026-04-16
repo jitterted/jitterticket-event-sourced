@@ -170,14 +170,18 @@
 
 ==> CURRENT TASK ==>
 
-    [ ] Align all STATE return values to use Checkpointed<STATE>
+    [X] Align all STATE return values to use Checkpointed<STATE>
         [X] Rename CheckpointedState<STATE> -> Checkpointed<STATE>
         [X] Get rid of the Persistence Port's Snapshot as it's a dupe of Checkpointed
             [X] Migrate SnapshotAssert
         [X] Change NewDomainProjector.projection() to return Checkpoint<FullState> (i.e., STATE generic type)
         [X] Add checkpoint() back, so that (at least) we can determine consistency lag in metrics (how big is the difference of Checkpoint values between the Projector and the EventStore)
-    [ ] Migrate ProjectionPersistencePort loadSnapshot() to return generic NewDomainProjector<STATE, DELTA extends ProjectionDelta>
 
+    [X] Added ProjectionPersistencePort loadProjector() that returns generic NewDomainProjector<STATE, DELTA extends ProjectionDelta> with cache loadedπ
+
+    [ ] Change signature of saveDelta() to take Checkpointed<DELTA> as the parameter (Parameter Object!)
+
+    [ ] ASSERTJ: How to make the CheckpointedAssert's state().isEqualTo() be aware of the STATE generic type (right now it becomes Object)
 
 
 

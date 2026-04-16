@@ -19,6 +19,10 @@ public class AllRegisteredCustomers {
         return new AllRegisteredCustomers(initialState.asList());
     }
 
+    static AllRegisteredCustomers of(RegisteredCustomer registeredCustomer) {
+        return new AllRegisteredCustomers(List.of(registeredCustomer));
+    }
+
     public void add(List<RegisteredCustomer> newlyRegisteredCustomers) {
         registeredCustomers.addAll(newlyRegisteredCustomers);
     }

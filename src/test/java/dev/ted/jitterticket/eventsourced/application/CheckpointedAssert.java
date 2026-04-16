@@ -38,12 +38,19 @@ public class CheckpointedAssert<STATE> extends
     public CheckpointedAssert<STATE> hasEmptyState() {
         isNotNull();
         // Assuming RegisteredCustomers or similar has a hasData() method
-        if (actual.state() instanceof RegisteredCustomers rc) {
-            if (rc.hasData()) {
-                failWithMessage("Expected snapshot state to be empty, but it contained data: <%s>", rc);
+        switch (actual.state()) {
+            case RegisteredCustomers state -> {
+                if (state.hasData()) {
+                    failWithMessage("Expected state to be empty, but it contained data: <%s>", state);
+                }
             }
-        } else {
-            failWithMessage("Don't know how to check the emptiness of state of type %s", actual.state().getClass().getSimpleName());
+            case AllRegisteredCustomers state -> {
+                if (state.hasData()) {
+                    failWithMessage("Expected state to be empty, but it contained data: <%s>", state);
+                }
+            }
+            default ->
+                    failWithMessage("Don't know how to check the emptiness of state of type %s", actual.state().getClass().getSimpleName());
         }
         return this;
     }
