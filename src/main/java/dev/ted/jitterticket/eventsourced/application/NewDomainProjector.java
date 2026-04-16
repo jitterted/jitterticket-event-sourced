@@ -9,7 +9,9 @@ public abstract class NewDomainProjector<STATE, DELTA extends ProjectionDelta>
      *
      * @return the full projection
      */
-    public abstract STATE currentState();
+    public abstract Checkpointed<STATE> projection();
+
+    protected abstract Checkpoint checkpoint();
 
     /**
      * Returns any uncommitted changes in the projection,

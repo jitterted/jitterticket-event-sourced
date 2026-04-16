@@ -43,6 +43,6 @@ public class NewProjectionCoordinator<STATE, DELTA extends ProjectionDelta>
     }
 
     public STATE projection() {
-        return domainProjector.currentState();
+        return domainProjector.projection().state();
     }
 }

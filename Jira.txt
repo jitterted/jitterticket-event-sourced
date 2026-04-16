@@ -174,7 +174,8 @@
         [X] Rename CheckpointedState<STATE> -> Checkpointed<STATE>
         [X] Get rid of the Persistence Port's Snapshot as it's a dupe of Checkpointed
             [X] Migrate SnapshotAssert
-        [ ] Change NewDomainProjector.currentState() to return Checkpoint<FullState> (i.e., STATE generic type)
+        [X] Change NewDomainProjector.projection() to return Checkpoint<FullState> (i.e., STATE generic type)
+        [X] Add checkpoint() back, so that (at least) we can determine consistency lag in metrics (how big is the difference of Checkpoint values between the Projector and the EventStore)
     [ ] Migrate ProjectionPersistencePort loadSnapshot() to return generic NewDomainProjector<STATE, DELTA extends ProjectionDelta>
 
 

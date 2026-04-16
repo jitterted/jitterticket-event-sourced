@@ -29,8 +29,13 @@ public class NewRegisteredCustomersProjector
     }
 
     @Override
-    public AllRegisteredCustomers currentState() {
-        return currentState;
+    public Checkpointed<AllRegisteredCustomers> projection() {
+        return new Checkpointed<>(currentState, checkpoint);
+    }
+
+    @Override
+    protected Checkpoint checkpoint() {
+        return checkpoint;
     }
 
     @Override
