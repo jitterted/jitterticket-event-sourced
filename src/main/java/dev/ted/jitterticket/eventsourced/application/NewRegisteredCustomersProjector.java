@@ -34,10 +34,11 @@ public class NewRegisteredCustomersProjector
     }
 
     @Override
-    public CheckpointedState<NewlyRegisteredCustomers> flush() {
+    // Snapshot
+    public Checkpointed<NewlyRegisteredCustomers> flush() {
         NewlyRegisteredCustomers uncommittedDelta = deltaState;
         deltaState = new NewlyRegisteredCustomers();
-        return new CheckpointedState<>(uncommittedDelta, checkpoint);
+        return new Checkpointed<>(uncommittedDelta, checkpoint);
     }
 
 }

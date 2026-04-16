@@ -41,7 +41,7 @@ class NewRegisteredCustomersProjectorTest {
         assertThat(registeredCustomersProjector.currentState().asList())
                 .as("Expected the Projection Full State to have only the newly registered customer")
                 .containsExactly(registeredCustomer);
-        CheckpointedState<NewlyRegisteredCustomers> registeredCustomers = registeredCustomersProjector.flush();
+        Checkpointed<NewlyRegisteredCustomers> registeredCustomers = registeredCustomersProjector.flush();
         assertThat(registeredCustomers.state().asList())
                 .as("Expected the Projection DELTA State to have only the newly registered customer")
                 .containsExactly(registeredCustomer);
@@ -66,7 +66,7 @@ class NewRegisteredCustomersProjectorTest {
                 .as("Expected Full Current State to have 2 Customers")
                 .extracting(RegisteredCustomer::customerId)
                 .containsExactly(fixture.existingCustomerId(), newCustomerId);
-        CheckpointedState<NewlyRegisteredCustomers> registeredCustomersDelta = registeredCustomersProjector.flush();
+        Checkpointed<NewlyRegisteredCustomers> registeredCustomersDelta = registeredCustomersProjector.flush();
         assertThat(registeredCustomersDelta.state().asList())
                 .as("Expecting Delta to have 1 New Customer")
                 .extracting(RegisteredCustomer::customerId)
@@ -88,7 +88,7 @@ class NewRegisteredCustomersProjectorTest {
         registeredCustomersProjector.handle(new CustomerRegistered(CustomerId.createRandom(), lastEventSequenceProcessed,
                                                                    "Third Customer", IRRELEVANT_EMAIL));
 
-        CheckpointedState<NewlyRegisteredCustomers> registeredCustomersDelta1 = registeredCustomersProjector.flush();
+        Checkpointed<NewlyRegisteredCustomers> registeredCustomersDelta1 = registeredCustomersProjector.flush();
         assertThat(registeredCustomersDelta1.state().asList())
                 .extracting(RegisteredCustomer::name)
                 .containsExactly("First Customer", "Second Customer", "Third Customer");
@@ -96,7 +96,7 @@ class NewRegisteredCustomersProjectorTest {
                 .as("From first flush(), Checkpoint should be 3 after processing through event sequence #3")
                 .isEqualTo(Checkpoint.of(lastEventSequenceProcessed));
 
-        CheckpointedState<NewlyRegisteredCustomers> registeredCustomersDelta2 = registeredCustomersProjector.flush();
+        Checkpointed<NewlyRegisteredCustomers> registeredCustomersDelta2 = registeredCustomersProjector.flush();
         assertThat(registeredCustomersDelta2.state().isEmpty())
                 .as("Flush should have emptied the uncommitted changes")
                 .isTrue();

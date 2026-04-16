@@ -18,6 +18,6 @@ public abstract class NewDomainProjector<STATE, DELTA extends ProjectionDelta>
      * @return uncommitted changes since the last time flush was called,
      * or since the projector was instantiated
      */
-    public abstract CheckpointedState<DELTA> flush();
+    public abstract Checkpointed<DELTA> flush();
 
 }

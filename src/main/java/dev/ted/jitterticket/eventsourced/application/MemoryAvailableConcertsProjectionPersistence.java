@@ -13,8 +13,8 @@ public class MemoryAvailableConcertsProjectionPersistence
     private final Map<ConcertId, AvailableConcert> state = new HashMap<>();
 
     @Override
-    public Snapshot<AvailableConcerts> loadSnapshot() {
-        return new Snapshot<>(new AvailableConcerts(List.copyOf(state.values())), checkpoint);
+    public Checkpointed<AvailableConcerts> loadSnapshot() {
+        return new Checkpointed<>(new AvailableConcerts(List.copyOf(state.values())), checkpoint);
     }
 
     @Override

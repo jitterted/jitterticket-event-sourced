@@ -2,6 +2,7 @@ package dev.ted.jitterticket;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
 import dev.ted.jitterticket.eventsourced.application.AllConcertsProjector;
+import dev.ted.jitterticket.eventsourced.application.AllRegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.AvailableConcerts;
 import dev.ted.jitterticket.eventsourced.application.AvailableConcertsDelta;
 import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
@@ -10,6 +11,10 @@ import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
 import dev.ted.jitterticket.eventsourced.application.MemoryAvailableConcertsProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.MemoryRegisteredCustomersProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.MemoryScheduledConcertsProjectionPersistence;
+import dev.ted.jitterticket.eventsourced.application.NewMemoryRegisteredCustomersProjectionPersistence;
+import dev.ted.jitterticket.eventsourced.application.NewProjectionCoordinator;
+import dev.ted.jitterticket.eventsourced.application.NewRegisteredCustomersProjector;
+import dev.ted.jitterticket.eventsourced.application.NewlyRegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
@@ -49,6 +54,17 @@ public class ProjectionConfiguration {
                                            new MemoryRegisteredCustomersProjectionPersistence(),
                                            customerStore);
     }
+
+    @Bean
+    NewProjectionCoordinator<AllRegisteredCustomers, NewlyRegisteredCustomers>
+    newRegisteredCustomersProjectionCoordinator(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
+        return new NewProjectionCoordinator<>(
+                // PRE-LOAD SNAPSHOT via some LOADER that we call from here
+                NewRegisteredCustomersProjector.createEmpty(),
+                new NewMemoryRegisteredCustomersProjectionPersistence(),
+                customerStore);
+    }
+
 
     @Bean
     ProjectionCoordinator<ConcertEvent, ScheduledConcerts, ScheduledConcertsDelta>

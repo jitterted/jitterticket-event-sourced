@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static dev.ted.jitterticket.eventsourced.application.Assertions.assertThat;
 
-class ProjectionPortPersistenceTest {
+class ProjectionPersistencePortTest {
 
     @Test
     void emptyPersistenceLoadsEmptySnapshotWithCheckpointAtZero() {

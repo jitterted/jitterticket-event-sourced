@@ -7,8 +7,9 @@ public class NewMemoryRegisteredCustomersProjectionPersistence
     private final AllRegisteredCustomers state = new AllRegisteredCustomers();
 
     @Override
-    public Snapshot<AllRegisteredCustomers> loadSnapshot() {
-        return new Snapshot<>(state, checkpoint);
+    public Checkpointed<AllRegisteredCustomers> loadSnapshot() {
+        // ensure we return a copy of the state to avoid aliasing errors
+        return new Checkpointed<>(AllRegisteredCustomers.copyOf(state), checkpoint);
     }
 
     @Override

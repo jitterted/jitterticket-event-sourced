@@ -1,20 +1,20 @@
 package dev.ted.jitterticket.eventsourced.application;
 
-import dev.ted.jitterticket.eventsourced.application.ProjectionPersistencePort.Snapshot;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.ObjectAssert;
 
-public class SnapshotAssert<STATE> extends AbstractAssert<SnapshotAssert<STATE>, Snapshot<STATE>> {
+public class CheckpointedAssert<STATE> extends
+        AbstractAssert<CheckpointedAssert<STATE>, Checkpointed<STATE>> {
 
-    protected SnapshotAssert(Snapshot<STATE> actual) {
-        super(actual, SnapshotAssert.class);
+    protected CheckpointedAssert(Checkpointed<STATE> actual) {
+        super(actual, CheckpointedAssert.class);
     }
 
-    public static <STATE> SnapshotAssert<STATE> assertThat(Snapshot<STATE> actual) {
-        return new SnapshotAssert<>(actual);
+    public static <STATE> CheckpointedAssert<STATE> assertThat(Checkpointed<STATE> actual) {
+        return new CheckpointedAssert<>(actual);
     }
 
-    public SnapshotAssert<STATE> hasCheckpointValueOf(long expectedCheckpointValue) {
+    public CheckpointedAssert<STATE> hasCheckpointValueOf(long expectedCheckpointValue) {
         isNotNull();
         if (actual.checkpoint().value() != expectedCheckpointValue) {
             failWithMessage("Expected snapshot to have checkpoint <%s> but was <%s>",
@@ -23,7 +23,7 @@ public class SnapshotAssert<STATE> extends AbstractAssert<SnapshotAssert<STATE>,
         return this;
     }
 
-    public SnapshotAssert<STATE> checkpointIsEqualTo(Checkpoint expectedCheckpoint) {
+    public CheckpointedAssert<STATE> checkpointIsEqualTo(Checkpoint expectedCheckpoint) {
         isNotNull();
         if (!actual.checkpoint().equals(expectedCheckpoint)) {
             failWithMessage("Expected snapshot to have checkpoint <%s> but was <%s>",
@@ -35,7 +35,7 @@ public class SnapshotAssert<STATE> extends AbstractAssert<SnapshotAssert<STATE>,
     /**
      * Assumes STATE has a way to check for emptiness (e.g., via a custom method or common interface).
      */
-    public SnapshotAssert<STATE> hasEmptyState() {
+    public CheckpointedAssert<STATE> hasEmptyState() {
         isNotNull();
         // Assuming RegisteredCustomers or similar has a hasData() method
         if (actual.state() instanceof RegisteredCustomers rc) {

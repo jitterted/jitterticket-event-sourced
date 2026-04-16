@@ -163,19 +163,29 @@
             [X] Reimplement Registered Customers using NewDomainProjector and EventHandler
             [X] in EventStore: Fix generics + varargs issue by using Set<Class<? extends Event>> instead of Class<? extends Event>...
 
-==> CURRENT TASK ==>
-
-            [ ] Add BaseEventStore.subscribe(EventConsumer, Set<Event> desiredEvents)
+            [X] Add BaseEventStore.subscribe(EventConsumer, Set<Event> desiredEvents)
                 e.g.: eventStore.subscribe(this, projector.handledEventTypes());
             [ ] Add BaseEventStore.subscribe(EventHandler)
                 The event store can ask the EventHandler which methods it's interested in.
 
-        [ ] New feature: schedule when tickets go on sale
-            [ ] Optimize projections to only retrieve relevant events
-                [X] EventStore supports specifying events of interest
-                [ ] Processor
+==> CURRENT TASK ==>
 
-            [ ] This means AvailableConcerts (Projection: rename to ConcertsOnSale) would no longer have scheduled concerts until their tickets go on sale, while scheduled concerts WOULD be listed in the ScheduledConcertsProjection since that projection is for scheduling conflicts (only)
+    [ ] Align all STATE return values to use Checkpointed<STATE>
+        [X] Rename CheckpointedState<STATE> -> Checkpointed<STATE>
+        [X] Get rid of the Persistence Port's Snapshot as it's a dupe of Checkpointed
+            [X] Migrate SnapshotAssert
+        [ ] Change NewDomainProjector.currentState() to return Checkpoint<FullState> (i.e., STATE generic type)
+    [ ] Migrate ProjectionPersistencePort loadSnapshot() to return generic NewDomainProjector<STATE, DELTA extends ProjectionDelta>
+
+
+
+
+    [ ] New feature: schedule when tickets go on sale
+        [ ] Optimize projections to only retrieve relevant events
+            [X] EventStore supports specifying events of interest
+            [ ] Processor
+
+        [ ] This means AvailableConcerts (Projection: rename to ConcertsOnSale) would no longer have scheduled concerts until their tickets go on sale, while scheduled concerts WOULD be listed in the ScheduledConcertsProjection since that projection is for scheduling conflicts (only)
 
     [ ] Convert ConcertStartedProcessor to use the EventHandler so desired events can be detected for configuration in the ProcessorConfiguration class instead of manually configuring them as I do at ProcessorConfiguration.java:39
 
