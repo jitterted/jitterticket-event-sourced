@@ -28,7 +28,6 @@ class NewProjectionCoordinatorTest {
                 .isEmpty();
     }
 
-    @Disabled("Until ProjectionPersistancePort loads Projectors")
     @Test
     void projectionLoadsNonEmptySnapshotUponCreation() {
         NewMemoryRegisteredCustomersProjectionPersistence projectionPersistence =
