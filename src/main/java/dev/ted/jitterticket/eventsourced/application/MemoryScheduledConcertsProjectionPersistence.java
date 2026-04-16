@@ -23,9 +23,9 @@ public class MemoryScheduledConcertsProjectionPersistence
     }
 
     @Override
-    public void saveDelta(ScheduledConcertsDelta delta, Checkpoint newCheckpoint) {
-        delta.upsertedConcerts().forEach(concert -> state.put(concert.concertId(), concert));
-        delta.removedConcertIds().forEach(state::remove);
-        checkpoint = newCheckpoint;
+    public void saveDelta(Checkpointed<ScheduledConcertsDelta> checkpointed) {
+        checkpointed.state().upsertedConcerts().forEach(concert -> state.put(concert.concertId(), concert));
+        checkpointed.state().removedConcertIds().forEach(state::remove);
+        this.checkpoint = checkpointed.checkpoint();
     }
 }

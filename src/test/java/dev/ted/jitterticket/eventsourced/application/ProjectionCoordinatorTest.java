@@ -177,8 +177,7 @@ class ProjectionCoordinatorTest {
                         CustomerId.createRandom(),
                         "Snapshotted Customer"));
         projectionPersistence.saveDelta(
-                delta,
-                Checkpoint.of(1));
+                new Checkpointed<>(delta, Checkpoint.of(1)));
 
         var projectionCoordinator = new ProjectionCoordinator<>(
                 new RegisteredCustomersProjector(),
@@ -201,8 +200,7 @@ class ProjectionCoordinatorTest {
                         snapshottedCustomerId,
                         snapshottedCustomerName));
         projectionPersistence.saveDelta(
-                delta,
-                Checkpoint.of(1));
+                new Checkpointed<>(delta, Checkpoint.of(1)));
 
         var customerEventStore = InMemoryEventStore.forCustomers();
         customerEventStore.save(Customer.register(snapshottedCustomerId,
@@ -309,15 +307,15 @@ class ProjectionCoordinatorTest {
         }
 
         @Override
-        public void saveDelta(RegisteredCustomers delta, Checkpoint newCheckpoint) {
+        public void saveDelta(Checkpointed<RegisteredCustomers> checkpointed) {
             if (++saveDeltaAttemptCount > saveDeltaAttemptsBeforeCrash) {
                 throw new IllegalStateException(
                         "Should not have attempted to persist projection delta: "
-                        + delta.asList()
+                        + checkpointed.state().asList()
                         + ", new checkpoint = "
-                        + newCheckpoint);
+                        + checkpointed.checkpoint());
             } else {
-                super.saveDelta(delta, newCheckpoint);
+                super.saveDelta(checkpointed);
             }
         }
     }

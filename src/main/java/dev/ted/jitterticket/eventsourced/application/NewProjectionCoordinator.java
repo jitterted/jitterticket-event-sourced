@@ -37,8 +37,7 @@ public class NewProjectionCoordinator<STATE, DELTA extends ProjectionDelta>
         if (checkpointedDelta.checkpoint().newerThan(lastWrittenCheckpoint)) {
             lastWrittenCheckpoint = checkpointedDelta.checkpoint();
             projectionPersistencePort.saveDelta(
-                    checkpointedDelta.state(),
-                    checkpointedDelta.checkpoint());
+                    new Checkpointed<>(checkpointedDelta.state(), checkpointedDelta.checkpoint()));
         }
     }
 

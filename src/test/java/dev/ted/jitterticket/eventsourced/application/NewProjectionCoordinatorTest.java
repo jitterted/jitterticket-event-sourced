@@ -40,8 +40,7 @@ class NewProjectionCoordinatorTest {
                         "Snapshotted Customer")
                 );
         projectionPersistence.saveDelta(
-                delta,
-                Checkpoint.of(1));
+                new Checkpointed<>(delta, Checkpoint.of(1)));
 
         NewProjectionCoordinator<AllRegisteredCustomers, NewlyRegisteredCustomers> projectionCoordinator = new NewProjectionCoordinator<>(
                 NewRegisteredCustomersProjector.createEmpty(),
@@ -327,15 +326,15 @@ class NewProjectionCoordinatorTest {
         }
 
         @Override
-        public void saveDelta(NewlyRegisteredCustomers delta, Checkpoint newCheckpoint) {
+        public void saveDelta(Checkpointed<NewlyRegisteredCustomers> checkpointed) {
             if (++saveDeltaAttemptCount > saveDeltaAttemptsBeforeCrash) {
                 throw new IllegalStateException(
                         "Should not have attempted to persist projection delta: "
-                        + delta.asList()
+                        + checkpointed.state().asList()
                         + ", new checkpoint = "
-                        + newCheckpoint);
+                        + checkpointed.checkpoint());
             } else {
-                super.saveDelta(delta, newCheckpoint);
+                super.saveDelta(checkpointed);
             }
         }
     }

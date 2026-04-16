@@ -55,8 +55,7 @@ public class ProjectionCoordinator<EVENT extends Event, STATE, DELTA extends Pro
         if (updatedCheckpoint.newerThan(cachedCheckpoint)) {
             cachedCheckpoint = updatedCheckpoint;
             projectionPersistencePort.saveDelta(
-                    projectorResult.delta(),
-                    updatedCheckpoint);
+                    new Checkpointed<>(projectorResult.delta(), updatedCheckpoint));
         }
     }
 

@@ -24,8 +24,8 @@ class ProjectionPersistencePortTest {
         var projectionPersistence =
                 new NewMemoryRegisteredCustomersProjectionPersistence();
 
-        projectionPersistence.saveDelta(new NewlyRegisteredCustomers(),
-                                        Checkpoint.of(1));
+        projectionPersistence.saveDelta(
+                new Checkpointed<>(new NewlyRegisteredCustomers(), Checkpoint.of(1)));
 
         var projector = projectionPersistence.loadProjector();
 
@@ -42,7 +42,7 @@ class ProjectionPersistencePortTest {
         RegisteredCustomer registeredCustomer = new RegisteredCustomer(CustomerId.createRandom(), "Customer Name");
         NewlyRegisteredCustomers delta = NewlyRegisteredCustomers
                 .createForTestWith(Checkpoint.of(1), registeredCustomer);
-        projectionPersistence.saveDelta(delta, Checkpoint.of(1));
+        projectionPersistence.saveDelta(new Checkpointed<>(delta, Checkpoint.of(1)));
 
         var projector = projectionPersistence.loadProjector();
 
@@ -56,14 +56,14 @@ class ProjectionPersistencePortTest {
     void savedDeltaIsMergedWithExistingState() {
         var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
         Checkpoint checkpoint = Checkpoint.of(1);
-        projectionPersistence.saveDelta(createDeltaWith("Existing Customer",
-                                                        checkpoint),
-                                        checkpoint);
+        projectionPersistence.saveDelta(
+                new Checkpointed<>(createDeltaWith("Existing Customer",
+                                                        checkpoint), checkpoint));
 
         Checkpoint deltaCheckpoint = Checkpoint.of(2);
         NewlyRegisteredCustomers delta = createDeltaWith("New Customer",
                                                          deltaCheckpoint);
-        projectionPersistence.saveDelta(delta, deltaCheckpoint);
+        projectionPersistence.saveDelta(new Checkpointed<>(delta, deltaCheckpoint));
 
         var projector = projectionPersistence.loadProjector();
 

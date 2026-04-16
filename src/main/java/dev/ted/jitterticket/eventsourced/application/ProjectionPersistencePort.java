@@ -6,5 +6,5 @@ public interface ProjectionPersistencePort<STATE, DELTA extends ProjectionDelta>
 
     NewDomainProjector<STATE, DELTA> loadProjector();
 
-    void saveDelta(DELTA delta, Checkpoint newCheckpoint);
+    void saveDelta(Checkpointed<DELTA> checkpointed);
 }

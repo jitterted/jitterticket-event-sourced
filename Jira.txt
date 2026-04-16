@@ -177,9 +177,9 @@
         [X] Change NewDomainProjector.projection() to return Checkpoint<FullState> (i.e., STATE generic type)
         [X] Add checkpoint() back, so that (at least) we can determine consistency lag in metrics (how big is the difference of Checkpoint values between the Projector and the EventStore)
 
-    [X] Added ProjectionPersistencePort loadProjector() that returns generic NewDomainProjector<STATE, DELTA extends ProjectionDelta> with cache loadedπ
+    [X] Added ProjectionPersistencePort loadProjector() that returns generic NewDomainProjector<STATE, DELTA extends ProjectionDelta> with cache loaded
 
-    [ ] Change signature of saveDelta() to take Checkpointed<DELTA> as the parameter (Parameter Object!)
+    [X] Change signature of saveDelta() to take Checkpointed<DELTA> as the parameter (Parameter Object!)
 
     [ ] ASSERTJ: How to make the CheckpointedAssert's state().isEqualTo() be aware of the STATE generic type (right now it becomes Object)
 
