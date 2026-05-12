@@ -4,7 +4,6 @@ import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -104,21 +103,20 @@ class NewProjectionCoordinatorTest {
                 );
     }
 
-    @Disabled("Until Projection Snapshot Loading works")
     @Test
     void projectorStateSameAfterCatchingUpForNoNewEvents() {
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId existingCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(
                 existingCustomerId, "Existing Customer", IRRELEVANT_EMAIL));
-        // catch up on new customer registered
-        NewMemoryRegisteredCustomersProjectionPersistence projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
-        new NewProjectionCoordinator<>(
+        // catch up on new customer registered, then throw away the coordinator
+        var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
+        var throwAwayCoordinator = new NewProjectionCoordinator<>(
                 projectionPersistence,
                 customerStore
         );
 
-        // this won't have any catching up to do, as no new events since last catch-up
+        // this won't have any catching up to do, as no new events since last catch-up (via the throw away coordinator)
         var projectionCoordinator = new NewProjectionCoordinator<>(
                 projectionPersistence,
                 customerStore
@@ -132,7 +130,7 @@ class NewProjectionCoordinatorTest {
                 .isEqualTo(Checkpoint.of(1L));
     }
 
-    //    @Test
+    @Test
     void handleEmptyStreamPreservesPersistedCheckpoint() {
         var projectionPersistence = new ConfigurableCrashingProjectionPersistence(1);
         var customerStore = InMemoryEventStore.forCustomers();
@@ -153,18 +151,28 @@ class NewProjectionCoordinatorTest {
                 .isEqualTo(Checkpoint.of(1L));
     }
 
-    //    @Test
+    @SuppressWarnings("unused")
+    @Test
     void doesNotPersistIfNewProjectionWithCheckpointIsUnchanged() {
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId existingCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(existingCustomerId, "Existing Customer", IRRELEVANT_EMAIL));
-        var projectionCoordinator = new NewProjectionCoordinator<>(
-                new NewMemoryRegisteredCustomersProjectionPersistence(),
+        var projectionPersistence = new ProjectionPersistenceSpy();
+        var coordinatorUpdatesPersistence = new NewProjectionCoordinator<>(
+                projectionPersistence,
                 customerStore
         );
 
-        assertThat(projectionCoordinator.projection().asList())
-                .hasSize(1);
+        assertThat(projectionPersistence.saveDeltaCount)
+                .isEqualTo(1);
+
+        var unchangedPersistenceCoordinator =
+                new NewProjectionCoordinator<>(
+                        projectionPersistence,
+                        customerStore);
+
+        assertThat(projectionPersistence.saveDeltaCount)
+                .isEqualTo(1);
     }
 
 //    @Test
@@ -324,6 +332,16 @@ class NewProjectionCoordinatorTest {
             } else {
                 super.saveDelta(checkpointed);
             }
+        }
+    }
+
+    private static class ProjectionPersistenceSpy extends NewMemoryRegisteredCustomersProjectionPersistence {
+        int saveDeltaCount = 0;
+
+        @Override
+        public void saveDelta(Checkpointed<NewlyRegisteredCustomers> checkpointed) {
+            saveDeltaCount++;
+            super.saveDelta(checkpointed);
         }
     }
 }
