@@ -1,0 +1,32 @@
+@startuml
+skinparam actorStyle hollow
+'hide footbox
+skinparam sequence {
+    ParticipantBackgroundColor azure
+}
+
+actor "Venue Manager" as VM
+participant "ConcertService (app layer)" as CS
+participant "EventStore" as ES
+participant Database as DB
+participant Concert as C
+
+VM -> CS: reschedule("ab-12-cd",new date/times)
+CS -> ES: findById("ab-12-cd")
+ES -> DB: SELECT * from events for ID
+DB --> ES: result set
+ES -> ES: deserialize events from JSON
+create C
+ES -> C: reconstitute(event objects)
+activate C
+== Concert Aggregate Loaded into Memory ==
+CS -> C: reschedule
+== Aggregate Mutated State ==
+CS -> ES: save(concert)
+ES -> C: uncommittedEvents()
+C --> ES: List<Event>
+deactivate C
+ES -> ES: serialize events to JSON
+ES --> DB: INSERT into events
+== Concert Aggregate Changes Stored in DB ==
+@enduml

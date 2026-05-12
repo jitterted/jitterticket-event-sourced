@@ -1,4 +1,3 @@
-```mermaid
 sequenceDiagram
     participant ConcertService
     participant ConcertRepositoryAdapter as Concert<br/>Repository<br/>Adapter
@@ -12,6 +11,3 @@ sequenceDiagram
     ConcertRepository-->>ConcertRepositoryAdapter: ConcertDto
     ConcertRepositoryAdapter-->>ConcertRepositoryAdapter: convert ConcertDto<br/> to Concert domain object
     ConcertRepositoryAdapter-->>ConcertService: Concert
-
-
-```

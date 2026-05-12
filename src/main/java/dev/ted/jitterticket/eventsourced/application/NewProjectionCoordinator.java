@@ -2,12 +2,16 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class NewProjectionCoordinator<STATE, DELTA extends ProjectionDelta>
         implements EventStreamConsumer {
 
+    private static final Logger log = LoggerFactory.getLogger(NewProjectionCoordinator.class);
     private final NewDomainProjector<STATE, DELTA> domainProjector;
     private final ProjectionPersistencePort<STATE, DELTA> projectionPersistencePort;
     private STATE cachedProjection;
@@ -23,10 +27,16 @@ public class NewProjectionCoordinator<STATE, DELTA extends ProjectionDelta>
         cachedProjection = snapshot.state();
         lastWrittenCheckpoint = snapshot.checkpoint();
 
-        Stream<? extends Event> eventStream = eventStore.allEventsAfter(lastWrittenCheckpoint);
+        Set<Class<? extends Event>> handledEventTypes = domainProjector.handledEventTypes();
+
+        log.info("Catching up on events for event types: {}", handledEventTypes);
+
+        Stream<? extends Event> eventStream = eventStore.allEventsAfter(lastWrittenCheckpoint, handledEventTypes);
+        log.info("Fetched events, now handling them...");
         handle(eventStream);
 
-        eventStore.subscribe(this);
+        log.info("Subscribing to event store for event types: {}", handledEventTypes);
+        eventStore.subscribe(this, handledEventTypes);
     }
 
     @Override

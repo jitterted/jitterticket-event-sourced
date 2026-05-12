@@ -1,0 +1,43 @@
+@startuml
+skinparam actorStyle hollow
+hide footbox
+skinparam sequence {
+    ParticipantBackgroundColor azure
+}
+
+actor "Venue Manager" as VM
+participant "ConcertService (app layer)" as CS
+participant Concert as C
+participant "Concert Repository Adapter" as CRA
+participant "ConcertRepository (Spring Data)" as CR
+participant ConcertDbo as DBO
+participant Database as DB
+
+VM -> CS: reschedule("ab-12-cd",new date/times)
+CS -> CRA: findConcertById("ab-12-cd")
+CRA -> CR: findById("ab-12-cd")
+CR -> DB: ORM does SELECT
+DB --> CR: result set
+create DBO
+activate DBO
+CR -> DBO: new from result set
+CR --> CRA: ConcertDbo
+CRA -> DBO: toDomain()
+create C
+DBO --> C: Concert
+activate C
+deactivate DBO
+CRA --> CS: Concert
+== Concert Aggregate Loaded into Memory ==
+CS -> C: reschedule
+== Aggregate Mutated State ==
+CS -> CRA: save(concert)
+create DBO
+CRA -> DBO: fromDomain(concert)
+deactivate C
+activate DBO
+CRA -> CR: save(concertDbo)
+CR -> DB: ORM does UPDATE(s)
+deactivate DBO
+== Concert Aggregate Changes Stored in DB ==
+@enduml

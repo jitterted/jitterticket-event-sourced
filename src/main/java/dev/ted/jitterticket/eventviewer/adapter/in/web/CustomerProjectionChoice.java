@@ -47,7 +47,14 @@ public class CustomerProjectionChoice extends ProjectionChoice {
         return List.of(
                 "Customer Name: " + customer.name(),
                 "Email: " + customer.email(),
+                "Tickets Purchased: " + totalTicketsPurchased(customer.ticketOrders()),
                 "Ticket Orders: " + ticketOrdersAsString(customer.ticketOrders()));
+    }
+
+    private String totalTicketsPurchased(List<Customer.TicketOrder> ticketOrders) {
+        return String.valueOf(ticketOrders.stream()
+                .mapToInt(Customer.TicketOrder::quantity)
+                .sum());
     }
 
     private String ticketOrdersAsString(List<Customer.TicketOrder> ticketOrders) {
@@ -56,7 +63,7 @@ public class CustomerProjectionChoice extends ProjectionChoice {
         }
         return ticketOrders.stream()
                            .map(this::orderAsString)
-                           .collect(Collectors.joining("<br/>"));
+                           .collect(Collectors.joining("\n"));
     }
 
     private String orderAsString(Customer.TicketOrder order) {

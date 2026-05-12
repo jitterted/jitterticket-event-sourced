@@ -17,7 +17,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
     private int capacity;
     private int maxTicketsPerPurchase;
     private int availableTicketCount;
-    private boolean canSellTickets = true;
+    private boolean ticketsOnSale = true;
 
     //region Creation Command
     public static Concert schedule(ConcertId concertId,
@@ -79,7 +79,7 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
                 this.doorsTime = rescheduled.newDoorsTime();
             }
             case TicketsSold sold -> availableTicketCount -= sold.quantity();
-            case TicketSalesStopped _ -> canSellTickets = false;
+            case TicketSalesStopped _ -> ticketsOnSale = false;
         }
     }
 
@@ -115,21 +115,23 @@ public class Concert extends EventSourcedAggregate<ConcertEvent, ConcertId> {
         return availableTicketCount;
     }
 
-    public boolean canSellTickets() {
-        return canSellTickets;
+    public boolean ticketsOnSale() {
+        return ticketsOnSale;
     }
 
     //endregion Queries
 
     //region Commands
 
-    public void rescheduleTo(LocalDateTime newShowDateTime,
-                             LocalTime newDoorsTime) {
-        // validation: new times must be X amount of time in the future
-        // validation: can't reschedule if >0 tickets sold
-        ConcertRescheduled concertRescheduled =
-                new ConcertRescheduled(getId(), null, newShowDateTime, newDoorsTime);
-        enqueue(concertRescheduled);
+    // other potential validations for this decision:
+    // * New date/time must be X amount of time in the future
+    // * Must not conflict with existing Concert
+    public void rescheduleTo(LocalDateTime newShowDateTime, LocalTime newDoorsTime) {
+        if (newShowDateTime.isAfter(showDateTime) && capacity - availableTicketCount == 0) {
+            ConcertRescheduled concertRescheduled =
+                    new ConcertRescheduled(getId(), null, newShowDateTime, newDoorsTime);
+            enqueue(concertRescheduled);
+        }
     }
 
     public void sellTicketsTo(CustomerId customerId, int quantity) {

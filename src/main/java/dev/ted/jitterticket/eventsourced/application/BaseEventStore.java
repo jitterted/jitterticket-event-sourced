@@ -13,12 +13,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import dev.ted.jitterticket.eventsourced.domain.customer.TicketsPurchased;
 import jakarta.annotation.Nonnull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -46,6 +41,11 @@ public abstract class BaseEventStore<ID extends Id, EVENT extends Event, AGGREGA
         List<EVENT> savedEvents = save(aggregateId, uncommittedEvents).toList();
         eventStreamConsumers.forEach(
                 eventConsumer -> {
+                    // TODO
+                    // perhaps invert the data structure, so that we have EventType -> Consumer,
+                    // so we just get only Consumers who subscribed for that event?
+                    // this means we have to coalesce desired events into a custom stream per Consumer,
+                    // which might be slower/harder than the way we're doing it below?
                     Set<Class<? extends Event>> desiredEventClasses = consumersToDesiredEvents.get(eventConsumer);
                     if (desiredEventClasses == null) {
                         throw new IllegalStateException("No desired events defined for " + eventConsumer);

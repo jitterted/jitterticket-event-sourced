@@ -41,7 +41,7 @@ class NewProjectionCoordinatorTest {
         projectionPersistence.saveDelta(
                 new Checkpointed<>(delta, Checkpoint.of(1)));
 
-        NewProjectionCoordinator<AllRegisteredCustomers, NewlyRegisteredCustomers> projectionCoordinator = new NewProjectionCoordinator<>(
+        var projectionCoordinator = new NewProjectionCoordinator<>(
                 NewRegisteredCustomersProjector.createEmpty(),
                 projectionPersistence,
                 InMemoryEventStore.forCustomers()

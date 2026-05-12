@@ -1,16 +1,6 @@
 package dev.ted.jitterticket.eventsourced.domain.concert;
 
-import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
-import dev.ted.jitterticket.eventsourced.application.Commands;
-import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
-import dev.ted.jitterticket.eventsourced.application.LocalDateTimeFactory;
-import dev.ted.jitterticket.eventsourced.application.MakeEvents;
-import dev.ted.jitterticket.eventsourced.application.MemoryScheduledConcertsProjectionPersistence;
-import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
-import dev.ted.jitterticket.eventsourced.application.RescheduleParams;
-import dev.ted.jitterticket.eventsourced.application.ScheduleParams;
-import dev.ted.jitterticket.eventsourced.application.ScheduledConcertsProjector;
-import dev.ted.jitterticket.eventsourced.application.SchedulingConflictException;
+import dev.ted.jitterticket.eventsourced.application.*;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import org.junit.jupiter.api.Nested;
@@ -22,7 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class ConcertTest {
 
@@ -238,8 +229,8 @@ public class ConcertTest {
                     .isEqualTo(maxTicketsPerPurchase);
             assertThat(concert.availableTicketCount())
                     .isEqualTo(capacity);
-            assertThat(concert.canSellTickets())
-                    .as("For newly scheduled concerts canSellTickets should be TRUE")
+            assertThat(concert.ticketsOnSale())
+                    .as("For newly scheduled concerts tickets should be available for purchase, i.e., this is TRUE")
                     .isTrue();
         }
 
@@ -291,7 +282,7 @@ public class ConcertTest {
         }
 
         @Test
-        void ticketSalesStoppedDisablesCanSellTickets() {
+        void ticketSalesStoppedDisablesTicketsOnSale() {
             ConcertScheduled concertScheduled = ConcertFactory.Events.scheduledConcert();
 
             TicketSalesStopped ticketSalesStopped = new TicketSalesStopped(
@@ -300,8 +291,8 @@ public class ConcertTest {
                     List.of(concertScheduled,
                             ticketSalesStopped));
 
-            assertThat(concert.canSellTickets())
-                    .as("Applying TicketSalesStopped must change canSellTickets to be FALSE")
+            assertThat(concert.ticketsOnSale())
+                    .as("Applying TicketSalesStopped must stop ticket sales, i.e., this is FALSE")
                     .isFalse();
         }
     }
