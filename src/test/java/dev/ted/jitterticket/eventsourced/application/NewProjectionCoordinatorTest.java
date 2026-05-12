@@ -30,7 +30,7 @@ class NewProjectionCoordinatorTest {
 
     @Test
     void projectionLoadsNonEmptySnapshotUponCreation() {
-        NewMemoryRegisteredCustomersProjectionPersistence projectionPersistence =
+        var projectionPersistence =
                 new NewMemoryRegisteredCustomersProjectionPersistence();
         NewlyRegisteredCustomers delta = NewlyRegisteredCustomers.createForTestWith(
                 Checkpoint.of(1),

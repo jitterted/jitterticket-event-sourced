@@ -1,3 +1,20 @@
+Tuesday, May 12, 2026
+=====================
+
+Never mind! I had already decided that the ProjectionPersistencePort is responsible for loading (new) Domain Projectors into memory, pre-loaded with their persisted cache (if any): ProjectionPersistencePort.loadProjector() does this.
+
+    Now that (new) DomainProjectors are responsible for their own cache, we need a way to load a snapshotted (persisted) projector before it's passed into the (new) ProjectionCoordinator.
+    It's possible to create an EMPTY DomainProjector, but it must not be possible to create a DomainProjector with state, unless the Checkpoint is not the INITIAL (aka 0) checkpoint, i.e., it MUST have processed at least ONE event in order to have any non-empty state.
+    Since we are always (except for tests) loading a snapshot from persistence, which may be empty, we should make it the default to always load it during startup (which might be implemented in Spring's @Configuration code).
+
+    OR?
+
+    The (new) ProjectionCoordinator instantiates the DomainProjector with its persisted (snapshotted) cache?
+
+        OR
+
+        DomainProjector has a .heresYourCache(snapshot) method that is called from the ProjectionCoordinator's constructor (i.e., during Startup).
+
 Wednesday, April 15, 2026
 =========================
 

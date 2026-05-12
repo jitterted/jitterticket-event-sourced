@@ -6,12 +6,12 @@ public class NewRegisteredCustomersProjector
         extends NewDomainProjector<AllRegisteredCustomers, NewlyRegisteredCustomers> {
 
     private final AllRegisteredCustomers currentState;
-    private NewlyRegisteredCustomers deltaState;
+    private NewlyRegisteredCustomers deltaState = new NewlyRegisteredCustomers();
     private Checkpoint checkpoint;
 
+    @Deprecated // any non-empty state must, by definition, have a Checkpoint that is not INITIAL, i.e., it MUST have processed at least ONE event for there to be a non-empty STATE
     public NewRegisteredCustomersProjector(AllRegisteredCustomers initialState) {
         this.currentState = AllRegisteredCustomers.copyOf(initialState);
-        deltaState = new NewlyRegisteredCustomers();
         checkpoint = Checkpoint.INITIAL;
     }
 

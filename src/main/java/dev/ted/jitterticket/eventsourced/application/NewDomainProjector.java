@@ -1,5 +1,8 @@
 package dev.ted.jitterticket.eventsourced.application;
 
+/**
+ * This is an abstract class instead of an interface, because EventHandler is an abstract class
+ */
 public abstract class NewDomainProjector<STATE, DELTA extends ProjectionDelta>
         extends EventHandler {
 

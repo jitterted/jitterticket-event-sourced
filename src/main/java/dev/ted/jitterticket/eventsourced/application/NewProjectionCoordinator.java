@@ -14,20 +14,22 @@ public class NewProjectionCoordinator<STATE, DELTA extends ProjectionDelta>
     private static final Logger log = LoggerFactory.getLogger(NewProjectionCoordinator.class);
     private final NewDomainProjector<STATE, DELTA> domainProjector;
     private final ProjectionPersistencePort<STATE, DELTA> projectionPersistencePort;
-    private STATE cachedProjection;
     private Checkpoint lastWrittenCheckpoint;
 
-    public NewProjectionCoordinator(NewDomainProjector<STATE, DELTA> domainProjector,
-                                    ProjectionPersistencePort<STATE, DELTA> projectionPersistencePort,
-                                    EventStore<?, ? extends Event, ?> eventStore) {
-        this.domainProjector = domainProjector;
+    public NewProjectionCoordinator(
+            NewDomainProjector<STATE, DELTA> domainProjector,
+            ProjectionPersistencePort<STATE, DELTA> projectionPersistencePort,
+            EventStore<?, ? extends Event, ?> eventStore) {
         this.projectionPersistencePort = projectionPersistencePort;
 
-        var snapshot = projectionPersistencePort.loadSnapshot();
-        cachedProjection = snapshot.state();
-        lastWrittenCheckpoint = snapshot.checkpoint();
+//        Checkpointed<STATE> snapshot = projectionPersistencePort.loadSnapshot();
+//        STATE cachedProjection = snapshot.state();
+//        lastWrittenCheckpoint = snapshot.checkpoint();
 
-        Set<Class<? extends Event>> handledEventTypes = domainProjector.handledEventTypes();
+        this.domainProjector = projectionPersistencePort.loadProjector();
+        this.lastWrittenCheckpoint = this.domainProjector.checkpoint();
+
+        Set<Class<? extends Event>> handledEventTypes = this.domainProjector.handledEventTypes();
 
         log.info("Catching up on events for event types: {}", handledEventTypes);
 
