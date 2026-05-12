@@ -19,7 +19,6 @@ class NewProjectionCoordinatorTest {
     @Test
     void projectionIsEmptyWhenNoCustomersAreRegistered() {
         var projectionCoordinator = new NewProjectionCoordinator<>(
-                NewRegisteredCustomersProjector.createEmpty(),
                 new NewMemoryRegisteredCustomersProjectionPersistence(),
                 InMemoryEventStore.forCustomers()
         );
@@ -37,12 +36,11 @@ class NewProjectionCoordinatorTest {
                 new RegisteredCustomer(
                         CustomerId.createRandom(),
                         "Snapshotted Customer")
-                );
+        );
         projectionPersistence.saveDelta(
                 new Checkpointed<>(delta, Checkpoint.of(1)));
 
         var projectionCoordinator = new NewProjectionCoordinator<>(
-                NewRegisteredCustomersProjector.createEmpty(),
                 projectionPersistence,
                 InMemoryEventStore.forCustomers()
         );
@@ -96,7 +94,6 @@ class NewProjectionCoordinatorTest {
         customerStore.save(Customer.register(existingCustomerId, "Existing Customer", IRRELEVANT_EMAIL));
 
         var projectionCoordinator = new NewProjectionCoordinator<>(
-                NewRegisteredCustomersProjector.createEmpty(),
                 new NewMemoryRegisteredCustomersProjectionPersistence(),
                 customerStore
         );
@@ -117,14 +114,12 @@ class NewProjectionCoordinatorTest {
         // catch up on new customer registered
         NewMemoryRegisteredCustomersProjectionPersistence projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
         new NewProjectionCoordinator<>(
-                NewRegisteredCustomersProjector.createEmpty(),
                 projectionPersistence,
                 customerStore
         );
 
         // this won't have any catching up to do, as no new events since last catch-up
         var projectionCoordinator = new NewProjectionCoordinator<>(
-                NewRegisteredCustomersProjector.createEmpty(),
                 projectionPersistence,
                 customerStore
         );
@@ -137,13 +132,12 @@ class NewProjectionCoordinatorTest {
                 .isEqualTo(Checkpoint.of(1L));
     }
 
-//    @Test
+    //    @Test
     void handleEmptyStreamPreservesPersistedCheckpoint() {
         var projectionPersistence = new ConfigurableCrashingProjectionPersistence(1);
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId customerId = CustomerId.createRandom();
         var projectionCoordinator = new NewProjectionCoordinator<>(
-                NewRegisteredCustomersProjector.createEmpty(),
                 projectionPersistence,
                 customerStore
         );
@@ -159,13 +153,12 @@ class NewProjectionCoordinatorTest {
                 .isEqualTo(Checkpoint.of(1L));
     }
 
-//    @Test
+    //    @Test
     void doesNotPersistIfNewProjectionWithCheckpointIsUnchanged() {
         var customerStore = InMemoryEventStore.forCustomers();
         CustomerId existingCustomerId = CustomerId.createRandom();
         customerStore.save(Customer.register(existingCustomerId, "Existing Customer", IRRELEVANT_EMAIL));
         var projectionCoordinator = new NewProjectionCoordinator<>(
-                NewRegisteredCustomersProjector.createEmpty(),
                 new NewMemoryRegisteredCustomersProjectionPersistence(),
                 customerStore
         );
@@ -179,8 +172,7 @@ class NewProjectionCoordinatorTest {
 //        var customerEventStore = InMemoryEventStore.forCustomers();
 //        var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
 //        var projectionCoordinator = new NewProjectionCoordinator<>(
-//                NewRegisteredCustomersProjector.createEmpty(),
-//                projectionPersistence,
+//                //                projectionPersistence,
 //                customerEventStore
 //        );
 //
@@ -206,8 +198,7 @@ class NewProjectionCoordinatorTest {
 //        CustomerId firstCustomerId = CustomerId.createRandom();
 //        customerStore.save(Customer.register(firstCustomerId, "First Customer", "first@example.com"));
 //        var projectionCoordinator = new NewProjectionCoordinator<>(
-//                NewRegisteredCustomersProjector.createEmpty(),
-//                new NewMemoryRegisteredCustomersProjectionPersistence(),
+//                //                new NewMemoryRegisteredCustomersProjectionPersistence(),
 //                customerStore
 //        );
 //
@@ -290,7 +281,6 @@ class NewProjectionCoordinatorTest {
 //    }
 
 
-
     private static RegisteredCustomer saveViaCustomerRegisteredEvent(Fixture fixture, String customerName) {
         CustomerId customerId = CustomerId.createRandom();
         fixture.customerEventStore.save(Customer.register(customerId,
@@ -304,7 +294,6 @@ class NewProjectionCoordinatorTest {
         var customerEventStore = InMemoryEventStore.forCustomers();
         var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
         new NewProjectionCoordinator<>(
-                NewRegisteredCustomersProjector.createEmpty(),
                 projectionPersistence,
                 customerEventStore
         );

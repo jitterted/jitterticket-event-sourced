@@ -13,7 +13,6 @@ import dev.ted.jitterticket.eventsourced.application.MemoryRegisteredCustomersPr
 import dev.ted.jitterticket.eventsourced.application.MemoryScheduledConcertsProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.NewMemoryRegisteredCustomersProjectionPersistence;
 import dev.ted.jitterticket.eventsourced.application.NewProjectionCoordinator;
-import dev.ted.jitterticket.eventsourced.application.NewRegisteredCustomersProjector;
 import dev.ted.jitterticket.eventsourced.application.NewlyRegisteredCustomers;
 import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
 import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
@@ -59,8 +58,6 @@ public class ProjectionConfiguration {
     NewProjectionCoordinator<AllRegisteredCustomers, NewlyRegisteredCustomers>
     newRegisteredCustomersProjectionCoordinator(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
         return new NewProjectionCoordinator<>(
-                // PRE-LOAD SNAPSHOT via some LOADER that we call from here
-                NewRegisteredCustomersProjector.createEmpty(),
                 new NewMemoryRegisteredCustomersProjectionPersistence(),
                 customerStore);
     }

@@ -17,14 +17,9 @@ public class NewProjectionCoordinator<STATE, DELTA extends ProjectionDelta>
     private Checkpoint lastWrittenCheckpoint;
 
     public NewProjectionCoordinator(
-            NewDomainProjector<STATE, DELTA> domainProjector,
             ProjectionPersistencePort<STATE, DELTA> projectionPersistencePort,
             EventStore<?, ? extends Event, ?> eventStore) {
         this.projectionPersistencePort = projectionPersistencePort;
-
-//        Checkpointed<STATE> snapshot = projectionPersistencePort.loadSnapshot();
-//        STATE cachedProjection = snapshot.state();
-//        lastWrittenCheckpoint = snapshot.checkpoint();
 
         this.domainProjector = projectionPersistencePort.loadProjector();
         this.lastWrittenCheckpoint = this.domainProjector.checkpoint();
