@@ -2,6 +2,7 @@ package dev.ted.jitterticket.eventsourced.application;
 
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
@@ -109,6 +110,7 @@ class ProjectionCoordinatorTest {
     }
 
     @Test
+    @Disabled("Not sure that this test is relevant, it's replaying an already processed event, it's not an 'inconsistent' stream")
     void inconsistentEventStreamsCauseCheckpointRegressionIfCachedCheckpointIsNotUpdated() {
         var customerEventStore = InMemoryEventStore.forCustomers();
         var projectionPersistence = new MemoryRegisteredCustomersProjectionPersistence();

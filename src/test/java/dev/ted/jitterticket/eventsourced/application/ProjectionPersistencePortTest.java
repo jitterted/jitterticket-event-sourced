@@ -41,7 +41,7 @@ class ProjectionPersistencePortTest {
 
         RegisteredCustomer registeredCustomer = new RegisteredCustomer(CustomerId.createRandom(), "Customer Name");
         NewlyRegisteredCustomers delta = NewlyRegisteredCustomers
-                .createForTestWith(Checkpoint.of(1), registeredCustomer);
+                .createForTestWith(registeredCustomer);
         projectionPersistence.saveDelta(new Checkpointed<>(delta, Checkpoint.of(1)));
 
         var projector = projectionPersistence.loadProjector();
@@ -57,12 +57,12 @@ class ProjectionPersistencePortTest {
         var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
         Checkpoint checkpoint = Checkpoint.of(1);
         projectionPersistence.saveDelta(
-                new Checkpointed<>(createDeltaWith("Existing Customer",
-                                                        checkpoint), checkpoint));
+                new Checkpointed<>(createDeltaWith("Existing Customer"
+                ), checkpoint));
 
         Checkpoint deltaCheckpoint = Checkpoint.of(2);
-        NewlyRegisteredCustomers delta = createDeltaWith("New Customer",
-                                                         deltaCheckpoint);
+        NewlyRegisteredCustomers delta = createDeltaWith("New Customer"
+        );
         projectionPersistence.saveDelta(new Checkpointed<>(delta, deltaCheckpoint));
 
         var projector = projectionPersistence.loadProjector();
@@ -75,9 +75,8 @@ class ProjectionPersistencePortTest {
                 .contains("Existing Customer", "New Customer");
     }
 
-    static NewlyRegisteredCustomers createDeltaWith(String customerName, Checkpoint deltaCheckpoint) {
+    static NewlyRegisteredCustomers createDeltaWith(String customerName) {
         return NewlyRegisteredCustomers.createForTestWith(
-                deltaCheckpoint,
                 new RegisteredCustomer(
                         CustomerId.createRandom(),
                         customerName

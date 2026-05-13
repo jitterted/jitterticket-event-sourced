@@ -8,17 +8,16 @@ import java.util.stream.Stream;
 
 public class NewlyRegisteredCustomers implements ProjectionDelta {
     private final List<RegisteredCustomer> registeredCustomers = new ArrayList<>();
-    private Checkpoint checkpoint;
 
     public NewlyRegisteredCustomers() {
     }
 
-    private NewlyRegisteredCustomers(Checkpoint checkpoint, RegisteredCustomer... registeredCustomers) {
+    private NewlyRegisteredCustomers(RegisteredCustomer... registeredCustomers) {
         add(registeredCustomers);
     }
 
-    public static NewlyRegisteredCustomers createForTestWith(Checkpoint checkpoint, RegisteredCustomer... registeredCustomers) {
-        return new NewlyRegisteredCustomers(checkpoint, registeredCustomers);
+    public static NewlyRegisteredCustomers createForTestWith(RegisteredCustomer... registeredCustomers) {
+        return new NewlyRegisteredCustomers(registeredCustomers);
     }
 
     public void add(RegisteredCustomer... newlyRegisteredCustomers) {
@@ -40,14 +39,6 @@ public class NewlyRegisteredCustomers implements ProjectionDelta {
     @Override
     public boolean isEmpty() {
         return registeredCustomers.isEmpty();
-    }
-
-    public void updateCheckpointTo(Checkpoint checkpoint) {
-        this.checkpoint = checkpoint;
-    }
-
-    public Checkpoint checkpoint() {
-        return checkpoint;
     }
 
     @Override
@@ -72,7 +63,6 @@ public class NewlyRegisteredCustomers implements ProjectionDelta {
         }
         return new StringJoiner(", ", NewlyRegisteredCustomers.class.getSimpleName() + "[", "]")
                 .add("registeredCustomers=" + registeredCustomers)
-                .add("checkpoint=" + checkpoint)
                 .toString();
     }
 }

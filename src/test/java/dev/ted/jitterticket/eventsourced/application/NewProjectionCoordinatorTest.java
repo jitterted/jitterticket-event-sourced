@@ -4,9 +4,11 @@ import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
+import dev.ted.jitterticket.eventsourced.domain.customer.CustomerRegistered;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static dev.ted.jitterticket.eventsourced.application.Assertions.assertThat;
@@ -31,7 +33,6 @@ class NewProjectionCoordinatorTest {
         var projectionPersistence =
                 new NewMemoryRegisteredCustomersProjectionPersistence();
         NewlyRegisteredCustomers delta = NewlyRegisteredCustomers.createForTestWith(
-                Checkpoint.of(1),
                 new RegisteredCustomer(
                         CustomerId.createRandom(),
                         "Snapshotted Customer")
@@ -175,118 +176,117 @@ class NewProjectionCoordinatorTest {
                 .isEqualTo(1);
     }
 
-//    @Test
-//    void inconsistentEventStreamsCauseCheckpointRegressionIfCachedCheckpointIsNotUpdated() {
-//        var customerEventStore = InMemoryEventStore.forCustomers();
-//        var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
-//        var projectionCoordinator = new NewProjectionCoordinator<>(
-//                //                projectionPersistence,
-//                customerEventStore
-//        );
-//
-//        customerEventStore.save(Customer.register(
-//                CustomerId.createRandom(), "First Customer", "first@example.com"));
-//        customerEventStore.save(Customer.register(
-//                CustomerId.createRandom(), "Second Customer", "second@example.com"));
-//
-//        // Simulate an "out of order" or "delayed" event with a "re-handle" of event 1
-//        // grabbing it from the event store ensure it has the event sequence assigned
-//        var event1 = customerEventStore.allEventsAfter(Checkpoint.INITIAL)
-//                                       .findFirst().orElseThrow();
-//        projectionCoordinator.handle(Stream.of(event1));
-//
-//        assertThat(projectionPersistence.loadSnapshot().checkpoint())
-//                .as("Checkpoint should not regress to 1 after it has reached 2")
-//                .isEqualTo(Checkpoint.of(2L));
-//    }
-//
-//    @Test
-//    void newlySavedCustomerEventsUpdatesProjector() {
-//        var customerStore = InMemoryEventStore.forCustomers();
-//        CustomerId firstCustomerId = CustomerId.createRandom();
-//        customerStore.save(Customer.register(firstCustomerId, "First Customer", "first@example.com"));
-//        var projectionCoordinator = new NewProjectionCoordinator<>(
-//                //                new NewMemoryRegisteredCustomersProjectionPersistence(),
-//                customerStore
-//        );
-//
-//        CustomerId secondCustomerId = CustomerId.createRandom();
-//        customerStore.save(Customer.register(secondCustomerId, "Second Customer", "second@example.com"));
-//
-//        RegisteredCustomers.RegisteredCustomer firstRegisteredCustomer = new RegisteredCustomers.RegisteredCustomer(firstCustomerId, "First Customer");
-//        RegisteredCustomers.RegisteredCustomer secondRegisteredCustomer = new RegisteredCustomers.RegisteredCustomer(secondCustomerId, "Second Customer");
-//        assertThat(projectionCoordinator.projection().asList())
-//                .containsExactlyInAnyOrder(
-//                        firstRegisteredCustomer,
-//                        secondRegisteredCustomer
-//                );
-//
-//        CustomerId thirdCustomerId = CustomerId.createRandom();
-//        customerStore.save(Customer.register(thirdCustomerId, "Third Customer", "third@example.com"));
-//
-//        RegisteredCustomers.RegisteredCustomer thirdRegisteredCustomer = new RegisteredCustomers.RegisteredCustomer(thirdCustomerId, "Third Customer");
-//        assertThat(projectionCoordinator.projection().asList())
-//                .containsExactlyInAnyOrder(
-//                        firstRegisteredCustomer,
-//                        secondRegisteredCustomer,
-//                        thirdRegisteredCustomer
-//                );
-//    }
+    @Test
+    void replayOfOldEventMustNotCauseCheckpointRegression() {
+        var customerEventStore = InMemoryEventStore.forCustomers();
+        var projectionPersistence = new NewMemoryRegisteredCustomersProjectionPersistence();
+        var projectionCoordinator = new NewProjectionCoordinator<>(
+                projectionPersistence,
+                customerEventStore
+        );
 
-//    @Test
-//    void projectionDoesNotApplyEventsAlreadyProcessedInSnapshot() {
-//        NewMemoryRegisteredCustomersProjectionPersistence projectionPersistence =
-//                new MemoryRegisteredCustomersProjectionPersistence();
-//        CustomerId snapshottedCustomerId = CustomerId.createRandom();
-//        String snapshottedCustomerName = "Snapshotted Customer";
-//        RegisteredCustomers delta = new RegisteredCustomers(
-//                new RegisteredCustomers.RegisteredCustomer(
-//                        snapshottedCustomerId,
-//                        snapshottedCustomerName));
-//        projectionPersistence.saveDelta(
-//                delta,
-//                Checkpoint.of(1));
-//
-//        var customerEventStore = InMemoryEventStore.forCustomers();
-//        customerEventStore.save(Customer.register(snapshottedCustomerId,
-//                                                  snapshottedCustomerName,
-//                                                  IRRELEVANT_EMAIL));
-//
-//        var projectionCoordinator = new ProjectionCoordinator<>(
-//                new RegisteredCustomersProjector(),
-//                projectionPersistence,
-//                customerEventStore
-//        );
-//
-//        assertThat(projectionCoordinator.projection().asList())
-//                .as("Projection should only contain the data loaded from the snapshot persistence")
-//                .hasSize(1);
-//    }
-//
-//    @Test
-//    void projectionPersistedAfterUpdatedAfterCatchUp() {
-//        NewMemoryRegisteredCustomersProjectionPersistence projectionPersistence =
-//                new MemoryRegisteredCustomersProjectionPersistence();
-//        var customerEventStore = InMemoryEventStore.forCustomers();
-//        CustomerId customerId = CustomerId.createRandom();
-//        String customerName = "Catchup Customer";
-//        customerEventStore.save(Customer.register(customerId,
-//                                                  customerName,
-//                                                  IRRELEVANT_EMAIL));
-//
-//        new ProjectionCoordinator<>(
-//                new RegisteredCustomersProjector(),
-//                projectionPersistence,
-//                customerEventStore
-//        );
-//
-//        assertThat(projectionPersistence.loadSnapshot().checkpoint())
-//                .as("Checkpoint should be 1 after catching up on a single CustomerRegistered event in the event store")
-//                .isEqualTo(Checkpoint.of(1L));
-//        assertThat(projectionPersistence.loadSnapshot().state().asList())
-//                .containsExactly(new RegisteredCustomers
-//                        .RegisteredCustomer(customerId, customerName));
-//    }
+        customerEventStore.save(Customer.register(
+                CustomerId.createRandom(), "First Customer", "first@example.com"));
+        customerEventStore.save(Customer.register(
+                CustomerId.createRandom(), "Second Customer", "second@example.com"));
+
+        // Simulate an "out of order" or "delayed" event with a "re-handle" of event 1
+        // Fetch it from the event store to ensure it has the event sequence assigned
+        var event1toReplay = customerEventStore.allEventsAfter(Checkpoint.INITIAL, Set.of(CustomerRegistered.class))
+                                       .findFirst().orElseThrow();
+        // replay an event that was already handled
+        projectionCoordinator.handle(Stream.of(event1toReplay));
+
+        assertThat(projectionPersistence.loadSnapshot().checkpoint())
+                .as("Checkpoint should not regress to 1 after it has reached 2")
+                .isEqualTo(Checkpoint.of(2L));
+    }
+
+    @Test
+    void newlySavedCustomerEventsUpdatesProjector() {
+        var customerStore = InMemoryEventStore.forCustomers();
+        CustomerId firstCustomerId = CustomerId.createRandom();
+        customerStore.save(Customer.register(firstCustomerId, "First Customer", "first@example.com"));
+        var projectionCoordinator = new NewProjectionCoordinator<>(
+                new NewMemoryRegisteredCustomersProjectionPersistence(),
+                customerStore
+        );
+
+        CustomerId secondCustomerId = CustomerId.createRandom();
+        customerStore.save(Customer.register(secondCustomerId, "Second Customer", "second@example.com"));
+
+        RegisteredCustomer firstRegisteredCustomer = new RegisteredCustomer(firstCustomerId, "First Customer");
+        RegisteredCustomer secondRegisteredCustomer = new RegisteredCustomer(secondCustomerId, "Second Customer");
+        assertThat(projectionCoordinator.projection().asList())
+                .containsExactlyInAnyOrder(
+                        firstRegisteredCustomer,
+                        secondRegisteredCustomer
+                );
+
+        CustomerId thirdCustomerId = CustomerId.createRandom();
+        customerStore.save(Customer.register(thirdCustomerId, "Third Customer", "third@example.com"));
+
+        RegisteredCustomer thirdRegisteredCustomer = new RegisteredCustomer(thirdCustomerId, "Third Customer");
+        assertThat(projectionCoordinator.projection().asList())
+                .containsExactlyInAnyOrder(
+                        firstRegisteredCustomer,
+                        secondRegisteredCustomer,
+                        thirdRegisteredCustomer
+                );
+    }
+
+    @Test
+    void projectionDoesNotDoAnyCatchUpWorkForEventsAlreadyProcessedInSnapshot() {
+        var projectionPersistence =
+                new NewMemoryRegisteredCustomersProjectionPersistence();
+        CustomerId snapshottedCustomerId = CustomerId.createRandom();
+        String snapshottedCustomerName = "Snapshotted Customer";
+        NewlyRegisteredCustomers delta = NewlyRegisteredCustomers.createForTestWith(
+                new RegisteredCustomer(
+                        snapshottedCustomerId,
+                        snapshottedCustomerName));
+        projectionPersistence.saveDelta(
+                new Checkpointed<>(delta, Checkpoint.of(1)));
+
+        var customerEventStore = InMemoryEventStore.forCustomers();
+        customerEventStore.save(Customer.register(snapshottedCustomerId,
+                                                  snapshottedCustomerName,
+                                                  IRRELEVANT_EMAIL));
+
+        var projectionCoordinator = new NewProjectionCoordinator<>(
+                projectionPersistence,
+                customerEventStore
+        );
+
+        assertThat(projectionCoordinator.projection().asList())
+                .as("Projection should only contain the data loaded from the snapshot persistence")
+                .hasSize(1);
+    }
+
+    @Test
+    void projectionPersistedAfterUpdatedAfterCatchUp() {
+        NewMemoryRegisteredCustomersProjectionPersistence projectionPersistence =
+                new NewMemoryRegisteredCustomersProjectionPersistence();
+        var customerEventStore = InMemoryEventStore.forCustomers();
+        CustomerId customerId = CustomerId.createRandom();
+        String customerName = "Catchup Customer";
+        customerEventStore.save(Customer.register(customerId,
+                                                  customerName,
+                                                  IRRELEVANT_EMAIL));
+
+        // don't need to hold onto it, we're just using the constructor to do the catch-up work
+        new NewProjectionCoordinator<>(
+                projectionPersistence,
+                customerEventStore
+        );
+
+        assertThat(projectionPersistence.loadSnapshot().checkpoint())
+                .as("Checkpoint should be 1 after catching up on a single CustomerRegistered event in the event store")
+                .isEqualTo(Checkpoint.of(1L));
+        assertThat(projectionPersistence.loadSnapshot().state().asList())
+                .containsExactly(
+                        new RegisteredCustomer(customerId, customerName));
+    }
 
 
     private static RegisteredCustomer saveViaCustomerRegisteredEvent(Fixture fixture, String customerName) {

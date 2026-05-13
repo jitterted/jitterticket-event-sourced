@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 
 public class RegisteredCustomers implements ProjectionDelta {
     private final List<RegisteredCustomer> registeredCustomers = new ArrayList<>();
-    private Checkpoint checkpoint = Checkpoint.INITIAL;
 
     public RegisteredCustomers() {
     }
@@ -17,7 +16,6 @@ public class RegisteredCustomers implements ProjectionDelta {
         add(registeredCustomers);
     }
 
-    @Deprecated // need to add Checkpoint as a parameter
     public static RegisteredCustomers createForTestWith(RegisteredCustomer... registeredCustomers) {
         return new RegisteredCustomers(registeredCustomers);
     }
@@ -26,23 +24,16 @@ public class RegisteredCustomers implements ProjectionDelta {
         add(registeredCustomers);
     }
 
-    @Deprecated // need to add Checkpoint as a parameter
     public static RegisteredCustomers createForTestWith(List<RegisteredCustomer> registeredCustomers) {
         return new RegisteredCustomers(registeredCustomers);
     }
 
-    static RegisteredCustomers copyOf(RegisteredCustomers initialState) {
-        return createForTestWith(initialState.asList());
-    }
-
-    @Deprecated // need to add a Checkpoint parameter
     RegisteredCustomers withNew(List<RegisteredCustomer> newlyRegisteredCustomers) {
         RegisteredCustomers newState = createForTestWith(asList());
         newState.add(newlyRegisteredCustomers);
         return newState;
     }
 
-    @Deprecated // need to add a Checkpoint parameter
     public RegisteredCustomers withNew(RegisteredCustomers delta) {
         return withNew(delta.asList());
     }
@@ -70,14 +61,6 @@ public class RegisteredCustomers implements ProjectionDelta {
     @Override
     public boolean isEmpty() {
         return registeredCustomers.isEmpty();
-    }
-
-    public void updateCheckpointTo(Checkpoint checkpoint) {
-        this.checkpoint = checkpoint;
-    }
-
-    public Checkpoint checkpoint() {
-        return checkpoint;
     }
 
     @Override

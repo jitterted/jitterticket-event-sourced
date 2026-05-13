@@ -1,3 +1,13 @@
+Wednesday, May 13, 2026
+=======================
+
+Need to add a way for the (new) ProjectionCoordinator to handle idempotency for events, there are two potential issues:
+
+   1. Double-handled events, i.e., receiving an event that's already been processed by the projector --> should discard before the Projector sees it
+   2. "Gap problem": Projector already processed event 2, but missed event 1, and can't just handle event 1 to fix it, events must be processed in order.
+      Need to prevent this from happening, or mark the projection as needing to be recalculated from scratch if it does happen.
+
+
 Tuesday, May 12, 2026
 =====================
 
