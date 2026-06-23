@@ -1,14 +1,6 @@
 package dev.ted.jitterticket.eventsourced.adapter.in.web;
 
-import dev.ted.jitterticket.eventsourced.application.CommandExecutorFactory;
-import dev.ted.jitterticket.eventsourced.application.Commands;
-import dev.ted.jitterticket.eventsourced.application.CreateWithParams;
-import dev.ted.jitterticket.eventsourced.application.InMemoryEventStore;
-import dev.ted.jitterticket.eventsourced.application.MemoryScheduledConcertsProjectionPersistence;
-import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
-import dev.ted.jitterticket.eventsourced.application.ScheduleParams;
-import dev.ted.jitterticket.eventsourced.application.ScheduledConcertsProjector;
-import dev.ted.jitterticket.eventsourced.application.SchedulingConflictException;
+import dev.ted.jitterticket.eventsourced.application.*;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -30,6 +22,7 @@ class ScheduleConcertController {
         this.scheduleCommand = scheduleCommand;
     }
 
+    //region test fixture
     static Fixture createForTest() {
         var concertEventStore = InMemoryEventStore.forConcerts();
         var projectionCoordinator = new ProjectionCoordinator<>(
@@ -47,7 +40,7 @@ class ScheduleConcertController {
     record Fixture(
             EventStore<ConcertId, ConcertEvent, Concert> concertEventStore,
             ScheduleConcertController controller) {}
-
+    //endregion
 
     @GetMapping("/schedule")
     public String showScheduleForm(Model model) {
