@@ -44,8 +44,7 @@ public class ConcertTest {
             LocalDateTime originalShowDateTime = LocalDateTime.of(2025, 11, 11, 20, 0);
             LocalTime originalDoorsTime = LocalTime.of(19, 0);
             ConcertScheduled concertScheduled =
-                    ConcertFactory.Events.
-                            scheduledConcert(originalShowDateTime, originalDoorsTime);
+                    ConcertFactory.Events.scheduledConcert(originalShowDateTime, originalDoorsTime);
             Concert concert = Concert.reconstitute(List.of(concertScheduled));
 
             LocalDateTime newShowDateTime = originalShowDateTime.plusDays(1).minusHours(1);
@@ -54,8 +53,7 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(new ConcertRescheduled(
-                            concert.getId(),
-                            null,
+                            concert.getId(), null,
                             newShowDateTime,
                             newDoorsTime));
         }
@@ -74,10 +72,9 @@ public class ConcertTest {
 
             assertThat(concert.uncommittedEvents())
                     .containsExactly(
-                            new TicketsSold(concertId,
-                                            null,
-                                            2,
-                                            35 * 2)
+                            new TicketsSold(concertId, null,
+                                            quantity,
+                                            ticketPrice * quantity)
                     );
         }
 
