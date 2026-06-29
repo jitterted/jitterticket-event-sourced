@@ -19,8 +19,16 @@ public abstract class EventSourcedAggregate<EVENT extends Event, ID extends Id> 
 
     protected abstract void apply(EVENT event);
 
+    /**
+     * Returns events that have been generated since this object was loaded into memory or when this method was last called.
+     * It's automatically cleared once the list of events is returned.
+     *
+     * @return events since this object was loaded, or the last time this was called
+     */
     public Stream<EVENT> uncommittedEvents() {
-        return uncommittedEvents.stream();
+        List<EVENT> events = List.copyOf(uncommittedEvents);
+        uncommittedEvents.clear();
+        return events.stream();
     }
 
     public ID getId() {

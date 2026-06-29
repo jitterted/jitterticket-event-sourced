@@ -1,25 +1,7 @@
 package dev.ted.jitterticket;
 
 import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
-import dev.ted.jitterticket.eventsourced.application.AllConcertsProjector;
-import dev.ted.jitterticket.eventsourced.application.AllRegisteredCustomers;
-import dev.ted.jitterticket.eventsourced.application.AvailableConcerts;
-import dev.ted.jitterticket.eventsourced.application.AvailableConcertsDelta;
-import dev.ted.jitterticket.eventsourced.application.AvailableConcertsProjector;
-import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjectionMediator;
-import dev.ted.jitterticket.eventsourced.application.ConcertSalesProjector;
-import dev.ted.jitterticket.eventsourced.application.MemoryAvailableConcertsProjectionPersistence;
-import dev.ted.jitterticket.eventsourced.application.MemoryRegisteredCustomersProjectionPersistence;
-import dev.ted.jitterticket.eventsourced.application.MemoryScheduledConcertsProjectionPersistence;
-import dev.ted.jitterticket.eventsourced.application.NewMemoryRegisteredCustomersProjectionPersistence;
-import dev.ted.jitterticket.eventsourced.application.NewProjectionCoordinator;
-import dev.ted.jitterticket.eventsourced.application.NewlyRegisteredCustomers;
-import dev.ted.jitterticket.eventsourced.application.ProjectionCoordinator;
-import dev.ted.jitterticket.eventsourced.application.RegisteredCustomers;
-import dev.ted.jitterticket.eventsourced.application.RegisteredCustomersProjector;
-import dev.ted.jitterticket.eventsourced.application.ScheduledConcerts;
-import dev.ted.jitterticket.eventsourced.application.ScheduledConcertsDelta;
-import dev.ted.jitterticket.eventsourced.application.ScheduledConcertsProjector;
+import dev.ted.jitterticket.eventsourced.application.*;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
 import dev.ted.jitterticket.eventsourced.domain.concert.ConcertEvent;
@@ -28,7 +10,7 @@ import dev.ted.jitterticket.eventsourced.domain.customer.Customer;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerEvent;
 import dev.ted.jitterticket.eventsourced.domain.customer.CustomerId;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ConcertProjectionChoice;
-import dev.ted.jitterticket.eventviewer.adapter.in.web.CustomerProjectionChoice;
+import dev.ted.jitterticket.eventviewer.adapter.in.web.NewCustomerProjectionChoice;
 import dev.ted.jitterticket.eventviewer.adapter.in.web.ProjectionChoices;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,18 +23,19 @@ public class ProjectionConfiguration {
     @Bean
     ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta>
     availableConcertsProjectionCoordinator(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        System.gc();
         return new ProjectionCoordinator<>(new AvailableConcertsProjector(),
                                            new MemoryAvailableConcertsProjectionPersistence(),
                                            concertStore);
     }
 
-    @Bean
-    ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers>
-    registeredCustomersProjectionCoordinator(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
-        return new ProjectionCoordinator<>(new RegisteredCustomersProjector(),
-                                           new MemoryRegisteredCustomersProjectionPersistence(),
-                                           customerStore);
-    }
+//    @Bean
+//    ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers>
+//    registeredCustomersProjectionCoordinator(EventStore<CustomerId, CustomerEvent, Customer> customerStore) {
+//        return new ProjectionCoordinator<>(new RegisteredCustomersProjector(),
+//                                           new MemoryRegisteredCustomersProjectionPersistence(),
+//                                           customerStore);
+//    }
 
     @Bean
     NewProjectionCoordinator<AllRegisteredCustomers, NewlyRegisteredCustomers>
@@ -66,10 +49,10 @@ public class ProjectionConfiguration {
     @Bean
     ProjectionCoordinator<ConcertEvent, ScheduledConcerts, ScheduledConcertsDelta>
     scheduledConcertsProjectionCoordinator(EventStore<ConcertId, ConcertEvent, Concert> concertStore) {
+        System.gc();
         return new ProjectionCoordinator<>(new ScheduledConcertsProjector(),
                                            new MemoryScheduledConcertsProjectionPersistence(),
                                            concertStore);
-
     }
 
     @Bean
@@ -85,16 +68,18 @@ public class ProjectionConfiguration {
     @Bean
     ProjectionChoices projectionChoices(
             EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-            EventStore<CustomerId, CustomerEvent, Customer> customerStore,
-            ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers> registeredCustomersProjection
+            EventStore<CustomerId, CustomerEvent, Customer> customerStore
+//            , ProjectionCoordinator<CustomerEvent, RegisteredCustomers, RegisteredCustomers> registeredCustomersProjection
+            ,NewProjectionCoordinator<AllRegisteredCustomers, NewlyRegisteredCustomers> newRegisteredCustomersProjection
     ) {
         ProjectionCoordinator<ConcertEvent, AvailableConcerts, AvailableConcertsDelta> allConcertsProjection =
                 new ProjectionCoordinator<>(new AllConcertsProjector(),
                                             new MemoryAvailableConcertsProjectionPersistence(),
                                             concertStore);
         return new ProjectionChoices(Map.of(
-                "concerts", new ConcertProjectionChoice(concertStore, allConcertsProjection),
-                "customers", new CustomerProjectionChoice(customerStore, registeredCustomersProjection)
+                "concerts", new ConcertProjectionChoice(concertStore, allConcertsProjection)
+//                , "customers", new CustomerProjectionChoice(customerStore, registeredCustomersProjection)
+                , "customers", new NewCustomerProjectionChoice(customerStore, newRegisteredCustomersProjection)
         ));
     }
 

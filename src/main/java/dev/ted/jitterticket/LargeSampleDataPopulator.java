@@ -1,7 +1,5 @@
 package dev.ted.jitterticket;
 
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.ConcertSalesProjectionRepository;
-import dev.ted.jitterticket.eventsourced.adapter.out.store.jdbc.EventDboRepository;
 import dev.ted.jitterticket.eventsourced.application.port.EventStore;
 import dev.ted.jitterticket.eventsourced.domain.TicketOrderId;
 import dev.ted.jitterticket.eventsourced.domain.concert.Concert;
@@ -14,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -26,13 +25,12 @@ import java.util.Random;
 public class LargeSampleDataPopulator implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LargeSampleDataPopulator.class);
-    private static final int CUSTOMERS_TO_CREATE = 1_000; // 100_000
-    private static final int CONCERTS_TO_CREATE = 100;
+    private static final int CUSTOMERS_TO_CREATE = 10_000; // 100_000
+    private static final int CONCERTS_TO_CREATE = 100; // 200
 
     private final EventStore<CustomerId, CustomerEvent, Customer> customerStore;
     private final EventStore<ConcertId, ConcertEvent, Concert> concertStore;
-    private final EventDboRepository eventDboRepository;
-    private final ConcertSalesProjectionRepository concertSalesProjectionRepository;
+    private final JdbcTemplate jdbcTemplate;
     private final Random random = new Random();
 
     private static final String[] ARTISTS = {
@@ -54,18 +52,15 @@ public class LargeSampleDataPopulator implements ApplicationRunner {
 
     public LargeSampleDataPopulator(EventStore<CustomerId, CustomerEvent, Customer> customerStore,
                                     EventStore<ConcertId, ConcertEvent, Concert> concertStore,
-                                    EventDboRepository eventDboRepository,
-                                    ConcertSalesProjectionRepository concertSalesProjectionRepository) {
+                                    JdbcTemplate jdbcTemplate) {
         this.customerStore = customerStore;
         this.concertStore = concertStore;
-        this.eventDboRepository = eventDboRepository;
-        this.concertSalesProjectionRepository = concertSalesProjectionRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public void run(ApplicationArguments args) {
-        eventDboRepository.deleteAll();
-        concertSalesProjectionRepository.deleteAll();
+        jdbcTemplate.execute("TRUNCATE TABLE events, concert_sales_projection RESTART IDENTITY CASCADE");
         log.info("Cleared existing data, starting population of large sample dataset");
 
         List<Customer> customers = createCustomerObjects(CUSTOMERS_TO_CREATE);
@@ -87,6 +82,7 @@ public class LargeSampleDataPopulator implements ApplicationRunner {
             concertStore.save(concert);
             customers.forEach(customerStore::save);
             log.info("Sold tickets for concert: {}", concert.artist());
+            System.gc();
         }
         log.info("Completed ticket sales processing after {}ms", System.currentTimeMillis() - start);
 
@@ -110,7 +106,7 @@ public class LargeSampleDataPopulator implements ApplicationRunner {
         for (int i = 0; i < count; i++) {
             String artist = ARTISTS[random.nextInt(ARTISTS.length)] + " " + i;
             int price = 20 + random.nextInt(180);
-            int capacity = 5000 + random.nextInt(5000);
+            int capacity = (CUSTOMERS_TO_CREATE * 4) + random.nextInt(5000);
             concerts.add(Concert.schedule(
                     ConcertId.createRandom(),
                     artist,

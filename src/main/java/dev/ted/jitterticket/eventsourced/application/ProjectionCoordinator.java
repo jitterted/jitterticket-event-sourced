@@ -30,8 +30,10 @@ public class ProjectionCoordinator<EVENT extends Event, STATE, DELTA extends Pro
         cachedCheckpoint = snapshot.checkpoint();
 
         log.info("Catching up on events from checkpoint {} for {}", cachedCheckpoint, domainProjector.getClass().getSimpleName());
+        System.gc();
         Stream<EVENT> eventStream = eventStore.allEventsAfter(cachedCheckpoint);
         log.info("Fetched events, now updating projection...");
+        System.gc();
         updateProjection(eventStream);
 
         log.info("Subscribing to event store for all events");
